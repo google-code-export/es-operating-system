@@ -1,0 +1,115 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *  
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+/** A thread of execution in a program.
+ */
+[object, uuid(032d1118-25db-11db-9c02-0009bf000001)]
+interface IThread : IInterface
+{
+    enum State
+    {
+        NEW,
+        RUNNABLE,
+        RUNNING,
+        BLOCKED,
+        WAITING,
+        TIMED_WAITING,
+        TERMINATED
+    };
+
+    /** The minimum priority that a thread can have.
+     */
+    const int Lowest = 1;
+
+    /** The default priority that is assigned to a thread.
+     */
+    const int Normal = 16;
+
+    /** The maximum priority that a thread can have.
+     */
+    const int Highest = 31;
+
+    /** Starts the execution of this thread.
+     */
+    void start();
+
+    /** Returns this thread's priority.
+     */
+    int getPriority();
+
+    /** Changes the priority of this thread.
+     */
+    void setPriority(int priority);
+
+    /** Waits for this thread to die.
+     */
+    boolean join([out] void** rval);
+
+    /** Cancels this thread.
+     */
+    void cancel();
+
+    /** Returns the state of this thread.
+     */
+    int getState();
+};
+
+[object, uuid(032e562c-25db-11db-9c02-0009bf000001)]
+interface ICurrentThread : IInterface
+{
+    enum Attr
+    {
+        /** Cancellation requests are held pending until a cancellation point
+         * is reached
+         */
+        CANCEL_DEFERRED = 0x00,
+
+        /** New or pending cancellation requests are acted upon at any time.
+         */
+        CANCEL_ASYNCHRONOUS = 0x01,
+
+        /** Cancellation requests against the target thread are held pending.
+         */
+        CANCEL_DISABLE = 0x00,
+
+        /** Cancellation requests are acted upon at any time.
+         */
+        CANCEL_ENABLE = 0x02,
+
+        CANCEL_REQUESTED = 0X04
+    };
+
+    /** Terminate the currently executing thread.
+     */
+    void exit([in] void* val);
+
+    /** Causes the currently executing thread to sleep.
+     */
+    void sleep(long timeout);
+
+    /** Sets the currently executing thread's cancelability state.
+     * @param state <code>CANCEL_ENABLE</code> or <code>CANCEL_DISABLE</code>.
+     */
+    int setCancelState(int state);
+
+    /** Sets the currently executing thread's cancelability type.
+     * @param state <code>CANCEL_DEFERRED</code> or <code>CANCEL_ASYNCHRONOUS</code>.
+     */
+    int setCancelType(int type);
+
+    /** Tests whether the current thread has been canceled.
+     */
+    void testCancel();
+}
