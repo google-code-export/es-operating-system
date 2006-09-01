@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -21,7 +21,7 @@
 void* const Process::USER_MIN = (void*) 0x1000;
 void* const Process::USER_MAX = (void*) (0x80000000 - 0x200000);
 
-u32* Mmu::kernelDirectory = (u32*) 0x10000;
+u32* Mmu::kernelDirectory = (u32*) 0x80010000;
 
 Mmu::
 Mmu(Cache* pageTable) :
