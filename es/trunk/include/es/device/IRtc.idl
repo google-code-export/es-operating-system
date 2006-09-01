@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -13,6 +13,9 @@
 
 import "es/base/IInterface.idl";
 
+/**
+ * This interface provides methods for managing a RTC (Real Time Clock).
+ */
 [object, uuid(83aaaf0c-25dc-11db-9c02-0009bf000001)]
 interface IRtc : IInterface
 {

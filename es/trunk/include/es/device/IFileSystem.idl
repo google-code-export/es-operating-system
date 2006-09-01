@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -13,15 +13,47 @@
 
 import "es/base/IStream.idl", "es/naming/IContext.idl";
 
+/**
+ * This interface provides methods for managing a file system.
+ */
 [object, uuid(83a6a1dc-25dc-11db-9c02-0009bf000001)]
 interface IFileSystem : IInterface
 {
+    /**
+     * Attaches a disk to the file subsystem, and
+     * makes the file system accessible.
+     */
     void mount(IStream* disk);
+    /**
+     * Detaches the disk from the file subsystem.
+     */
     void dismount();
+    /**
+     * Gets the root namespace of this file system.
+     * @param root the root of the namespace.
+     */
     void getRoot([out] IContext** root);
+    /**
+     * Gets the size of the free space in this file system.
+     * @param freeBytes the size of the free space in bytes.
+     */
     void getFreeSpace([out] long& freeBytes);
+    /**
+     * Gets the total size of the space in this file system.
+     * @param bytes the size of the total space in bytes.
+     */
     void getTotalSpace([out] long& bytes);
+    /**
+     * Checks this file system.
+     * @param fixError the boolean if <code>checkDisk</code> repairs this file system or not.
+     */
     int checkDisk(boolean fixError);
+    /**
+     * Formats this file system.
+     */
     void format();
+    /**
+     *  Reduces fragmentation in this file system.
+     */
     int defrag();
 }

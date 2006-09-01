@@ -13,8 +13,17 @@
 
 import "es/base/IInterface.idl";
 
+/**
+ * This interface represents a factory for creating an object.
+ */
 [object, uuid(0323fccc-25db-11db-9c02-0009bf000001)]
 interface IClassFactory : IInterface
 {
+    /**
+     * Creates a new object from this class factory.
+     * @param riid the interface ID of the interface to be used to communicate with the new object.
+     * @param objectPtr the new object.
+     * @return true if the object is successfully created. Otherwise, false.
+     */
     boolean createInstance([in] uuid& riid, [out, iid_is(riid)] void** objectPtr);
 }

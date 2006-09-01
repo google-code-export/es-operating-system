@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -13,8 +13,15 @@
 
 import "es/base/IInterface.idl";
 
+/**
+ * This interface provides a method to manage page sets.
+ */
 [object, uuid(032b1ff2-25db-11db-9c02-0009bf000001)]
 interface IPageSet : IInterface
 {
+    /**
+     * Reserves the specified number of pages for this page set.
+     * @param reserveCount the number of pages to be reserved.
+     */
     void reserve(unsigned long reserveCount);
 };
