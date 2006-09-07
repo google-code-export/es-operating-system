@@ -115,10 +115,9 @@ interface ICurrentProcess : IInterface
     ICurrentThread* currentThread();
 
     /** Creates and returns a new thread.
-     * @return          A new thread.
-     * @param start     The pointer to ICallback from which a new thread
-     *                  starts its execution.
-     * @param param     The argument to be passed to <code>run</run>.
+     * @return          a new thread.
+     * @param start     the function to be started in a new thread.
+     * @param param     the argument to be passed to <code>start</code>.
      * @see IThread
      */
     IThread* createThread(void* (*start)(void* param), void* param);

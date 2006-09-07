@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -16,12 +16,23 @@
 
 #include <es/types.h>
 
+/**
+ * This class provides methods for managing a ring buffer.
+ */
 class Ring
 {
-    u8*     buf;    // Pointer to the ring buffer
-    long    size;   // The size of the ring buffer in bytes
-    u8*     head;   // Pointer to the head of data in the ring buffer
-    long    used;   // The number of filled bytes in the ring buffer
+    /** the ring buffer.
+     */
+    u8*     buf;
+    /** the size of the ring buffer in bytes.
+     */
+    long    size;
+    /** the head of data in the ring buffer.
+     */
+    u8*     head;
+    /** the number of filled bytes in the ring buffer.
+     */
+    long    used;
 
     long min(long a, long b)
     {
@@ -49,34 +60,39 @@ public:
         }
     };
 
+    /**
+     * Constructs a ring buffer object managing the specified ring buffer.
+     * @param buf the ring buffer.
+     * @param size the size of the ring buffer.
+     */
     Ring(void* buf, long size) :
         buf(static_cast<u8*>(buf)), size(size), head(static_cast<u8*>(buf)), used(0)
     {
     }
 
-    /** Peeks data from the ring buffer.
-     * @param dst       pointer to data to be peeked.
+    /** Peeks data from this ring buffer.
+     * @param dst       the data to be peeked.
      * @param count     the length of the data in bytes.
      * @return          the length of the data peeked
      */
     long peek(void* dst, long count);
 
-    /** Reads data from the ring buffer.
-     * @param dst       pointer to data to be read.
+    /** Reads data from this ring buffer.
+     * @param dst       the data to be read.
      * @param count     the length of the data in bytes.
      * @return          the length of the data read
      */
     long read(void* dst, long count);
 
-    /** Writes data to the ring buffer.
-     * @param src       pointer to data to be written.
+    /** Writes data to this ring buffer.
+     * @param src       the data to be written.
      * @param count     the length of the data in bytes.
      * @return          the length of the data written
      */
     long write(const void* src, long count);
 
-    /** Writes data to the ring buffer.
-     * @param src       pointer to data to be written.
+    /** Writes data to this ring buffer.
+     * @param src       the data to be written.
      * @param count     the length of the data in bytes.
      * @param blocks    array of Vec{}.
      * @param maxblock  the number of Vec{} entries of the array.
@@ -84,6 +100,10 @@ public:
      */
     long write(const void* src, long count, long offset, Vec* blocks, long maxblock);
 
+    /**
+     * Gets the number of filled bytes in this ring buffer.
+     * @return the number of filled bytes.
+     */
     long getUsed()
     {
         return used;

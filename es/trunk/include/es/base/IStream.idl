@@ -40,7 +40,7 @@ interface IStream : IInterface
 
     /**
      * Reads <code>count</code> bytes from this stream to <code>dst</code>
-     * @param dst pointer to a buffer into which the data is read.
+     * @param dst a buffer into which the data is read.
      * @param count the number of bytes to be read.
      * @return the number of bytes read.
      */
@@ -49,7 +49,7 @@ interface IStream : IInterface
     /**
      * Reads <code>count</code> bytes from this stream
      * at offset <code>offset</code> to <code>dst</code>
-     * @param dst pointer to a buffer into which the data is read.
+     * @param dst a buffer into which the data is read.
      * @param count the number of bytes to be read.
      * @param offset the start offset of the data.
      * @return the number of bytes read.
@@ -58,7 +58,7 @@ interface IStream : IInterface
 
     /**
      * Writes <code>count</code> bytes from <code>src</code> to this stream.
-     * @param src pointer to the data.
+     * @param src the data.
      * @param count the byte to be written.
      * @return the number of bytes written.
      */
@@ -67,7 +67,7 @@ interface IStream : IInterface
     /**
      * Writes <code>count</code> bytes from <code>src</code>
      * to this stream at offset <code>offset</code>.
-     * @param src pointer to the data.
+     * @param src the data.
      * @param count the number of bytes to be written.
      * @param offset the start offset of the data.
      * @return the number of bytes written.

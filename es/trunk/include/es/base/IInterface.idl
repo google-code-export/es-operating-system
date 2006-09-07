@@ -18,7 +18,7 @@ interface IInterface
 {
     /** Determines if an interface can be used with this object.
      * @param riid          UUID of the interface to be queried.
-     * @param objectPtr     pointer to a buffer that receives a pointer
+     * @param objectPtr     the buffer that receives a pointer
      *                      to the object.
      */
     boolean queryInterface([in] uuid& riid, [out, iid_is(riid)] void** objectPtr);

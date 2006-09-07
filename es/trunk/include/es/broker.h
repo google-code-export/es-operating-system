@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -16,6 +16,12 @@
 
 #include <stdarg.h>
 
+/**
+ * This template class provides methods for invoking the method of the alternative interface according to the vptr table.
+ * @param broker the function to pass the information about the method and the interface
+ * to another function.
+ * @param maxInterface the maximum number of interfaces.
+ */
 template<long long (*broker)(void* self, void* base, int m, va_list ap), unsigned maxInterface>
 class Broker
 {
@@ -356,6 +362,11 @@ class Broker
 
 public:
 
+    /**
+     * Gets the vptr table which contains objects.
+     * Each object only has a vptr pointing to the vtbl.
+     * @return the vptr table.
+     */
     static void** getInterfaceTable()
     {
         // Note ptbl cannot be initialized by the constructor as

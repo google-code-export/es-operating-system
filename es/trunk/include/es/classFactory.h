@@ -21,6 +21,11 @@
 #include <es/ref.h>
 #include <es/base/IClassFactory.h>
 
+/**
+ * This is an implementation of <code>IClassFactory</code> interface.
+ * @param C the class of objects to be constructed from the <code>ClassFactory</code> class.
+ *        C must have a default constructor.
+ */
 template<class C>
 class ClassFactory : public IClassFactory
 {

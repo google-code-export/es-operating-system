@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -17,6 +17,9 @@
 #include <stdarg.h>
 #include <es/base/IStream.h>
 
+/**
+ * This class provides methods to output a formatted string.
+ */
 class Formatter
 {
     char    filler;
@@ -195,13 +198,41 @@ class Formatter
     }
 
 public:
+    /**
+     * Constructs a new formatter with the specified output function.
+     * The output stream of the formatted output is determined by the specified function.
+     * @param putc the function to print a character.
+     */
     Formatter(int (*putc)(int, void*), void* opt) throw();
+    /**
+     * Copy constructor.
+     */
     Formatter(const Formatter& o) throw();
+    /**
+     * Constructs a new formatter with the specified output stream.
+     * The formated strings are written to the specified stream.
+     * @param stream the output stream.
+     */
     Formatter(IStream* stream) throw();
+    /**
+     * Destructs this object.
+     */
     ~Formatter();
 
+    /**
+     * Writes a formatted string to the output stream of this object
+     * using the specified format string and arguments.
+     * @param spec the format string.
+     * @param args the arguments referenced by the format specifiers in the format string.
+     */
     int format(const char* spec, va_list args)  __attribute__ ((format (printf, 2, 0)));
 
+    /**
+     * Writes a formatted string to the output stream of this object
+     * using the specified format string and arguments.
+     * @param spec the format string.
+     * @param ... the arguments referenced by the format specifiers in the format string.
+     */
     int format(const char* spec, ...) __attribute__ ((format (printf, 2, 3)))
     {
         va_list list;
