@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -15,6 +15,7 @@
 #define NINTENDO_ES_KERNEL_I386_CORE_H_INCLUDED
 
 #include <es/base/ICallback.h>
+#include "cache.h"
 #include "process.h"
 #include "thread.h"
 #include "8259.h"
@@ -91,5 +92,7 @@ public:
     static void shutdown();
 
 } __attribute__ ((aligned (16)));
+
+int esInit(IInterface** nameSpace);
 
 #endif  // NINTENDO_ES_KERNEL_I386_CORE_H_INCLUDED

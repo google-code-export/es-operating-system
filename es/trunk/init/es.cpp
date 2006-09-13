@@ -19,6 +19,7 @@
 #include <es/base/IProcess.h>
 #include <es/device/IFileSystem.h>
 
+int esInit(IInterface** nameSpace);
 IStream* esReportStream();
 
 void init(Handle<IContext> root)

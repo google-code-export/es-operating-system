@@ -166,6 +166,10 @@ class SpinLock : public Monitor
     using Monitor::release;
 };
 
+#include "cache.h"
+
+int esInit(IInterface** nameSpace);
+
 #ifdef __cplusplus
 extern "C" {
 #endif

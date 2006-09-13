@@ -11,6 +11,9 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <es/base/IInterface.h>
+int esInit(IInterface** nameSpace);
+
 #ifdef __unix__
 
 #include <errno.h>

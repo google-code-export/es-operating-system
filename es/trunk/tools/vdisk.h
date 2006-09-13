@@ -24,6 +24,8 @@
 #include <es/base/IStream.h>
 #include <es/device/IDiskManagement.h>
 
+int esInit(IInterface** nameSpace);
+
 class VDisk : public IStream, public IDiskManagement
 {
     Ref      ref;
