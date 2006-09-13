@@ -18,6 +18,7 @@
 #include <es/clsid.h>
 #include <es/interlocked.h>
 #include <es/base/ICache.h>
+#include "core.h"
 
 #define VERBOSE
 #include "memoryStream.h"

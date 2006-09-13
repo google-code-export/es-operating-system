@@ -17,7 +17,7 @@
 #include <es/base/IAlarm.h>
 #include <es/clsid.h>
 #include <es/handle.h>
-#include "thread.h"
+#include "core.h"
 #include "alarm.h"
 
 #define TEST(exp)                           \

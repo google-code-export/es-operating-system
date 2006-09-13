@@ -13,6 +13,7 @@
 
 #include <es.h>
 #include "context.h"
+#include "core.h"
 
 #define NumOf(x)        (sizeof(x)/sizeof((x)[0]))
 #define TEST(exp)                           \

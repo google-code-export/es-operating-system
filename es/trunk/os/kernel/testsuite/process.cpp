@@ -17,7 +17,7 @@
 #include <es/handle.h>
 #include <es/reflect.h>
 #include <es/naming/IContext.h>
-#include "process.h"
+#include "core.h"
 
 Reflect::Interface* getInterface(const Guid* iid);
 

@@ -18,6 +18,7 @@
 #include <es/base/IStream.h>
 #include <es/device/IAudioFormat.h>
 #include <es/naming/IContext.h>
+#include "core.h"
 
 #define TEST(exp)                           \
     (void) ((exp) ||                        \

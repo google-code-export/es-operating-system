@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -19,7 +19,7 @@
 #include <es/interlocked.h>
 #include <es/base/ICache.h>
 #include "memoryStream.h"
-#include "cache.h"
+#include "core.h"
 
 #define PAGE_SIZE        (4 * 1024)
 #define BUF_SIZE         (1024 * 1024)

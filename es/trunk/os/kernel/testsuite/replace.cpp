@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -20,8 +20,8 @@
 #include <es/clsid.h>
 #include <es/interlocked.h>
 #include <es/base/ICache.h>
+#include "core.h"
 #include "memoryStream.h"
-#include "cache.h"
 
 #define PAGE_SIZE   4096
 #define NON_RESERVED_PAGE  4

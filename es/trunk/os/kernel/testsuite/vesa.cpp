@@ -14,7 +14,7 @@
 #include <es.h>
 #include <es/handle.h>
 #include <es/naming/IContext.h>
-#include "8042.h"
+#include "core.h"
 #include "vesa.h"
 
 #define TEST(exp)                           \

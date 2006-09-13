@@ -16,8 +16,8 @@
 #include <es/handle.h>
 #include <es/naming/IContext.h>
 #include "8237a.h"
+#include "core.h"
 #include "fdc.h"
-#include "io.h"
 
 u8 sec[512];
 

@@ -15,6 +15,7 @@
 #include <es/base/ICache.h>
 #include <es/exception.h>
 #include <iostream>
+#include "core.h"
 #include "memoryStream.h"
 
 #define TEST(exp)                           \

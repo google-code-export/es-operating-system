@@ -14,7 +14,7 @@
 #include <es.h>
 #include <fstream>
 #include <sstream>
-#include "thread.h"
+#include "core.h"
 #include <es/dateTime.h>
 
 #define TEST(exp)                           \

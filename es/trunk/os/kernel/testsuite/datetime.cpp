@@ -15,6 +15,7 @@
 #include <es/dateTime.h>
 #include <iostream>
 #include <iomanip>
+#include "core.h"
 
 #define TEST(exp)                           \
     (void) ((exp) ||                        \

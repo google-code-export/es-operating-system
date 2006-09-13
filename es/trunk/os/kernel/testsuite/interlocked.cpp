@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <es.h>
 #include <es/interlocked.h>
+#include "core.h"
 
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
