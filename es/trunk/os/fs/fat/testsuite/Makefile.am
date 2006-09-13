@@ -32,8 +32,7 @@ endif POSIX
 
 if ES
 
-TESTS = start \
-	fat replace \
+TESTS = fat replace \
         fat_createdir fat_createfile fat_readwrite fat_attribute fat_size \
         fat_getStream fat_time fat_removedir fat_object fat_createmax fat_writemax \
 	fat16 fat16_replace \
@@ -49,7 +48,6 @@ noinst_SCRIPTS = $(TESTS)
 noinst_PROGRAMS = $(noinst_SCRIPTS)
 
 noinst_DATA = 2hd.img fat16_5MB.img fat32.img \
-	start.img \
 	fat.img replace.img \
         fat_createdir.img fat_createfile.img fat_readwrite.img fat_attribute.img fat_size.img \
         fat_getStream.img fat_time.img fat_removedir.img fat_object.img fat_createmax.img fat_writemax.img \
@@ -67,8 +65,6 @@ clean-local:
 	-rm -f *.map *.log
 
 AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
-
-start_SOURCES = start.cpp
 
 endif ES
 

@@ -114,7 +114,7 @@ isValid(const void* start, long long length, bool write)
 
 void* Process::
 map(const void* start, long long length, unsigned prot, unsigned flags,
-                   IPageable* pageable, long long offset)
+    IPageable* pageable, long long offset)
 {
     Monitor::Synchronized method(monitor);
 
@@ -129,8 +129,8 @@ map(const void* start, long long length, unsigned prot, unsigned flags,
 
 void* Process::
 map(const void* start, long long length, unsigned prot, unsigned flags,
-                   IPageable* pageable, long long offset, long long size /* in pageable object */,
-                   void* min, void* max)
+    IPageable* pageable, long long offset, long long size /* in pageable object */,
+    void* min, void* max)
 {
     Map::List::Iterator iter = mapList.begin();
     Map* map;
@@ -338,6 +338,14 @@ setBreak(long long increment)
     return from;
 }
 
+bool Process::
+trace(bool on)
+{
+    bool prev();
+    log = on;
+    return prev;
+}
+
 int Process::
 validityFault(const void* addr, u32 error)
 {
@@ -504,29 +512,55 @@ Process() :
     tlsImageSize(0),
     tlsSize(0),
     threadCount(0),
-    root(0)
+    root(0),
+    in(0),
+    out(0),
+    error(0),
+    log(false),
+    upcallCount(0)
 {
     ICache* cache = cacheFactory->create(zero);
     mmu = new Mmu(dynamic_cast<Cache*>(cache));
     ASSERT(mmu);
 
-    interfaceTable[0].set((void*) esCurrentProcess(), &IID_ICurrentProcess);
+    syscallTable[0].set((void*) esCurrentProcess(), &IID_ICurrentProcess);
 
     const unsigned stackSize = 2*1024*1024;
     Thread* thread(createThread(stackSize));
     ASSERT(thread);
+
+    Process* current(Process::getCurrentProcess());
+    if (current)
+    {
+        setRoot(current->root);
+        setIn(current->in);
+        setOut(current->out);
+        setError(current->error);
+    }
 }
 
 Process::
 ~Process()
 {
-    for (InterfaceStub* stub(interfaceTable);
-         stub < &interfaceTable[INTERFACE_POINTER_MAX];
-         ++stub)
+    setIn(0);
+    setOut(0);
+    setError(0);
+    setRoot(0);
+
+    while (!upcallList.isEmpty())
     {
-        if (stub->interface)
+        UpcallRecord* record(upcallList.removeFirst());
+        delete record;
+    }
+
+    for (SyscallProxy* proxy(syscallTable);
+         proxy < &syscallTable[INTERFACE_POINTER_MAX];
+         ++proxy)
+    {
+        if (1 < proxy->addRef())
         {
-            static_cast<IInterface*>(stub->interface)->release();
+            ASSERT(proxy->interface);
+            static_cast<IInterface*>(proxy->interface)->release();
         }
     }
 
@@ -550,15 +584,15 @@ load()
 // that has been assigned for the interface. However, the reference count of
 // the interface pointer must also be adjusted to do this.
 int Process::
-set(void* interface, const Guid* iid)
+set(SyscallProxy* table, void* interface, const Guid* iid)
 {
     Monitor::Synchronized method(monitor);
 
-    for (InterfaceStub* stub(interfaceTable);
-         stub < &interfaceTable[INTERFACE_POINTER_MAX];
-         ++stub)
+    for (SyscallProxy* proxy(table);
+         proxy < &table[INTERFACE_POINTER_MAX];
+         ++proxy)
     {
-        if (0 <= stub->set(interface, iid))
+        if (proxy->set(interface, iid))
         {
 #ifdef VERBOSE
             esReport("Process::set(%p, {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}) : %d;\n",
@@ -566,9 +600,9 @@ set(void* interface, const Guid* iid)
                      iid->Data1, iid->Data2, iid->Data3,
                      iid->Data4[0], iid->Data4[1], iid->Data4[2], iid->Data4[3],
                      iid->Data4[4], iid->Data4[5], iid->Data4[6], iid->Data4[7],
-                     stub - interfaceTable);
+                     proxy - table);
 #endif
-            return stub - interfaceTable;
+            return proxy - table;
         }
     }
     return -1;
@@ -609,7 +643,7 @@ Thread* Process::
 createThread(const unsigned stackSize)
 {
     // Map a user stack
-    void* userStack(static_cast<u8*>(USER_MAX) - ((threadCount + 1) * stackSize));
+    void* userStack(static_cast<u8*>(USER_MAX) - ((threadCount + upcallCount + 1) * stackSize));
     userStack = map(userStack, stackSize - Page::SIZE,
                     ICurrentProcess::PROT_READ | ICurrentProcess::PROT_WRITE,
                     ICurrentProcess::MAP_PRIVATE, 0, 0);
@@ -1062,4 +1096,76 @@ getCurrentProcess()
 {
     Core* core = Core::getCurrentCore();
     return core->currentProc;
+}
+
+int Process::
+read(void* dst, int count, long long offset)
+{
+    u8* addr(reinterpret_cast<u8*>(offset));
+    int len;
+    int n;
+    unsigned long pageOffset(Page::pageOffset(offset));
+    for (len = 0;
+         len < count;
+         len += n, addr += n, dst = (u8*) dst + n)
+    {
+        if (validityFault(addr, ICurrentProcess::PROT_READ) < 0)
+        {
+            break;
+        }
+        unsigned long pte = mmu->get(addr);
+        if (!pte)
+        {
+            break;
+        }
+        u8* src = static_cast<u8*>(mmu->getPointer(pte));
+        if (!src)
+        {
+            break;
+        }
+        n = Page::SIZE - pageOffset;
+        if (count - len < n)
+        {
+            n = count - len;
+        }
+        memmove(dst, src + pageOffset, n);
+        pageOffset = 0;
+    }
+    return len;
+}
+
+int Process::
+write(const void* src, int count, long long offset)
+{
+    u8* addr(reinterpret_cast<u8*>(offset));
+    int len;
+    int n;
+    unsigned long pageOffset(Page::pageOffset(offset));
+    for (len = 0;
+         len < count;
+         len += n, addr += n, src = (u8*) src + n)
+    {
+        if (protectionFault(addr, ICurrentProcess::PROT_WRITE) < 0)
+        {
+            break;
+        }
+        unsigned long pte = mmu->get(addr);
+        if (!pte)
+        {
+            break;
+        }
+        u8* dst = static_cast<u8*>(mmu->getPointer(pte));
+        if (!dst)
+        {
+            break;
+        }
+        n = Page::SIZE - pageOffset;
+        if (count - len < n)
+        {
+            n = count - len;
+        }
+        memmove(dst + pageOffset, src, n);
+        pageOffset = 0;
+    }
+    return len;
 }

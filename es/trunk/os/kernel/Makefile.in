@@ -50,8 +50,9 @@ target_triplet = @target@
 @ES_TRUE@am__append_2 = port/malloc.cpp port/map.cpp port/mmu.cpp \
 @ES_TRUE@	port/monitor.cpp port/process.cpp port/rendezvous.cpp \
 @ES_TRUE@	port/sched.cpp port/swap.cpp port/syscall.cpp \
-@ES_TRUE@	port/thread.cpp pc/8042.cpp pc/8237a.cpp pc/8254.cpp \
-@ES_TRUE@	pc/8259.cpp pc/ataController.cpp pc/ataDevice.cpp \
+@ES_TRUE@	port/thread.cpp port/upcall.cpp pc/8042.cpp \
+@ES_TRUE@	pc/8237a.cpp pc/8254.cpp pc/8259.cpp \
+@ES_TRUE@	pc/ataController.cpp pc/ataDevice.cpp \
 @ES_TRUE@	pc/ataPacket.cpp pc/cga.cpp pc/fdc.cpp pc/fdd.cpp \
 @ES_TRUE@	pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
 @ES_TRUE@	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
@@ -129,37 +130,38 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	port/partitionStream.cpp port/partitionIterator.cpp \
 	port/malloc.cpp port/map.cpp port/mmu.cpp port/monitor.cpp \
 	port/process.cpp port/rendezvous.cpp port/sched.cpp \
-	port/swap.cpp port/syscall.cpp port/thread.cpp pc/8042.cpp \
-	pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/ataController.cpp \
-	pc/ataDevice.cpp pc/ataPacket.cpp pc/cga.cpp pc/fdc.cpp \
-	pc/fdd.cpp pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
-	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
-	pc/vesa.cpp pc/xreg.cpp windows/ref.cpp posix/posix_thread.cpp \
-	posix/posix_monitor.cpp posix/posix_core.cpp \
-	posix/posix_dateTime.cpp posix/posix_init.cpp include/alarm.h \
-	include/arena.h include/cache.h include/classStore.h \
-	include/context.h include/elfFile.h include/heap.h \
-	include/line.h include/partition.h include/process.h \
-	include/spinlock.h include/thread.h include/zero.h \
-	include/ata.h include/uart.h include/i386/8042.h \
-	include/i386/8237a.h include/i386/8254.h include/i386/8259.h \
-	include/i386/ataController.h include/i386/cga.h \
-	include/i386/core.h include/i386/cpu.h include/i386/fdc.h \
-	include/i386/label.h include/i386/io.h include/i386/rtc.h \
-	include/i386/sb16.h include/i386/vesa.h include/posix/core.h
+	port/swap.cpp port/syscall.cpp port/thread.cpp port/upcall.cpp \
+	pc/8042.cpp pc/8237a.cpp pc/8254.cpp pc/8259.cpp \
+	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
+	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/pc_core.cpp \
+	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
+	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp \
+	windows/ref.cpp posix/posix_thread.cpp posix/posix_monitor.cpp \
+	posix/posix_core.cpp posix/posix_dateTime.cpp \
+	posix/posix_init.cpp include/alarm.h include/arena.h \
+	include/cache.h include/classStore.h include/context.h \
+	include/elfFile.h include/heap.h include/line.h \
+	include/partition.h include/process.h include/spinlock.h \
+	include/thread.h include/zero.h include/ata.h include/uart.h \
+	include/i386/8042.h include/i386/8237a.h include/i386/8254.h \
+	include/i386/8259.h include/i386/ataController.h \
+	include/i386/cga.h include/i386/core.h include/i386/cpu.h \
+	include/i386/fdc.h include/i386/label.h include/i386/io.h \
+	include/i386/rtc.h include/i386/sb16.h include/i386/vesa.h \
+	include/posix/core.h
 @ES_TRUE@am__objects_1 = label.$(OBJEXT)
 am__objects_2 =
 @ES_TRUE@am__objects_3 = malloc.$(OBJEXT) map.$(OBJEXT) mmu.$(OBJEXT) \
 @ES_TRUE@	monitor.$(OBJEXT) process.$(OBJEXT) \
 @ES_TRUE@	rendezvous.$(OBJEXT) sched.$(OBJEXT) swap.$(OBJEXT) \
-@ES_TRUE@	syscall.$(OBJEXT) thread.$(OBJEXT) 8042.$(OBJEXT) \
-@ES_TRUE@	8237a.$(OBJEXT) 8254.$(OBJEXT) 8259.$(OBJEXT) \
-@ES_TRUE@	ataController.$(OBJEXT) ataDevice.$(OBJEXT) \
-@ES_TRUE@	ataPacket.$(OBJEXT) cga.$(OBJEXT) fdc.$(OBJEXT) \
-@ES_TRUE@	fdd.$(OBJEXT) pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
-@ES_TRUE@	pc_init.$(OBJEXT) pc_thread.$(OBJEXT) rtc.$(OBJEXT) \
-@ES_TRUE@	sb16.$(OBJEXT) uart.$(OBJEXT) vesa.$(OBJEXT) \
-@ES_TRUE@	xreg.$(OBJEXT)
+@ES_TRUE@	syscall.$(OBJEXT) thread.$(OBJEXT) upcall.$(OBJEXT) \
+@ES_TRUE@	8042.$(OBJEXT) 8237a.$(OBJEXT) 8254.$(OBJEXT) \
+@ES_TRUE@	8259.$(OBJEXT) ataController.$(OBJEXT) \
+@ES_TRUE@	ataDevice.$(OBJEXT) ataPacket.$(OBJEXT) cga.$(OBJEXT) \
+@ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) pc_core.$(OBJEXT) \
+@ES_TRUE@	pc_dateTime.$(OBJEXT) pc_init.$(OBJEXT) \
+@ES_TRUE@	pc_thread.$(OBJEXT) rtc.$(OBJEXT) sb16.$(OBJEXT) \
+@ES_TRUE@	uart.$(OBJEXT) vesa.$(OBJEXT) xreg.$(OBJEXT)
 @WIN32_TRUE@am__objects_4 = ref.$(OBJEXT)
 @POSIX_TRUE@am__objects_5 = posix_thread.$(OBJEXT) \
 @POSIX_TRUE@	posix_monitor.$(OBJEXT) posix_core.$(OBJEXT) \
@@ -179,12 +181,13 @@ nodist_libeskernel_a_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	ICallback.$(OBJEXT) IClassFactory.$(OBJEXT) \
 	IClassStore.$(OBJEXT) IFile.$(OBJEXT) IInterface.$(OBJEXT) \
 	IMonitor.$(OBJEXT) IPageable.$(OBJEXT) IPageSet.$(OBJEXT) \
-	IProcess.$(OBJEXT) IStream.$(OBJEXT) IThread.$(OBJEXT) \
-	IAudioFormat.$(OBJEXT) IBeep.$(OBJEXT) ICursor.$(OBJEXT) \
-	IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) IDmac.$(OBJEXT) \
-	IFileSystem.$(OBJEXT) IPic.$(OBJEXT) IRemovableMedia.$(OBJEXT) \
-	IRtc.$(OBJEXT) IPartition.$(OBJEXT) IBinding.$(OBJEXT) \
-	IContext.$(OBJEXT) IIterator.$(OBJEXT) ISet.$(OBJEXT)
+	IProcess.$(OBJEXT) IRuntime.$(OBJEXT) IStream.$(OBJEXT) \
+	IThread.$(OBJEXT) IAudioFormat.$(OBJEXT) IBeep.$(OBJEXT) \
+	ICursor.$(OBJEXT) IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) \
+	IDmac.$(OBJEXT) IFileSystem.$(OBJEXT) IPic.$(OBJEXT) \
+	IRemovableMedia.$(OBJEXT) IRtc.$(OBJEXT) IPartition.$(OBJEXT) \
+	IBinding.$(OBJEXT) IContext.$(OBJEXT) IIterator.$(OBJEXT) \
+	ISet.$(OBJEXT)
 libeskernel_a_OBJECTS = $(am_libeskernel_a_OBJECTS) \
 	$(nodist_libeskernel_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -334,6 +337,7 @@ nodist_libeskernel_a_SOURCES = \
 	base/IPageable.c \
 	base/IPageSet.c \
 	base/IProcess.c \
+	base/IRuntime.c \
 	base/IStream.c \
 	base/IThread.c \
 	device/IAudioFormat.c \
@@ -493,6 +497,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IProcess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IRemovableMedia.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IRtc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IRuntime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ISet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IStream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IThread.Po@am__quote@
@@ -543,6 +548,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syscall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/uart.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upcall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vesa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xreg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zero.Po@am__quote@
@@ -726,6 +732,20 @@ IProcess.obj: base/IProcess.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IProcess.c' object='IProcess.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IProcess.obj `if test -f 'base/IProcess.c'; then $(CYGPATH_W) 'base/IProcess.c'; else $(CYGPATH_W) '$(srcdir)/base/IProcess.c'; fi`
+
+IRuntime.o: base/IRuntime.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IRuntime.o -MD -MP -MF "$(DEPDIR)/IRuntime.Tpo" -c -o IRuntime.o `test -f 'base/IRuntime.c' || echo '$(srcdir)/'`base/IRuntime.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IRuntime.Tpo" "$(DEPDIR)/IRuntime.Po"; else rm -f "$(DEPDIR)/IRuntime.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IRuntime.c' object='IRuntime.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IRuntime.o `test -f 'base/IRuntime.c' || echo '$(srcdir)/'`base/IRuntime.c
+
+IRuntime.obj: base/IRuntime.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IRuntime.obj -MD -MP -MF "$(DEPDIR)/IRuntime.Tpo" -c -o IRuntime.obj `if test -f 'base/IRuntime.c'; then $(CYGPATH_W) 'base/IRuntime.c'; else $(CYGPATH_W) '$(srcdir)/base/IRuntime.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IRuntime.Tpo" "$(DEPDIR)/IRuntime.Po"; else rm -f "$(DEPDIR)/IRuntime.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IRuntime.c' object='IRuntime.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IRuntime.obj `if test -f 'base/IRuntime.c'; then $(CYGPATH_W) 'base/IRuntime.c'; else $(CYGPATH_W) '$(srcdir)/base/IRuntime.c'; fi`
 
 IStream.o: base/IStream.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IStream.o -MD -MP -MF "$(DEPDIR)/IStream.Tpo" -c -o IStream.o `test -f 'base/IStream.c' || echo '$(srcdir)/'`base/IStream.c; \
@@ -1384,6 +1404,20 @@ thread.obj: port/thread.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/thread.cpp' object='thread.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o thread.obj `if test -f 'port/thread.cpp'; then $(CYGPATH_W) 'port/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/port/thread.cpp'; fi`
+
+upcall.o: port/upcall.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT upcall.o -MD -MP -MF "$(DEPDIR)/upcall.Tpo" -c -o upcall.o `test -f 'port/upcall.cpp' || echo '$(srcdir)/'`port/upcall.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/upcall.Tpo" "$(DEPDIR)/upcall.Po"; else rm -f "$(DEPDIR)/upcall.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/upcall.cpp' object='upcall.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o upcall.o `test -f 'port/upcall.cpp' || echo '$(srcdir)/'`port/upcall.cpp
+
+upcall.obj: port/upcall.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT upcall.obj -MD -MP -MF "$(DEPDIR)/upcall.Tpo" -c -o upcall.obj `if test -f 'port/upcall.cpp'; then $(CYGPATH_W) 'port/upcall.cpp'; else $(CYGPATH_W) '$(srcdir)/port/upcall.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/upcall.Tpo" "$(DEPDIR)/upcall.Po"; else rm -f "$(DEPDIR)/upcall.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/upcall.cpp' object='upcall.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o upcall.obj `if test -f 'port/upcall.cpp'; then $(CYGPATH_W) 'port/upcall.cpp'; else $(CYGPATH_W) '$(srcdir)/port/upcall.cpp'; fi`
 
 8042.o: pc/8042.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT 8042.o -MD -MP -MF "$(DEPDIR)/8042.Tpo" -c -o 8042.o `test -f 'pc/8042.cpp' || echo '$(srcdir)/'`pc/8042.cpp; \

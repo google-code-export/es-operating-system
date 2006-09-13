@@ -16,15 +16,13 @@
 
 #include <stdarg.h>
 #include <es/types.h>
+#include <es/uuid.h>
 
 #ifdef __cplusplus
-
-#include <es/base/IInterface.h>
 
 extern "C" {
 
 bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr);
-int  esInit(IInterface** nameSpace);
 
 #endif  // __cplusplus
 
@@ -95,7 +93,6 @@ void esUnlockMonitor(esMonitor* monitor);
 #define ASSERT  assert
 
 #endif  // !__es__
-
 
 #ifdef __cplusplus
 }

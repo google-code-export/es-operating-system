@@ -12,7 +12,9 @@
  */
 
 #include <errno.h>
+#include <stddef.h>
 #include <es.h>
+#include <es/broker.h>
 #include <es/exception.h>
 #include <es/reflect.h>
 #include "core.h"
@@ -23,12 +25,40 @@ extern Reflect::Interface* getInterface(const Guid* iid);
 
 typedef long long (*Method)(void* self, ...);
 
-long long Process::
-systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
+bool SyscallProxy::set(void* interface, const Guid* iid)
 {
-    bool log(false);
+    if (ref.addRef() != 1)
+    {
+        ref.release();
+        return false;
+    }
+    this->interface = interface;
+    this->iid = iid;
+    return true;
+}
 
-    ipt = base;
+unsigned int SyscallProxy::addRef()
+{
+    return ref.addRef();
+}
+
+unsigned int SyscallProxy::release()
+{
+    IInterface* object(static_cast<IInterface*>(interface));
+    unsigned int count = ref.release();
+    if (count == 0)
+    {
+        object->release();
+    }
+}
+
+long long Process::
+systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
+{
+    if (base)
+    {
+        ipt = base;
+    }
 
     //
     // Determine the type of interface and which method is being invoked.
@@ -38,18 +68,19 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
     {
         throw SystemException<EBADF>();
     }
-    InterfaceStub* stub = &interfaceTable[interfaceNumber];
-    if (stub->interface == 0)
+    SyscallProxy* proxy = &syscallTable[interfaceNumber];
+    if (proxy->interface == 0)
     {
         throw SystemException<EBADF>();
     }
-    Reflect::Interface* interface = getInterface(stub->iid);
+
+    Reflect::Interface* interface = getInterface(proxy->iid);
     if (!interface)
     {
         throw SystemException<EBADF>();
     }
 
-    if ((void*) stub->interface == (void*) esReportStream() ||
+    if ((void*) proxy->interface == (void*) esReportStream() ||
         interfaceNumber == 0 && methodNumber == 15)
     {
         log = false;
@@ -81,7 +112,8 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
 
     if (log)
     {
-        esReport("system call[%d]: %s::%s(", interfaceNumber, interface->getName(), method.getName());
+        esReport("system call[%d:%p]: %s::%s(",
+                 interfaceNumber, this, interface->getName(), method.getName());
     }
 
     // Process addRef() and release() locally
@@ -91,7 +123,7 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
         switch (methodNumber - baseMethodCount)
         {
         case 1: // addRef
-            count = stub->addRef();
+            count = proxy->addRef();
             if (log)
             {
                 esReport(") : %d;\n", count);
@@ -99,7 +131,7 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
             return count;
             break;
         case 2: // release
-            count = stub->release();
+            count = proxy->release();
             if (log)
             {
                 esReport(") : %d;\n", count);
@@ -134,9 +166,28 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
             }
             else
             {
-                unsigned interfaceNumber(*(void***) (param + paramc) - base);
-                InterfaceStub* stub = &interfaceTable[interfaceNumber];
-                *(void***) (param + paramc) = (void**) stub->interface;
+                void** ip(*(void***) (param + paramc));
+
+                if (base <= ip && ip < base + INTERFACE_POINTER_MAX)
+                {
+                    unsigned interfaceNumber(ip - base);
+                    SyscallProxy* proxy = &syscallTable[interfaceNumber];
+                    *(void***) (param + paramc) = (void**) proxy->interface;
+                }
+                else if (ip)
+                {
+                    // Allocate an entry in the upcall table and set the
+                    // interface pointer to the broker for the upcall table.
+                    int n = set(this, (IInterface*) ip, parameter.getType().getInterface().getIid());
+                    if (log)
+                    {
+                        esReport(" = %p", ip);
+                    }
+                    *(void***) (param + paramc) = &(broker.getInterfaceTable())[n];
+
+                    // Note the reference count to the created upcall proxy must
+                    // be decremented by one at the end of this system call.
+                }
             }
         }
         paramc += size / sizeof(unsigned);
@@ -153,7 +204,7 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
 
     // Invoke method
     long long rc;
-    Method** object = reinterpret_cast<Method**>(stub->interface);
+    Method** object = reinterpret_cast<Method**>(proxy->interface);
     switch (paramc)
     {
     case 0:
@@ -193,38 +244,52 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
         int size = parameter.getType().getSize();
         size += sizeof(unsigned) - 1;
         size &= ~(sizeof(unsigned) - 1);
-        if (parameter.isOutput() && parameter.isInterfacePointer())
+        if (parameter.isInterfacePointer())
         {
-            ASSERT(*(void***) (param + paramc) == &ipv[paramc]);
+            if (parameter.isOutput())
+            {
+                ASSERT(*(void***) (param + paramc) == &ipv[paramc]);
 
-            int n(-1);
-            void* ip(ipv[paramc]);
-            if (ip)
-            {
-                // Set up new interface stub.
-                // We also need to know the IID of the interface.
-                if (0 <= parameter.getIidIs())
+                int n(-1);
+                void* ip(ipv[paramc]);
+                if (ip)
                 {
-                    // XXX should check type of iid_is.
-                    n = set((IInterface*) ip, *(Guid**) ((u8*) paramv + method.getParameterOffset(parameter.getIidIs())));
+                    // Set up new interface proxy.
+                    // We also need to know the IID of the interface.
+                    Guid* iid;
+                    if (0 <= parameter.getIidIs())
+                    {
+                        iid = *(Guid**) ((u8*) paramv + method.getParameterOffset(parameter.getIidIs()));
+                    }
+                    else if (parameter.getType().isInterfacePointer())
+                    {
+                        iid = parameter.getType().getInterface().getIid();
+                    }
+                    n = set(syscallTable, (IInterface*) ip, iid);
                 }
-                else if (parameter.getType().isInterfacePointer())
+                if (0 <= n)
                 {
-                    n = set((IInterface*) ip, parameter.getType().getInterface().getIid());
+                    // Set ip to proxy ip
+                    ip = &base[n];
                 }
-            }
-            if (0 <= n)
-            {
-                // Set ip to proxy ip
-                ip = &ipt[n];
+                else
+                {
+                    // XXX ip->release()
+                    ip = 0;
+                }
+                **(void***) ((u32*) paramv + paramc) = ip;
             }
             else
             {
-                // XXX ip->release()
-                ip = 0;
+                void** ip(*(void***) (param + paramc));
+                void** base(broker.getInterfaceTable());
+                if (base <= ip && ip < base + INTERFACE_POINTER_MAX)
+                {
+                    unsigned interfaceNumber(ip - base);
+                    UpcallProxy* proxy(&upcallTable[interfaceNumber]);
+                    proxy->release();
+                }
             }
-
-            **(void***) ((u32*) paramv + paramc) = ip;
         }
         paramc += size / sizeof(unsigned);
         ASSERT(paramc <= 8);    // XXX
@@ -238,11 +303,11 @@ systemCall(void** self, unsigned methodNumber, void* paramv, void** base)
         void* ip((void*) rc);
         if (ip)
         {
-            n = set(ip, returnType.getInterface().getIid());
+            n = set(syscallTable, ip, returnType.getInterface().getIid());
         }
         if (0 <= n)
         {
-            rc = (long long)(&ipt[n]);
+            rc = (long long)(&base[n]);
         }
         else
         {

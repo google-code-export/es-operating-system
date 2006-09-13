@@ -16,13 +16,16 @@
 
 #ifdef __es__
 
+#include <stdarg.h>
 #include <stddef.h> // size_t
 #include <es.h>
 #include <es/interlocked.h>
 #include <es/list.h>
 #include <es/ref.h>
+#include <es/reflect.h>
 #include <es/base/IMonitor.h>
 #include <es/base/IProcess.h>
+#include <es/base/IRuntime.h>
 #include <es/base/IThread.h>
 #include "alarm.h"
 #include "cpu.h"
@@ -30,6 +33,7 @@
 #include "spinlock.h"
 
 class Delegate;
+class UpcallProxy;
 class Process;
 class Sched;
 class SpinLock;
@@ -61,6 +65,72 @@ public:
     }
 };
 
+class UpcallRecord
+{
+    static const int INIT = 0;
+    static const int READY = 1;
+
+    int                 state;
+    Link<UpcallRecord>  link;
+    Link<UpcallRecord>  linkThread;
+    Process*            process;    // The server process
+    void*               userStack;  // User stack to be used for upcalls
+    void*               tcb;        // Thread control block
+    Ureg                ureg;       // Where to start upcall in user-land
+
+    Process*            client;     // The client process
+    unsigned            sp0;        // Previous kernel stack top address
+    Label               label;      // Where to continue executing after upcall
+
+    UpcallProxy*        proxy;
+    int                 methodNumber;
+    va_list             param;
+    Reflect::Function   method;
+
+    friend class Core;
+    friend class Thread;
+    friend class Process;
+
+    UpcallRecord(Process* process) :
+        state(INIT),
+        process(process),
+        client(0)
+    {
+    }
+
+    int getState()
+    {
+        return state;
+    }
+
+    void setState(int state)
+    {
+        this->state = state;
+    }
+
+    void* tls(unsigned size, unsigned align)
+    {
+        size = (size + align - 1) & ~(align -1);
+
+        ureg.esp -= size;
+        tcb = reinterpret_cast<void*>(ureg.esp + size);
+        return reinterpret_cast<void*>(ureg.esp);
+    }
+
+    void push(unsigned arg)
+    {
+        unsigned* frame = reinterpret_cast<unsigned*>(ureg.esp);
+        *--frame = arg;
+        ureg.esp = reinterpret_cast<unsigned>(frame);
+    }
+
+    void entry(unsigned long start)
+    {
+        ASSERT(state == INIT);
+        ureg.eip = start;
+    }
+};
+
 class Thread : public IThread, public ICallback, public SpinLock
 {
     friend class Sched;
@@ -86,6 +156,7 @@ public:
 
     void*               stack;
     unsigned            stackSize;
+    unsigned            sp0;
     void*               ktcb;
     Label               label;
 #ifdef __i386__
@@ -206,6 +277,8 @@ public:
     void*               userStack;
     Link<Thread>        linkProcess;
     void*               tcb;
+    List<UpcallRecord, &UpcallRecord::linkThread>
+                        upcallList;     // List of upcall records
 
     Thread(void* (*run)(void*), void* param, int priority,
            void* stack = 0, unsigned stackSize = 8192);
@@ -249,6 +322,9 @@ public:
     /** Push argc and argv to the user stack.
      */
     void setArguments(char* arguments);
+
+    Process* returnToClient();
+    Process* leapIntoServer(UpcallRecord* record);
 
     //
     // ICurrentThread (called by Sched)
@@ -295,7 +371,7 @@ public:
     static void reschedule();
 };
 
-class Sched : public ICurrentThread, public ICurrentProcess, public SpinLock
+class Sched : public ICurrentThread, public ICurrentProcess, public IRuntime, public SpinLock
 {
     friend class Thread;
 
@@ -335,7 +411,11 @@ public:
     IStream* getError();
     void* setBreak(long long increment);
     long long getNow();
+    bool trace(bool on);
+
+    // IRuntime
     void setStartup(void (*startup)(void* (*start)(void* param), void* param));
+    void setFocus(void* (*focus)(void* param));
 
     //
     // IInterface

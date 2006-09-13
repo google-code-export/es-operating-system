@@ -424,6 +424,7 @@ Core(Sched* sched, void* stack, unsigned stackSize, Tss* tss) :
     }
 
     idt[65].setDPL(3);  // for system call
+    idt[66].setDPL(3);  // for upcall
 
     gdtLoc.loadGDT();
     idtLoc.loadIDT();
@@ -495,12 +496,22 @@ reschedule(void* param)
         core->currentFPU = 0;
         core->ktcb->tcb = current->ktcb;
 
-        if (current->process)
+        UpcallRecord* record = current->upcallList.getLast();
+        if (!record)
         {
-            core->tcb->tcb = current->tcb;
-            core->tss->sp0 = (u32) current->stack + current->stackSize - 2048 /* default kernel TLS size */;
-            current->process->load();
+            if (current->process)
+            {
+                core->tcb->tcb = current->tcb;
+                current->process->load();
+            }
         }
+        else
+        {
+            // The current thread is upcalling a server process.
+            core->tcb->tcb = record->tcb;
+            record->process->load();
+        }
+        core->tss->sp0 = current->sp0;
 
 #ifdef VERBOSE
         esReport("reschedule: %d %p %p\n", core->id, current, current->label.eip);
@@ -605,15 +616,20 @@ dispatchException(Ureg* ureg)
         // ureg->esi: base
         if (core->currentProc)
         {
+            // esReport("[%p]::dispatchException: %u @ %x\n", core->currentProc, ureg->trap, ureg->eip);
             int errorCode(0);
             long long result;
 
+            core->current->param = ureg;
             try
             {
+                va_list param(reinterpret_cast<va_list>(ureg->ecx));
+
+                ureg->ecx = 0;  // To indicate this is not an exception call
                 result = core->currentProc->systemCall(
                     reinterpret_cast<void**>(ureg->eax),
                     ureg->edx,
-                    reinterpret_cast<void*>(ureg->ecx),
+                    param,
                     reinterpret_cast<void**>(ureg->esi));
             }
             catch (Exception& error)
@@ -632,12 +648,24 @@ dispatchException(Ureg* ureg)
 
             if (errorCode)
             {
-                esReport("SystemException: %d\n", errorCode);
+                esReport("[SystemException: %d]\n", errorCode);
             }
 
             ureg->eax = (u32) result;
             ureg->ecx = (u32) errorCode;
             ureg->edx = (u32) (result >> 32);
+            core->current->testCancel();
+            break;
+        }
+        esPanic(__FILE__, __LINE__, "Failed Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
+        break;
+      case 66:  // upcall interface
+        if (core->currentProc)
+        {
+            // esReport("[%p]::dispatchException: %u @ %x\n", core->currentProc, ureg->trap, ureg->eip);
+            ureg->ecx = 0;  // To indicate this is not an exception call
+            core->current->param = ureg;
+            core->currentProc->returnFromUpcall(ureg);
             core->current->testCancel();
             break;
         }

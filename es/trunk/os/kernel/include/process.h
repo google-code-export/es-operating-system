@@ -16,9 +16,11 @@
 
 #ifdef __es__
 
+#include <es/broker.h>
 #include <es/ref.h>
 #include <es/list.h>
 #include <es/base/IProcess.h>
+#include <es/base/IRuntime.h>
 #include "cache.h"
 #include "thread.h"
 #include "zero.h"
@@ -27,51 +29,48 @@ class InterfaceDescriptor;
 class Map;
 class Process;
 
-class InterfaceStub
+class SyscallProxy
 {
     Ref         ref;
     void*       interface;
     const Guid* iid;
 
 public:
-    InterfaceStub() :
+    SyscallProxy() :
         ref(0),
         interface(0),
         iid(0)
     {
     }
 
-    int set(void* interface, const Guid* iid)
-    {
-        if (this->interface != 0)
-        {
-            return -1;
-        }
+    bool set(void* interface, const Guid* iid);
+    unsigned int addRef();
+    unsigned int release();
 
-        ASSERT(this->iid == 0);
-        this->interface = interface;
-        this->iid = iid;
-        addRef();
-        return 0;
+    friend class Process;
+};
+
+class UpcallProxy
+{
+    Ref         ref;
+    Interlocked use;
+    void*       interface;
+    const Guid* iid;
+    Process*    process;
+
+public:
+    UpcallProxy() :
+        ref(0),
+        interface(0),
+        iid(0),
+        process(0)
+    {
     }
 
-    unsigned int addRef()
-    {
-        return ref.addRef();
-    }
-
-    unsigned int release()
-    {
-        unsigned int count = ref.release();
-        if (count == 0)
-        {
-            static_cast<IInterface*>(interface)->release();
-            interface = 0;
-            iid = 0;
-            return 0;
-        }
-        return count;
-    }
+    bool set(Process* process, void* interface, const Guid* iid);
+    unsigned int addRef();
+    unsigned int release();
+    bool isUsed();
 
     friend class Process;
 };
@@ -168,7 +167,7 @@ class Map
     long long getPosition(const void* addr);
 };
 
-class Process : public IProcess
+class Process : public IProcess, public IRuntime
 {
 public:
     static void* const USER_MIN;
@@ -189,7 +188,7 @@ private:
     void*           end;    // break value
 
     void**          ipt;    // XXX rename this field
-    InterfaceStub   interfaceTable[INTERFACE_POINTER_MAX];
+    SyscallProxy    syscallTable[INTERFACE_POINTER_MAX];
 
     int             exitValue;
     Rendezvous      waitPoint;
@@ -209,6 +208,16 @@ private:
     IStream*        out;
     IStream*        error;
 
+    bool            log;
+
+    // Upcall related fields:
+    void*           (*focus)(void* param);
+    int             upcallCount;    // Maximum # of upcalls that can be made simultaneously.
+    List<UpcallRecord, &UpcallRecord::link>
+                    upcallList;     // List of free upcall records
+    List<UpcallRecord, &UpcallRecord::link>
+                    activatedList;  // List of upcall records in use
+
     int condWait(int);
 
 public:
@@ -224,8 +233,11 @@ public:
     int validityFault(const void* addr, u32 error);
     int protectionFault(const void* addr, u32 error);
 
-    long long systemCall(void** self, unsigned methodNumber, void* stackPointer, void** base);
-    int set(void* interface, const Guid* iid);
+    int read(void* dst, int count, long long offset);
+    int write(const void* src, int count, long long offset);
+
+    long long systemCall(void** self, unsigned methodNumber, va_list param, void** base);
+    int set(SyscallProxy* table, void* interface, const Guid* iid);
 
     Thread* createThread(const unsigned stackSize);
     void detach(Thread* thread);
@@ -245,7 +257,11 @@ public:
     IStream* getOut();
     IStream* getError();
     void* setBreak(long long increment);
+    bool trace(bool on);
+
+    // IRuntime
     void setStartup(void (*startup)(void* (*start)(void* param), void* param));
+    void setFocus(void* (*focus)(void* param));
 
     // IProcess
     void kill();
@@ -272,6 +288,26 @@ public:
 
     friend class Mmu;
     friend class Swap;
+
+    static long long upcall(void* self, void* base, int m, va_list ap);
+    static Broker<upcall, INTERFACE_POINTER_MAX> broker;
+    static UpcallProxy upcallTable[INTERFACE_POINTER_MAX];
+    static int set(Process* process, void* interface, const Guid* iid);
+
+    UpcallRecord* createUpcallRecord(const unsigned stackSize);
+    UpcallRecord* getUpcallRecord();
+    void putUpcallRecord(UpcallRecord* record);
+    void returnFromUpcall(Ureg* ureg);
+
+    /** Copies the parameters to the user stack of the server process.
+     * The space for the input parameters must also be reserved in the
+     * server user stack so that they can be copied back later.
+     */
+    void copyIn(UpcallRecord* record);
+
+    /** Copies back the input parameters from the server user stack.
+     */
+    void copyOut(UpcallRecord* record);
 };
 
 #endif // __es__
@@ -291,6 +327,7 @@ extern unsigned char IMonitorInfo[];
 extern unsigned char IPageableInfo[];
 extern unsigned char IPageSetInfo[];
 extern unsigned char IProcessInfo[];
+extern unsigned char IRuntimeInfo[];
 extern unsigned char IStreamInfo[];
 extern unsigned char IThreadInfo[];
 

@@ -237,11 +237,25 @@ getNow()
     return DateTime::getNow().getTicks();
 }
 
+bool Sched::
+trace(bool on)
+{
+    Process* current(Process::getCurrentProcess());
+    return current->trace(on);
+}
+
 void Sched::
 setStartup(void (*startup)(void* (*start)(void* param), void* param))
 {
     Process* current(Process::getCurrentProcess());
     return current->setStartup(startup);
+}
+
+void Sched::
+setFocus(void* (*focus)(void* param))
+{
+    Process* current(Process::getCurrentProcess());
+    return current->setFocus(focus);
 }
 
 //
@@ -259,13 +273,17 @@ queryInterface(const Guid& riid, void** objectPtr)
     {
         *objectPtr = static_cast<ICurrentProcess*>(this);
     }
+    else if (riid == IID_IRuntime)
+    {
+        *objectPtr = static_cast<IRuntime*>(this);
+    }
     else if (riid == IID_IInterface)
     {
         *objectPtr = static_cast<ICurrentThread*>(this);
     }
     else
     {
-        *objectPtr = NULL;
+            *objectPtr = NULL;
         return false;
     }
     static_cast<IInterface*>(*objectPtr)->addRef();

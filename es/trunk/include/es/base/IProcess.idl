@@ -75,7 +75,7 @@ interface IProcess : IInterface
 
 /** This interface provides methods for handling the current process.
  */
-[object, uuid(0329ef1a-25db-11db-9c02-0009bf000001)]
+[object, uuid(765edc68-41f9-11db-9c02-0009bf000001)]
 interface ICurrentProcess : IInterface
 {
     const unsigned int PROT_NONE = 0x0;
@@ -110,7 +110,7 @@ interface ICurrentProcess : IInterface
      */
     void unmap([in] void* start, long length);
 
-    /** Returns a reference to the currently executing thread.
+    /** Returns the currently executing thread.
      */
     ICurrentThread* currentThread();
 
@@ -128,7 +128,7 @@ interface ICurrentProcess : IInterface
     void yield();
 
     /** Creates and returns an unlocked monitor.
-     * @return          An unlocked monitor.
+     * @return          an unlocked monitor.
      * @see IMonitor
      */
     IMonitor* createMonitor();
@@ -167,8 +167,8 @@ interface ICurrentProcess : IInterface
     long getNow();
 
     /**
-     * Sets the startup routine of threads.
-     * @param startup the function to start up a thread.
+     * Traces the system call invocation.
+     * @param on    enable/disable trace.
      */
-    void setStartup(void (*startup)(void* (*start)(void* param), void* param));
+    boolean trace(boolean on);
 }

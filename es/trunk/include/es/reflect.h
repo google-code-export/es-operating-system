@@ -243,6 +243,49 @@ public:
         }
 
         /**
+         * Gets the size of object being referenced by this type.
+         */
+        int getReferentSize() const
+        {
+            ASSERT(isPointer() || isReference());
+            if (1 < getPointer())
+            {
+                return sizeof(void*);
+            }
+            if (isPrimitive())
+            {
+                switch (offset & ReflectionFile::OFFSET_MASK)
+                {
+                case ReflectionFile::TAG_CHAR:
+                case ReflectionFile::TAG_S8:
+                case ReflectionFile::TAG_U8:
+                    return sizeof(u8);
+                case ReflectionFile::TAG_S16:
+                case ReflectionFile::TAG_U16:
+                    return sizeof(u16);
+                case ReflectionFile::TAG_S32:
+                case ReflectionFile::TAG_U32:
+                case ReflectionFile::TAG_F32:
+                    return sizeof(u32);
+                case ReflectionFile::TAG_S64:
+                case ReflectionFile::TAG_U64:
+                case ReflectionFile::TAG_F64:
+                    return sizeof(u64);
+                case ReflectionFile::TAG_BOOLEAN:
+                    return sizeof(bool);
+                case ReflectionFile::TAG_WIDECHAR:
+                    return sizeof(wchar_t);
+                case ReflectionFile::TAG_VOID:
+                    return 0;
+                case ReflectionFile::TAG_UUID:
+                    return sizeof(Guid);
+                }
+            }
+            ASSERT(0);  // XXX
+            return 0;
+        }
+
+        /**
          * Checks if this type is an interface pointer.
          */
         bool isInterfacePointer()
@@ -361,8 +404,7 @@ public:
          */
         bool isInterfacePointer()
         {
-            return 0 <=
-            getIidIs() || getType().isInterfacePointer();
+            return 0 <= getIidIs() || getType().isInterfacePointer();
         }
     };
 
@@ -376,6 +418,15 @@ public:
         ReflectionFile::FunctionRecord* record;
 
     public:
+        /** Default constructor
+         */
+        Function() :
+            info(0),
+            offset(0),
+            record(0)
+        {
+        }
+
         /**
          * Constructs an object which represents the specified function.
          * @param info the interface reflection file.
@@ -387,6 +438,16 @@ public:
             record(static_cast<ReflectionFile::FunctionRecord*>(Reflect::getPointer(info, offset)))
         {
             ASSERT((offset & ReflectionFile::TYPE_MASK) == ReflectionFile::IS_FUNCTION);
+        }
+
+        /**
+         * Copy-constructor.
+         */
+        Function(const Function& function) :
+            info(function.info),
+            offset(function.offset),
+            record(function.record)
+        {
         }
 
         /**

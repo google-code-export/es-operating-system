@@ -41,6 +41,7 @@ nobase_nodist_include_HEADERS = \
 	es/base/IPageable.h \
 	es/base/IPageSet.h \
 	es/base/IProcess.h \
+	es/base/IRuntime.h \
 	es/base/IStream.h \
 	es/base/IThread.h \
 	es/device/IAudioFormat.h \
@@ -71,6 +72,7 @@ nobase_nodist_include_HEADERS += \
 	es/base/IPageable.ird \
 	es/base/IPageSet.ird \
 	es/base/IProcess.ird \
+	es/base/IRuntime.ird \
 	es/base/IStream.ird \
 	es/base/IThread.ird \
 	es/device/IAudioFormat.ird \
@@ -101,6 +103,7 @@ EXTRA_DIST = \
 	es/base/IPageable.idl \
 	es/base/IPageSet.idl \
 	es/base/IProcess.idl \
+	es/base/IRuntime.idl \
 	es/base/IStream.idl \
 	es/base/IThread.idl \
 	es/device/IAudioFormat.idl \

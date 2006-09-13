@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <es.h>
 #include <es/dateTime.h>
+#include "core.h"
 #include "thread.h"
 #include "process.h"
 
@@ -201,6 +202,17 @@ isDeadlocked()
 void Thread::
 exit(const void* val)
 {
+    UpcallRecord* record(upcallList.getLast());
+    if (record)
+    {
+        // Move back to the client process.
+        ASSERT(process);
+        Ureg* ureg(static_cast<Ureg*>(param));
+        ureg->ecx = reinterpret_cast<u32>(val);
+        process->returnFromUpcall(ureg);
+        return;
+    }
+
     if (process)
     {
         process->detach(this);
@@ -448,6 +460,7 @@ Thread(void* (*func)(void*), void* param, int priority,
         ASSERT(stack);
     }
     this->stack = stack;
+    sp0 = (u32) stack + stackSize - 2048;   // 2048: default kernel TLS size
     ktcb = static_cast<u8*>(stack) + stackSize;
     label.init(stack, stackSize - 2048 /* default kernel TLS size */, startUp, this);
 }
@@ -498,4 +511,33 @@ release(void)
         return 0;
     }
     return count;
+}
+
+Process* Thread::
+returnToClient()
+{
+    Core* core(Core::getCurrentCore());
+
+    upcallList.removeLast();
+    UpcallRecord* record(upcallList.getLast());
+    if (!record)
+    {
+        core->tcb->tcb = tcb;
+        return process;
+    }
+    else
+    {
+        core->tcb->tcb = record->tcb;
+        return record->process;
+    }
+}
+
+Process* Thread::
+leapIntoServer(UpcallRecord* record)
+{
+    Core* core(Core::getCurrentCore());
+
+    upcallList.addLast(record);
+    core->tcb->tcb = record->tcb;
+    return record->process;
 }

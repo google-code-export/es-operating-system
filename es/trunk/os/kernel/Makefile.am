@@ -32,6 +32,7 @@ nodist_libeskernel_a_SOURCES = \
 	base/IPageable.c \
 	base/IPageSet.c \
 	base/IProcess.c \
+	base/IRuntime.c \
 	base/IStream.c \
 	base/IThread.c \
 	device/IAudioFormat.c \
@@ -128,7 +129,8 @@ cpp_source_files += \
 	port/sched.cpp \
 	port/swap.cpp \
 	port/syscall.cpp \
-	port/thread.cpp
+	port/thread.cpp \
+	port/upcall.cpp
 
 # c_source_files += \
 # 	pc/i386-stub.c

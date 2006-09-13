@@ -22,7 +22,7 @@
 #include <es/base/IClassFactory.h>
 
 /**
- * This is an implementation of <code>IClassFactory</code> interface.
+ * This class implements the <code>IClassFactory</code> interface.
  * @param C the class of objects to be constructed from the <code>ClassFactory</code> class.
  *        C must have a default constructor.
  */
@@ -35,7 +35,7 @@ public:
     bool createInstance(const Guid& riid, void** objectPtr)
     {
         *objectPtr = 0;
-        C* instance = new C;
+        C* instance = new(std::nothrow) C;
         if (!instance)
         {
             throw SystemException<ENOMEM>();

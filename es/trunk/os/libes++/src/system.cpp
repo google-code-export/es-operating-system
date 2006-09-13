@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <errno.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -20,8 +21,10 @@
 #include <es/dateTime.h>
 #include <es/exception.h>
 #include <es/formatter.h>
+#include <es/handle.h>
 #include <es/ref.h>
 #include <es/base/IProcess.h>
+#include <es/base/IRuntime.h>
 
 static __thread void* stopCfa;
 static __thread jmp_buf stopBuf;
@@ -114,7 +117,14 @@ public:
         currentProcess(reinterpret_cast<ICurrentProcess*>(&(broker.getInterfaceTable()[0]))),
         current(currentProcess->currentThread())
     {
-        setStartup(start);
+        IRuntime* runtime;
+        currentProcess->queryInterface(IID_IRuntime, (void**) &runtime);
+        if (runtime)
+        {
+            runtime->setStartup(start);
+            runtime->setFocus(focus);
+            runtime->release();
+        }
     }
 
     void exit(int status)
@@ -183,9 +193,9 @@ public:
         return currentProcess->getNow();
     }
 
-    void setStartup(void (*startup)(void* (*start)(void* param), void* param))
+    bool trace(bool on)
     {
-        currentProcess->setStartup(startup);
+        return currentProcess->trace(on);
     }
 
     bool queryInterface(const Guid& riid, void** objectPtr)
@@ -204,6 +214,8 @@ public:
     }
 
     static void start(void* (*func)(void*), void* param);
+
+    static void* focus(void* param);
 
     static _Unwind_Reason_Code stop(int version,
                                     _Unwind_Action actions,
@@ -230,7 +242,7 @@ start(void* (*func)(void*), void* param)
     stopCfa = &func;
     if (setjmp(stopBuf) == 0)
     {
-        func(param);
+        rval = func(param);
     }
     esDeallocateSpecific(); // Deallocate TSD.
     ::current.current.currentThread->exit(rval);
@@ -255,6 +267,46 @@ void System::
 cleanup(_Unwind_Reason_Code reason, struct _Unwind_Exception* exc)
 {
     abort();
+}
+
+long long esHall()
+{
+    typedef long long (*Method)(...);
+    Method** object;
+    int      method;
+
+    __asm__ __volatile__ (
+        "int    $66\n"
+        : "=a"(object), "=d"(method));
+    (*object)[method]();
+}
+
+void* System::
+focus(void* param)
+{
+    int errorCode(0);
+
+    try
+    {
+        for (;;)
+        {
+            esHall();
+        }
+    }
+    catch (Exception& error)
+    {
+        errorCode = error.getResult();
+    }
+    catch (std::bad_alloc)
+    {
+        errorCode = ENOMEM;
+    }
+    catch (...)
+    {
+        // Unexpected exception
+        errorCode = EINVAL;
+    }
+    return reinterpret_cast<void*>(errorCode);
 }
 
 int esReport(const char* spec, ...) __attribute__((weak));
