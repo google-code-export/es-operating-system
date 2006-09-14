@@ -30,12 +30,6 @@
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
 
 ICurrentProcess* System();
-Handle<IClassStore> classStore;
-
-bool createInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
-{
-    return classStore->createInstance(rclsid, riid, objectPtr);
-}
 
 class Binder : public IBinding
 {
@@ -133,17 +127,19 @@ int main(int argc, char* argv[])
     System()->trace(true);
 
     Handle<IContext> nameSpace = System()->getRoot();
-    classStore = nameSpace->lookup("class");
+    Handle<IClassStore> classStore = nameSpace->lookup("class");
     TEST(classStore);
 
-    // Register BinderFactory
-    IClassFactory* processFactory = new(ClassFactory<Binder>);
-    classStore->add(CLSID_Binder, processFactory);
+    // Register Binder factory.
+    Handle<IClassFactory> binderFactory(new(ClassFactory<Binder>));
+    classStore->add(CLSID_Binder, binderFactory);
 
     // Create a client process.
     Handle<IProcess> client;
-    bool result = createInstance(CLSID_Process, IID_IProcess,
-                                 reinterpret_cast<void**>(&client));
+    bool result =
+        classStore->createInstance(CLSID_Process,
+                                   client->interfaceID(),
+                                   reinterpret_cast<void**>(&client));
     TEST(result);
 
     // Start the client process.
@@ -154,8 +150,8 @@ int main(int argc, char* argv[])
     // Wait for the client to exit
     client->wait();
 
-    classStore->remove(CLSID_Binder, processFactory);
-    processFactory->release();
+    // Unregister Binder factory.
+    classStore->remove(CLSID_Binder, binderFactory);
 
     System()->trace(false);
 }

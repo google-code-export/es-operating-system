@@ -13,7 +13,6 @@
 
 #include <es.h>
 #include <es/handle.h>
-#include <es/ref.h>
 #include <es/exception.h>
 #include <es/base/IClassStore.h>
 #include <es/base/IProcess.h>
@@ -25,12 +24,6 @@
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
 
 ICurrentProcess* System();
-Handle<IClassStore> classStore;
-
-bool createInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
-{
-    return classStore->createInstance(rclsid, riid, objectPtr);
-}
 
 int main(int argc, char* argv[])
 {
@@ -38,15 +31,17 @@ int main(int argc, char* argv[])
     System()->trace(true);
 
     Handle<IContext> nameSpace = System()->getRoot();
-    classStore = nameSpace->lookup("class");
+    Handle<IClassStore> classStore = nameSpace->lookup("class");
     TEST(classStore);
 
     // Create binder objects.
     Handle<IBinding> binder[2];
     for (int i(0); i < 2; ++i)
     {
-        bool result = createInstance(CLSID_Binder, IID_IBinding,
-                                     reinterpret_cast<void**>(&binder[i]));
+        bool result =
+            classStore->createInstance(CLSID_Binder,
+                                       binder[i]->interfaceID(),
+                                       reinterpret_cast<void**>(&binder[i]));
         TEST(result);
 
         char name[14];
