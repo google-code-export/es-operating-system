@@ -81,6 +81,8 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 ESIDL = @ESIDL@
+ES_FALSE = @ES_FALSE@
+ES_TRUE = @ES_TRUE@
 EXEEXT = @EXEEXT@
 INIT = @INIT@
 INSTALL_DATA = @INSTALL_DATA@
@@ -468,8 +470,11 @@ uninstall-am: uninstall-info-am uninstall-nobase_includeHEADERS \
 	uninstall-nobase_nodist_includeHEADERS
 
 
-%.h %.ird : %.idl
-	esidl -I $(srcdir) $<
+@ES_TRUE@%.h %.ird : %.idl
+@ES_TRUE@	esidl -I $(srcdir) $<
+
+@ES_FALSE@%.h %.ird : %.idl
+@ES_FALSE@	../esidl/esidl -I $(srcdir) $<
 
 clean-local:
 	-rm -rf es

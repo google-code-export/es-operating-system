@@ -1,0 +1,9 @@
+2006-09-14  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.2 released.
+	* Support procedural IPC.
+	* Fixed clean build problem.
+
+2006-08-30  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.1 released.

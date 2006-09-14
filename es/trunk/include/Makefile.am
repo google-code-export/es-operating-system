@@ -1,7 +1,16 @@
 SUFFIXES = .h .idl
 
+if ES
+
 %.h %.ird : %.idl
 	esidl -I $(srcdir) $<
+
+else !ES
+
+%.h %.ird : %.idl
+	../esidl/esidl -I $(srcdir) $<
+
+endif !ES
 
 nobase_include_HEADERS = \
 	es.h \
