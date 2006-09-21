@@ -74,7 +74,7 @@ public:
 
     int getName(char* name, unsigned int len)
     {
-        unsigned count(strlen(this->name));
+        unsigned count(strlen(this->name) + 1);
         if (len < count)
         {
             count = len;
