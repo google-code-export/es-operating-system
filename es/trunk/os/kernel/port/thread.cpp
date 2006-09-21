@@ -200,7 +200,7 @@ isDeadlocked()
 }
 
 void Thread::
-exit(const void* val)
+exit(void* val)
 {
     UpcallRecord* record(upcallList.getLast());
     if (record)

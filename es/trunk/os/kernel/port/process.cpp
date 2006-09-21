@@ -341,7 +341,7 @@ setBreak(long long increment)
 bool Process::
 trace(bool on)
 {
-    bool prev();
+    bool prev(log);
     log = on;
     return prev;
 }
@@ -547,27 +547,27 @@ Process::
     setError(0);
     setRoot(0);
 
-    while (!upcallList.isEmpty())
-    {
-        UpcallRecord* record(upcallList.removeFirst());
-        delete record;
-    }
-
     for (SyscallProxy* proxy(syscallTable);
          proxy < &syscallTable[INTERFACE_POINTER_MAX];
          ++proxy)
     {
         if (1 < proxy->addRef())
         {
-            ASSERT(proxy->interface);
-            static_cast<IInterface*>(proxy->interface)->release();
+            static_cast<IInterface*>(proxy->getObject())->release();
         }
     }
+
+    while (!upcallList.isEmpty())
+    {
+        upcallCount.decrement();
+        UpcallRecord* record(upcallList.removeFirst());
+        delete record;
+    }
+    ASSERT(upcallCount == 0);
 
     ASSERT(threadList.isEmpty());
 
     unmap(USER_MIN, static_cast<u8*>(USER_MAX) - static_cast<u8*>(USER_MIN));
-
     ASSERT(mmu);
     delete mmu;
 }

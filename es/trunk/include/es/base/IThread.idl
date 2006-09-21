@@ -66,7 +66,7 @@ interface IThread : IInterface
     int getState();
 };
 
-[object, uuid(032e562c-25db-11db-9c02-0009bf000001)]
+[object, uuid(beb0489e-4492-11db-9c02-0009bf000001)]
 interface ICurrentThread : IInterface
 {
     enum Attr
@@ -93,7 +93,7 @@ interface ICurrentThread : IInterface
 
     /** Terminates the currently executing thread.
      */
-    void exit([in] void* val);
+    void exit(void* val);
 
     /** Causes the currently executing thread to sleep.
      */

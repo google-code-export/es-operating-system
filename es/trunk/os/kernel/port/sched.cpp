@@ -103,7 +103,7 @@ selectThread()
 //
 
 void Sched::
-exit(const void* val)
+exit(void* val)
 {
     Thread* current(Thread::getCurrentThread());
     current->exit(val);

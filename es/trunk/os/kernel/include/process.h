@@ -29,48 +29,81 @@ class InterfaceDescriptor;
 class Map;
 class Process;
 
-class SyscallProxy
+class SyscallProxy : public IInterface
 {
     Ref         ref;
-    void*       interface;
+    Interlocked use;
+    void*       object;
     const Guid* iid;
 
 public:
     SyscallProxy() :
         ref(0),
-        interface(0),
+        object(0),
         iid(0)
     {
     }
 
-    bool set(void* interface, const Guid* iid);
+    bool set(void* object, const Guid* iid);
+
+    void* getObject() const
+    {
+        return object;
+    }
+
+    const Guid* getIID() const
+    {
+        return iid;
+    }
+
+    bool isValid() const
+    {
+        return (0 < ref && 0 < use) ? true : false;
+    }
+
+    long addUser();
+    long releaseUser();
+
+    // IInterface
+    bool queryInterface(const Guid& riid, void** objectPtr)
+    {
+        ASSERT(false);
+        return false;
+    }
     unsigned int addRef();
     unsigned int release();
 
     friend class Process;
 };
 
-class UpcallProxy
+class UpcallProxy : public IInterface
 {
     Ref         ref;
     Interlocked use;
-    void*       interface;
+    void*       object;
     const Guid* iid;
     Process*    process;
 
 public:
     UpcallProxy() :
         ref(0),
-        interface(0),
+        object(0),
         iid(0),
         process(0)
     {
     }
 
-    bool set(Process* process, void* interface, const Guid* iid);
+    bool set(Process* process, void* object, const Guid* iid);
+    bool isUsed();
+
+    // IInterface
+    bool queryInterface(const Guid& riid, void** objectPtr)
+    {
+        ASSERT(false);
+        return false;
+    }
     unsigned int addRef();
     unsigned int release();
-    bool isUsed();
 
     friend class Process;
 };
@@ -211,8 +244,9 @@ private:
     bool            log;
 
     // Upcall related fields:
+    SpinLock        spinLock;
     void*           (*focus)(void* param);
-    int             upcallCount;    // Maximum # of upcalls that can be made simultaneously.
+    Interlocked     upcallCount;    // Number of UpcallRecords allocated to this process
     List<UpcallRecord, &UpcallRecord::link>
                     upcallList;     // List of free upcall records
     List<UpcallRecord, &UpcallRecord::link>
@@ -227,6 +261,15 @@ public:
     void load();
 
     Map* lookup(const void* addr);
+    bool isValid(const void* start, long long length)
+    {
+        const void* end(static_cast<const u8*>(start) + length);
+        if (start < USER_MIN || USER_MAX < end || end < start)
+        {
+            return false;
+        }
+        return true;
+    }
     bool isValid(const void* start, long long length, bool write);
     void dump();
 
@@ -237,7 +280,7 @@ public:
     int write(const void* src, int count, long long offset);
 
     long long systemCall(void** self, unsigned methodNumber, va_list param, void** base);
-    int set(SyscallProxy* table, void* interface, const Guid* iid);
+    int set(SyscallProxy* table, void* object, const Guid* iid);
 
     Thread* createThread(const unsigned stackSize);
     void detach(Thread* thread);
@@ -292,7 +335,7 @@ public:
     static long long upcall(void* self, void* base, int m, va_list ap);
     static Broker<upcall, INTERFACE_POINTER_MAX> broker;
     static UpcallProxy upcallTable[INTERFACE_POINTER_MAX];
-    static int set(Process* process, void* interface, const Guid* iid);
+    static int set(Process* process, void* object, const Guid* iid);
 
     UpcallRecord* createUpcallRecord(const unsigned stackSize);
     UpcallRecord* getUpcallRecord();
@@ -302,12 +345,14 @@ public:
     /** Copies the parameters to the user stack of the server process.
      * The space for the input parameters must also be reserved in the
      * server user stack so that they can be copied back later.
+     * @return  error number
      */
-    void copyIn(UpcallRecord* record);
+    int copyIn(UpcallRecord* record);
 
     /** Copies back the input parameters from the server user stack.
+     * @return  error number
      */
-    void copyOut(UpcallRecord* record);
+    int copyOut(UpcallRecord* record);
 };
 
 #endif // __es__

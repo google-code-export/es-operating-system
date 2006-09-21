@@ -329,7 +329,7 @@ public:
     //
     // ICurrentThread (called by Sched)
     //
-    void exit(const void* val);
+    void exit(void* val);
     void sleep(long long timeout);
     int setCancelState(int state);
     int setCancelType(int type);
@@ -389,7 +389,7 @@ public:
     //
     // ICurrentThread
     //
-    void exit(const void* val);
+    void exit(void* val);
     void sleep(long long timeout);
     int setCancelState(int state);
     int setCancelType(int type);

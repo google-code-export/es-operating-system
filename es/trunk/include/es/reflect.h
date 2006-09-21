@@ -238,6 +238,10 @@ public:
                     return sizeof(Guid);
                 }
             }
+            if (isInterface())
+            {
+                return sizeof(void*);
+            }
             ASSERT(0);  // XXX
             return 0;
         }
@@ -281,14 +285,15 @@ public:
                     return sizeof(Guid);
                 }
             }
-            ASSERT(0);  // XXX
-            return 0;
+
+            Type type(info, offset);
+            return type.getSize();
         }
 
         /**
          * Checks if this type is an interface pointer.
          */
-        bool isInterfacePointer()
+        bool isInterfacePointer() const
         {
             int str = getPointer();
             if (isReference())
@@ -402,7 +407,7 @@ public:
         /**
          * Checks if this identifier is an interface pointer.
          */
-        bool isInterfacePointer()
+        bool isInterfacePointer() const
         {
             return 0 <= getIidIs() || getType().isInterfacePointer();
         }

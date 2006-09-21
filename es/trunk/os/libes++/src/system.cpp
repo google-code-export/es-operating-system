@@ -29,7 +29,7 @@
 static __thread void* stopCfa;
 static __thread jmp_buf stopBuf;
 static __thread struct _Unwind_Exception exc;
-static __thread const void* rval;
+static __thread void* rval;
 
 long long _syscall(void* self, void* base, int m, va_list ap)
 {
@@ -64,7 +64,7 @@ class System : public ICurrentProcess
             release();
         }
 
-        void exit(const void* val)
+        void exit(void* val)
         {
             // Call destructors before terminating the current thread.
             rval = val;

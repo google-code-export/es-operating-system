@@ -17,6 +17,7 @@
 #include <es.h>
 #include <es/broker.h>
 #include <es/exception.h>
+#include <es/handle.h>
 #include <es/reflect.h>
 #include "core.h"
 #include "process.h"
@@ -28,14 +29,15 @@ typedef long long (*Method)(void* self, ...);
 Broker<Process::upcall, Process::INTERFACE_POINTER_MAX> Process::broker;
 UpcallProxy Process::upcallTable[Process::INTERFACE_POINTER_MAX];
 
-bool UpcallProxy::set(Process* process, void* interface, const Guid* iid)
+bool UpcallProxy::set(Process* process, void* object, const Guid* iid)
 {
+    ASSERT(reinterpret_cast<const void*>(0x80000000) < iid);
     if (ref.addRef() != 1)
     {
         ref.release();
         return false;
     }
-    this->interface = interface;
+    this->object = object;
     this->iid = iid;
     this->process = process;
     use.exchange(0);
@@ -58,17 +60,17 @@ bool UpcallProxy::isUsed()
 }
 
 int Process::
-set(Process* process, void* interface, const Guid* iid)
+set(Process* process, void* object, const Guid* iid)
 {
     for (UpcallProxy* proxy(upcallTable);
          proxy < &upcallTable[INTERFACE_POINTER_MAX];
          ++proxy)
     {
-        if (proxy->set(process, interface, iid))
+        if (proxy->set(process, object, iid))
         {
 #ifdef VERBOSE
             esReport("Process::set(%p, {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}) : %d;\n",
-                     interface,
+                     object,
                      iid->Data1, iid->Data2, iid->Data3,
                      iid->Data4[0], iid->Data4[1], iid->Data4[2], iid->Data4[3],
                      iid->Data4[4], iid->Data4[5], iid->Data4[6], iid->Data4[7],
@@ -86,7 +88,7 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
     Thread* current(Thread::getCurrentThread());
     Core* core(Core::getCurrentCore());
 
-    unsigned interfaceNumber((void**) self - (void**) base);
+    unsigned interfaceNumber(static_cast<void**>(self) - static_cast<void**>(base));
     UpcallProxy* proxy = &upcallTable[interfaceNumber];
 
     // Now we need to identify which process is to be used for this upcall.
@@ -94,15 +96,10 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
 #ifdef VERBOSE
     esReport("Process(%p)::upcall[%d] %d\n", server, interfaceNumber, methodNumber);
 #endif
-    UpcallRecord* record = server->getUpcallRecord();
-    if (!record)
-    {
-        throw SystemException<ENOMEM>();
-    }
     bool log(server->log);
 
     // Determine the type of interface and which method is being invoked.
-    Reflect::Interface* interface = getInterface(proxy->iid);
+    Reflect::Interface* interface = getInterface(proxy->iid);   // XXX Should cache the result
     ASSERT(interface);
 
     // If this interface inherits another interface,
@@ -127,12 +124,12 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
             super = getInterface(piid);
         }
     }
-    record->method = Reflect::Function(super->getMethod(methodNumber - baseMethodCount));
+    Reflect::Function method(Reflect::Function(super->getMethod(methodNumber - baseMethodCount)));
 
     if (log)
     {
         esReport("upcall: %s::%s(",
-                 interface->getName(), record->method.getName());
+                 interface->getName(), method.getName());
     }
 
     unsigned long ref;
@@ -167,6 +164,14 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         }
     }
 
+    // Get a free upcall record
+    UpcallRecord* record = server->getUpcallRecord();
+    if (!record)
+    {
+        throw SystemException<ENOMEM>();
+    }
+    record->method = method;
+
     // Save the upcall context
     record->client = getCurrentProcess();
     record->proxy = proxy;
@@ -174,6 +179,7 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
     record->param = ap;
 
     long long result(0);
+    int errorCode(0);
     switch (record->getState())
     {
     case UpcallRecord::INIT:
@@ -213,14 +219,18 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         // FALL THROUGH
     case UpcallRecord::READY:
         // Copy parameters to the user stack of the server process
-        server->copyIn(record);
+        errorCode = server->copyIn(record);
+        if (errorCode)
+        {
+            break;
+        }
 
         // Leap into the server process.
         current->leapIntoServer(record);
         server->load();
 
         // Invoke method
-        record->ureg.eax = reinterpret_cast<u32>(record->proxy->interface);
+        record->ureg.eax = reinterpret_cast<u32>(record->proxy->object);
         record->ureg.edx = record->methodNumber;
 #ifdef VERBOSE
         esReport("ureg->eip: %p of %p[%d]\n", ureg->eax, object, record->methodNumber);
@@ -243,44 +253,59 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
             }
 
             // Copy output parameters from the user stack of the server process.
-            server->copyOut(record);
+            errorCode = server->copyOut(record);
 
             // Get result code
-            result = ((long long) record->ureg.edx << 32) | record->ureg.eax;
-            int errorCode = record->ureg.ecx;
+            if (errorCode == 0)
+            {
+                result = (static_cast<long long>(record->ureg.edx) << 32) | record->ureg.eax;
+                errorCode = record->ureg.ecx;
+            }
 
             // Process return code
             Reflect::Type returnType(record->method.getReturnType());
             if (errorCode == 0 && returnType.isInterfacePointer())
             {
                 // Convert the received interface pointer to kernel's interface pointer
-                void** ip((void**) result);
+                void** ip(reinterpret_cast<void**>(result));
                 if (server->ipt <= ip && ip < server->ipt + INTERFACE_POINTER_MAX)
                 {
                     unsigned interfaceNumber(ip - server->ipt);
-                    SyscallProxy* proxy = &server->syscallTable[interfaceNumber];
-                    result = (long long) proxy->interface;
+                    Handle<SyscallProxy> proxy(&server->syscallTable[interfaceNumber], true);
+                    if (proxy->isValid())
+                    {
+                        result = reinterpret_cast<long>(proxy->getObject());
+                    }
+                    else
+                    {
+                        result = 0;
+                        errorCode = EBADFD;
+                    }
                 }
-                else
+                else if (server->isValid(ip, sizeof(void*)))
                 {
                     // Allocate an entry in the upcall table and set the
                     // interface pointer to the broker for the upcall table.
-                    int n = set(server, (IInterface*) ip, returnType.getInterface().getIid());
+                    int n = set(server, reinterpret_cast<IInterface*>(ip), returnType.getInterface().getIid());
+                    if (0 <= n)
+                    {
+                        result = reinterpret_cast<long>(&(broker.getInterfaceTable())[n]);
+                    }
+                    else
+                    {
+                        // XXX object pointed by ip would be left allocated.
+                        result = 0;
+                        errorCode = ENFILE;
+                    }
                     if (log)
                     {
                         esReport(" = %p", ip);
                     }
-                    result = (long long) &(broker.getInterfaceTable())[n];
                 }
-            }
-
-            server->putUpcallRecord(record);
-
-            if (errorCode)
-            {
-                // Switch the record state back to INIT.
-                record->setState(UpcallRecord::INIT);
-                esThrow(errorCode);
+                else
+                {
+                    errorCode = EBADFD;
+                }
             }
         }
         break;
@@ -298,6 +323,16 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
             break;
         }
     }
+
+    if (errorCode)
+    {
+        // Switch the record state back to INIT.
+        record->setState(UpcallRecord::INIT);
+        server->putUpcallRecord(record);
+        esThrow(errorCode);
+    }
+
+    server->putUpcallRecord(record);
 
     return result;
 }
@@ -356,7 +391,7 @@ createUpcallRecord(const unsigned stackSize)
     record->tls(tlsSize, tlsAlign);
     record->userStack = userStack;
 
-    ++upcallCount;
+    upcallCount.increment();
 
     return record;
 }
@@ -364,11 +399,16 @@ createUpcallRecord(const unsigned stackSize)
 UpcallRecord* Process::
 getUpcallRecord()
 {
-    UpcallRecord* record(upcallList.removeFirst());
-    if (record)
     {
-        return record;
+        SpinLock::Synchronized method(spinLock);
+
+        UpcallRecord* record = upcallList.removeFirst();
+        if (record)
+        {
+            return record;
+        }
     }
+
     const unsigned stackSize = 2*1024*1024;
     return createUpcallRecord(stackSize);
 }
@@ -376,58 +416,31 @@ getUpcallRecord()
 void Process::
 putUpcallRecord(UpcallRecord* record)
 {
+    SpinLock::Synchronized method(spinLock);
+
     upcallList.addLast(record);
 }
 
 // Note copyIn() is called against the server process, so that
 // copyIn() can be called from the kernel thread to make an upcall,
-void Process::
+int Process::
 copyIn(UpcallRecord* record)
 {
     UpcallProxy* proxy(record->proxy);
     int methodNumber(record->methodNumber);
-    void* paramv(record->param);
+    va_list paramv(record->param);
     u8* esp(reinterpret_cast<u8*>(record->ureg.esp));
     Ureg* ureg(&record->ureg);
 
     //
-    // Determine the type of interface and which method is being invoked.
-    //
-    Reflect::Interface* interface = getInterface(proxy->iid);
-    ASSERT(interface);
-
-    // If this interface inherits another interface,
-    // methodNumber is checked accordingly.
-    if (interface->getTotalMethodCount() <= methodNumber)
-    {
-        throw SystemException<ENOSYS>();
-    }
-    unsigned baseMethodCount;
-    Reflect::Interface* super(interface);
-    for (;;)
-    {
-        baseMethodCount = super->getTotalMethodCount() - super->getMethodCount();
-        if (baseMethodCount <= methodNumber)
-        {
-            break;
-        }
-        else
-        {
-            Guid* piid = super->getSuperIid();
-            ASSERT(piid);
-            super = getInterface(piid);
-        }
-    }
-    Reflect::Function method(super->getMethod(methodNumber - baseMethodCount));
-
-    //
     // Copy parameters
     //
+    unsigned arg[sizeof(void*) / sizeof(unsigned) + 8]; // XXX 8 is enough?
     int paramc(0);
-    unsigned param[8];  // XXX 8 is enough?
-    for (int i(0); i < method.getParameterCount(); ++i)
+    unsigned* param(arg + sizeof(void*) / sizeof(unsigned));
+    for (int i(0); i < record->method.getParameterCount(); ++i)
     {
-        Reflect::Identifier parameter(method.getParameter(i));
+        Reflect::Identifier parameter(record->method.getParameter(i));
         if (log)
         {
             esReport("%s", parameter.getName());
@@ -435,27 +448,28 @@ copyIn(UpcallRecord* record)
         int size = parameter.getType().getSize();
         size += sizeof(unsigned) - 1;
         size &= ~(sizeof(unsigned) - 1);
-        memmove(&param[paramc], &((u32*) paramv)[paramc], size);
+        memmove(&param[paramc], &reinterpret_cast<int*>(paramv)[paramc], size);
         if (parameter.isInterfacePointer() && !parameter.isOutput())
         {
-            void** ip(*(void***) (param + paramc));
-
-            const Guid* iid;
-            if (0 <= parameter.getIidIs())
-            {
-                iid = *(Guid**) ((u8*) paramv + method.getParameterOffset(parameter.getIidIs()));
-            }
-            else
-            {
-                iid = parameter.getType().getInterface().getIid();
-            }
-
-            // Set up new interface proxy.
-            // We also need to know the IID of the interface.
+            void** ip(*reinterpret_cast<void***>(param + paramc));
             if (ip)
             {
-                IInterface* object((IInterface*) ip);
+                // Check the IID of the interface pointer.
+                const Guid* iid;
+                if (0 <= parameter.getIidIs())
+                {
+                    iid = *reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
+                    Reflect::Interface* interface(getInterface(iid));
+                    ASSERT(interface);  // XXX
+                    iid = interface->getIid();
+                }
+                else
+                {
+                    iid = parameter.getType().getInterface().getIid();
+                }
 
+                // Set up a new system call proxy.
+                IInterface* object(reinterpret_cast<IInterface*>(ip));
                 int n = set(syscallTable, object, iid);
                 if (0 <= n)
                 {
@@ -467,45 +481,41 @@ copyIn(UpcallRecord* record)
                 {
                     ip = 0;
                 }
+                *reinterpret_cast<void***>(param + paramc) = *reinterpret_cast<void***>(reinterpret_cast<int*>(paramv) + paramc) = ip;
             }
-            *(void***) (param + paramc) = ((void***) paramv)[paramc] = ip;
 
             // Note the reference count to the created syscall proxy must
             // be decremented by one at the end of this upcall.
         }
         else if (parameter.getType().isPointer() || parameter.getType().isReference())
         {
-            if (parameter.isInput() || parameter.isOutput())
+            // Determine the size of the object pointed.
+            int count(0);
+            if (0 <= parameter.getSizeIs())
             {
-                // Determine the size of the object pointed.
-                int count(0);
-                if (0 <= parameter.getSizeIs())
-                {
-                    count = *(int*) ((u8*) paramv + method.getParameterOffset(parameter.getSizeIs()));
-                }
-                else
-                {
-                    // Determine the size of object pointed by this parameter.
-                    count = parameter.getType().getReferentSize();
-                }
-
-                if (Page::SIZE < count)
-                {
-                    throw SystemException<ENOBUFS>();
-                }
-
-                // Reserve count space in the server user stack.
-                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
-                if (parameter.isInput())
-                {
-                    write(((void**) paramv)[paramc], count, reinterpret_cast<long long>(esp));
-                }
-                *(void**) (param + paramc) = esp;
+                count = *reinterpret_cast<int*>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getSizeIs()));
             }
+            else
+            {
+                count = parameter.getType().getReferentSize();
+            }
+
+            if (Page::SIZE < count)
+            {
+                return ENOBUFS;
+            }
+
+            // Reserve count space in the server user stack.
+            esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+            if (!parameter.isOutput())
+            {
+                write(*reinterpret_cast<void**>(reinterpret_cast<int*>(paramv) + paramc), count, reinterpret_cast<long long>(esp));
+            }
+            *reinterpret_cast<void**>(param + paramc) = esp;
         }
         paramc += size / sizeof(unsigned);
         ASSERT(paramc <= 8);    // XXX
-        if (log && i + 1 < method.getParameterCount())
+        if (log && i + 1 < record->method.getParameterCount())
         {
             esReport(", ");
         }
@@ -515,23 +525,17 @@ copyIn(UpcallRecord* record)
         esReport(");\n");
     }
 
-    // XXX
-    // Note the following stage would be much easier to implement if the
-    // current process is the server process itself.
+    // Copy arguments with 'this' pointer
+    memmove(arg, &proxy->object, sizeof(void*));
+    esp -= sizeof(void*) + sizeof(int) * paramc;
+    write(arg, sizeof(void*) + sizeof(int) * paramc, reinterpret_cast<long>(esp));
+    ureg->esp = reinterpret_cast<long>(esp);
 
-    // Copy arguments
-    esp -= sizeof(int) * paramc;
-    write(param, sizeof(int) * paramc, reinterpret_cast<long long>(esp));
-
-    // Copy 'this'
-    esp -= sizeof(int);
-    write(&proxy->interface, sizeof(int), reinterpret_cast<long long>(esp));
-
-    ureg->esp = reinterpret_cast<u32>(esp);
+    return 0;
 }
 
-// Note copyIn() is called against the server process.
-void Process::
+// Note copyOut() is called against the server process.
+int Process::
 copyOut(UpcallRecord* record)
 {
     UpcallProxy* proxy(record->proxy);
@@ -539,50 +543,21 @@ copyOut(UpcallRecord* record)
     void* paramv(record->param);
     u8* esp(reinterpret_cast<u8*>(record->ureg.esp));  // XXX should be saved separately
 
-    //
-    // Determine the type of interface and which method is being invoked.
-    //
-    Reflect::Interface* interface = getInterface(proxy->iid);
-    ASSERT(interface);
-
-    // If this interface inherits another interface,
-    // methodNumber is checked accordingly.
-    if (interface->getTotalMethodCount() <= methodNumber)
-    {
-        throw SystemException<ENOSYS>();
-    }
-    unsigned baseMethodCount;
-    Reflect::Interface* super(interface);
-    for (;;)
-    {
-        baseMethodCount = super->getTotalMethodCount() - super->getMethodCount();
-        if (baseMethodCount <= methodNumber)
-        {
-            break;
-        }
-        else
-        {
-            Guid* piid = super->getSuperIid();
-            ASSERT(piid);
-            super = getInterface(piid);
-        }
-    }
-    Reflect::Function method(super->getMethod(methodNumber - baseMethodCount));
-
     if (log)
     {
+        Reflect::Interface* interface = getInterface(proxy->iid);
+        ASSERT(interface);
         esReport("return from upcall: %s::%s(",
-                 interface->getName(), method.getName());
+                 interface->getName(), record->method.getName());
     }
 
     //
     // Copy parameters
     //
     int paramc(0);
-    unsigned param[8];  // XXX 8 is enough?
-    for (int i(0); i < method.getParameterCount(); ++i)
+    for (int i(0); i < record->method.getParameterCount(); ++i)
     {
-        Reflect::Identifier parameter(method.getParameter(i));
+        Reflect::Identifier parameter(record->method.getParameter(i));
         if (log)
         {
             esReport("%s", parameter.getName());
@@ -593,7 +568,7 @@ copyOut(UpcallRecord* record)
 
         if (parameter.isInterfacePointer() && !parameter.isOutput())
         {
-            void** ip(((void***) paramv)[paramc]);
+            void** ip(*reinterpret_cast<void***>(reinterpret_cast<int*>(paramv) + paramc));
             if (log)
             {
                 esReport(" = %p", ip);
@@ -607,31 +582,27 @@ copyOut(UpcallRecord* record)
         }
         else if (parameter.getType().isPointer() || parameter.getType().isReference())
         {
-            if (parameter.isInput() || parameter.isOutput())
+            // Determine the size of the object pointed.
+            int count(0);
+            if (0 <= parameter.getSizeIs())
             {
-                // Determine the size of the object pointed.
-                int count(0);
-                if (0 <= parameter.getSizeIs())
-                {
-                    count = *(int*) ((u8*) paramv + method.getParameterOffset(parameter.getSizeIs()));
-                }
-                else
-                {
-                    // Determine the size of object pointed by this parameter.
-                    count = parameter.getType().getReferentSize();
-                }
+                count = *reinterpret_cast<int*>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getSizeIs()));
+            }
+            else
+            {
+                count = parameter.getType().getReferentSize();
+            }
 
-                if (Page::SIZE < count)
-                {
-                    throw SystemException<ENOBUFS>();
-                }
+            if (Page::SIZE < count)
+            {
+                return ENOBUFS;
+            }
 
-                // Reserve count space in the server user stack.
-                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
-                if (parameter.isOutput())
-                {
-                    read(((void**) paramv)[paramc], count, reinterpret_cast<long long>(esp));
-                }
+            // Reserve count space in the server user stack.
+            esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+            if (parameter.isOutput())
+            {
+                read(*reinterpret_cast<void**>(reinterpret_cast<int*>(paramv) + paramc), count, reinterpret_cast<long long>(esp));
             }
         }
 
@@ -640,40 +611,64 @@ copyOut(UpcallRecord* record)
             if (parameter.isOutput())
             {
                 // Convert the received interface pointer to kernel's interface pointer
-                void** ip(*(((void****) paramv)[paramc]));
+                void** ip(**reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc));
 
                 if (ipt <= ip && ip < ipt + INTERFACE_POINTER_MAX)
                 {
-                    SyscallProxy* proxy = &syscallTable[ip - ipt];
-                    *((void***) paramv)[paramc] = (void**) proxy->interface;
+                    Handle<SyscallProxy> proxy(&syscallTable[ip - ipt], true);
+                    if (proxy->isValid())
+                    {
+                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = static_cast<void**>(proxy->getObject());
+                    }
+                    else
+                    {
+                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = 0;
+                        return EBADFD;
+                    }
                 }
-                else if (ip)
+                else if (isValid(ip, sizeof(void*)))
                 {
                     // Allocate an entry in the upcall table and set the
                     // interface pointer to the broker for the upcall table.
                     const Guid* iid;
                     if (0 <= parameter.getIidIs())
                     {
-                        iid = *(Guid**) ((u8*) paramv + method.getParameterOffset(parameter.getIidIs()));
+                        iid = *reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
+                        Reflect::Interface* interface(getInterface(iid));
+                        ASSERT(interface);  // XXX
+                        iid = interface->getIid();
                     }
                     else
                     {
                         iid = parameter.getType().getInterface().getIid();
                     }
 
-                    int n = set(this, (IInterface*) ip, iid);
+                    int n = set(this, reinterpret_cast<IInterface*>(ip), iid);
+                    if (0 <= n)
+                    {
+                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = &(broker.getInterfaceTable())[n];
+                    }
+                    else
+                    {
+                        // XXX object pointed by ip would be left allocated.
+                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = 0;
+                        return ENFILE;
+                    }
                     if (log)
                     {
                         esReport(" = %p", ip);
                     }
-                    *((void***) paramv)[paramc] = &(broker.getInterfaceTable())[n];
+                }
+                else
+                {
+                    return EFAULT;
                 }
             }
         }
 
         paramc += size / sizeof(unsigned);
         ASSERT(paramc <= 8);    // XXX
-        if (log && i + 1 < method.getParameterCount())
+        if (log && i + 1 < record->method.getParameterCount())
         {
             esReport(", ");
         }
@@ -682,4 +677,6 @@ copyOut(UpcallRecord* record)
     {
         esReport(");\n");
     }
+
+    return 0;
 }
