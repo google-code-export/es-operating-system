@@ -23,6 +23,7 @@ nobase_include_HEADERS = \
 	es/exception.h \
 	es/formatter.h \
 	es/handle.h \
+	es/hashtable.h \
 	es/interlocked.h \
 	es/irf.h \
 	es/list.h \
@@ -46,6 +47,7 @@ nobase_nodist_include_HEADERS = \
 	es/base/IClassStore.h \
 	es/base/IFile.h \
 	es/base/IInterface.h \
+	es/base/IInterfaceStore.h \
 	es/base/IMonitor.h \
 	es/base/IPageable.h \
 	es/base/IPageSet.h \
@@ -77,6 +79,7 @@ nobase_nodist_include_HEADERS += \
 	es/base/IClassStore.ird \
 	es/base/IFile.ird \
 	es/base/IInterface.ird \
+	es/base/IInterfaceStore.ird \
 	es/base/IMonitor.ird \
 	es/base/IPageable.ird \
 	es/base/IPageSet.ird \
@@ -100,7 +103,7 @@ nobase_nodist_include_HEADERS += \
 	es/util/IIterator.ird \
 	es/util/ISet.ird
 
-EXTRA_DIST = \
+nobase_include_HEADERS += \
 	es/base/IAlarm.idl \
 	es/base/ICache.idl \
 	es/base/ICallback.idl \
@@ -108,6 +111,7 @@ EXTRA_DIST = \
 	es/base/IClassStore.idl \
 	es/base/IFile.idl \
 	es/base/IInterface.idl \
+	es/base/IInterfaceStore.idl \
 	es/base/IMonitor.idl \
 	es/base/IPageable.idl \
 	es/base/IPageSet.idl \

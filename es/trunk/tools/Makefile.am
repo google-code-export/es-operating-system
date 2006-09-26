@@ -1,4 +1,4 @@
-LDADD = ../os/fs/fat/libesfat.a ../os/kernel/libeskernel.a ../os/libes++/libes++.a -lrt
+LDADD = ../os/fs/fat/libesfat.a ../os/kernel/libeskernel.a ../os/libes++/libessup++.a -lrt
 
 bin_PROGRAMS = trunc bm vformat vcopy vlist guidgen
 

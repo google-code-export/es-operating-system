@@ -140,15 +140,15 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	posix/posix_core.cpp posix/posix_dateTime.cpp \
 	posix/posix_init.cpp include/alarm.h include/arena.h \
 	include/cache.h include/classStore.h include/context.h \
-	include/elfFile.h include/heap.h include/line.h \
-	include/partition.h include/process.h include/spinlock.h \
-	include/thread.h include/zero.h include/ata.h include/uart.h \
-	include/i386/8042.h include/i386/8237a.h include/i386/8254.h \
-	include/i386/8259.h include/i386/ataController.h \
-	include/i386/cga.h include/i386/core.h include/i386/cpu.h \
-	include/i386/fdc.h include/i386/label.h include/i386/io.h \
-	include/i386/rtc.h include/i386/sb16.h include/i386/vesa.h \
-	include/posix/core.h
+	include/elfFile.h include/heap.h include/interfaceStore.h \
+	include/line.h include/partition.h include/process.h \
+	include/spinlock.h include/thread.h include/zero.h \
+	include/ata.h include/uart.h include/i386/8042.h \
+	include/i386/8237a.h include/i386/8254.h include/i386/8259.h \
+	include/i386/ataController.h include/i386/cga.h \
+	include/i386/core.h include/i386/cpu.h include/i386/fdc.h \
+	include/i386/label.h include/i386/io.h include/i386/rtc.h \
+	include/i386/sb16.h include/i386/vesa.h include/posix/core.h
 @ES_TRUE@am__objects_1 = label.$(OBJEXT)
 am__objects_2 =
 @ES_TRUE@am__objects_3 = malloc.$(OBJEXT) map.$(OBJEXT) mmu.$(OBJEXT) \
@@ -180,14 +180,14 @@ am_libeskernel_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
 nodist_libeskernel_a_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	ICallback.$(OBJEXT) IClassFactory.$(OBJEXT) \
 	IClassStore.$(OBJEXT) IFile.$(OBJEXT) IInterface.$(OBJEXT) \
-	IMonitor.$(OBJEXT) IPageable.$(OBJEXT) IPageSet.$(OBJEXT) \
-	IProcess.$(OBJEXT) IRuntime.$(OBJEXT) IStream.$(OBJEXT) \
-	IThread.$(OBJEXT) IAudioFormat.$(OBJEXT) IBeep.$(OBJEXT) \
-	ICursor.$(OBJEXT) IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) \
-	IDmac.$(OBJEXT) IFileSystem.$(OBJEXT) IPic.$(OBJEXT) \
-	IRemovableMedia.$(OBJEXT) IRtc.$(OBJEXT) IPartition.$(OBJEXT) \
-	IBinding.$(OBJEXT) IContext.$(OBJEXT) IIterator.$(OBJEXT) \
-	ISet.$(OBJEXT)
+	IInterfaceStore.$(OBJEXT) IMonitor.$(OBJEXT) \
+	IPageable.$(OBJEXT) IPageSet.$(OBJEXT) IProcess.$(OBJEXT) \
+	IRuntime.$(OBJEXT) IStream.$(OBJEXT) IThread.$(OBJEXT) \
+	IAudioFormat.$(OBJEXT) IBeep.$(OBJEXT) ICursor.$(OBJEXT) \
+	IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) IDmac.$(OBJEXT) \
+	IFileSystem.$(OBJEXT) IPic.$(OBJEXT) IRemovableMedia.$(OBJEXT) \
+	IRtc.$(OBJEXT) IPartition.$(OBJEXT) IBinding.$(OBJEXT) \
+	IContext.$(OBJEXT) IIterator.$(OBJEXT) ISet.$(OBJEXT)
 libeskernel_a_OBJECTS = $(am_libeskernel_a_OBJECTS) \
 	$(nodist_libeskernel_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -333,6 +333,7 @@ nodist_libeskernel_a_SOURCES = \
 	base/IClassStore.c \
 	base/IFile.c \
 	base/IInterface.c \
+	base/IInterfaceStore.c \
 	base/IMonitor.c \
 	base/IPageable.c \
 	base/IPageSet.c \
@@ -381,10 +382,10 @@ cpp_source_files = port/classStore.cpp port/context.cpp port/elf.cpp \
 # extra header files
 header_files = include/alarm.h include/arena.h include/cache.h \
 	include/classStore.h include/context.h include/elfFile.h \
-	include/heap.h include/line.h include/partition.h \
-	include/process.h include/spinlock.h include/thread.h \
-	include/zero.h include/ata.h include/uart.h $(am__append_3) \
-	$(am__append_6)
+	include/heap.h include/interfaceStore.h include/line.h \
+	include/partition.h include/process.h include/spinlock.h \
+	include/thread.h include/zero.h include/ata.h include/uart.h \
+	$(am__append_3) $(am__append_6)
 
 # cpp_source_files += \
 # 	pc/acpios.cpp
@@ -488,6 +489,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IFile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IFileSystem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInterface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInterfaceStore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IIterator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IMonitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IPageSet.Po@am__quote@
@@ -676,6 +678,20 @@ IInterface.obj: base/IInterface.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IInterface.c' object='IInterface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInterface.obj `if test -f 'base/IInterface.c'; then $(CYGPATH_W) 'base/IInterface.c'; else $(CYGPATH_W) '$(srcdir)/base/IInterface.c'; fi`
+
+IInterfaceStore.o: base/IInterfaceStore.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IInterfaceStore.o -MD -MP -MF "$(DEPDIR)/IInterfaceStore.Tpo" -c -o IInterfaceStore.o `test -f 'base/IInterfaceStore.c' || echo '$(srcdir)/'`base/IInterfaceStore.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IInterfaceStore.Tpo" "$(DEPDIR)/IInterfaceStore.Po"; else rm -f "$(DEPDIR)/IInterfaceStore.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IInterfaceStore.c' object='IInterfaceStore.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInterfaceStore.o `test -f 'base/IInterfaceStore.c' || echo '$(srcdir)/'`base/IInterfaceStore.c
+
+IInterfaceStore.obj: base/IInterfaceStore.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IInterfaceStore.obj -MD -MP -MF "$(DEPDIR)/IInterfaceStore.Tpo" -c -o IInterfaceStore.obj `if test -f 'base/IInterfaceStore.c'; then $(CYGPATH_W) 'base/IInterfaceStore.c'; else $(CYGPATH_W) '$(srcdir)/base/IInterfaceStore.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IInterfaceStore.Tpo" "$(DEPDIR)/IInterfaceStore.Po"; else rm -f "$(DEPDIR)/IInterfaceStore.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IInterfaceStore.c' object='IInterfaceStore.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInterfaceStore.obj `if test -f 'base/IInterfaceStore.c'; then $(CYGPATH_W) 'base/IInterfaceStore.c'; else $(CYGPATH_W) '$(srcdir)/base/IInterfaceStore.c'; fi`
 
 IMonitor.o: base/IMonitor.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IMonitor.o -MD -MP -MF "$(DEPDIR)/IMonitor.Tpo" -c -o IMonitor.o `test -f 'base/IMonitor.c' || echo '$(srcdir)/'`base/IMonitor.c; \

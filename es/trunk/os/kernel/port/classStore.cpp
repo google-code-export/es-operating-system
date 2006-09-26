@@ -17,58 +17,16 @@
 #include <new>
 #include "classStore.h"
 
-static int hashCode(const Guid& clsid)
-{
-    int code = ((u32*) &clsid)[0] ^
-               ((u32*) &clsid)[1] ^
-               ((u32*) &clsid)[2] ^
-               ((u32*) &clsid)[3];
-    return code;
-}
-
-ClassEntry* ClassStore::
-lookup(const Guid& clsid)
-{
-    ClassEntry* entry;
-    ClassList::Iterator iter =
-        hashTable[hashCode(clsid) % entryCount].begin();
-    while ((entry = iter.next()))
-    {
-        if (entry->clsid == clsid)
-        {
-            return entry;
-        }
-    }
-    return 0;
-}
-
 ClassStore::
-ClassStore(int entryCount) :
-    entryCount(entryCount)
+ClassStore(int capacity) :
+    hashtable(capacity)
 {
-    entryTable = new ClassEntry[entryCount];
-    hashTable = new ClassList[entryCount];
-
-    ClassEntry* entry;
-    for (entry = entryTable; entry < &entryTable[entryCount]; ++entry)
-    {
-        freeList.addLast(entry);
-    }
 }
 
 ClassStore::
 ~ClassStore()
 {
-    ClassEntry* entry;
-    for (entry = entryTable; entry < &entryTable[entryCount]; ++entry)
-    {
-        if (entry->factory)
-        {
-            entry->factory->release();
-        }
-    }
-    delete entryTable;
-    delete hashTable;
+    // XXX call release() for all the registered factory classes.
 }
 
 void ClassStore::
@@ -78,87 +36,38 @@ add(const Guid& clsid, IClassFactory* factory)
     {
         esThrow(EINVAL);
     }
-    factory->addRef();
-
-    ClassEntry* entry;
-    IClassFactory* prev = 0;
     {
         SpinLock::Synchronized method(spinLock);
 
-        entry = lookup(clsid);
-        if (entry)
-        {
-            prev = entry->factory;
-            entry->factory = factory;
-        }
-        else
-        {
-            entry = freeList.removeFirst();
-            if (entry)
-            {
-                entry->clsid = clsid;
-                entry->factory = factory;
-                hashTable[hashCode(clsid) % entryCount].addFirst(entry);
-            }
-        }
+        hashtable.add(clsid, factory);
     }
-
-    if (prev)
-    {
-        prev->release();
-    }
-    if (!entry)
-    {
-        factory->release();
-        esThrow(ENOSPC);
-    }
+    factory->addRef();
 }
 
 void ClassStore::
-remove(const Guid& clsid, IClassFactory* factory)
+remove(const Guid& clsid)
 {
-    {
-        SpinLock::Synchronized method(spinLock);
+    SpinLock::Synchronized method(spinLock);
 
-        ClassEntry* entry = lookup(clsid);
-        if (entry)
-        {
-            factory = entry->factory;
-            entry->factory = 0;
-            hashTable[hashCode(clsid) % entryCount].remove(entry);
-            freeList.addLast(entry);
-        }
-        else
-        {
-            factory = 0;
-        }
-    }
-    if (factory)
-    {
-        factory->release();
-    }
+    IClassFactory* registered = hashtable.get(clsid);
+    ASSERT(registered);
+    hashtable.remove(clsid);
+    registered->release();
 }
 
 bool ClassStore::
 createInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
 {
     *objectPtr = 0;
-
     IClassFactory* factory;
     {
         SpinLock::Synchronized method(spinLock);
 
-        ClassEntry* entry = lookup(rclsid);
-        if (!entry)
-        {
-            esThrow(ENOENT);
-        }
-        factory = entry->factory;
-        factory->addRef();
+        factory = hashtable.get(rclsid);
+        ASSERT(factory);
     }
-    bool rc = factory->createInstance(riid, objectPtr);
-    factory->release();
-    return rc;
+    // XXX Should ensure 'factory' is valid while calling createInstance().
+    return factory->createInstance(riid, objectPtr);
 }
 
 bool ClassStore::

@@ -28,6 +28,7 @@ nodist_libeskernel_a_SOURCES = \
 	base/IClassStore.c \
 	base/IFile.c \
 	base/IInterface.c \
+	base/IInterfaceStore.c \
 	base/IMonitor.c \
 	base/IPageable.c \
 	base/IPageSet.c \
@@ -86,6 +87,7 @@ header_files = \
 	include/context.h \
 	include/elfFile.h \
 	include/heap.h \
+	include/interfaceStore.h \
 	include/line.h \
 	include/partition.h \
 	include/process.h \

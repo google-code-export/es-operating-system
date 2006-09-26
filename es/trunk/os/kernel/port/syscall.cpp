@@ -19,14 +19,14 @@
 #include <es/handle.h>
 #include <es/reflect.h>
 #include "core.h"
+#include "interfaceStore.h"
 #include "process.h"
 
 extern IStream* esReportStream();
-extern Reflect::Interface* getInterface(const Guid* iid);
 
 typedef long long (*Method)(void* self, ...);
 
-bool SyscallProxy::set(void* object, const Guid* iid)
+bool SyscallProxy::set(void* object, const Guid& iid)
 {
     if (ref.addRef() != 1)
     {
@@ -106,11 +106,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
         throw SystemException<EBADF>();
     }
 
-    Reflect::Interface* interface = getInterface(proxy->iid);   // XXX Should cache the result.
-    if (!interface)
-    {
-        throw SystemException<EBADF>();
-    }
+    Reflect::Interface interface = getInterface(proxy->iid);   // XXX Should cache the result.
 
     // Suppress unwanted trace outputs.
     if (proxy->getObject() == esReportStream() ||
@@ -121,36 +117,31 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
 
     // If this interface inherits another interface,
     // methodNumber is checked accordingly.
-    if (interface->getTotalMethodCount() <= methodNumber)
+    if (interface.getTotalMethodCount() <= methodNumber)
     {
         throw SystemException<ENOSYS>();
     }
     unsigned baseMethodCount;
-    Reflect::Interface* super(interface);
+    Reflect::Interface super(interface);
     for (;;)
     {
-        baseMethodCount = super->getTotalMethodCount() - super->getMethodCount();
+        baseMethodCount = super.getTotalMethodCount() - super.getMethodCount();
         if (baseMethodCount <= methodNumber)
         {
             break;
         }
-        else
-        {
-            Guid* piid = super->getSuperIid();
-            ASSERT(piid);
-            super = getInterface(piid);
-        }
+        super = getInterface(super.getSuperIid());
     }
-    Reflect::Function method(super->getMethod(methodNumber - baseMethodCount));
+    Reflect::Function method(super.getMethod(methodNumber - baseMethodCount));
 
     if (log)
     {
         esReport("system call[%d:%p]: %s::%s(",
-                 interfaceNumber, this, interface->getName(), method.getName());
+                 interfaceNumber, this, interface.getName(), method.getName());
     }
 
     // Process addRef() and release() locally
-    if (*super->getIid() == IID_IInterface)
+    if (super.getIid() == IID_IInterface)
     {
         unsigned long count;
         switch (methodNumber - baseMethodCount)
@@ -182,7 +173,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
     struct
     {
         void* object;
-        Guid* iid;
+        Guid  iid;
     } ipv[8];
     Handle<SyscallProxy> inputProxies[8];
     Handle<SyscallProxy> outputProxies[8];
@@ -239,24 +230,18 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
                 *reinterpret_cast<void***>(param + paramc) = &ipv[i].object;
 
                 // Check the IID of the interface pointer.
-                Guid* iid;
+                Guid iid;
                 if (0 <= parameter.getIidIs())
                 {
-                    iid = *reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + method.getParameterOffset(parameter.getIidIs()));
-                    Reflect::Interface* interface(getInterface(iid));
-                    if (!interface)
-                    {
-                        // This iid has not been registered to the kernel.
-                        throw SystemException<ENODEV>();
-                    }
-                    iid = interface->getIid();
+                    iid = **reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + method.getParameterOffset(parameter.getIidIs()));
+                    Reflect::Interface interface(getInterface(iid));
+                    iid = interface.getIid();
                 }
                 else
                 {
                     ASSERT(parameter.getType().isInterfacePointer());
                     iid = parameter.getType().getInterface().getIid();
                 }
-                ASSERT(iid);
                 ipv[i].iid = iid;
             }
             else

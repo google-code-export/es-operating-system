@@ -3541,7 +3541,7 @@ else
 fi
 
 
-                                                                                                    ac_config_files="$ac_config_files Makefile libes++/Makefile bootsect/Makefile fs/Makefile fs/fat/Makefile fs/fat/testsuite/Makefile fs/iso9660/Makefile fs/iso9660/testsuite/Makefile kernel/Makefile kernel/testsuite/Makefile"
+                                                                                                              ac_config_files="$ac_config_files Makefile libes++/Makefile libes++/testsuite/Makefile bootsect/Makefile fs/Makefile fs/fat/Makefile fs/fat/testsuite/Makefile fs/iso9660/Makefile fs/iso9660/testsuite/Makefile kernel/Makefile kernel/testsuite/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -4163,6 +4163,7 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "libes++/Makefile" ) CONFIG_FILES="$CONFIG_FILES libes++/Makefile" ;;
+  "libes++/testsuite/Makefile" ) CONFIG_FILES="$CONFIG_FILES libes++/testsuite/Makefile" ;;
   "bootsect/Makefile" ) CONFIG_FILES="$CONFIG_FILES bootsect/Makefile" ;;
   "fs/Makefile" ) CONFIG_FILES="$CONFIG_FILES fs/Makefile" ;;
   "fs/fat/Makefile" ) CONFIG_FILES="$CONFIG_FILES fs/fat/Makefile" ;;

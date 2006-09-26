@@ -14,15 +14,13 @@
 
 @SET_MAKE@
 
-
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ..
+top_builddir = ../..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
 install_sh_DATA = $(install_sh) -c -m 644
@@ -39,8 +37,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = $(am__EXEEXT_2)
-subdir = testsuite
+@POSIX_TRUE@noinst_PROGRAMS = $(am__EXEEXT_1)
+@POSIX_TRUE@am__append_1 = -lpthread -lrt
+subdir = libes++/testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -48,31 +47,21 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-am__EXEEXT_1 = main$(EXEEXT) start$(EXEEXT) binder$(EXEEXT) \
-	location$(EXEEXT)
-am__EXEEXT_2 = $(am__EXEEXT_1)
+@POSIX_TRUE@am__EXEEXT_1 = list$(EXEEXT) hashtable$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
-am_binder_OBJECTS = binder.$(OBJEXT)
-binder_OBJECTS = $(am_binder_OBJECTS)
-binder_LDADD = $(LDADD)
-binder_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
-	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
-am_location_OBJECTS = location.$(OBJEXT)
-location_OBJECTS = $(am_location_OBJECTS)
-location_LDADD = $(LDADD)
-location_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
-	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
-am_main_OBJECTS = main.$(OBJEXT)
-main_OBJECTS = $(am_main_OBJECTS)
-main_LDADD = $(LDADD)
-main_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
-	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
-am_start_OBJECTS = start.$(OBJEXT)
-start_OBJECTS = $(am_start_OBJECTS)
-start_LDADD = $(LDADD)
-start_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
-	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
-SCRIPTS = $(noinst_SCRIPTS)
+am__hashtable_SOURCES_DIST = hashtable.cpp
+@POSIX_TRUE@am_hashtable_OBJECTS = hashtable.$(OBJEXT)
+hashtable_OBJECTS = $(am_hashtable_OBJECTS)
+hashtable_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+hashtable_DEPENDENCIES = ../../../os/kernel/libeskernel.a \
+	../libessup++.a $(am__DEPENDENCIES_1)
+am__list_SOURCES_DIST = list.cpp
+@POSIX_TRUE@am_list_OBJECTS = list.$(OBJEXT)
+list_OBJECTS = $(am_list_OBJECTS)
+list_LDADD = $(LDADD)
+list_DEPENDENCIES = ../../../os/kernel/libeskernel.a ../libessup++.a \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -81,11 +70,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(binder_SOURCES) $(location_SOURCES) $(main_SOURCES) \
-	$(start_SOURCES)
-DIST_SOURCES = $(binder_SOURCES) $(location_SOURCES) $(main_SOURCES) \
-	$(start_SOURCES)
-DATA = $(noinst_DATA)
+SOURCES = $(hashtable_SOURCES) $(list_SOURCES)
+DIST_SOURCES = $(am__hashtable_SOURCES_DIST) $(am__list_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -190,32 +176,21 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
-SUFFIXES = .img .gz
-TESTS = main start binder location
-noinst_SCRIPTS = $(TESTS)
-noinst_DATA = fat16_5MB.img \
-	main.img \
-	start.img \
-	binder.img \
-	location.img
-
-CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
-AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
-main_SOURCES = main.cpp
-start_SOURCES = start.cpp
-binder_SOURCES = binder.cpp
-location_SOURCES = location.cpp
+LDADD = ../../../os/kernel/libeskernel.a ../libessup++.a \
+	$(am__append_1)
 AM_CPPFLAGS = \
+	-I $(srcdir)/../include \
 	-I- \
-	-I../../include \
-	-I$(srcdir)/../../include
+	-I ../../../include \
+	-I $(srcdir)/../../../include
 
-EXTRA_DIST = fat16_5MB.img.gz makeScript
+@POSIX_TRUE@TESTS = list hashtable
+@POSIX_TRUE@list_SOURCES = list.cpp
+@POSIX_TRUE@hashtable_SOURCES = hashtable.cpp
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .img .gz .cpp .o .obj
+.SUFFIXES: .cpp .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -225,9 +200,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  testsuite/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  libes++/testsuite/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  testsuite/Makefile
+	  $(AUTOMAKE) --foreign  libes++/testsuite/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -248,18 +223,12 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-binder$(EXEEXT): $(binder_OBJECTS) $(binder_DEPENDENCIES) 
-	@rm -f binder$(EXEEXT)
-	$(CXXLINK) $(binder_LDFLAGS) $(binder_OBJECTS) $(binder_LDADD) $(LIBS)
-location$(EXEEXT): $(location_OBJECTS) $(location_DEPENDENCIES) 
-	@rm -f location$(EXEEXT)
-	$(CXXLINK) $(location_LDFLAGS) $(location_OBJECTS) $(location_LDADD) $(LIBS)
-main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES) 
-	@rm -f main$(EXEEXT)
-	$(CXXLINK) $(main_LDFLAGS) $(main_OBJECTS) $(main_LDADD) $(LIBS)
-start$(EXEEXT): $(start_OBJECTS) $(start_DEPENDENCIES) 
-	@rm -f start$(EXEEXT)
-	$(CXXLINK) $(start_LDFLAGS) $(start_OBJECTS) $(start_LDADD) $(LIBS)
+hashtable$(EXEEXT): $(hashtable_OBJECTS) $(hashtable_DEPENDENCIES) 
+	@rm -f hashtable$(EXEEXT)
+	$(CXXLINK) $(hashtable_LDFLAGS) $(hashtable_OBJECTS) $(hashtable_LDADD) $(LIBS)
+list$(EXEEXT): $(list_OBJECTS) $(list_DEPENDENCIES) 
+	@rm -f list$(EXEEXT)
+	$(CXXLINK) $(list_LDFLAGS) $(list_OBJECTS) $(list_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -267,10 +236,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binder.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/location.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/start.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -438,7 +405,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(DATA)
+all-am: Makefile $(PROGRAMS)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -457,7 +424,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -467,8 +433,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-local clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -516,7 +481,7 @@ ps-am:
 uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-generic clean-local clean-noinstPROGRAMS ctags distclean \
+	clean-generic clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-exec install-exec-am \
@@ -526,19 +491,6 @@ uninstall-am: uninstall-info-am
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-info-am
 
-
-%.img : %.elf
-	$(host_alias)-objcopy -O binary $< $@
-
-% : %.img
-	$(srcdir)/makeScript "`pwd`" $@
-
-clean-local:
-	-rm -f *.map *.log
-
-fat16_5MB.img: fat16_5MB.img.gz
-	gunzip -c $< > $@
-	vformat $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

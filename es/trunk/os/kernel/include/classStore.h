@@ -15,47 +15,25 @@
 #define NINTENDO_ES_KERNEL_CLASS_STORE_H_INCLUDED
 
 #include <es.h>
-#include <es/list.h>
+#include <es/hashtable.h>
 #include <es/ref.h>
 #include <es/base/IClassStore.h>
 #include "thread.h"
 
-class ClassEntry;
-class ClassStore;
-
-class ClassEntry
-{
-    Guid                clsid;
-    IClassFactory*      factory;
-    Link<ClassEntry>    link;
-
-    friend class ClassStore;
-
-    ClassEntry() : factory(0)
-    {
-    }
-};
-
 class ClassStore : public IClassStore
 {
-    typedef List<ClassEntry, &ClassEntry::link> ClassList;
-
-    SpinLock            spinLock;
-    Ref                 ref;
-    int                 entryCount;
-    ClassEntry*         entryTable;
-    ClassList*          hashTable;
-    ClassList           freeList;
-
-    ClassEntry* lookup(const Guid& clsid);
+    SpinLock    spinLock;
+    Ref         ref;
+    Hashtable<Guid, IClassFactory*>
+                hashtable;
 
 public:
-    ClassStore(int entryCount = 100);
+    ClassStore(int capacity = 128);
     ~ClassStore();
 
     // IClassStore
     void add(const Guid& clsid, IClassFactory* factory);
-    void remove(const Guid& clsid, IClassFactory* factory);
+    void remove(const Guid& clsid);
     bool createInstance(const Guid& rclsid, const Guid& riid, void** objectPtr);
 
     // IInterface

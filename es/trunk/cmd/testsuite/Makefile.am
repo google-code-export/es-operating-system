@@ -1,6 +1,6 @@
 LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
 
-SUFFIXES = .img .gz 
+SUFFIXES = .img .gz
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
@@ -8,7 +8,7 @@ SUFFIXES = .img .gz
 % : %.img
 	$(srcdir)/makeScript "`pwd`" $@
 
-TESTS = main start binder
+TESTS = main start binder location
 
 noinst_SCRIPTS = $(TESTS)
 
@@ -17,7 +17,8 @@ noinst_PROGRAMS = $(noinst_SCRIPTS)
 noinst_DATA = fat16_5MB.img \
 	main.img \
 	start.img \
-	binder.img
+	binder.img \
+	location.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 
@@ -31,6 +32,8 @@ main_SOURCES = main.cpp
 start_SOURCES = start.cpp
 
 binder_SOURCES = binder.cpp
+
+location_SOURCES = location.cpp
 
 fat16_5MB.img: fat16_5MB.img.gz
 	gunzip -c $< > $@

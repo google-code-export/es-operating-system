@@ -16,26 +16,25 @@ import "es/base/IClassFactory.idl";
 /**
  * This interface provides methods for managing class factories.
  */
-[object, uuid(032508b0-25db-11db-9c02-0009bf000001)]
+[object, uuid(eeb4c758-4a0b-11db-9c02-0009bf000001)]
 interface IClassStore : IInterface
 {
     /**
      * Registers the specified class factory in this class store.
-     * @param rclsid the class ID.
-     * @param factory the class factory.
+     * @param rclsid    the class ID.
+     * @param factory   the class factory.
      */
     void add([in] uuid& rclsid, IClassFactory* factory);
     /**
      * Removes the specified class factory from this class store.
-     * @param rclsid the class ID.
-     * @param factory the class factory.
+     * @param rclsid    the class ID.
      */
-    void remove([in] uuid& rclsid, IClassFactory* factory);
+    void remove([in] uuid& rclsid);
     /**
      * Creates an object from the class factory identified with the specified class ID.
      * The class factory must be registered in this class store.
-     * @param rclsid the class ID of the class factory.
-     * @param riid the interface ID of the interface to be used to communicate with the new object.
+     * @param rclsid    the class ID of the class factory.
+     * @param riid      the interface ID of the interface to be used to communicate with the new object.
      * @param objectPtr the new object.
      * @return true if the object is successfully created. Otherwise, false.
      */

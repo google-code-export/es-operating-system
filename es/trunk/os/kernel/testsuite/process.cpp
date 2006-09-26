@@ -18,8 +18,7 @@
 #include <es/reflect.h>
 #include <es/naming/IContext.h>
 #include "core.h"
-
-Reflect::Interface* getInterface(const Guid* iid);
+#include "interfaceStore.h"
 
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
@@ -54,8 +53,8 @@ int main()
     long long size;
     size = framebuffer->getSize();
 
-    Reflect::Interface* interface = getInterface(&IInterface::interfaceID());
-    esReport("%p, %s\n", interface, interface->getName());
+    Reflect::Interface interface = getInterface(IInterface::interfaceID());
+    esReport("%s\n", interface.getName());
 
     Process* process = new Process;
     process->load();

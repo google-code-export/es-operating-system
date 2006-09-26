@@ -1,4 +1,6 @@
-lib_LIBRARIES = libes++.a libessup++.a
+SUBDIRS = . testsuite
+
+lib_LIBRARIES = libessup++.a
 
 AM_CPPFLAGS = \
 	-I../../include \
@@ -20,4 +22,10 @@ header_files =
 
 libessup___a_SOURCES = $(c_source_files) $(cpp_source_files) $(header_files)
 
+if ES
+
+lib_LIBRARIES += libes++.a
+
 libes___a_SOURCES = $(libessup___a_SOURCES) src/system.cpp
+
+endif ES

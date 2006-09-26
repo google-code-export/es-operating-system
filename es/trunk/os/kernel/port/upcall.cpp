@@ -20,18 +20,16 @@
 #include <es/handle.h>
 #include <es/reflect.h>
 #include "core.h"
+#include "interfaceStore.h"
 #include "process.h"
-
-extern Reflect::Interface* getInterface(const Guid* iid);
 
 typedef long long (*Method)(void* self, ...);
 
 Broker<Process::upcall, Process::INTERFACE_POINTER_MAX> Process::broker;
 UpcallProxy Process::upcallTable[Process::INTERFACE_POINTER_MAX];
 
-bool UpcallProxy::set(Process* process, void* object, const Guid* iid)
+bool UpcallProxy::set(Process* process, void* object, const Guid& iid)
 {
-    ASSERT(reinterpret_cast<const void*>(0x80000000) < iid);
     if (ref.addRef() != 1)
     {
         ref.release();
@@ -60,7 +58,7 @@ bool UpcallProxy::isUsed()
 }
 
 int Process::
-set(Process* process, void* object, const Guid* iid)
+set(Process* process, void* object, const Guid& iid)
 {
     for (UpcallProxy* proxy(upcallTable);
          proxy < &upcallTable[INTERFACE_POINTER_MAX];
@@ -99,41 +97,35 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
     bool log(server->log);
 
     // Determine the type of interface and which method is being invoked.
-    Reflect::Interface* interface = getInterface(proxy->iid);   // XXX Should cache the result
-    ASSERT(interface);
+    Reflect::Interface interface = getInterface(proxy->iid);   // XXX Should cache the result
 
     // If this interface inherits another interface,
     // methodNumber is checked accordingly.
-    if (interface->getTotalMethodCount() <= methodNumber)
+    if (interface.getTotalMethodCount() <= methodNumber)
     {
         throw SystemException<ENOSYS>();
     }
     unsigned baseMethodCount;
-    Reflect::Interface* super(interface);
+    Reflect::Interface super(interface);
     for (;;)
     {
-        baseMethodCount = super->getTotalMethodCount() - super->getMethodCount();
+        baseMethodCount = super.getTotalMethodCount() - super.getMethodCount();
         if (baseMethodCount <= methodNumber)
         {
             break;
         }
-        else
-        {
-            Guid* piid = super->getSuperIid();
-            ASSERT(piid);
-            super = getInterface(piid);
-        }
+        super = getInterface(super.getSuperIid());
     }
-    Reflect::Function method(Reflect::Function(super->getMethod(methodNumber - baseMethodCount)));
+    Reflect::Function method(Reflect::Function(super.getMethod(methodNumber - baseMethodCount)));
 
     if (log)
     {
-        esReport("upcall: %s::%s(",
-                 interface->getName(), method.getName());
+        esReport("upcall[%d:%p]: %s::%s(",
+                 interfaceNumber, server, interface.getName(), method.getName());
     }
 
     unsigned long ref;
-    if (*super->getIid() == IID_IInterface)
+    if (super.getIid() == IID_IInterface)
     {
         switch (methodNumber - baseMethodCount)
         {
@@ -311,7 +303,7 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         break;
     }
 
-    if (*super->getIid() == IID_IInterface)
+    if (super.getIid() == IID_IInterface)
     {
         switch (methodNumber - baseMethodCount)
         {
@@ -432,9 +424,6 @@ copyIn(UpcallRecord* record)
     u8* esp(reinterpret_cast<u8*>(record->ureg.esp));
     Ureg* ureg(&record->ureg);
 
-    //
-    // Copy parameters
-    //
     unsigned arg[sizeof(void*) / sizeof(unsigned) + 8]; // XXX 8 is enough?
     int paramc(0);
     unsigned* param(arg + sizeof(void*) / sizeof(unsigned));
@@ -455,13 +444,20 @@ copyIn(UpcallRecord* record)
             if (ip)
             {
                 // Check the IID of the interface pointer.
-                const Guid* iid;
+                Guid iid;
                 if (0 <= parameter.getIidIs())
                 {
-                    iid = *reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
-                    Reflect::Interface* interface(getInterface(iid));
-                    ASSERT(interface);  // XXX
-                    iid = interface->getIid();
+                    iid = **reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
+                    Reflect::Interface interface;
+                    try
+                    {
+                        interface = getInterface(iid);
+                    }
+                    catch (Exception& error)
+                    {
+                        return error.getResult();
+                    }
+                    iid = interface.getIid();
                 }
                 else
                 {
@@ -494,6 +490,23 @@ copyIn(UpcallRecord* record)
             if (0 <= parameter.getSizeIs())
             {
                 count = *reinterpret_cast<int*>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getSizeIs()));
+            }
+            else if (parameter.getType().isString())
+            {
+                // Check zero termination
+                char* ptr = *reinterpret_cast<char**>(&param[paramc]);
+                for (count = 1; *ptr != '\0'; ++count)
+                {
+                    ++ptr;
+                    if (!isValid(ptr, 1))
+                    {
+                        return EFAULT;
+                    }
+                }
+                if (log)
+                {
+                    esReport("[count = %d]", count);
+                }
             }
             else
             {
@@ -545,15 +558,19 @@ copyOut(UpcallRecord* record)
 
     if (log)
     {
-        Reflect::Interface* interface = getInterface(proxy->iid);
-        ASSERT(interface);
+        Reflect::Interface interface;
+        try
+        {
+            interface = getInterface(proxy->iid);
+        }
+        catch (Exception& error)
+        {
+            return error.getResult();
+        }
         esReport("return from upcall: %s::%s(",
-                 interface->getName(), record->method.getName());
+                 interface.getName(), record->method.getName());
     }
 
-    //
-    // Copy parameters
-    //
     int paramc(0);
     for (int i(0); i < record->method.getParameterCount(); ++i)
     {
@@ -630,13 +647,20 @@ copyOut(UpcallRecord* record)
                 {
                     // Allocate an entry in the upcall table and set the
                     // interface pointer to the broker for the upcall table.
-                    const Guid* iid;
+                    Guid iid;
                     if (0 <= parameter.getIidIs())
                     {
-                        iid = *reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
-                        Reflect::Interface* interface(getInterface(iid));
-                        ASSERT(interface);  // XXX
-                        iid = interface->getIid();
+                        iid = **reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
+                        Reflect::Interface interface;
+                        try
+                        {
+                            interface = getInterface(iid);
+                        }
+                        catch (Exception& error)
+                        {
+                            return error.getResult();
+                        }
+                        iid = interface.getIid();
                     }
                     else
                     {

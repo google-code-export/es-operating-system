@@ -33,6 +33,7 @@
 #include "core.h"
 #include "fdc.h"
 #include "heap.h"
+#include "interfaceStore.h"
 #include "partition.h"
 #include "rtc.h"
 #include "sb16.h"
@@ -40,14 +41,13 @@
 #include "uart.h"
 #include "vesa.h"
 
-void initInterfaceInfo();
-
 Reflect::Interface* getInterface(const Guid* iid);
 
 namespace
 {
     IContext*       root;
     IClassStore*    classStore;
+    InterfaceStore* interfaceStore;
     Sched*          sched;
     unsigned        coreStack[4096] __attribute__ ((aligned (16)));
     Tss             coreTss __attribute__ ((aligned (256)));
@@ -129,7 +129,7 @@ int esInit(IInterface** nameSpace)
         return 0;
     }
 
-    Cga* cga = new Cga();
+    Cga* cga = new Cga;
     reportStream = cga;
 
     // Initialize the page table
@@ -137,7 +137,7 @@ int esInit(IInterface** nameSpace)
     ASSERT(PageTable::pageSet);
 
     // Create the thread scheduler
-    sched = new Sched();
+    sched = new Sched;
 
     // Initialize the current core
     Core* core = new Core(sched, coreStack, sizeof coreStack, &coreTss);
@@ -149,7 +149,7 @@ int esInit(IInterface** nameSpace)
     thread->sched = sched;
     core->current = thread;
 
-    rtc = new Rtc();
+    rtc = new Rtc;
     pit = new Pit(1000);
 
     root = new Context;
@@ -171,6 +171,11 @@ int esInit(IInterface** nameSpace)
     // Create class store
     classStore = static_cast<IClassStore*>(new ClassStore);
     binding = root->bind("class", classStore);
+    binding->release();
+
+    // Create interface store
+    interfaceStore = new InterfaceStore;
+    binding = root->bind("interface", static_cast<IInterfaceStore*>(interfaceStore));
     binding->release();
 
     // Register CLSID_Process
@@ -240,8 +245,6 @@ int esInit(IInterface** nameSpace)
     root->bind("device/soundOutput", static_cast<IStream*>(&sb16->outputLine));
 
     Process::initialize();
-
-    initInterfaceInfo();
 
     return 0;
 }
@@ -319,4 +322,9 @@ ICurrentProcess* esCurrentProcess()
 IStream* esReportStream()
 {
     return reportStream;
+}
+
+Reflect::Interface& getInterface(const Guid& iid)
+{
+    return interfaceStore->getInterface(iid);
 }

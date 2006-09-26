@@ -34,24 +34,24 @@ class SyscallProxy : public IInterface
     Ref         ref;
     Interlocked use;
     void*       object;
-    const Guid* iid;
+    Guid        iid;
 
 public:
     SyscallProxy() :
         ref(0),
         object(0),
-        iid(0)
+        iid(GUID_NULL)
     {
     }
 
-    bool set(void* object, const Guid* iid);
+    bool set(void* object, const Guid& iid);
 
     void* getObject() const
     {
         return object;
     }
 
-    const Guid* getIID() const
+    const Guid& getIID() const
     {
         return iid;
     }
@@ -81,19 +81,19 @@ class UpcallProxy : public IInterface
     Ref         ref;
     Interlocked use;
     void*       object;
-    const Guid* iid;
+    Guid        iid;
     Process*    process;
 
 public:
     UpcallProxy() :
         ref(0),
         object(0),
-        iid(0),
+        iid(GUID_NULL),
         process(0)
     {
     }
 
-    bool set(Process* process, void* object, const Guid* iid);
+    bool set(Process* process, void* object, const Guid& iid);
     bool isUsed();
 
     // IInterface
@@ -280,7 +280,7 @@ public:
     int write(const void* src, int count, long long offset);
 
     long long systemCall(void** self, unsigned methodNumber, va_list param, void** base);
-    int set(SyscallProxy* table, void* object, const Guid* iid);
+    int set(SyscallProxy* table, void* object, const Guid& iid);
 
     Thread* createThread(const unsigned stackSize);
     void detach(Thread* thread);
@@ -335,7 +335,7 @@ public:
     static long long upcall(void* self, void* base, int m, va_list ap);
     static Broker<upcall, INTERFACE_POINTER_MAX> broker;
     static UpcallProxy upcallTable[INTERFACE_POINTER_MAX];
-    static int set(Process* process, void* object, const Guid* iid);
+    static int set(Process* process, void* object, const Guid& iid);
 
     UpcallRecord* createUpcallRecord(const unsigned stackSize);
     UpcallRecord* getUpcallRecord();
@@ -356,42 +356,5 @@ public:
 };
 
 #endif // __es__
-
-//
-// Reflection data of the default interface set
-//
-
-extern unsigned char IAlarmInfo[];
-extern unsigned char ICacheInfo[];
-extern unsigned char ICallbackInfo[];
-extern unsigned char IClassFactoryInfo[];
-extern unsigned char IClassStoreInfo[];
-extern unsigned char IFileInfo[];
-extern unsigned char IInterfaceInfo[];
-extern unsigned char IMonitorInfo[];
-extern unsigned char IPageableInfo[];
-extern unsigned char IPageSetInfo[];
-extern unsigned char IProcessInfo[];
-extern unsigned char IRuntimeInfo[];
-extern unsigned char IStreamInfo[];
-extern unsigned char IThreadInfo[];
-
-extern unsigned char IAudioFormatInfo[];
-extern unsigned char IBeepInfo[];
-extern unsigned char ICursorInfo[];
-extern unsigned char IDeviceInfo[];
-extern unsigned char IDiskManagementInfo[];
-extern unsigned char IDmacInfo[];
-extern unsigned char IFileSystemInfo[];
-extern unsigned char IPicInfo[];
-extern unsigned char IRemovableMediaInfo[];
-extern unsigned char IRtcInfo[];
-extern unsigned char IPartitionInfo[];
-
-extern unsigned char IBindingInfo[];
-extern unsigned char IContextInfo[];
-
-extern unsigned char IIteratorInfo[];
-extern unsigned char ISetInfo[];
 
 #endif // NINTENDO_ES_KERNEL_PROCESS_H_INCLUDED

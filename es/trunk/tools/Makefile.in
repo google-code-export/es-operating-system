@@ -55,32 +55,32 @@ am_bm_OBJECTS = bm.$(OBJEXT)
 bm_OBJECTS = $(am_bm_OBJECTS)
 bm_LDADD = $(LDADD)
 bm_DEPENDENCIES = ../os/fs/fat/libesfat.a ../os/kernel/libeskernel.a \
-	../os/libes++/libes++.a
+	../os/libes++/libessup++.a
 am_guidgen_OBJECTS = guidgen.$(OBJEXT)
 guidgen_OBJECTS = $(am_guidgen_OBJECTS)
 guidgen_LDADD = $(LDADD)
 guidgen_DEPENDENCIES = ../os/fs/fat/libesfat.a \
-	../os/kernel/libeskernel.a ../os/libes++/libes++.a
+	../os/kernel/libeskernel.a ../os/libes++/libessup++.a
 am_trunc_OBJECTS = trunc.$(OBJEXT)
 trunc_OBJECTS = $(am_trunc_OBJECTS)
 trunc_LDADD = $(LDADD)
 trunc_DEPENDENCIES = ../os/fs/fat/libesfat.a \
-	../os/kernel/libeskernel.a ../os/libes++/libes++.a
+	../os/kernel/libeskernel.a ../os/libes++/libessup++.a
 am_vcopy_OBJECTS = vcopy.$(OBJEXT)
 vcopy_OBJECTS = $(am_vcopy_OBJECTS)
 vcopy_LDADD = $(LDADD)
 vcopy_DEPENDENCIES = ../os/fs/fat/libesfat.a \
-	../os/kernel/libeskernel.a ../os/libes++/libes++.a
+	../os/kernel/libeskernel.a ../os/libes++/libessup++.a
 am_vformat_OBJECTS = vformat.$(OBJEXT)
 vformat_OBJECTS = $(am_vformat_OBJECTS)
 vformat_LDADD = $(LDADD)
 vformat_DEPENDENCIES = ../os/fs/fat/libesfat.a \
-	../os/kernel/libeskernel.a ../os/libes++/libes++.a
+	../os/kernel/libeskernel.a ../os/libes++/libessup++.a
 am_vlist_OBJECTS = vlist.$(OBJEXT)
 vlist_OBJECTS = $(am_vlist_OBJECTS)
 vlist_LDADD = $(LDADD)
 vlist_DEPENDENCIES = ../os/fs/fat/libesfat.a \
-	../os/kernel/libeskernel.a ../os/libes++/libes++.a
+	../os/kernel/libeskernel.a ../os/libes++/libessup++.a
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -185,7 +185,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-LDADD = ../os/fs/fat/libesfat.a ../os/kernel/libeskernel.a ../os/libes++/libes++.a -lrt
+LDADD = ../os/fs/fat/libesfat.a ../os/kernel/libeskernel.a ../os/libes++/libessup++.a -lrt
 trunc_SOURCES = trunc.c
 bm_SOURCES = bm.c
 vformat_SOURCES = vformat.cpp vdisk.h

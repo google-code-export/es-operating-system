@@ -11,12 +11,13 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#include <stdlib.h>
+#include <string.h>
 #include <es.h>
+#include <es/hashtable.h>
 #include <es/reflect.h>
-#include "process.h"
+#include "interfaceStore.h"
 
-static unsigned char* DefaultInterfaceInfo[] =
+unsigned char* InterfaceStore::defaultInterfaceInfo[] =
 {
     IAlarmInfo,
     ICacheInfo,
@@ -25,6 +26,7 @@ static unsigned char* DefaultInterfaceInfo[] =
     IClassStoreInfo,
     IFileInfo,
     IInterfaceInfo,
+    IInterfaceStoreInfo,
     IMonitorInfo,
     IPageableInfo,
     IPageSetInfo,
@@ -52,85 +54,93 @@ static unsigned char* DefaultInterfaceInfo[] =
     ISetInfo,
 };
 
-static Reflect::Interface DefulatInterfaceTable[256];
-
-// for qsort()
-static int compareInterface(const void* a, const void* b)
+InterfaceStore::
+InterfaceStore(int capacity) :
+    hashtable(capacity)
 {
-    const Guid* g1 = static_cast<const Reflect::Interface*>(a)->getIid();
-    const Guid* g2 = static_cast<const Reflect::Interface*>(b)->getIid();
-
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0;
+         i < sizeof defaultInterfaceInfo / sizeof defaultInterfaceInfo[0];
+         ++i)
     {
-        u32 e1 = ((u32*) g1)[i];
-        u32 e2 = ((u32*) g2)[i];
-        if (e1 < e2)
-        {
-            return -1;
-        }
-        if (e2 < e1)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-// for bsearch()
-static int compareIid(const void* a, const void* b)
-{
-    const Guid* g1 = static_cast<const Guid*>(a);
-    const Guid* g2 = static_cast<const Reflect::Interface*>(b)->getIid();
-
-    for (int i = 0; i < 4; ++i)
-    {
-        u32 e1 = ((u32*) g1)[i];
-        u32 e2 = ((u32*) g2)[i];
-        if (e1 < e2)
-        {
-            return -1;
-        }
-        if (e2 < e1)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-static int interfaceCount(0);
-
-void initInterfaceInfo()
-{
-    for (int i = 0; i < sizeof DefaultInterfaceInfo / sizeof DefaultInterfaceInfo[0]; ++i)
-    {
-        Reflect r(DefaultInterfaceInfo[i]);
+        Reflect r(defaultInterfaceInfo[i]);
         for (int j = 0; j < r.getInterfaceCount(); ++j)
         {
             if (r.getInterface(j).getType().isImported())
             {
                 continue;
             }
-            DefulatInterfaceTable[interfaceCount] = r.getInterface(j);
-            ++interfaceCount;
+            hashtable.add(r.getInterface(j).getIid(), r.getInterface(j));
         }
     }
-
-    qsort(DefulatInterfaceTable, interfaceCount, sizeof(Reflect::Interface), compareInterface);
-#ifdef VERBOSE
-    for (int i = 0; i < interfaceCount; ++i)
-    {
-        esReport("interface %s\n", DefulatInterfaceTable[i].getName());
-    }
-#endif
 }
 
-Reflect::Interface* getInterface(const Guid* iid)
+InterfaceStore::
+~InterfaceStore()
 {
-    return static_cast<Reflect::Interface*>(
-        bsearch(static_cast<const void*>(iid),
-                static_cast<const void*>(DefulatInterfaceTable),
-                interfaceCount,
-                sizeof(Reflect::Interface),
-                compareIid));
+}
+
+void InterfaceStore::
+add(const void* data, int length)
+{
+    void* buffer = new u8[length];
+    memmove(buffer, data, length);
+    Reflect r(buffer);
+    for (int i = 0; i < r.getInterfaceCount(); ++i)
+    {
+        if (r.getInterface(i).getType().isImported())
+        {
+            continue;
+        }
+        {
+            SpinLock::Synchronized method(spinLock);
+
+            hashtable.add(r.getInterface(i).getIid(), r.getInterface(i));
+        }
+    }
+}
+
+void InterfaceStore::
+remove(const Guid& riid)
+{
+    SpinLock::Synchronized method(spinLock);
+
+    hashtable.remove(riid);
+}
+
+bool InterfaceStore::
+queryInterface(const Guid& riid, void** objectPtr)
+{
+    if (riid == IID_IInterfaceStore)
+    {
+        *objectPtr = static_cast<IInterfaceStore*>(this);
+    }
+    else if (riid == IID_IInterface)
+    {
+        *objectPtr = static_cast<IInterfaceStore*>(this);
+    }
+    else
+    {
+        *objectPtr = NULL;
+        return false;
+    }
+    static_cast<IInterface*>(*objectPtr)->addRef();
+    return true;
+}
+
+unsigned int InterfaceStore::
+addRef(void)
+{
+    return ref.addRef();
+}
+
+unsigned int InterfaceStore::
+release(void)
+{
+    unsigned int count = ref.release();
+    if (count == 0)
+    {
+        delete this;
+        return 0;
+    }
+    return count;
 }

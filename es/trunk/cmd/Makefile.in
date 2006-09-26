@@ -38,7 +38,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 noinst_PROGRAMS = main$(EXEEXT) server$(EXEEXT) client$(EXEEXT) \
-	binder$(EXEEXT) binderClient$(EXEEXT)
+	binder$(EXEEXT) binderClient$(EXEEXT) location$(EXEEXT) \
+	locationClient$(EXEEXT)
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure config.guess \
 	config.sub depcomp install-sh missing
@@ -64,6 +65,15 @@ am_client_OBJECTS = client.$(OBJEXT)
 client_OBJECTS = $(am_client_OBJECTS)
 client_LDADD = $(LDADD)
 client_DEPENDENCIES = ../os/libes++/libes++.a
+am_location_OBJECTS = location.$(OBJEXT)
+nodist_location_OBJECTS = ILocation.$(OBJEXT)
+location_OBJECTS = $(am_location_OBJECTS) $(nodist_location_OBJECTS)
+location_LDADD = $(LDADD)
+location_DEPENDENCIES = ../os/libes++/libes++.a
+am_locationClient_OBJECTS = locationClient.$(OBJEXT)
+locationClient_OBJECTS = $(am_locationClient_OBJECTS)
+locationClient_LDADD = $(LDADD)
+locationClient_DEPENDENCIES = ../os/libes++/libes++.a
 am_main_OBJECTS = main.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
@@ -75,19 +85,21 @@ server_DEPENDENCIES = ../os/libes++/libes++.a
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) $(client_SOURCES) \
-	$(main_SOURCES) $(server_SOURCES)
+	$(location_SOURCES) $(nodist_location_SOURCES) \
+	$(locationClient_SOURCES) $(main_SOURCES) $(server_SOURCES)
 DIST_SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) \
-	$(client_SOURCES) $(main_SOURCES) $(server_SOURCES)
+	$(client_SOURCES) $(location_SOURCES) \
+	$(locationClient_SOURCES) $(main_SOURCES) $(server_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -210,6 +222,7 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 SUBDIRS = . testsuite
+SUFFIXES = .h .idl .ird
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref
 AM_CPPFLAGS = -I- \
 	-I../include \
@@ -221,10 +234,15 @@ server_SOURCES = server.cpp
 client_SOURCES = client.cpp
 binder_SOURCES = binder.cpp binder.h
 binderClient_SOURCES = binderClient.cpp binder.h
-all: all-recursive
+location_SOURCES = location.cpp location.h ILocation.idl
+locationClient_SOURCES = locationClient.cpp location.h ILocation.idl
+nodist_location_SOURCES = ILocation.c
+BUILT_SOURCES = ILocation.h ILocation.ird
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cpp .o .obj
+.SUFFIXES: .h .idl .ird .c .cpp .o .obj
 am--refresh:
 	@:
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -270,6 +288,12 @@ binderClient$(EXEEXT): $(binderClient_OBJECTS) $(binderClient_DEPENDENCIES)
 client$(EXEEXT): $(client_OBJECTS) $(client_DEPENDENCIES) 
 	@rm -f client$(EXEEXT)
 	$(CXXLINK) $(client_LDFLAGS) $(client_OBJECTS) $(client_LDADD) $(LIBS)
+location$(EXEEXT): $(location_OBJECTS) $(location_DEPENDENCIES) 
+	@rm -f location$(EXEEXT)
+	$(CXXLINK) $(location_LDFLAGS) $(location_OBJECTS) $(location_LDADD) $(LIBS)
+locationClient$(EXEEXT): $(locationClient_OBJECTS) $(locationClient_DEPENDENCIES) 
+	@rm -f locationClient$(EXEEXT)
+	$(CXXLINK) $(locationClient_LDFLAGS) $(locationClient_OBJECTS) $(locationClient_LDADD) $(LIBS)
 main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES) 
 	@rm -f main$(EXEEXT)
 	$(CXXLINK) $(main_LDFLAGS) $(main_OBJECTS) $(main_LDADD) $(LIBS)
@@ -283,11 +307,28 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ILocation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binderClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/location.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/locationClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -578,11 +619,13 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
-check: check-recursive
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 all-am: Makefile $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
-install: install-recursive
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
@@ -606,9 +649,11 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-recursive
 
-clean-am: clean-generic clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-local clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -661,7 +706,7 @@ uninstall-am: uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am am--refresh check \
-	check-am clean clean-generic clean-noinstPROGRAMS \
+	check-am clean clean-generic clean-local clean-noinstPROGRAMS \
 	clean-recursive ctags ctags-recursive dist dist-all dist-bzip2 \
 	dist-gzip dist-shar dist-tarZ dist-zip distcheck distclean \
 	distclean-compile distclean-generic distclean-recursive \
@@ -675,6 +720,22 @@ uninstall-info: uninstall-info-recursive
 	mostlyclean-generic mostlyclean-recursive pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
+
+%.h %.ird : %.idl
+	esidl -I $(prefix)/include $<
+
+%.c : %.ird
+	mkdir -p $(*D);
+	echo -n "unsigned char" $(*F) > $@;
+	echo "Info[] = {" >> $@;
+	od -A n -t x1 -v -w8 $< | sed -e 's/^ */0x/' -e 's/ /, 0x/g' -e 's/$$/,/' >> $@;
+	echo "};" >> $@
+	echo -n "unsigned" $(*F) >> $@;
+	echo -n "InfoSize = sizeof" $(*F) >> $@;
+	echo "Info;" >> $@;
+
+clean-local:
+	-rm -f $(BUILT_SOURCES)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

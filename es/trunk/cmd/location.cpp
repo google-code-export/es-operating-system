@@ -21,9 +21,9 @@
 #include <es/handle.h>
 #include <es/ref.h>
 #include <es/base/IClassStore.h>
+#include <es/base/IInterfaceStore.h>
 #include <es/base/IProcess.h>
-#include <es/naming/IBinding.h>
-#include "binder.h"
+#include "location.h"
 
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
@@ -31,45 +31,44 @@
 
 ICurrentProcess* System();
 
-class Binder : public IBinding
+class Location : public ILocation
 {
     static int  id;
 
     Ref         ref;
-    IInterface* object;
+    Point       point;
     char        name[14];
 
 public:
-    Binder() :
-        object(0)
+    Location()
     {
+        point.x = point.y = 0;
         sprintf(name, "id%d", ++id);
     }
 
-    ~Binder()
+    ~Location()
     {
-        if (object)
-        {
-            object->release();
-        }
     }
 
-    IInterface* getObject()
+    void set(const Point* point)
     {
-        return object;
+        this->point = *point;
     }
 
-    int setObject(IInterface* element)
+    void get(Point* point)
     {
-        if (element)
-        {
-            element->addRef();
-        }
-        if (object)
-        {
-            object->release();
-        }
-        object = element;
+        *point = this->point;
+    }
+
+    void move(const Point* direction)
+    {
+        point.x += direction->x;
+        point.y += direction->y;
+    }
+
+    void setName(const char* name)
+    {
+        strncpy(this->name, name, sizeof name);
     }
 
     int getName(char* name, unsigned int len)
@@ -87,11 +86,11 @@ public:
     {
         if (riid == IID_IInterface)
         {
-            *objectPtr = static_cast<IBinding*>(this);
+            *objectPtr = static_cast<ILocation*>(this);
         }
-        else if (riid == IID_IBinding)
+        else if (riid == IID_ILocation)
         {
-            *objectPtr = static_cast<IBinding*>(this);
+            *objectPtr = static_cast<ILocation*>(this);
         }
         else
         {
@@ -119,20 +118,25 @@ public:
     }
 };
 
-int Binder::id = 0;
+int Location::id = 0;
 
 int main(int argc, char* argv[])
 {
-    esReport("This is the Binder server process.\n");
+    esReport("This is the Location server process.\n");
     System()->trace(true);
 
     Handle<IContext> nameSpace = System()->getRoot();
+
+    // Register ILocation interface.
+    Handle<IInterfaceStore> interfaceStore = nameSpace->lookup("interface");
+    TEST(interfaceStore);
+    interfaceStore->add(ILocationInfo, ILocationInfoSize);
+
+    // Register Location factory.
     Handle<IClassStore> classStore = nameSpace->lookup("class");
     TEST(classStore);
-
-    // Register Binder factory.
-    Handle<IClassFactory> binderFactory(new(ClassFactory<Binder>));
-    classStore->add(CLSID_Binder, binderFactory);
+    Handle<IClassFactory> binderFactory(new(ClassFactory<Location>));
+    classStore->add(CLSID_Location, binderFactory);
 
     // Create a client process.
     Handle<IProcess> client;
@@ -143,15 +147,15 @@ int main(int argc, char* argv[])
     TEST(result);
 
     // Start the client process.
-    Handle<IFile> file = nameSpace->lookup("file/binderClient.elf");
+    Handle<IFile> file = nameSpace->lookup("file/locationClient.elf");
     TEST(file);
     client->start(file);
 
     // Wait for the client to exit
     client->wait();
 
-    // Unregister Binder factory.
-    classStore->remove(CLSID_Binder);
+    // Unregister Location factory.
+    classStore->remove(CLSID_Location);
 
     System()->trace(false);
 }

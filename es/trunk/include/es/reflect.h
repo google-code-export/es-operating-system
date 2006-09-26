@@ -44,6 +44,7 @@ public:
     }
 
     class Interface;
+    class Structure;
 
     /**
      * This represents a type record from the specified interface reflection file.
@@ -161,6 +162,26 @@ public:
         }
 
         /**
+         * Checks if this type is a character string.
+         */
+        bool isString() const
+        {
+            if (!(offset & ReflectionFile::IS_STAR))
+            {
+                return false;
+            }
+            if (!isPrimitive())
+            {
+                return false;
+            }
+            if ((offset & ReflectionFile::OFFSET_MASK) != ReflectionFile::TAG_CHAR)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /**
          * Checks if this type is imported.
          */
         bool isImported() const
@@ -242,6 +263,11 @@ public:
             {
                 return sizeof(void*);
             }
+            if (isStructure())
+            {
+                Structure st(info, offset);
+                return st.getSize();
+            }
             ASSERT(0);  // XXX
             return 0;
         }
@@ -256,37 +282,7 @@ public:
             {
                 return sizeof(void*);
             }
-            if (isPrimitive())
-            {
-                switch (offset & ReflectionFile::OFFSET_MASK)
-                {
-                case ReflectionFile::TAG_CHAR:
-                case ReflectionFile::TAG_S8:
-                case ReflectionFile::TAG_U8:
-                    return sizeof(u8);
-                case ReflectionFile::TAG_S16:
-                case ReflectionFile::TAG_U16:
-                    return sizeof(u16);
-                case ReflectionFile::TAG_S32:
-                case ReflectionFile::TAG_U32:
-                case ReflectionFile::TAG_F32:
-                    return sizeof(u32);
-                case ReflectionFile::TAG_S64:
-                case ReflectionFile::TAG_U64:
-                case ReflectionFile::TAG_F64:
-                    return sizeof(u64);
-                case ReflectionFile::TAG_BOOLEAN:
-                    return sizeof(bool);
-                case ReflectionFile::TAG_WIDECHAR:
-                    return sizeof(wchar_t);
-                case ReflectionFile::TAG_VOID:
-                    return 0;
-                case ReflectionFile::TAG_UUID:
-                    return sizeof(Guid);
-                }
-            }
-
-            Type type(info, offset);
+            Type type(info, offset & ~(ReflectionFile::IS_REFERENCE | ReflectionFile::IS_STAR));
             return type.getSize();
         }
 
@@ -314,7 +310,11 @@ public:
         /**
          * Gets the interface of this type.
          */
-        Interface getInterface();
+        Interface getInterface()
+        {
+            ASSERT(isInterface());
+            return Reflect::Interface(info, offset);
+        }
     };
 
     /**
@@ -516,6 +516,97 @@ public:
     };
 
     /**
+     * This represents a structure loaded from the specified interface reflection file.
+     */
+    class Structure
+    {
+        u8* info;
+        u32 offset;
+        ReflectionFile::StructureRecord* record;
+
+    public:
+        /**
+         * Constructs a new object.
+         */
+        Structure() :
+            info(0),
+            offset(0),
+            record(0)
+        {
+        }
+
+        /**
+         * Constructs a new object which represents the specified structure.
+         * @param info the interface reflection file.
+         * @param offset the offset to the structure record.
+         */
+        Structure(u8* info, u32 offset) :
+            info(info),
+            offset(offset),
+            record(static_cast<ReflectionFile::StructureRecord*>(Reflect::getPointer(info, offset)))
+        {
+        }
+
+        /**
+         * Copy-constructor.
+         */
+        Structure(const Structure& st) :
+            info(st.info),
+            offset(st.offset),
+            record(st.record)
+        {
+        }
+
+        /**
+         * Gets the type of this interface.
+         */
+        Type getType() const
+        {
+            return Type(info, record->type);
+        }
+
+        /**
+         * Gets the name of this interface.
+         */
+        char* getName() const
+        {
+            return static_cast<char*>(Reflect::getPointer(info, record->name));
+        }
+
+        /**
+         * Gets the number of members in this interface.
+         */
+        int getMemberCount() const
+        {
+            return record->numMembers;
+        }
+
+        /**
+         * Gets the specified member.
+         * @param n the member number.
+         */
+        Identifier getMember(int n) const
+        {
+            return Identifier(info, record->members[n]);
+        }
+
+        /**
+         * Gets the size of this type.
+         */
+        int getSize() const
+        {
+            int size = 0;
+            for (int i = 0; i < getMemberCount(); ++i)
+            {
+                Identifier member(getMember(i));
+                Type type(member.getType());
+                size += type.getSize();
+            }
+            return size;
+        }
+    };
+
+    /**
      * This represents an interface loaded from the specified interface reflection file.
      */
     class Interface
@@ -552,6 +643,17 @@ public:
         }
 
         /**
+         * Copy-constructor.
+         */
+        Interface(const Interface& interface) :
+            info(interface.info),
+            offset(interface.offset),
+            record(interface.record),
+            methods(interface.methods)
+        {
+        }
+
+        /**
          * Gets the type of this interface.
          */
         Type getType() const
@@ -570,23 +672,19 @@ public:
         /**
          * Gets the interface identifier of this interface.
          */
-        Guid* getIid() const
+        Guid& getIid() const
         {
-            return &record->iid;
+            return record->iid;
         }
 
         /**
          * Gets the identifier of the super interface.
          * @return the IID of the super interface. 0 if not inherited any interface.
          */
-        Guid* getSuperIid() const
+        Guid& getSuperIid() const
         {
             ASSERT(!(record->type & ReflectionFile::IS_IID));
-            if (methods->piid == GUID_NULL)
-            {
-                return 0;
-            }
-            return &methods->piid;
+            return methods->piid;
         }
 
         /**
@@ -683,12 +781,5 @@ public:
         return typeDirectory->numTypes;
     }
 };
-
-inline Reflect::Interface Reflect::Type::
-getInterface()
-{
-    ASSERT(isInterface());
-    return Reflect::Interface(info, offset);
-}
 
 #endif  // #ifndef NINTENDO_ES_REFLECT_H_INCLUDED

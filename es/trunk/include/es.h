@@ -16,15 +16,10 @@
 
 #include <stdarg.h>
 #include <es/types.h>
-#include <es/uuid.h>
 
 #ifdef __cplusplus
-
 extern "C" {
-
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr);
-
-#endif  // __cplusplus
+#endif // __cplusplus
 
 void esPanic(const char* file, int line, const char* msg, ...);
 int  esReport(const char* spec, ...) __attribute__ ((format (printf, 1, 2)));

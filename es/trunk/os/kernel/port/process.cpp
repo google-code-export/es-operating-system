@@ -523,7 +523,7 @@ Process() :
     mmu = new Mmu(dynamic_cast<Cache*>(cache));
     ASSERT(mmu);
 
-    syscallTable[0].set((void*) esCurrentProcess(), &IID_ICurrentProcess);
+    syscallTable[0].set(esCurrentProcess(), IID_ICurrentProcess);
 
     const unsigned stackSize = 2*1024*1024;
     Thread* thread(createThread(stackSize));
@@ -584,7 +584,7 @@ load()
 // that has been assigned for the interface. However, the reference count of
 // the interface pointer must also be adjusted to do this.
 int Process::
-set(SyscallProxy* table, void* interface, const Guid* iid)
+set(SyscallProxy* table, void* interface, const Guid& iid)
 {
     Monitor::Synchronized method(monitor);
 
