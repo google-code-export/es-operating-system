@@ -4228,9 +4228,67 @@ diff -bcrN newlib-1.14.0.org/newlib/libc/include/sys/config.h newlib-1.14.0/newl
   #ifdef __linux__
   /* we want the reentrancy structure to be returned by a function */
   #define __DYNAMIC_REENT__
+diff -bcrN newlib-1.14.0.org/newlib/libc/include/sys/errno.h newlib-1.14.0/newlib/libc/include/sys/errno.h
+*** newlib-1.14.0.org/newlib/libc/include/sys/errno.h	2002-09-24 23:10:12.000000000 +0900
+--- newlib-1.14.0/newlib/libc/include/sys/errno.h	2006-09-22 10:37:07.000000000 +0900
+***************
+*** 3,15 ****
+     __errno.  */
+  
+  #ifndef _SYS_ERRNO_H_
+- #ifdef __cplusplus
+- extern "C" {
+- #endif
+  #define _SYS_ERRNO_H_
+  
+  #include <sys/reent.h>
+  
+  #ifndef _REENT_ONLY
+  #define errno (*__errno())
+  extern int *__errno _PARAMS ((void));
+--- 3,16 ----
+     __errno.  */
+  
+  #ifndef _SYS_ERRNO_H_
+  #define _SYS_ERRNO_H_
+  
+  #include <sys/reent.h>
+  
++ #ifdef __cplusplus
++ extern "C" {
++ #endif
++ 
+  #ifndef _REENT_ONLY
+  #define errno (*__errno())
+  extern int *__errno _PARAMS ((void));
 diff -bcrN newlib-1.14.0.org/newlib/libc/include/sys/reent.h newlib-1.14.0/newlib/libc/include/sys/reent.h
 *** newlib-1.14.0.org/newlib/libc/include/sys/reent.h	2005-02-08 10:33:16.000000000 +0900
---- newlib-1.14.0/newlib/libc/include/sys/reent.h	2006-08-17 09:16:53.000000000 +0900
+--- newlib-1.14.0/newlib/libc/include/sys/reent.h	2006-09-22 10:30:58.000000000 +0900
+***************
+*** 5,13 ****
+     in the namespace allotted to us.  */
+  
+  #ifndef _SYS_REENT_H_
+- #ifdef __cplusplus
+- extern "C" {
+- #endif
+  #define _SYS_REENT_H_
+  
+  #include <_ansi.h>
+--- 5,10 ----
+***************
+*** 32,37 ****
+--- 29,38 ----
+  typedef __uint32_t __ULong;
+  #endif
+  
++ #ifdef __cplusplus
++ extern "C" {
++ #endif
++ 
+  /*
+   * If _REENT_SMALL is defined, we make struct _reent as small as possible,
+   * by having nearly everything possible allocated at first use.
 ***************
 *** 796,802 ****
   #define __ATTRIBUTE_IMPURE_PTR__
@@ -4240,7 +4298,7 @@ diff -bcrN newlib-1.14.0.org/newlib/libc/include/sys/reent.h newlib-1.14.0/newli
   extern struct _reent *_CONST _global_impure_ptr __ATTRIBUTE_IMPURE_PTR__;
   
   void _reclaim_reent _PARAMS ((struct _reent *));
---- 796,806 ----
+--- 797,807 ----
   #define __ATTRIBUTE_IMPURE_PTR__
   #endif
   
