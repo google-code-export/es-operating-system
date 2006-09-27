@@ -2,13 +2,20 @@ SUBDIRS = . testsuite
 
 lib_LIBRARIES = libeskernel.a
 
-SUFFIXES = .ird .c
+SUFFIXES = .ird .c .bin
 vpath %.ird = ../../include/es
 
 %.c : %.ird
 	mkdir -p $(*D);
 	echo -n "unsigned char" $(*F) > $@;
 	echo "Info[] = {" >> $@;
+	od -A n -t x1 -v -w8 $< | sed -e 's/^ */0x/' -e 's/ /, 0x/g' -e 's/$$/,/' >> $@;
+	echo "};" >> $@
+
+vpath %.bin = ../bootsect
+
+.bin.c:
+	echo "unsigned char" $(*F) "[] = {" > $@;
 	od -A n -t x1 -v -w8 $< | sed -e 's/^ */0x/' -e 's/ /, 0x/g' -e 's/$$/,/' >> $@;
 	echo "};" >> $@
 
@@ -110,6 +117,8 @@ header_files += \
 	include/uart.h
 
 # 	include/space.h 
+
+nodist_libeskernel_a_SOURCES += mbr.c
 
 #
 # pc
