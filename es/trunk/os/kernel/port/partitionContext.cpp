@@ -31,6 +31,11 @@ const char* PartitionContext::PREFIX_EXTENDED = "extended";
 const char* PartitionContext::PREFIX_LOGICAL = "logical";
 const int PartitionContext::MAX_PREFIX_LEN = 9;
 
+extern "C"
+{
+    extern unsigned char mbr[];
+}
+
 PartitionContext::
 PartitionContext(void) : disk(0)
 {
@@ -600,6 +605,29 @@ getDefaultPartitionType(long long size)
 //
 // PartitionContext : IPartition
 //
+
+int PartitionContext::
+initialize(void)
+{
+    if (!disk)
+    {
+        return -1;
+    }
+
+    u8* sector = new u8[512];
+    if (!sector)
+    {
+        return -1;
+    }
+    memmove(sector, mbr, 512);
+
+    disk->write(sector, 512, 0);
+    disk->flush();
+
+    delete[] sector;
+
+    return 0;
+}
 
 /*
  *  In the partition list,
