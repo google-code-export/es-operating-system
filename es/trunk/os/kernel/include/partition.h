@@ -146,6 +146,7 @@ public:
     IIterator* list(const char* name);
 
     // IPartition
+    int initialize();
     int mount(IStream* disk);
     int unmount();
 
