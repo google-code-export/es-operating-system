@@ -1,3 +1,13 @@
+2006-09-28  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.3 released.
+	* Implement the kernel page fault handler that raises the EFAULT
+	  system exception.
+	* Implement the interface store.
+	* Refine the system call and upcall paths.
+	* (gcc-4.1.1.patch) : New. 
+	* (newlib-1.14.0.patch) : Move extern "C" declarations.
+
 2006-09-14  Okasaka  <okasaka@users.sourceforge.jp>
 
 	* es 0.0.2 released.
