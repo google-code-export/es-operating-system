@@ -329,6 +329,7 @@ public:
     static void* ast(void* param);
     static Process* getCurrentProcess();
 
+    friend class Core;
     friend class Mmu;
     friend class Swap;
 

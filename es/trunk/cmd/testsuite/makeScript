@@ -6,17 +6,17 @@ SCRIPT=$DIR/$2
 echo '#!/bin/sh' > $SCRIPT
 echo 'LOG='$2'.log' >> $SCRIPT
 echo 'cp -pf '$DIR/$2'.img '$DIR'/es.img' >> $SCRIPT
-echo 'vformat '$DIR'/fat16_5MB.img > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../../os/bootsect/es.ldr > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/es.img > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../main.elf > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../server.elf > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../client.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vformat '$DIR'/disk.img > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../../os/bootsect/es.ldr > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/es.img > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../main.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../server.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../client.elf > /dev/null 2>&1' >> $SCRIPT
 echo '' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../binder.elf > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../binderClient.elf > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../location.elf > /dev/null 2>&1' >> $SCRIPT
-echo 'vcopy '$DIR'/fat16_5MB.img '$DIR'/../locationClient.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../binder.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../binderClient.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../location.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../locationClient.elf > /dev/null 2>&1' >> $SCRIPT
 echo '' >> $SCRIPT
 echo '# run QEMU on the background.' >> $SCRIPT
 
@@ -27,7 +27,7 @@ if [ -n "$FAT32" ]; then
     echo 'vformat '$DIR'/fat32.img > /dev/null 2>&1' >> $SCRIPT
     echo '(qemu -hda '$DIR'/fat32.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
 else
-    echo '(qemu -hda '$DIR'/fat16_5MB.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
+    echo '(qemu -hda '$DIR'/disk.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
 fi
 echo '' >> $SCRIPT
 echo '# Keep PID.' >> $SCRIPT

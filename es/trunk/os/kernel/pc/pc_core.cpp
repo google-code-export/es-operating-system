@@ -47,6 +47,7 @@ extern "C"
     asm("   movw    %ax,%gs");
 
     asm("   movl    %esp, %eax");
+    asm("   pushl   %eax");     // gap for kernel page fault handling
     asm("   pushl   56(%eax)");
     asm("   pushl   8(%eax)");
     asm("   movl    %esp, %ebp");
@@ -54,7 +55,7 @@ extern "C"
 
     asm("   call    _ZN4Core17dispatchExceptionEP4Ureg");
 
-    asm("   addl    $12,%esp");
+    asm("   addl    $16,%esp");
     asm("   popal");
     asm("   popl    %gs");
     asm("   popl    %fs");
@@ -569,6 +570,11 @@ cpuid(int op, int* eax, int* ebx, int* ecx, int* edx)
         : "a" (op));
 }
 
+static void kernelFault()
+{
+    throw SystemException<EFAULT>();
+}
+
 void Core::
 dispatchException(Ureg* ureg)
 {
@@ -603,6 +609,24 @@ dispatchException(Ureg* ureg)
             }
             if (0 <= rc)
             {
+                break;
+            }
+            if (ureg->cs == KCODESEL && core->currentProc->isValid((void*) cr2, 1))
+            {
+                // Kernel page fault: Create a stack frame as if kernelFault() is
+                // called. By using the -fnon-call-exceptions g++ compiler option,
+                // the function incurred a kernel page fault will receive an
+                // EFFALT system exception.
+                if (core->currentProc->log)
+                {
+                    esReport("[kernel page fault at %p]", cr2);
+                }
+                Ureg* exc = (Ureg*) ((char*) ureg - sizeof(u32));
+                memmove(exc, ureg, sizeof(Ureg) - 8);
+                u32 ret = exc->eip;
+                exc->esp = ret;     // Note &exc->esp is the new esp address after iret.
+                exc->eip = (u32) kernelFault;
+                exc->load();
                 break;
             }
         }

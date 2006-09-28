@@ -127,7 +127,7 @@ nodist_libeskernel_a_SOURCES += mbr.c
 if ES
 
 if I386
-AM_CPPFLAGS += -iquote $(srcdir)/include/i386
+AM_CPPFLAGS += -iquote $(srcdir)/include/i386 -fnon-call-exceptions
 endif I386
 
 cpp_source_files += \

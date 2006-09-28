@@ -212,7 +212,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
 
                 // Check range
                 void* ptr(*reinterpret_cast<void**>(param + paramc));
-                if (ptr && !isValid(ptr, count, parameter.isOutput()))
+                if (ptr && !isValid(ptr, count))
                 {
                     if (log)
                     {
@@ -269,7 +269,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
                         {
                             throw SystemException<ENFILE>();
                         }
-                        // Note the reference count to the created upcall proxy must
+                        // Note the reference count of the created upcall proxy must
                         // be decremented by one at the end of this system call.
                         upcallProxies[i] = &upcallTable[n];
                         *reinterpret_cast<void***>(param + paramc) = &(broker.getInterfaceTable())[n];

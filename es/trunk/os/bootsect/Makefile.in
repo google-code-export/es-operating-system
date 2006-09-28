@@ -39,7 +39,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = bootfat12.bin$(EXEEXT) bootfat16.bin$(EXEEXT) \
-	bootfat32.bin$(EXEEXT) es.ldr$(EXEEXT)
+	bootfat32.bin$(EXEEXT) es.ldr$(EXEEXT) mbr.bin$(EXEEXT)
 subdir = bootsect
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -64,15 +64,18 @@ bootfat32_bin_LDADD = $(LDADD)
 am_es_ldr_OBJECTS = loader.$(OBJEXT)
 es_ldr_OBJECTS = $(am_es_ldr_OBJECTS)
 es_ldr_LDADD = $(LDADD)
+am_mbr_bin_OBJECTS = mbr.$(OBJEXT)
+mbr_bin_OBJECTS = $(am_mbr_bin_OBJECTS)
+mbr_bin_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 CCASCOMPILE = $(CCAS) $(AM_CCASFLAGS) $(CCASFLAGS)
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 SOURCES = $(bootfat12_bin_SOURCES) $(bootfat16_bin_SOURCES) \
-	$(bootfat32_bin_SOURCES) $(es_ldr_SOURCES)
+	$(bootfat32_bin_SOURCES) $(es_ldr_SOURCES) $(mbr_bin_SOURCES)
 DIST_SOURCES = $(bootfat12_bin_SOURCES) $(bootfat16_bin_SOURCES) \
-	$(bootfat32_bin_SOURCES) $(es_ldr_SOURCES)
+	$(bootfat32_bin_SOURCES) $(es_ldr_SOURCES) $(mbr_bin_SOURCES)
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -186,6 +189,7 @@ bootfat12_bin_SOURCES = bootfat.S
 bootfat16_bin_SOURCES = bootfat.S
 bootfat32_bin_SOURCES = bootfat32.S
 es_ldr_SOURCES = loader.S
+mbr_bin_SOURCES = mbr.S
 INCLUDES = \
 	-I$(srcdir)
 
@@ -260,6 +264,9 @@ bootfat32.bin$(EXEEXT): $(bootfat32_bin_OBJECTS) $(bootfat32_bin_DEPENDENCIES)
 es.ldr$(EXEEXT): $(es_ldr_OBJECTS) $(es_ldr_DEPENDENCIES) 
 	@rm -f es.ldr$(EXEEXT)
 	$(LINK) $(es_ldr_LDFLAGS) $(es_ldr_OBJECTS) $(es_ldr_LDADD) $(LIBS)
+mbr.bin$(EXEEXT): $(mbr_bin_OBJECTS) $(mbr_bin_DEPENDENCIES) 
+	@rm -f mbr.bin$(EXEEXT)
+	$(LINK) $(mbr_bin_LDFLAGS) $(mbr_bin_OBJECTS) $(mbr_bin_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

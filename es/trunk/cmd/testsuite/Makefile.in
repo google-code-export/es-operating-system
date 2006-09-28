@@ -194,7 +194,7 @@ LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes+
 SUFFIXES = .img .gz
 TESTS = main start binder location
 noinst_SCRIPTS = $(TESTS)
-noinst_DATA = fat16_5MB.img \
+noinst_DATA = disk.img \
 	main.img \
 	start.img \
 	binder.img \
@@ -211,7 +211,7 @@ AM_CPPFLAGS = \
 	-I../../include \
 	-I$(srcdir)/../../include
 
-EXTRA_DIST = fat16_5MB.img.gz makeScript
+EXTRA_DIST = disk.img.gz makeScript
 all: all-am
 
 .SUFFIXES:
@@ -536,7 +536,7 @@ uninstall-am: uninstall-info-am
 clean-local:
 	-rm -f *.map *.log
 
-fat16_5MB.img: fat16_5MB.img.gz
+disk.img: disk.img.gz
 	gunzip -c $< > $@
 	vformat $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

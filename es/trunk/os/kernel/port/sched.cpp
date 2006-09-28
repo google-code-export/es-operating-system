@@ -283,7 +283,7 @@ queryInterface(const Guid& riid, void** objectPtr)
     }
     else
     {
-            *objectPtr = NULL;
+        *objectPtr = NULL;
         return false;
     }
     static_cast<IInterface*>(*objectPtr)->addRef();

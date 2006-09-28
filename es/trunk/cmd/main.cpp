@@ -95,6 +95,16 @@ int main(int argc, char* argv[])
 
     esReport("main(): %d %d %p\n", testA, testB, &testA);
 
+    // Check kernel page fault
+    try
+    {
+        current->queryInterface(IID_IInterface, (void**) 0x8000);
+    }
+    catch (Exception& error)
+    {
+        esReport("catch error: %d\n", error.getResult());
+    }
+
     current->queryInterface(IID_IInterface, (void**) &current);
     try
     {

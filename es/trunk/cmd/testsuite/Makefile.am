@@ -14,7 +14,7 @@ noinst_SCRIPTS = $(TESTS)
 
 noinst_PROGRAMS = $(noinst_SCRIPTS)
 
-noinst_DATA = fat16_5MB.img \
+noinst_DATA = disk.img \
 	main.img \
 	start.img \
 	binder.img \
@@ -35,7 +35,7 @@ binder_SOURCES = binder.cpp
 
 location_SOURCES = location.cpp
 
-fat16_5MB.img: fat16_5MB.img.gz
+disk.img: disk.img.gz
 	gunzip -c $< > $@
 	vformat $@
 
@@ -44,4 +44,4 @@ AM_CPPFLAGS = \
 	-I../../include \
 	-I$(srcdir)/../../include
 
-EXTRA_DIST = fat16_5MB.img.gz makeScript
+EXTRA_DIST = disk.img.gz makeScript

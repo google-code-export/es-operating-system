@@ -38,12 +38,10 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 
-# 	include/space.h 
-
 #
 # pc
 #
-@ES_TRUE@@I386_TRUE@am__append_1 = -iquote $(srcdir)/include/i386
+@ES_TRUE@@I386_TRUE@am__append_1 = -iquote $(srcdir)/include/i386 -fnon-call-exceptions
 
 # c_source_files += \
 # 	pc/i386-stub.c
@@ -187,7 +185,8 @@ nodist_libeskernel_a_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) IDmac.$(OBJEXT) \
 	IFileSystem.$(OBJEXT) IPic.$(OBJEXT) IRemovableMedia.$(OBJEXT) \
 	IRtc.$(OBJEXT) IPartition.$(OBJEXT) IBinding.$(OBJEXT) \
-	IContext.$(OBJEXT) IIterator.$(OBJEXT) ISet.$(OBJEXT)
+	IContext.$(OBJEXT) IIterator.$(OBJEXT) ISet.$(OBJEXT) \
+	mbr.$(OBJEXT)
 libeskernel_a_OBJECTS = $(am_libeskernel_a_OBJECTS) \
 	$(nodist_libeskernel_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -318,45 +317,25 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 SUBDIRS = . testsuite
 lib_LIBRARIES = libeskernel.a
-SUFFIXES = .ird .c
+SUFFIXES = .ird .c .bin
 AM_CPPFLAGS = -I../../include -I$(srcdir)/../../include -iquote \
 	$(srcdir)/include $(am__append_1) $(am__append_7)
 
 #
 # default interface information
 #
-nodist_libeskernel_a_SOURCES = \
-	base/IAlarm.c \
-	base/ICache.c \
-	base/ICallback.c \
-	base/IClassFactory.c \
-	base/IClassStore.c \
-	base/IFile.c \
-	base/IInterface.c \
-	base/IInterfaceStore.c \
-	base/IMonitor.c \
-	base/IPageable.c \
-	base/IPageSet.c \
-	base/IProcess.c \
-	base/IRuntime.c \
-	base/IStream.c \
-	base/IThread.c \
-	device/IAudioFormat.c \
-	device/IBeep.c \
-	device/ICursor.c \
-	device/IDevice.c \
-	device/IDiskManagement.c \
-	device/IDmac.c \
-	device/IFileSystem.c \
-	device/IPic.c \
-	device/IRemovableMedia.c \
-	device/IRtc.c \
-	device/IPartition.c \
-	naming/IBinding.c \
-	naming/IContext.c \
-	util/IIterator.c \
-	util/ISet.c
 
+# 	include/space.h 
+nodist_libeskernel_a_SOURCES = base/IAlarm.c base/ICache.c \
+	base/ICallback.c base/IClassFactory.c base/IClassStore.c \
+	base/IFile.c base/IInterface.c base/IInterfaceStore.c \
+	base/IMonitor.c base/IPageable.c base/IPageSet.c \
+	base/IProcess.c base/IRuntime.c base/IStream.c base/IThread.c \
+	device/IAudioFormat.c device/IBeep.c device/ICursor.c \
+	device/IDevice.c device/IDiskManagement.c device/IDmac.c \
+	device/IFileSystem.c device/IPic.c device/IRemovableMedia.c \
+	device/IRtc.c device/IPartition.c naming/IBinding.c \
+	naming/IContext.c util/IIterator.c util/ISet.c mbr.c
 
 #
 # port
@@ -399,7 +378,7 @@ libeskernel_a_SOURCES = $(s_source_files) $(c_source_files) $(cpp_source_files) 
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .ird .c .S .cpp .o .obj
+.SUFFIXES: .ird .c .bin .S .cpp .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -522,6 +501,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/line.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/malloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/page.Po@am__quote@
@@ -2064,6 +2044,13 @@ vpath %.ird = ../../include/es
 	mkdir -p $(*D);
 	echo -n "unsigned char" $(*F) > $@;
 	echo "Info[] = {" >> $@;
+	od -A n -t x1 -v -w8 $< | sed -e 's/^ */0x/' -e 's/ /, 0x/g' -e 's/$$/,/' >> $@;
+	echo "};" >> $@
+
+vpath %.bin = ../bootsect
+
+.bin.c:
+	echo "unsigned char" $(*F) "[] = {" > $@;
 	od -A n -t x1 -v -w8 $< | sed -e 's/^ */0x/' -e 's/ /, 0x/g' -e 's/$$/,/' >> $@;
 	echo "};" >> $@
 
