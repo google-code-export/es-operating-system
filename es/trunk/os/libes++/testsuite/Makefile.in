@@ -54,14 +54,12 @@ am__hashtable_SOURCES_DIST = hashtable.cpp
 hashtable_OBJECTS = $(am_hashtable_OBJECTS)
 hashtable_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-hashtable_DEPENDENCIES = ../../../os/kernel/libeskernel.a \
-	../libessup++.a $(am__DEPENDENCIES_1)
+hashtable_DEPENDENCIES = ../libessup++.a $(am__DEPENDENCIES_1)
 am__list_SOURCES_DIST = list.cpp
 @POSIX_TRUE@am_list_OBJECTS = list.$(OBJEXT)
 list_OBJECTS = $(am_list_OBJECTS)
 list_LDADD = $(LDADD)
-list_DEPENDENCIES = ../../../os/kernel/libeskernel.a ../libessup++.a \
-	$(am__DEPENDENCIES_1)
+list_DEPENDENCIES = ../libessup++.a $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -176,8 +174,7 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-LDADD = ../../../os/kernel/libeskernel.a ../libessup++.a \
-	$(am__append_1)
+LDADD = ../libessup++.a $(am__append_1)
 AM_CPPFLAGS = \
 	-I $(srcdir)/../include \
 	-I- \

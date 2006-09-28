@@ -1,4 +1,4 @@
-LDADD = ../../../os/kernel/libeskernel.a ../libessup++.a
+LDADD = ../libessup++.a
 
 AM_CPPFLAGS = \
 	-I $(srcdir)/../include \
