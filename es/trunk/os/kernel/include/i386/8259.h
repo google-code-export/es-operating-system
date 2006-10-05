@@ -40,6 +40,10 @@ public:
     bool ack(unsigned irq);
     void end(unsigned irq);
     void setAffinity(unsigned irq, unsigned int cpuMask);
+    unsigned int splIdle();
+    unsigned int splLo();
+    unsigned int splHi();
+    void splX(unsigned int x);
 
     static const int PORT_MASTER =  0x20;
     static const int PORT_MASTER_IMR =  0x21;

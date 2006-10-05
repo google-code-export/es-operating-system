@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include "core.h"
 #include "thread.h"
 
 void Thread::Rendezvous::
@@ -18,7 +19,7 @@ sleep(Delegate* delegate)
 {
     for (;;)
     {
-        unsigned x = splHi();
+        unsigned x = Core::splHi();
         Thread* current = getCurrentThread();
         ASSERT(current);
         current->lock();
@@ -34,7 +35,7 @@ sleep(Delegate* delegate)
             queue.remove(current);
             current->unlock();
             unlock();
-            splX(x);
+            Core::splX(x);
             return;
         }
 
@@ -43,7 +44,7 @@ sleep(Delegate* delegate)
 
         current->unlock();
         unlock();
-        splX(x);
+        Core::splX(x);
 
         reschedule();
     }
@@ -53,7 +54,7 @@ sleep(Delegate* delegate)
 void Thread::Rendezvous::
 wakeup(Delegate* delegate)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
 
     if (!delegate || delegate->invoke(1))
@@ -83,13 +84,13 @@ wakeup(Delegate* delegate)
     }
 
     unlock();
-    splX(x);
+    Core::splX(x);
 }
 
 void Thread::Rendezvous::
 remove(Thread* thread)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
     if (thread->rendezvous == this)
     {
@@ -97,13 +98,13 @@ remove(Thread* thread)
         thread->rendezvous = 0;
     }
     unlock();
-    splX(x);
+    Core::splX(x);
 }
 
 void Thread::Rendezvous::
 update(Thread* thread, int effective)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
     if (thread->rendezvous == this)
     {
@@ -116,7 +117,7 @@ update(Thread* thread, int effective)
         thread->priority = effective;
     }
     unlock();
-    splX(x);
+    Core::splX(x);
 }
 
 int Thread::Rendezvous::

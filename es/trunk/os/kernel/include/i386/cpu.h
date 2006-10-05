@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -16,9 +16,7 @@
 
 #include <es/types.h>
 
-/*
- * Exception vector No.
- */
+// Exception vector No.
 #define NO_DE       0                   // Divide Error
 #define NO_DB       1                   // Debug
 #define NO_NMI      2                   // NMI Interrupt
@@ -39,30 +37,28 @@
 #define NO_MC       18                  // Machine Check
 #define NO_XF       19                  // SIMD Floating-Point Exception
 
-/*
- *  segment descriptor/gate
- */
+// Segment descriptor/gate
 struct Segdesc
 {
     // fields in segment descriptors
-    static const u32 SEGG = 1L<<23;             // granularity (1=4K)
-    static const u32 SEGD = 1L<<22;             // 32-bit code segment
-    static const u32 SEGB = 1L<<22;             // 32-bit stack pointer register
-    static const u32 SEGP = 1L<<15;             // segment present
-    static const u32 SEGS = 1L<<12;             // descriptor type (0 = system; 1 = code or data)
-    static const u32 SEGE = 1L<<10;             // expand down
-    static const u32 SEGW = 1L<<9;              // writable (for data/stack)
-    static const u32 SEGR = 1L<<9;              // readable (for code)
-    static const u32 SEGBUSY = 1L<<9;           // busy (for task)
-    static const u32 SEGA = 1L<<8;              // accessed
-    static const u32 SEGDATA = 0x10L<<8;        // data/stack segment
-    static const u32 SEGEXEC = 0x18L<<8;        // executable segment
-    static const u32 SEGLDT = 0x02L<<8;         // LDT
-    static const u32 SEGTASK = 0x05L<<8;        // task gate
-    static const u32 SEGTSS = 0x09L<<8;         // 32-bit TSS segment
-    static const u32 SEGCG = 0x0cL<<8;          // 32-bit call gate
-    static const u32 SEGIG = 0x0eL<<8;          // 32-bit interrupt gate
-    static const u32 SEGTG = 0x0fL<<8;          // 32-bit trap gate
+    static const u32 SEGG = 1<<23;      // granularity (1=4K)
+    static const u32 SEGD = 1<<22;      // 32-bit code segment
+    static const u32 SEGB = 1<<22;      // 32-bit stack pointer register
+    static const u32 SEGP = 1<<15;      // segment present
+    static const u32 SEGS = 1<<12;      // descriptor type (0 = system; 1 = code or data)
+    static const u32 SEGE = 1<<10;      // expand down
+    static const u32 SEGW = 1<<9;       // writable (for data/stack)
+    static const u32 SEGR = 1<<9;       // readable (for code)
+    static const u32 SEGBUSY = 1<<9;    // busy (for task)
+    static const u32 SEGA = 1<<8;       // accessed
+    static const u32 SEGDATA = 0x10<<8; // data/stack segment
+    static const u32 SEGEXEC = 0x18<<8; // executable segment
+    static const u32 SEGLDT = 0x02<<8;  // LDT
+    static const u32 SEGTASK = 0x05<<8; // task gate
+    static const u32 SEGTSS = 0x09<<8;  // 32-bit TSS segment
+    static const u32 SEGCG = 0x0c<<8;   // 32-bit call gate
+    static const u32 SEGIG = 0x0e<<8;   // 32-bit interrupt gate
+    static const u32 SEGTG = 0x0f<<8;   // 32-bit trap gate
 
     u32 d0;
     u32 d1;
@@ -80,16 +76,16 @@ struct Segdesc
         d1 |= fields | (dpl << 13);
     }
 
-    void setExceptionHandler(u16 sel, void (*exceptionAddress)())
+    void setInterruptHandler(u16 sel, u32 exceptionAddress)
     {
-        d0 = (sel << 16) | ((u32) exceptionAddress & 0xffff);
-        d1 = ((u32) exceptionAddress & 0xffff0000) | SEGP | SEGIG;
+        d0 = (sel << 16) | (exceptionAddress & 0xffff);
+        d1 = (exceptionAddress & 0xffff0000) | SEGP | SEGIG;
     }
 
-    void setTrapHandler(u16 sel, void (*exceptionAddress)())
+    void setTrapHandler(u16 sel, u32 exceptionAddress)
     {
-        d0 = (sel << 16) | ((u32) exceptionAddress & 0xffff);
-        d1 = ((u32) exceptionAddress & 0xffff0000) | SEGP | SEGTG;
+        d0 = (sel << 16) | (exceptionAddress & 0xffff);
+        d1 = (exceptionAddress & 0xffff0000) | SEGP | SEGTG;
     }
 
     void setDPL(u8 dpl)
@@ -100,9 +96,7 @@ struct Segdesc
     }
 };
 
-/*
- *  descriptor table location for lgdt, lidt
- */
+// Descriptor table location for lgdt, lidt
 struct SegdescLoc
 {
     u16         alignment __attribute__ ((packed));
@@ -128,9 +122,7 @@ struct SegdescLoc
 
 } __attribute__ ((aligned (4)));;
 
-/*
- *  task state segment
- */
+// Task state segment
 struct Tss
 {
     u32 backlink;

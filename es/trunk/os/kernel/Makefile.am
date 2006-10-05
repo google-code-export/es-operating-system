@@ -151,12 +151,14 @@ cpp_source_files += \
  	pc/8237a.cpp \
 	pc/8254.cpp \
 	pc/8259.cpp \
+	pc/apic.cpp \
 	pc/ataController.cpp \
 	pc/ataDevice.cpp \
 	pc/ataPacket.cpp \
 	pc/cga.cpp \
- 	pc/fdc.cpp \
- 	pc/fdd.cpp \
+	pc/fdc.cpp \
+	pc/fdd.cpp \
+	pc/mps.cpp \
 	pc/pc_core.cpp \
 	pc/pc_dateTime.cpp \
 	pc/pc_init.cpp \
@@ -181,13 +183,15 @@ header_files += \
  	include/i386/8237a.h \
 	include/i386/8254.h \
 	include/i386/8259.h \
+	include/i386/apic.h \
 	include/i386/ataController.h \
 	include/i386/cga.h \
 	include/i386/core.h \
 	include/i386/cpu.h \
  	include/i386/fdc.h \
-	include/i386/label.h \
 	include/i386/io.h \
+	include/i386/label.h \
+	include/i386/mps.h \
 	include/i386/rtc.h \
  	include/i386/sb16.h \
 	include/i386/vesa.h

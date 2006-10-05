@@ -48,11 +48,13 @@
 // 0x00009000 - 0x0000ffff      Default kernel stack
 // 0x00010000 - 0x00010fff      Page directory table
 // 0x00011000 - 0x00011fff      User TCB
-// 0x00012000 - 0x00012fff      Kernel TCB
+// 0x00012000 - 0x00012fff      Kernel TCBs
+// 0x00013000 - 0x00013fff      AP initial stack
 // 0x00020000 - 0x00020fff      FDC DMA buffer
 // 0x00021000 - 0x00021fff      SB16 8-bit DMA buffer
 // 0x00022000 - 0x00023fff      SB16 16-bit DMA buffer
-// 0x00040000 - 0x00080000      Heap
+// 0x00030000 - 0x0003ffff      MPS Core objects
+// 0x00040000 - 0x0007ffff      Heap
 // 0x01000000 -                 Kernel
 
 #include "fat.h"
@@ -91,8 +93,11 @@
 
 #define Dest                    124
 
-#define Bios                    124     // _shutdown address
+#define Shutdown                124     // _shutdown address
+#define Startap                 126     // _startap address
 #define Font                    128     // VGA font address
+#define Entryap                 132     // AP protected-mode entry address [m16:32]
+#define Halt                    138
 
 .code16
 .text
@@ -105,7 +110,11 @@ _start:                                 // at location 3000:0000
 
         // BPB is copied here
 
-        .org    132
+        .org    Entryap
+        .word   0, 0, 8
+        .org    Halt
+        .word   0
+
 0:
         // Set %sp
         cli
@@ -413,7 +422,15 @@ run:
 
         // Save APM _shutdown address
         leaw    _shutdown, %ax
-        movw    %ax, (Bios)
+        movw    %ax, (Shutdown)
+
+        // Save MPS _startap address
+        leaw    _startap, %ax
+        movw    %ax, (Startap)
+
+        // Save _halt address
+        leaw    _halt, %ax
+        movw    %ax, (Halt)
 
 kernel_mode:
         cli
@@ -469,8 +486,9 @@ kernel_mode:
         addl    $0x00400000, %eax
         loop    0b
 
+        // Load page directory
         movl    $0x10000, %eax
-        movl    %eax, %cr3              // set the page table pointer
+        movl    %eax, %cr3
 
         // Enable paging
         movl    %cr0, %eax
@@ -479,9 +497,10 @@ kernel_mode:
 #endif
 
         movl    $0x80010000, %esp
+        pushl   %esp
         movl    %esp, %gs:0             // Set kernel TLS thread pointer
         xorl    %eax, %eax
-        movl    $512, %ecx              // Reserve 2KB for the default TLS
+        movl    $511, %ecx              // Reserve 2KB for the default TLS
 0:      pushl   %eax
         loop    0b
 
@@ -553,14 +572,15 @@ _shutdown:
 
 3:      leaw    turnoff, %si
         call    prtstr
-4:      hlt
-        jmp     4b
+        jmp     _halt
 
 hang:
         leaw    failed, %si
         call    prtstr
-0:      hlt
-        jmp     0b
+.global _halt
+_halt:
+        hlt
+        jmp     _halt
 
 prtchr:
         pushw   %ax
@@ -981,3 +1001,81 @@ gdt48:
 idt48Real:
         .word   0x400                   // idt limit = 0
         .word   0, 0                    // idt base = 0L
+
+        .align  4096
+        // Application processor startup routine
+.global _startap
+_startap:
+        // Set %sp
+        cli
+        xorw    %ax, %ax
+        movw    %ax, %ss
+        movw    $0x7c00, %sp
+
+        // Set %ds and %es
+        movw    $0x3000, %ax
+        movw    %ax, %ds
+        movw    %ax, %es
+
+        cli
+        cld
+
+        // Set up GDT and IDT
+        lgdt    gdt48
+        lidt    idt48
+
+        // Switch to the protected mode
+        movl    %cr0, %eax
+        orl     $1, %eax
+        movl    %eax, %cr0
+
+        // Switch to the protected mode
+        movl    %cr0, %eax
+        orl     $1, %eax
+        movl    %eax, %cr0
+
+        .code32
+        .byte 0x66                      // Need prefix as still using 16bit CS
+        ljmp    $8, $(0x3000*16 + 0f)   // Clear prefetch and normalize %eip
+0:
+        movw    $16, %ax
+        movw    %ax, %ds
+        movw    %ax, %es
+        movw    %ax, %fs
+        movw    %ax, %ss
+
+        movw    $40, %ax
+        movw    %ax, %gs
+
+        xorl    %eax, %eax
+        lldt    %ax                     // Invalidate LDTR
+
+#if 1
+        // Turn on PSE
+        movl    %cr4, %eax
+        orl     $0x10, %eax
+        movl    %eax, %cr4
+
+        // Load page directory
+        movl    $0x10000, %eax
+        movl    %eax, %cr3
+
+        // Enable paging
+        movl    %cr0, %eax
+        orl     $0x80010000, %eax
+        movl    %eax, %cr0              // and set paging (PG) bit with WP
+#endif
+
+        movl    $0x80040000, %esp
+        pushl   %esp
+        movl    %esp, %gs:0             // Set AP TLS thread pointer
+        xorl    %eax, %eax
+        movl    $511, %ecx              // Reserve 2KB for the default TLS
+0:      pushl   %eax
+        loop    0b
+
+        pushl   %eax                    // argv
+        pushl   %eax                    // argc
+        ljmpl   *(0x30000 + Entryap)    // Jump to the es.img
+
+        .code16

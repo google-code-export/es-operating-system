@@ -135,6 +135,57 @@ setAffinity(unsigned irq, unsigned int cpuMask)
     return;
 }
 
+unsigned Pic::
+splIdle()
+{
+    register unsigned eax;
+
+    __asm__ __volatile__ (
+        "pushfl\n"
+        "popl    %0\n"
+        "sti"
+        : "=a" (eax));
+
+    return eax;
+}
+
+unsigned Pic::
+splLo()
+{
+    register unsigned eax;
+
+    __asm__ __volatile__ (
+        "pushfl\n"
+        "popl   %0\n"
+        "sti"
+        : "=a" (eax));
+
+    return eax;
+}
+
+unsigned Pic::
+splHi()
+{
+    register unsigned eax;
+
+    __asm__ __volatile__ (
+        "pushfl\n"
+        "popl   %0\n"
+        "cli"
+        : "=a" (eax));
+
+    return eax;
+}
+
+void Pic::
+splX(unsigned x)
+{
+    __asm__ __volatile__ (
+        "pushl   %0\n"
+        "popfl"
+        :: "r" (x));
+}
+
 //
 // IInterface
 //

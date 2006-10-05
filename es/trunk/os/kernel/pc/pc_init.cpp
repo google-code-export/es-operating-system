@@ -25,6 +25,7 @@
 #include "8042.h"
 #include "8237a.h"
 #include "8254.h"
+#include "apic.h"
 #include "ataController.h"
 #include "cache.h"
 #include "cga.h"
@@ -34,6 +35,7 @@
 #include "fdc.h"
 #include "heap.h"
 #include "interfaceStore.h"
+#include "mps.h"
 #include "partition.h"
 #include "rtc.h"
 #include "sb16.h"
@@ -49,15 +51,15 @@ namespace
     IClassStore*    classStore;
     InterfaceStore* interfaceStore;
     Sched*          sched;
-    unsigned        coreStack[4096] __attribute__ ((aligned (16)));
-    Tss             coreTss __attribute__ ((aligned (256)));
-    unsigned        mainStack[4096] __attribute__ ((aligned (16)));
     Pit*            pit;
     IRtc*           rtc;
     IStream*        reportStream;
     IClassFactory*  alarmFactory;
     Dmac*           master;
     Dmac*           slave;
+    Pic*            pic;
+    Mps*            mps;
+    Apic*           apic;
 };
 
 const int Page::SIZE = 4096;
@@ -118,6 +120,16 @@ static void initArena()
     free(0);    // Just to link malloc.cpp
 }
 
+static void initAP(...)
+{
+    apic->enableLocalApic();
+    apic->splHi();
+    Core* core = new Core(sched);
+    apic->started();
+    core->start();
+    // NOT REACHED HERE
+}
+
 int esInit(IInterface** nameSpace)
 {
     if (root)
@@ -131,6 +143,19 @@ int esInit(IInterface** nameSpace)
 
     Cga* cga = new Cga;
     reportStream = cga;
+#if 1
+    int port = ((u16*) 0x400)[0];
+    if (port)
+    {
+        Uart* uart = new Uart(port);
+        if (uart)
+        {
+            reportStream = uart;
+        }
+    }
+#endif
+
+    pic = new Pic();  // Initialize 8259 anyways.
 
     // Initialize the page table
     initArena();
@@ -140,7 +165,30 @@ int esInit(IInterface** nameSpace)
     sched = new Sched;
 
     // Initialize the current core
-    Core* core = new Core(sched, coreStack, sizeof coreStack, &coreTss);
+    Core* core = new Core(sched);
+
+    mps = new Mps;
+    if (!mps->getFloatingPointerStructure())
+    {
+        Core::pic = pic;
+    }
+    else
+    {
+        // Startup APs
+        u32 hltAP = 0x30000 + *(u16*) (0x30000 + 138);
+        u32 startAP = 0x30000 + *(u16*) (0x30000 + 126);
+        *(u32*) (0x30000 + 132) = (u32) initAP;
+
+        esReport("Startap: %x\n", startAP);
+        esReport("Halt: %x\n", hltAP);
+
+        apic = new Apic(mps);
+        Core::pic = apic;
+
+        Core::registerExceptionHandler(67, sched);
+
+        apic->startup(hltAP, startAP);
+    }
 
     // Create the default thread (stack top: 0x80010000)
     Thread* thread = new Thread(0, 0, IThread::Normal,
@@ -148,6 +196,7 @@ int esInit(IInterface** nameSpace)
     thread->state = IThread::RUNNING;
     thread->sched = sched;
     core->current = thread;
+    core->ktcb.tcb = thread->ktcb;
 
     rtc = new Rtc;
     pit = new Pit(1000);
@@ -201,22 +250,10 @@ int esInit(IInterface** nameSpace)
     IClassFactory* partitionFactory = new(ClassFactory<PartitionContext>);
     classStore->add(CLSID_Partition, partitionFactory);
 
-#if 1
-    int port = ((u16*) 0x400)[0];
-    if (port)
-    {
-        Uart* uart = new Uart(port);
-        if (uart)
-        {
-            reportStream = uart;
-        }
-    }
-#endif
-
     slave = new Dmac(0x00, 0x80, 0);
     master = new Dmac(0xc0, 0x88, 1);
 
-    __asm__ __volatile__ ("sti\n");
+    Core::pic->splLo();
 
     root->bind("device/beep", static_cast<IBeep*>(pit));
 

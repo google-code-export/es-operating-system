@@ -364,27 +364,31 @@ public:
 
     // Architecture specific functions
     static Thread* getCurrentThread();
-    static unsigned splIdle();
-    static unsigned splLo();
-    static unsigned splHi();
-    static void splX(unsigned x);
     static void reschedule();
 };
 
-class Sched : public ICurrentThread, public ICurrentProcess, public IRuntime, public SpinLock
+class Sched : public ICurrentThread, public ICurrentProcess, public IRuntime,
+              public ICallback, public SpinLock
 {
     friend class Thread;
+    friend class SpinLock;
+    friend class Core;
 
     Ref                 ref;
     volatile unsigned   runQueueBits;
     bool                runQueueHint;
     Thread::Queue       runQueue[IThread::Highest + 1];
 
+    static Ref          numCores;
+
 public:
     Sched();
     void setRun(Thread* thread);
     void unsetRun(Thread* thread);
     Thread* selectThread();
+
+    // ICallback
+    int invoke(int result);
 
     //
     // ICurrentThread
@@ -480,7 +484,7 @@ tryLock()
 inline void SpinLock::
 lock()
 {
-    ASSERT(!spin || owner == Thread::getCurrentThread());   // XXX single processor only
+    ASSERT(1 < Sched::numCores || !spin || owner == Thread::getCurrentThread());
     do
     {
         wait();
@@ -498,21 +502,6 @@ unlock()
     {
         spin.exchange(0);
     }
-}
-
-inline SpinLock::Synchronized::
-Synchronized(SpinLock& spinLock) :
-    spinLock(spinLock)
-{
-    x = Thread::splHi();
-    spinLock.lock();
-}
-
-inline SpinLock::Synchronized::
-~Synchronized()
-{
-    spinLock.unlock();
-    Thread::splX(x);
 }
 
 typedef Thread::Monitor     Monitor;

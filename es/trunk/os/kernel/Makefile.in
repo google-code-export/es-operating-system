@@ -49,24 +49,26 @@ target_triplet = @target@
 @ES_TRUE@	port/monitor.cpp port/process.cpp port/rendezvous.cpp \
 @ES_TRUE@	port/sched.cpp port/swap.cpp port/syscall.cpp \
 @ES_TRUE@	port/thread.cpp port/upcall.cpp pc/8042.cpp \
-@ES_TRUE@	pc/8237a.cpp pc/8254.cpp pc/8259.cpp \
+@ES_TRUE@	pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/apic.cpp \
 @ES_TRUE@	pc/ataController.cpp pc/ataDevice.cpp \
 @ES_TRUE@	pc/ataPacket.cpp pc/cga.cpp pc/fdc.cpp pc/fdd.cpp \
-@ES_TRUE@	pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
-@ES_TRUE@	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
-@ES_TRUE@	pc/vesa.cpp pc/xreg.cpp
+@ES_TRUE@	pc/mps.cpp pc/pc_core.cpp pc/pc_dateTime.cpp \
+@ES_TRUE@	pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
+@ES_TRUE@	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp
 @ES_TRUE@am__append_3 = \
 @ES_TRUE@	include/i386/8042.h \
 @ES_TRUE@ 	include/i386/8237a.h \
 @ES_TRUE@	include/i386/8254.h \
 @ES_TRUE@	include/i386/8259.h \
+@ES_TRUE@	include/i386/apic.h \
 @ES_TRUE@	include/i386/ataController.h \
 @ES_TRUE@	include/i386/cga.h \
 @ES_TRUE@	include/i386/core.h \
 @ES_TRUE@	include/i386/cpu.h \
 @ES_TRUE@ 	include/i386/fdc.h \
-@ES_TRUE@	include/i386/label.h \
 @ES_TRUE@	include/i386/io.h \
+@ES_TRUE@	include/i386/label.h \
+@ES_TRUE@	include/i386/mps.h \
 @ES_TRUE@	include/i386/rtc.h \
 @ES_TRUE@ 	include/i386/sb16.h \
 @ES_TRUE@	include/i386/vesa.h
@@ -129,9 +131,9 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	port/malloc.cpp port/map.cpp port/mmu.cpp port/monitor.cpp \
 	port/process.cpp port/rendezvous.cpp port/sched.cpp \
 	port/swap.cpp port/syscall.cpp port/thread.cpp port/upcall.cpp \
-	pc/8042.cpp pc/8237a.cpp pc/8254.cpp pc/8259.cpp \
+	pc/8042.cpp pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/apic.cpp \
 	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
-	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/pc_core.cpp \
+	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp \
 	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
 	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp \
 	windows/ref.cpp posix/posix_thread.cpp posix/posix_monitor.cpp \
@@ -143,10 +145,11 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	include/spinlock.h include/thread.h include/zero.h \
 	include/ata.h include/uart.h include/i386/8042.h \
 	include/i386/8237a.h include/i386/8254.h include/i386/8259.h \
-	include/i386/ataController.h include/i386/cga.h \
-	include/i386/core.h include/i386/cpu.h include/i386/fdc.h \
-	include/i386/label.h include/i386/io.h include/i386/rtc.h \
-	include/i386/sb16.h include/i386/vesa.h include/posix/core.h
+	include/i386/apic.h include/i386/ataController.h \
+	include/i386/cga.h include/i386/core.h include/i386/cpu.h \
+	include/i386/fdc.h include/i386/io.h include/i386/label.h \
+	include/i386/mps.h include/i386/rtc.h include/i386/sb16.h \
+	include/i386/vesa.h include/posix/core.h
 @ES_TRUE@am__objects_1 = label.$(OBJEXT)
 am__objects_2 =
 @ES_TRUE@am__objects_3 = malloc.$(OBJEXT) map.$(OBJEXT) mmu.$(OBJEXT) \
@@ -154,12 +157,13 @@ am__objects_2 =
 @ES_TRUE@	rendezvous.$(OBJEXT) sched.$(OBJEXT) swap.$(OBJEXT) \
 @ES_TRUE@	syscall.$(OBJEXT) thread.$(OBJEXT) upcall.$(OBJEXT) \
 @ES_TRUE@	8042.$(OBJEXT) 8237a.$(OBJEXT) 8254.$(OBJEXT) \
-@ES_TRUE@	8259.$(OBJEXT) ataController.$(OBJEXT) \
+@ES_TRUE@	8259.$(OBJEXT) apic.$(OBJEXT) ataController.$(OBJEXT) \
 @ES_TRUE@	ataDevice.$(OBJEXT) ataPacket.$(OBJEXT) cga.$(OBJEXT) \
-@ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) pc_core.$(OBJEXT) \
-@ES_TRUE@	pc_dateTime.$(OBJEXT) pc_init.$(OBJEXT) \
-@ES_TRUE@	pc_thread.$(OBJEXT) rtc.$(OBJEXT) sb16.$(OBJEXT) \
-@ES_TRUE@	uart.$(OBJEXT) vesa.$(OBJEXT) xreg.$(OBJEXT)
+@ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) mps.$(OBJEXT) \
+@ES_TRUE@	pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
+@ES_TRUE@	pc_init.$(OBJEXT) pc_thread.$(OBJEXT) rtc.$(OBJEXT) \
+@ES_TRUE@	sb16.$(OBJEXT) uart.$(OBJEXT) vesa.$(OBJEXT) \
+@ES_TRUE@	xreg.$(OBJEXT)
 @WIN32_TRUE@am__objects_4 = ref.$(OBJEXT)
 @POSIX_TRUE@am__objects_5 = posix_thread.$(OBJEXT) \
 @POSIX_TRUE@	posix_monitor.$(OBJEXT) posix_core.$(OBJEXT) \
@@ -483,6 +487,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IStream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alarm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/apic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arena.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ataController.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ataDevice.Po@am__quote@
@@ -504,6 +509,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mps.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/page.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pageSet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pageTable.Po@am__quote@
@@ -1471,6 +1477,20 @@ upcall.obj: port/upcall.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o 8259.obj `if test -f 'pc/8259.cpp'; then $(CYGPATH_W) 'pc/8259.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/8259.cpp'; fi`
 
+apic.o: pc/apic.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT apic.o -MD -MP -MF "$(DEPDIR)/apic.Tpo" -c -o apic.o `test -f 'pc/apic.cpp' || echo '$(srcdir)/'`pc/apic.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/apic.Tpo" "$(DEPDIR)/apic.Po"; else rm -f "$(DEPDIR)/apic.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/apic.cpp' object='apic.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o apic.o `test -f 'pc/apic.cpp' || echo '$(srcdir)/'`pc/apic.cpp
+
+apic.obj: pc/apic.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT apic.obj -MD -MP -MF "$(DEPDIR)/apic.Tpo" -c -o apic.obj `if test -f 'pc/apic.cpp'; then $(CYGPATH_W) 'pc/apic.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/apic.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/apic.Tpo" "$(DEPDIR)/apic.Po"; else rm -f "$(DEPDIR)/apic.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/apic.cpp' object='apic.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o apic.obj `if test -f 'pc/apic.cpp'; then $(CYGPATH_W) 'pc/apic.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/apic.cpp'; fi`
+
 ataController.o: pc/ataController.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ataController.o -MD -MP -MF "$(DEPDIR)/ataController.Tpo" -c -o ataController.o `test -f 'pc/ataController.cpp' || echo '$(srcdir)/'`pc/ataController.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ataController.Tpo" "$(DEPDIR)/ataController.Po"; else rm -f "$(DEPDIR)/ataController.Tpo"; exit 1; fi
@@ -1554,6 +1574,20 @@ fdd.obj: pc/fdd.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/fdd.cpp' object='fdd.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fdd.obj `if test -f 'pc/fdd.cpp'; then $(CYGPATH_W) 'pc/fdd.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/fdd.cpp'; fi`
+
+mps.o: pc/mps.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mps.o -MD -MP -MF "$(DEPDIR)/mps.Tpo" -c -o mps.o `test -f 'pc/mps.cpp' || echo '$(srcdir)/'`pc/mps.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mps.Tpo" "$(DEPDIR)/mps.Po"; else rm -f "$(DEPDIR)/mps.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/mps.cpp' object='mps.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mps.o `test -f 'pc/mps.cpp' || echo '$(srcdir)/'`pc/mps.cpp
+
+mps.obj: pc/mps.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mps.obj -MD -MP -MF "$(DEPDIR)/mps.Tpo" -c -o mps.obj `if test -f 'pc/mps.cpp'; then $(CYGPATH_W) 'pc/mps.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/mps.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mps.Tpo" "$(DEPDIR)/mps.Po"; else rm -f "$(DEPDIR)/mps.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/mps.cpp' object='mps.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mps.obj `if test -f 'pc/mps.cpp'; then $(CYGPATH_W) 'pc/mps.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/mps.cpp'; fi`
 
 pc_core.o: pc/pc_core.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pc_core.o -MD -MP -MF "$(DEPDIR)/pc_core.Tpo" -c -o pc_core.o `test -f 'pc/pc_core.cpp' || echo '$(srcdir)/'`pc/pc_core.cpp; \

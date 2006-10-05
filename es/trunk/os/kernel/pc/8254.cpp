@@ -76,11 +76,11 @@ setFrequency(unsigned hz)
     freq = hz;
     unsigned count = (143181800 / hz / 12 + 5) / 10;
 
-    unsigned x = Thread::splHi();
+    unsigned x = Core::splHi();
     outpb(PORT_CONTROL, COUNTER_2 | COUNTER_HI | COUNTER_LO | MODE_SQUARE);
     outpb(PORT_COUNTER_2, count);
     outpb(PORT_COUNTER_2, count >> 8);
-    Thread::splX(x);
+    Core::splX(x);
 }
 
 unsigned Pit::
@@ -98,10 +98,10 @@ getFrequency()
 void Pit::
 beep()
 {
-    unsigned x = Thread::splHi();
+    unsigned x = Core::splHi();
     beeper = duration * 10000LL;
     outpb(SYSTEM_PORT, inpb(SYSTEM_PORT) | 0x03);
-    Thread::splX(x);
+    Core::splX(x);
 }
 
 //

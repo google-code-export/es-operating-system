@@ -12,8 +12,12 @@
  */
 
 #include <string.h> // ffs()
+#include "apic.h"
+#include "core.h"
 #include "thread.h"
 #include "process.h"
+
+Ref Sched::numCores(0);
 
 Sched::
 Sched() :
@@ -33,7 +37,8 @@ setRun(Thread* thread)
     runQueueHint = true;   // Hint to scheduler to check run queue
     unlock();
 
-    // XXX IPI to notify the other processors that another thread becomes ready to run.
+    // Broadcast IPI to notify the other processors that another thread becomes ready to run.
+    Apic::broadcastIPI(67);
 }
 
 void Sched::
@@ -61,14 +66,14 @@ selectThread()
     {
         do
         {
-            unsigned x = Thread::splIdle();
+            unsigned x = Core::splIdle();
             while (runQueueBits == 0)
             {
 #ifdef __i386__
                 __asm__ __volatile__ ("hlt\n");
 #endif
             }
-            Thread::splX(x);
+            Core::splX(x);
         } while (runQueueBits == 0);
 
         lock();
@@ -259,6 +264,17 @@ setFocus(void* (*focus)(void* param))
 }
 
 //
+// ICallback
+//
+
+int Sched::
+invoke(int result)
+{
+    // Process IPIs
+    int vec = 32 + result;
+}
+
+//
 // IInterface
 //
 
@@ -276,6 +292,10 @@ queryInterface(const Guid& riid, void** objectPtr)
     else if (riid == IID_IRuntime)
     {
         *objectPtr = static_cast<IRuntime*>(this);
+    }
+    else if (riid == IID_ICallback)
+    {
+        *objectPtr = static_cast<ICallback*>(this);
     }
     else if (riid == IID_IInterface)
     {
@@ -306,4 +326,19 @@ release(void)
         return 0;
     }
     return count;
+}
+
+SpinLock::Synchronized::
+Synchronized(SpinLock& spinLock) :
+    spinLock(spinLock)
+{
+    x = Core::splHi();
+    spinLock.lock();
+}
+
+SpinLock::Synchronized::
+~Synchronized()
+{
+    spinLock.unlock();
+    Core::splX(x);
 }

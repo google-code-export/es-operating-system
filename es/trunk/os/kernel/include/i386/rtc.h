@@ -58,6 +58,9 @@ public:
     bool queryInterface(const Guid& riid, void** objectPtr);
     unsigned int addRef(void);
     unsigned int release(void);
+
+    static u8 cmosRead(u8 offset);
+    static void cmosWrite(u8 offset, u8 val);
 };
 
 #endif // NINTENDO_ES_KERNEL_I386_RTC_H_INCLUDED

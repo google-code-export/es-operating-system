@@ -135,3 +135,19 @@ release(void)
     }
     return count;
 }
+
+u8 Rtc::
+cmosRead(u8 offset)
+{
+    ASSERT(0x0e <= offset);
+    outpb(PORT_ADDR, offset);
+    return inpb(PORT_DATA);
+}
+
+void Rtc::
+cmosWrite(u8 offset, u8 val)
+{
+    ASSERT(0x0e <= offset);
+    outpb(PORT_ADDR, offset);
+    outpb(PORT_DATA, val);
+}

@@ -42,7 +42,7 @@ if I386
 AM_CPPFLAGS += -iquote $(srcdir)/../include/i386
 endif I386
 
-TESTS = interlocked exception utf ring fpu tsd \
+TESTS = thread_smp interlocked exception utf ring fpu tsd \
 	context datetime thread thread_cancel \
 	monitor0 monitor1 monitor2 monitor3 \
 	bpi bpi2 bpi3 \
@@ -58,7 +58,7 @@ noinst_SCRIPTS = $(TESTS)
 noinst_PROGRAMS = $(noinst_SCRIPTS)
 
 noinst_DATA = fat16.img isotest.iso \
-	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+	thread_smp.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
 	context.img datetime.img thread.img thread_cancel.img \
 	monitor0.img monitor1.img monitor2.img monitor3.img \
 	bpi.img bpi2.img bpi3.img \
@@ -142,6 +142,8 @@ context_SOURCES = context.cpp
 datetime_SOURCES = datetime.cpp
 
 thread_SOURCES = thread.cpp
+
+thread_smp_SOURCES = thread_smp.cpp
 
 thread_cancel_SOURCES = thread_cancel.cpp
 

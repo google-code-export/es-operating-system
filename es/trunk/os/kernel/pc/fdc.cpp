@@ -20,8 +20,9 @@
 
 FloppyController::
 FloppyController(IDmac* dmac, u16 base, u8 irq) :
-    dmac(dmac),
-    base(base)
+    base(base),
+    current(0),
+    dmac(dmac)
 {
     esCreateInstance(CLSID_Monitor,
                      IID_IMonitor,
@@ -122,6 +123,11 @@ issue(FloppyDrive* drive, u8 cmd, void* param)
 int FloppyController::
 invoke(int param)
 {
+    if (!current)
+    {
+        return -1;
+    }
+
     switch (command[0])
     {
       case READ:

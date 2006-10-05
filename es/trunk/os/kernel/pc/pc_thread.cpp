@@ -16,57 +16,6 @@
 #include "thread.h"
 #include "core.h"
 
-unsigned Thread::
-splIdle()
-{
-    register unsigned eax;
-
-    __asm__ __volatile__ (
-        "pushfl\n"
-        "popl    %0\n"
-        "sti"
-        : "=a" (eax));
-
-    return eax;
-}
-
-unsigned Thread::
-splLo()
-{
-    register unsigned eax;
-
-    __asm__ __volatile__ (
-        "pushfl\n"
-        "popl   %0\n"
-        "sti"
-        : "=a" (eax));
-
-    return eax;
-}
-
-unsigned Thread::
-splHi()
-{
-    register unsigned eax;
-
-    __asm__ __volatile__ (
-        "pushfl\n"
-        "popl   %0\n"
-        "cli"
-        : "=a" (eax));
-
-    return eax;
-}
-
-void Thread::
-splX(unsigned x)
-{
-    __asm__ __volatile__ (
-        "pushl   %0\n"
-        "popfl"
-        :: "r" (x));
-}
-
 Thread* Thread::
 getCurrentThread()
 {
@@ -77,11 +26,11 @@ getCurrentThread()
 void Thread::
 reschedule()
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
     if (!core->yieldable)
     {
-        splX(x);
+        Core::splX(x);
         return;
     }
     Thread* current = core->current;
@@ -90,7 +39,7 @@ reschedule()
         if (current->label.set())
         {
             // This thread resumes from here.
-            splX(x);
+            Core::splX(x);
             return;
         }
     }

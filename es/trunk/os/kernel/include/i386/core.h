@@ -14,6 +14,7 @@
 #ifndef NINTENDO_ES_KERNEL_I386_CORE_H_INCLUDED
 #define NINTENDO_ES_KERNEL_I386_CORE_H_INCLUDED
 
+#include <new>
 #include <es/base/ICallback.h>
 #include "cache.h"
 #include "process.h"
@@ -31,10 +32,13 @@ class Core
     struct Tcb
     {
         void*           tcb;
+        Tcb() : tcb(0)
+        {
+        }
     };
 
 public:
-    static const int MaxCore = 32;
+    static const int CORE_MAX = 8;
 
     static const u16 KCODESEL = 8;
     static const u16 KDATASEL = 16;
@@ -47,7 +51,7 @@ public:
     static const u16 TCBSEL = 72 | 3;   // for TCB
 
 private:
-    long                id;
+    u8                  id;             // Core ID (may not be equal to local APIC ID)
     Sched*              sched;
     Process*            currentProc;
     Thread*             current;
@@ -57,25 +61,39 @@ private:
     Label               label;
     Tss*                tss;            // 256 byte aligned
     Tcb*                tcb;
-    Tcb*                ktcb;
+    Tcb                 ktcb;
     Segdesc             gdt[10] __attribute__ ((aligned (16)));
     SegdescLoc          gdtLoc;
 
-    static Ref          numCores;
-    static Core*        coreTable[MaxCore];
+    static Core*        coreTable[CORE_MAX];
 
     static bool         fxsr;
     static bool         sse;
     static Segdesc      idt[256] __attribute__ ((aligned (16)));
     static SegdescLoc   idtLoc;
 
-    // 8259 related
+    // 8259/APIC related
     static SpinLock     spinLock;
     static ICallback*   exceptionHandlers[255];
     static IPic*        pic;
 
 public:
-    Core(Sched* sched, void* stack, unsigned stackSize, Tss* tss);
+    Core(Sched* sched);
+
+    void setID(u8 id)
+    {
+        this->id = id;
+    }
+
+    u8 getID()
+    {
+        return id;
+    }
+
+    void start()
+    {
+        label.jump();     // Jump to reschedule().
+    }
 
     static Core* getCurrentCore();
     static void reschedule(void* param);
@@ -84,6 +102,24 @@ public:
     static long registerExceptionHandler(u8 exceptionNumber, ICallback* callback);
     static long unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback);
 
+    // processor execution level
+    static unsigned int splIdle()
+    {
+        return pic->splIdle();
+    }
+    static unsigned int splLo()
+    {
+        return pic->splLo();
+    }
+    static unsigned int splHi()
+    {
+        return pic->splHi();
+    }
+    static void splX(unsigned int x)
+    {
+        pic->splX(x);
+    }
+
     // i386 specific
     static void cpuid(int op, int* eax, int* ebx, int* ecx, int* edx);
     static void initFPU();
@@ -91,6 +127,9 @@ public:
     static void disableFPU();
     static void shutdown();
 
+    // class specific allocator
+    static void* operator new(size_t size) throw(std::bad_alloc);
+    static void operator delete(void*) throw();
 } __attribute__ ((aligned (16)));
 
 int esInit(IInterface** nameSpace);

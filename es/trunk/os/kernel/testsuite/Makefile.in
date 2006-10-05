@@ -74,9 +74,10 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	partition_bind$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_over8GB$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_print$(EXEEXT)
-@ES_TRUE@am__EXEEXT_1 = interlocked$(EXEEXT) exception$(EXEEXT) \
-@ES_TRUE@	utf$(EXEEXT) ring$(EXEEXT) fpu$(EXEEXT) tsd$(EXEEXT) \
-@ES_TRUE@	context$(EXEEXT) datetime$(EXEEXT) thread$(EXEEXT) \
+@ES_TRUE@am__EXEEXT_1 = thread_smp$(EXEEXT) interlocked$(EXEEXT) \
+@ES_TRUE@	exception$(EXEEXT) utf$(EXEEXT) ring$(EXEEXT) \
+@ES_TRUE@	fpu$(EXEEXT) tsd$(EXEEXT) context$(EXEEXT) \
+@ES_TRUE@	datetime$(EXEEXT) thread$(EXEEXT) \
 @ES_TRUE@	thread_cancel$(EXEEXT) monitor0$(EXEEXT) \
 @ES_TRUE@	monitor1$(EXEEXT) monitor2$(EXEEXT) monitor3$(EXEEXT) \
 @ES_TRUE@	bpi$(EXEEXT) bpi2$(EXEEXT) bpi3$(EXEEXT) ata$(EXEEXT) \
@@ -296,6 +297,11 @@ thread_cancel_OBJECTS = $(am_thread_cancel_OBJECTS)
 thread_cancel_LDADD = $(LDADD)
 thread_cancel_DEPENDENCIES = ../libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_thread_smp_OBJECTS = thread_smp.$(OBJEXT)
+thread_smp_OBJECTS = $(am_thread_smp_OBJECTS)
+thread_smp_LDADD = $(LDADD)
+thread_smp_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
+	$(am__DEPENDENCIES_1)
 am_tsd_OBJECTS = tsd.$(OBJEXT)
 tsd_OBJECTS = $(am_tsd_OBJECTS)
 tsd_LDADD = $(LDADD)
@@ -354,9 +360,10 @@ SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(partition_print_SOURCES) $(position_SOURCES) \
 	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
 	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
-	$(thread_SOURCES) $(thread_cancel_SOURCES) $(tsd_SOURCES) \
-	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
-	$(write_read_SOURCES) $(write_read2_SOURCES)
+	$(thread_SOURCES) $(thread_cancel_SOURCES) \
+	$(thread_smp_SOURCES) $(tsd_SOURCES) $(utf_SOURCES) \
+	$(vesa_SOURCES) $(write_SOURCES) $(write_read_SOURCES) \
+	$(write_read2_SOURCES)
 DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(bpi_SOURCES) $(bpi2_SOURCES) $(bpi3_SOURCES) \
 	$(cache_SOURCES) $(cdrom_SOURCES) $(context_SOURCES) \
@@ -372,9 +379,10 @@ DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(partition_print_SOURCES) $(position_SOURCES) \
 	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
 	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
-	$(thread_SOURCES) $(thread_cancel_SOURCES) $(tsd_SOURCES) \
-	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
-	$(write_read_SOURCES) $(write_read2_SOURCES)
+	$(thread_SOURCES) $(thread_cancel_SOURCES) \
+	$(thread_smp_SOURCES) $(tsd_SOURCES) $(utf_SOURCES) \
+	$(vesa_SOURCES) $(write_SOURCES) $(write_read_SOURCES) \
+	$(write_read2_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -484,7 +492,7 @@ LDADD = ../libeskernel.a ../../libes++/libessup++.a $(am__append_2)
 SUFFIXES = .img .gz .iso
 AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 	$(srcdir)/../../../include $(am__append_1) $(am__append_3)
-@ES_TRUE@TESTS = interlocked exception utf ring fpu tsd \
+@ES_TRUE@TESTS = thread_smp interlocked exception utf ring fpu tsd \
 @ES_TRUE@	context datetime thread thread_cancel \
 @ES_TRUE@	monitor0 monitor1 monitor2 monitor3 \
 @ES_TRUE@	bpi bpi2 bpi3 \
@@ -506,7 +514,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @POSIX_TRUE@        partition_bind partition_over8GB partition_print
 
 @ES_TRUE@noinst_DATA = fat16.img isotest.iso \
-@ES_TRUE@	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+@ES_TRUE@	thread_smp.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
 @ES_TRUE@	context.img datetime.img thread.img thread_cancel.img \
 @ES_TRUE@	monitor0.img monitor1.img monitor2.img monitor3.img \
 @ES_TRUE@	bpi.img bpi2.img bpi3.img \
@@ -554,6 +562,7 @@ replace_SOURCES = replace.cpp memoryStream.h
 context_SOURCES = context.cpp
 datetime_SOURCES = datetime.cpp
 thread_SOURCES = thread.cpp
+thread_smp_SOURCES = thread_smp.cpp
 thread_cancel_SOURCES = thread_cancel.cpp
 monitor0_SOURCES = monitor0.cpp
 monitor1_SOURCES = monitor1.cpp
@@ -729,6 +738,9 @@ thread$(EXEEXT): $(thread_OBJECTS) $(thread_DEPENDENCIES)
 thread_cancel$(EXEEXT): $(thread_cancel_OBJECTS) $(thread_cancel_DEPENDENCIES) 
 	@rm -f thread_cancel$(EXEEXT)
 	$(CXXLINK) $(thread_cancel_LDFLAGS) $(thread_cancel_OBJECTS) $(thread_cancel_LDADD) $(LIBS)
+thread_smp$(EXEEXT): $(thread_smp_OBJECTS) $(thread_smp_DEPENDENCIES) 
+	@rm -f thread_smp$(EXEEXT)
+	$(CXXLINK) $(thread_smp_LDFLAGS) $(thread_smp_OBJECTS) $(thread_smp_LDADD) $(LIBS)
 tsd$(EXEEXT): $(tsd_OBJECTS) $(tsd_DEPENDENCIES) 
 	@rm -f tsd$(EXEEXT)
 	$(CXXLINK) $(tsd_LDFLAGS) $(tsd_OBJECTS) $(tsd_LDADD) $(LIBS)
@@ -795,6 +807,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_cancel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_smp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vesa.Po@am__quote@

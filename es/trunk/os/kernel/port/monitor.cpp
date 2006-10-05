@@ -12,6 +12,7 @@
  */
 
 #include <new>
+#include "core.h"
 #include "thread.h"
 
 Thread::Monitor::
@@ -35,14 +36,14 @@ spinUnlock()
 void Thread::Monitor::
 update()
 {
-    unsigned x = splHi();         // Cling to the current core
+    unsigned x = Core::splHi();         // Cling to the current core
     spinLock();
     if (owner)
     {
         owner->updatePriority();
     }
     spinUnlock();
-    splX(x);
+    Core::splX(x);
 }
 
 int Thread::Monitor::
@@ -167,14 +168,14 @@ condWait(int)
 bool Thread::Monitor::
 wait()
 {
-    unsigned x = splHi();         // Cling to the current core
+    unsigned x = Core::splHi();         // Cling to the current core
 
     Thread* current = getCurrentThread();
     ASSERT(current);
     ASSERT(current->state == IThread::RUNNING);
     if (owner != current)
     {
-        splX(x);
+        Core::splX(x);
         return false;
     }
 
@@ -189,7 +190,7 @@ wait()
     release();
     ASSERT(0 < lockCount);
 
-    splX(x);
+    Core::splX(x);
     return true;
 }
 
@@ -203,7 +204,7 @@ invoke(int)
 bool Thread::Monitor::
 wait(s64 timeout)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
 
     Thread* current = getCurrentThread();
     ASSERT(current);
@@ -216,21 +217,21 @@ wait(s64 timeout)
 
     current->alarm.setEnabled(false);
 
-    splX(x);
+    Core::splX(x);
     return !current->condSleep(0);
 }
 
 void Thread::Monitor::
 notify()
 {
-    unsigned x = splHi();         // Cling to the current core
+    unsigned x = Core::splHi();         // Cling to the current core
     cv.wakeup();
     Thread* current = getCurrentThread();
     if (current && current->state == IThread::RUNNING)
     {
         reschedule();
     }
-    splX(x);
+    Core::splX(x);
 }
 
 void Thread::Monitor::

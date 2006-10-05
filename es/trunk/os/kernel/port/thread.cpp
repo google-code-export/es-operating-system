@@ -44,7 +44,7 @@ bool Thread::
 holdsLock(Monitor* monitor)
 {
     bool holds = false;
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
     if (monitor)
     {
@@ -60,7 +60,7 @@ holdsLock(Monitor* monitor)
         }
     }
     unlock();
-    splX(x);
+    Core::splX(x);
     return holds;
 }
 
@@ -78,7 +78,7 @@ setPriority(int priority)
         return;
     }
 
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
     if (base != priority)
     {
@@ -86,7 +86,7 @@ setPriority(int priority)
         updatePriority();
     }
     unlock();
-    splX(x);
+    Core::splX(x);
     reschedule();
 }
 
@@ -218,7 +218,7 @@ exit(void* val)
         process->detach(this);
     }
 
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     ASSERT(state == RUNNING);
     ASSERT(getCurrentThread() == this);
 
@@ -234,7 +234,7 @@ exit(void* val)
     reschedule();
     // NOT REACHED HERE
 
-    splX(x);
+    Core::splX(x);
 }
 
 int Thread::
@@ -262,7 +262,7 @@ join(void** rval)
 int Thread::
 setCancelState(int state)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
 
     // ASSERT(this == getCurrentThread());
@@ -277,7 +277,7 @@ setCancelState(int state)
     }
 
     unlock();
-    splX(x);
+    Core::splX(x);
 
     return previous;
 }
@@ -285,7 +285,7 @@ setCancelState(int state)
 int Thread::
 setCancelType(int type)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
 
     // ASSERT(this == getCurrentThread());
@@ -300,7 +300,7 @@ setCancelType(int type)
     }
 
     unlock();
-    splX(x);
+    Core::splX(x);
 
     return previous;
 }
@@ -308,25 +308,25 @@ setCancelType(int type)
 void Thread::
 testCancel()
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     ASSERT(this == getCurrentThread());
     if (attr & ICurrentThread::CANCEL_REQUESTED)
     {
         exit(0);
     }
-    splX(x);
+    Core::splX(x);
 }
 
 void Thread::
 cancel()
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
 
     if (attr & ICurrentThread::CANCEL_DISABLE)
     {
         unlock();
-        splX(x);
+        Core::splX(x);
         return;
     }
 
@@ -346,7 +346,7 @@ cancel()
         }
 
         unlock();
-        splX(x);
+        Core::splX(x);
         return;
     }
 
@@ -366,7 +366,7 @@ cancel()
         break;
       default:
         unlock();
-        splX(x);
+        Core::splX(x);
         return;
     }
 
@@ -378,7 +378,7 @@ cancel()
     joinPoint.wakeup();
 
     unlock();
-    splX(x);
+    Core::splX(x);
 
     reschedule();
 }
@@ -386,7 +386,7 @@ cancel()
 void Thread::
 start()
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     lock();
     if (state == NEW)
     {
@@ -395,7 +395,7 @@ start()
         addRef();
     }
     unlock();
-    splX(x);
+    Core::splX(x);
     reschedule();
 }
 
@@ -416,20 +416,20 @@ condSleep(int)
 void Thread::
 sleep(s64 timeout)
 {
-    unsigned x = splHi();
+    unsigned x = Core::splHi();
     ASSERT(state == RUNNING);
     alarm.setInterval(timeout);
     alarm.setCallback(static_cast<ICallback*>(this));
     alarm.setEnabled(true);
     DelegateTemplate<Thread> d(this, &Thread::condSleep);
     sleepPoint.sleep(&d);
-    splX(x);
+    Core::splX(x);
 }
 
 void Thread::
 startUp(void* param)
 {
-    splLo();
+    Core::splLo();
     Thread* thread = (Thread*) param;
     void* ret = thread->func(thread->param);
     thread->exit(ret);
