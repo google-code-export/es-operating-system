@@ -130,6 +130,8 @@ static void initAP(...)
     // NOT REACHED HERE
 }
 
+extern int main(int, char* []);
+
 int esInit(IInterface** nameSpace)
 {
     if (root)
@@ -195,6 +197,7 @@ int esInit(IInterface** nameSpace)
                                 (void*) 0x80009000, 0x80010000 - 0x80009000);
     thread->state = IThread::RUNNING;
     thread->sched = sched;
+    thread->func = (void* (*)(void*)) main;
     core->current = thread;
     core->ktcb.tcb = thread->ktcb;
 

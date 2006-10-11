@@ -30,7 +30,7 @@ void Sched::
 setRun(Thread* thread)
 {
     lock();
-    ASSERT(thread->state == IThread::RUNNABLE);
+    thread->state = IThread::RUNNABLE;
     Thread::Queue* queue = &runQueue[thread->priority];
     queue->addLast(thread);
     runQueueBits |= 0x80000000u >> thread->priority;
@@ -326,19 +326,4 @@ release(void)
         return 0;
     }
     return count;
-}
-
-SpinLock::Synchronized::
-Synchronized(SpinLock& spinLock) :
-    spinLock(spinLock)
-{
-    x = Core::splHi();
-    spinLock.lock();
-}
-
-SpinLock::Synchronized::
-~Synchronized()
-{
-    spinLock.unlock();
-    Core::splX(x);
 }

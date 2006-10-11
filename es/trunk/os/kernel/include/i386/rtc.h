@@ -40,7 +40,7 @@ class Rtc : public IRtc
 
     Ref                 ref;
 
-    static SpinLock     spinLock;
+    static Lock         spinLock;
     static long long    epoch;
 
     static int getCounter(int addr);

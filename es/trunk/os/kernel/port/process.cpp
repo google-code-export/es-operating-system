@@ -575,9 +575,11 @@ Process::
 void Process::
 load()
 {
+    unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
     core->currentProc = this;
     mmu->load();
+    Core::splX(x);
 }
 
 // XXX if this interface has been registered already, should return the slot
@@ -1094,8 +1096,11 @@ release()
 Process* Process::
 getCurrentProcess()
 {
+    unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
-    return core->currentProc;
+    Process* process = core->currentProc;
+    Core::splX(x);
+    return process;
 }
 
 int Process::

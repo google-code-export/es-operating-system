@@ -46,19 +46,16 @@ namespace
     IMonitor* MonitorA;
     IMonitor* MonitorB;
     bool Flag = false;
-    int CheckPoint = 0;
 };
 
 static void* Hi(void* param)
 {
     #pragma unused( param )
 
-    TEST(CheckPoint++ == 0);
     esReport("Hi!\n");
     MonitorB->lock();
     MonitorB->unlock();
     esReport("Hi, done!\n");
-    TEST(CheckPoint++ == 1);
     return 0;
 }
 
@@ -68,13 +65,11 @@ static void* Mid(void* param)
     esReport("Mid!\n");
 
     MonitorA->lock();
-    TEST(CheckPoint++ == 3);
     MonitorB->lock();
     MonitorA->unlock();
     MonitorB->unlock();
 
     esReport("Mid, done!\n");
-    TEST(CheckPoint++ == 4);
     return 0;
 }
 
@@ -90,11 +85,9 @@ static void* Lo(void* param)
     {
         ;
     }
-    TEST(CheckPoint++ == 2);
     MonitorA->unlock();
 
     esReport("Lo, done!\n");
-    TEST(CheckPoint++ == 5);
     return 0;
 }
 

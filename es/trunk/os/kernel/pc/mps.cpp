@@ -11,7 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#define VERBOSE
+// #define VERBOSE
 
 #include <es.h>
 #include "cpu.h"

@@ -19,7 +19,7 @@
 #define LLONG_MAX 9223372036854775807LLu
 #endif
 
-SpinLock        Alarm::spinLock;
+Lock            Alarm::spinLock;
 Alarm::Queue    Alarm::queues[2];
 
 Alarm::
@@ -38,7 +38,7 @@ Alarm::
 {
     if (current)
     {
-        SpinLock::Synchronized method(spinLock);
+        Lock::Synchronized method(spinLock);
 
         cancel();
     }
@@ -77,7 +77,7 @@ setCallback(ICallback* callback)
         callback->addRef();
     }
     {
-        SpinLock::Synchronized method(spinLock);
+        Lock::Synchronized method(spinLock);
 
         prev = this->callback;
         this->callback = callback;
@@ -91,7 +91,7 @@ setCallback(ICallback* callback)
 void Alarm::
 setPeriodic(bool periodic)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     periodic ? setFlag(Periodic) : clearFlag(Periodic);
 }
@@ -99,7 +99,7 @@ setPeriodic(bool periodic)
 void Alarm::
 setEnabled(bool enabled)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     if (enabled)
     {
@@ -125,7 +125,7 @@ setInterval(long long interval)
 {
     if (0 <= interval)
     {
-        SpinLock::Synchronized method(spinLock);
+        Lock::Synchronized method(spinLock);
 
         cancel();
         this->interval = interval;
@@ -142,7 +142,7 @@ getStartTime(long long& time)
 void Alarm::
 setStartTime(long long time)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     cancel();
     this->start = time;
@@ -249,7 +249,7 @@ Queue::process(long long ticks)
     do
     {
         {
-            SpinLock::Synchronized method(spinLock);
+            Lock::Synchronized method(spinLock);
             if ((alarm = queue.getFirst()))
             {
                 if (!alarm->isExpired(ticks))
@@ -278,7 +278,7 @@ Queue::process(long long ticks)
     } while (alarm);
 
     {
-        SpinLock::Synchronized method(spinLock);
+        Lock::Synchronized method(spinLock);
         if (!queue.isEmpty())
         {
             update();
@@ -362,7 +362,7 @@ Queue::getDelta(long long now)
 bool Alarm::
 Queue::check()
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     Alarm* next;
     List<Alarm, &Alarm::link>::Iterator iter = queue.begin();

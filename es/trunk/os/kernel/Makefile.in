@@ -47,10 +47,10 @@ target_triplet = @target@
 # 	pc/i386-stub.c
 @ES_TRUE@am__append_2 = port/malloc.cpp port/map.cpp port/mmu.cpp \
 @ES_TRUE@	port/monitor.cpp port/process.cpp port/rendezvous.cpp \
-@ES_TRUE@	port/sched.cpp port/swap.cpp port/syscall.cpp \
-@ES_TRUE@	port/thread.cpp port/upcall.cpp pc/8042.cpp \
-@ES_TRUE@	pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/apic.cpp \
-@ES_TRUE@	pc/ataController.cpp pc/ataDevice.cpp \
+@ES_TRUE@	port/sched.cpp port/spinlock.cpp port/swap.cpp \
+@ES_TRUE@	port/syscall.cpp port/thread.cpp port/upcall.cpp \
+@ES_TRUE@	pc/8042.cpp pc/8237a.cpp pc/8254.cpp pc/8259.cpp \
+@ES_TRUE@	pc/apic.cpp pc/ataController.cpp pc/ataDevice.cpp \
 @ES_TRUE@	pc/ataPacket.cpp pc/cga.cpp pc/fdc.cpp pc/fdd.cpp \
 @ES_TRUE@	pc/mps.cpp pc/pc_core.cpp pc/pc_dateTime.cpp \
 @ES_TRUE@	pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
@@ -130,13 +130,14 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	port/partitionStream.cpp port/partitionIterator.cpp \
 	port/malloc.cpp port/map.cpp port/mmu.cpp port/monitor.cpp \
 	port/process.cpp port/rendezvous.cpp port/sched.cpp \
-	port/swap.cpp port/syscall.cpp port/thread.cpp port/upcall.cpp \
-	pc/8042.cpp pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/apic.cpp \
-	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
-	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp \
-	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
-	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp \
-	windows/ref.cpp posix/posix_thread.cpp posix/posix_monitor.cpp \
+	port/spinlock.cpp port/swap.cpp port/syscall.cpp \
+	port/thread.cpp port/upcall.cpp pc/8042.cpp pc/8237a.cpp \
+	pc/8254.cpp pc/8259.cpp pc/apic.cpp pc/ataController.cpp \
+	pc/ataDevice.cpp pc/ataPacket.cpp pc/cga.cpp pc/fdc.cpp \
+	pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp pc/pc_dateTime.cpp \
+	pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp \
+	pc/uart.cpp pc/vesa.cpp pc/xreg.cpp windows/ref.cpp \
+	posix/posix_thread.cpp posix/posix_monitor.cpp \
 	posix/posix_core.cpp posix/posix_dateTime.cpp \
 	posix/posix_init.cpp include/alarm.h include/arena.h \
 	include/cache.h include/classStore.h include/context.h \
@@ -154,10 +155,11 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 am__objects_2 =
 @ES_TRUE@am__objects_3 = malloc.$(OBJEXT) map.$(OBJEXT) mmu.$(OBJEXT) \
 @ES_TRUE@	monitor.$(OBJEXT) process.$(OBJEXT) \
-@ES_TRUE@	rendezvous.$(OBJEXT) sched.$(OBJEXT) swap.$(OBJEXT) \
-@ES_TRUE@	syscall.$(OBJEXT) thread.$(OBJEXT) upcall.$(OBJEXT) \
-@ES_TRUE@	8042.$(OBJEXT) 8237a.$(OBJEXT) 8254.$(OBJEXT) \
-@ES_TRUE@	8259.$(OBJEXT) apic.$(OBJEXT) ataController.$(OBJEXT) \
+@ES_TRUE@	rendezvous.$(OBJEXT) sched.$(OBJEXT) \
+@ES_TRUE@	spinlock.$(OBJEXT) swap.$(OBJEXT) syscall.$(OBJEXT) \
+@ES_TRUE@	thread.$(OBJEXT) upcall.$(OBJEXT) 8042.$(OBJEXT) \
+@ES_TRUE@	8237a.$(OBJEXT) 8254.$(OBJEXT) 8259.$(OBJEXT) \
+@ES_TRUE@	apic.$(OBJEXT) ataController.$(OBJEXT) \
 @ES_TRUE@	ataDevice.$(OBJEXT) ataPacket.$(OBJEXT) cga.$(OBJEXT) \
 @ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) mps.$(OBJEXT) \
 @ES_TRUE@	pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
@@ -531,6 +533,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sb16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sched.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spinlock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syscall.Po@am__quote@
@@ -1364,6 +1367,20 @@ sched.obj: port/sched.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/sched.cpp' object='sched.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sched.obj `if test -f 'port/sched.cpp'; then $(CYGPATH_W) 'port/sched.cpp'; else $(CYGPATH_W) '$(srcdir)/port/sched.cpp'; fi`
+
+spinlock.o: port/spinlock.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT spinlock.o -MD -MP -MF "$(DEPDIR)/spinlock.Tpo" -c -o spinlock.o `test -f 'port/spinlock.cpp' || echo '$(srcdir)/'`port/spinlock.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/spinlock.Tpo" "$(DEPDIR)/spinlock.Po"; else rm -f "$(DEPDIR)/spinlock.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/spinlock.cpp' object='spinlock.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o spinlock.o `test -f 'port/spinlock.cpp' || echo '$(srcdir)/'`port/spinlock.cpp
+
+spinlock.obj: port/spinlock.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT spinlock.obj -MD -MP -MF "$(DEPDIR)/spinlock.Tpo" -c -o spinlock.obj `if test -f 'port/spinlock.cpp'; then $(CYGPATH_W) 'port/spinlock.cpp'; else $(CYGPATH_W) '$(srcdir)/port/spinlock.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/spinlock.Tpo" "$(DEPDIR)/spinlock.Po"; else rm -f "$(DEPDIR)/spinlock.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/spinlock.cpp' object='spinlock.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o spinlock.obj `if test -f 'port/spinlock.cpp'; then $(CYGPATH_W) 'port/spinlock.cpp'; else $(CYGPATH_W) '$(srcdir)/port/spinlock.cpp'; fi`
 
 swap.o: port/swap.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT swap.o -MD -MP -MF "$(DEPDIR)/swap.Tpo" -c -o swap.o `test -f 'port/swap.cpp' || echo '$(srcdir)/'`port/swap.cpp; \

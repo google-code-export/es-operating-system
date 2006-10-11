@@ -73,7 +73,7 @@ private:
     static SegdescLoc   idtLoc;
 
     // 8259/APIC related
-    static SpinLock     spinLock;
+    static Lock         spinLock;
     static ICallback*   exceptionHandlers[255];
     static IPic*        pic;
 

@@ -482,7 +482,7 @@ invoke(int param)
 
             if (count == 0)
             {
-                SpinLock::Synchronized method(spinLock);
+                Lock::Synchronized method(spinLock);
 
                 int d;
 
@@ -540,7 +540,7 @@ invoke(int param)
             }
             if (key)
             {
-                SpinLock::Synchronized method(spinLock);
+                Lock::Synchronized method(spinLock);
 
                 if (data & 0x80)
                 {
@@ -690,7 +690,7 @@ detectAuxDevice(void)
 int Keyboard::
 readKeyboard(void* dst, int count)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     if (count <= 0)
     {
@@ -731,7 +731,7 @@ readKeyboard(void* dst, int count)
 int Keyboard::
 readMouse(void* dst, int count)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     if (count <= 0)
     {

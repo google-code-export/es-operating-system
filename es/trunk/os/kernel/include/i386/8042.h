@@ -25,8 +25,6 @@
 
 class Keyboard : public ICallback
 {
-    friend int main();
-
     typedef int (Keyboard::*Reader)(void* dst, int count);
 
     class Stream : public IStream
@@ -100,7 +98,7 @@ class Keyboard : public ICallback
     static const u8 IRQ_AUXILIARY_DEVICE = 12;
 
     Ref         ref;
-    SpinLock    spinLock;
+    Lock        spinLock;
     u8          cmd;
 
     // Keyboard

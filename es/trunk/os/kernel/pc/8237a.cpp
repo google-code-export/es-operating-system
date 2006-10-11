@@ -62,7 +62,7 @@ setup(u8 chan, u32 buffer, int len, u8 mode)
 void Dmac::
 Chan::setup(void* buffer, int len, u8 mode)
 {
-    SpinLock::Synchronized method(dmac->spinLock);
+    Lock::Synchronized method(dmac->spinLock);
 
     mode &= IDmac::READ | IDmac::WRITE | IDmac::AUTO_INITIALIZE;
     dmac->setup(chan, ((u32) buffer) & ~0xc0000000, len, mode | 0x40);  // single mode
@@ -71,7 +71,7 @@ Chan::setup(void* buffer, int len, u8 mode)
 void Dmac::
 Chan::start()
 {
-    SpinLock::Synchronized method(dmac->spinLock);
+    Lock::Synchronized method(dmac->spinLock);
 
     outpb(dmac->base + (SINGLE_MASK << dmac->shift), chan);
 }
@@ -79,7 +79,7 @@ Chan::start()
 void Dmac::
 Chan::stop()
 {
-    SpinLock::Synchronized method(dmac->spinLock);
+    Lock::Synchronized method(dmac->spinLock);
 
     outpb(dmac->base + (SINGLE_MASK << dmac->shift), 0x04 | chan);
 }
@@ -87,7 +87,7 @@ Chan::stop()
 bool Dmac::
 Chan::isDone()
 {
-    SpinLock::Synchronized method(dmac->spinLock);
+    Lock::Synchronized method(dmac->spinLock);
 
     return inpb(dmac->base + (COMMAND << dmac->shift)) & (1 << chan);
 }
@@ -95,7 +95,7 @@ Chan::isDone()
 int Dmac::
 Chan::getCount()
 {
-    SpinLock::Synchronized method(dmac->spinLock);
+    Lock::Synchronized method(dmac->spinLock);
 
     outpb(dmac->base + (CLEAR_BYTE_POINTER << dmac->shift), 0);
     int count = inpb(dmac->base + (((chan << 1) + COUNT) << dmac->shift));

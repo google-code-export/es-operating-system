@@ -84,7 +84,6 @@ long long Process::
 upcall(void* self, void* base, int methodNumber, va_list ap)
 {
     Thread* current(Thread::getCurrentThread());
-    Core* core(Core::getCurrentCore());
 
     unsigned interfaceNumber(static_cast<void**>(self) - static_cast<void**>(base));
     UpcallProxy* proxy = &upcallTable[interfaceNumber];
@@ -191,8 +190,11 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         if (record->label.set() == 0)
         {
             // Make an upcall the server process.
+            unsigned x = Core::splHi();
+            Core* core = Core::getCurrentCore();
             record->sp0 = core->tss->sp0;
             core->tss->sp0 = current->sp0 = record->label.esp;
+            Core::splX(x);
             record->ureg.load();
             // NOT REACHED HERE
         }
@@ -230,8 +232,11 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         if (record->label.set() == 0)
         {
             // Make an upcall the server process.
+            unsigned x = Core::splHi();
+            Core* core = Core::getCurrentCore();
             record->sp0 = core->tss->sp0;
             core->tss->sp0 = current->sp0 = record->label.esp;
+            Core::splX(x);
             record->ureg.load();
             // NOT REACHED HERE
         }
@@ -340,8 +345,10 @@ returnFromUpcall(Ureg* ureg)
     }
     ASSERT(record->process == getCurrentProcess());
 
-    Core* core(Core::getCurrentCore());
+    unsigned x = Core::splHi();
+    Core* core = Core::getCurrentCore();
     core->tss->sp0 = current->sp0 = record->sp0;
+    Core::splX(x);
     memmove(&record->ureg, ureg, sizeof(Ureg));
     record->label.jump();
     // NOT REACHED HERE

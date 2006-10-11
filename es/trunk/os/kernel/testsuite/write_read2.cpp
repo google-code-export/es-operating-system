@@ -97,8 +97,6 @@ ERROR:
     stream->release();
     cache->release();
 
-    backingStore->release();
-
     return ret;
 }
 

@@ -17,32 +17,27 @@
 void Thread::Rendezvous::
 sleep(Delegate* delegate)
 {
+    Thread* current = getCurrentThread();
+    ASSERT(current);
+    ASSERT(current->state == IThread::RUNNING);
     for (;;)
     {
         unsigned x = Core::splHi();
-        Thread* current = getCurrentThread();
-        ASSERT(current);
-        current->lock();
-        ASSERT(current->state == IThread::RUNNING);
         lock();
-
-        // Insert current to queue so that getPriority() can return the correct
-        // priority for the delegate function.
-        queue.addPrio(current);
 
         if (delegate->invoke(0))
         {
-            queue.remove(current);
-            current->unlock();
             unlock();
             Core::splX(x);
             return;
         }
 
+        current->lock();
+        queue.addPrio(current);
         current->state = IThread::WAITING;
         current->rendezvous = this;
-
         current->unlock();
+
         unlock();
         Core::splX(x);
 
@@ -124,9 +119,5 @@ int Thread::Rendezvous::
 getPriority()
 {
     Thread* blocked = queue.getFirst();
-    if (blocked)
-    {
-        return blocked->priority;
-    }
-    return IThread::Lowest;
+    return blocked ? blocked->priority : IThread::Lowest;
 }

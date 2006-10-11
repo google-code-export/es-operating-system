@@ -19,8 +19,16 @@
 Thread* Thread::
 getCurrentThread()
 {
+    if (Sched::numCores == 0)
+    {
+        return 0;
+    }
+
+    unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
-    return core ? core->current : 0;
+    Thread* current = core ? core->current : 0;
+    Core::splX(x);
+    return current;
 }
 
 void Thread::
@@ -76,7 +84,8 @@ tls(unsigned size, unsigned align)
     return reinterpret_cast<void*>(ureg->esp);
 }
 
-void Thread::setArguments(char* arguments)
+void Thread::
+setArguments(char* arguments)
 {
     ASSERT(arguments[-1] == '\0');
     Ureg* ureg(static_cast<Ureg*>(param));

@@ -18,7 +18,7 @@
 #include "io.h"
 #include "rtc.h"
 
-SpinLock Rtc::spinLock;
+Lock Rtc::spinLock;
 long long Rtc::epoch;
 
 Rtc::
@@ -31,7 +31,7 @@ Rtc() :
 int Rtc::
 getCounter(int addr)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     outpb(PORT_ADDR, addr);
     u8 bcd = inpb(PORT_DATA);
@@ -41,7 +41,7 @@ getCounter(int addr)
 void Rtc::
 setCounter(int addr, int count)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     outpb(PORT_ADDR, addr);
     outpb(PORT_DATA, (count % 10) | ((count / 10 % 10) << 4));
@@ -62,7 +62,7 @@ getTime()
 void Rtc::
 setTime(long long ticks)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     DateTime date(ticks);
 

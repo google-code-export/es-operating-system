@@ -79,13 +79,11 @@ setPriority(int priority)
     }
 
     unsigned x = Core::splHi();
-    lock();
     if (base != priority)
     {
         base = priority;
         updatePriority();
     }
-    unlock();
     Core::splX(x);
     reschedule();
 }
@@ -126,6 +124,42 @@ setEffectivePriority(int effective)
     return 0;
 }
 
+/** Updates the thread's scheduling priority based on the currently holding
+ * monitor priorities.
+ */
+Thread* Thread::
+resetPriority()
+{
+    ASSERT(isLocked());
+
+    Thread* next;
+    Monitor* monitor;
+    MonitorList::Iterator iter = monitorList.begin();
+    int effective = base;
+    while ((monitor = iter.next()))
+    {
+        monitor->spinLock();
+        int monitorPriority = monitor->getPriority();
+        if (effective < monitorPriority)
+        {
+            effective = monitorPriority;
+        }
+    }
+    if (priority != effective)
+    {
+        next = setEffectivePriority(effective);
+    }
+    else
+    {
+        next = 0;
+    }
+    while ((monitor = iter.previous()))
+    {
+        monitor->spinUnlock();
+    }
+    return next;
+}
+
 /** Updates the thread's scheduling priority. Propagates it if necessary.
  */
 void Thread::
@@ -133,33 +167,12 @@ updatePriority()
 {
     Thread* thread = this;
     do {
-        Thread* next = 0;
-
         thread->lock();
-        int effective = thread->base;
-        Monitor* monitor;
-        MonitorList::Iterator iter = thread->monitorList.begin();
-        while ((monitor = iter.next()))
-        {
-            monitor->spinLock();
-            int monitorPriority = monitor->getPriority();
-            if (effective < monitorPriority)
-            {
-                effective = monitorPriority;
-            }
-        }
-
-        if (thread->priority != effective)
-        {
-            next = thread->setEffectivePriority(effective);
-        }
-
-        while ((monitor = iter.previous()))
-        {
-            monitor->spinUnlock();
-        }
+        Thread* next = thread->resetPriority();
         thread->unlock();
-        thread = next;      // at this point, next might have been released the monitor.
+        // At this point, next might have been released the monitor.
+        // XXX there is a small window where priority inversion could occur.
+        thread = next;
     } while (thread);
 }
 
@@ -516,28 +529,40 @@ release(void)
 Process* Thread::
 returnToClient()
 {
-    Core* core(Core::getCurrentCore());
+    Process* client;
+
+    unsigned x = Core::splHi();
+    Core* core = Core::getCurrentCore();
 
     upcallList.removeLast();
     UpcallRecord* record(upcallList.getLast());
     if (!record)
     {
         core->tcb->tcb = tcb;
-        return process;
+        client = process;
     }
     else
     {
         core->tcb->tcb = record->tcb;
-        return record->process;
+        client = record->process;
     }
+    Core::splX(x);
+
+    return client;
 }
 
 Process* Thread::
 leapIntoServer(UpcallRecord* record)
 {
-    Core* core(Core::getCurrentCore());
+    Process* server;
+
+    unsigned x = Core::splHi();
+    Core* core = Core::getCurrentCore();
 
     upcallList.addLast(record);
     core->tcb->tcb = record->tcb;
-    return record->process;
+    server = record->process;
+
+    Core::splX(x);
+    return server;
 }

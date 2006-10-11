@@ -146,6 +146,7 @@ invoke(int param)
 
     if (done)
     {
+        current = 0;
         monitor->notify();  // XXX Fix timing issue
     }
 }

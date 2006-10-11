@@ -74,21 +74,20 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	partition_bind$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_over8GB$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_print$(EXEEXT)
-@ES_TRUE@am__EXEEXT_1 = thread_smp$(EXEEXT) interlocked$(EXEEXT) \
-@ES_TRUE@	exception$(EXEEXT) utf$(EXEEXT) ring$(EXEEXT) \
-@ES_TRUE@	fpu$(EXEEXT) tsd$(EXEEXT) context$(EXEEXT) \
-@ES_TRUE@	datetime$(EXEEXT) thread$(EXEEXT) \
-@ES_TRUE@	thread_cancel$(EXEEXT) monitor0$(EXEEXT) \
-@ES_TRUE@	monitor1$(EXEEXT) monitor2$(EXEEXT) monitor3$(EXEEXT) \
-@ES_TRUE@	bpi$(EXEEXT) bpi2$(EXEEXT) bpi3$(EXEEXT) ata$(EXEEXT) \
-@ES_TRUE@	beep$(EXEEXT) 8042$(EXEEXT) vesa$(EXEEXT) \
-@ES_TRUE@	fdc$(EXEEXT) fdc_diskChange$(EXEEXT) sb16$(EXEEXT) \
-@ES_TRUE@	cdrom$(EXEEXT) page$(EXEEXT) cache$(EXEEXT) \
-@ES_TRUE@	replace$(EXEEXT) position$(EXEEXT) size$(EXEEXT) \
-@ES_TRUE@	write_read$(EXEEXT) write_read2$(EXEEXT) \
-@ES_TRUE@	write$(EXEEXT) read$(EXEEXT) create_release$(EXEEXT) \
-@ES_TRUE@	getPageCount$(EXEEXT) invalidate$(EXEEXT) \
-@ES_TRUE@	pageSet$(EXEEXT) process$(EXEEXT)
+@ES_TRUE@am__EXEEXT_1 = interlocked$(EXEEXT) exception$(EXEEXT) \
+@ES_TRUE@	utf$(EXEEXT) ring$(EXEEXT) fpu$(EXEEXT) tsd$(EXEEXT) \
+@ES_TRUE@	context$(EXEEXT) datetime$(EXEEXT) thread$(EXEEXT) \
+@ES_TRUE@	thread_cancel$(EXEEXT) thread_smp$(EXEEXT) \
+@ES_TRUE@	monitor0$(EXEEXT) monitor1$(EXEEXT) monitor2$(EXEEXT) \
+@ES_TRUE@	monitor3$(EXEEXT) bpi$(EXEEXT) bpi2$(EXEEXT) \
+@ES_TRUE@	bpi3$(EXEEXT) ata$(EXEEXT) beep$(EXEEXT) \
+@ES_TRUE@	8042$(EXEEXT) vesa$(EXEEXT) fdc$(EXEEXT) \
+@ES_TRUE@	fdc_diskChange$(EXEEXT) sb16$(EXEEXT) cdrom$(EXEEXT) \
+@ES_TRUE@	page$(EXEEXT) cache$(EXEEXT) replace$(EXEEXT) \
+@ES_TRUE@	position$(EXEEXT) size$(EXEEXT) write_read$(EXEEXT) \
+@ES_TRUE@	write_read2$(EXEEXT) write$(EXEEXT) read$(EXEEXT) \
+@ES_TRUE@	create_release$(EXEEXT) getPageCount$(EXEEXT) \
+@ES_TRUE@	invalidate$(EXEEXT) pageSet$(EXEEXT) process$(EXEEXT)
 @ES_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 PROGRAMS = $(noinst_PROGRAMS)
 am_8042_OBJECTS = 8042.$(OBJEXT)
@@ -492,8 +491,8 @@ LDADD = ../libeskernel.a ../../libes++/libessup++.a $(am__append_2)
 SUFFIXES = .img .gz .iso
 AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 	$(srcdir)/../../../include $(am__append_1) $(am__append_3)
-@ES_TRUE@TESTS = thread_smp interlocked exception utf ring fpu tsd \
-@ES_TRUE@	context datetime thread thread_cancel \
+@ES_TRUE@TESTS = interlocked exception utf ring fpu tsd \
+@ES_TRUE@	context datetime thread thread_cancel thread_smp \
 @ES_TRUE@	monitor0 monitor1 monitor2 monitor3 \
 @ES_TRUE@	bpi bpi2 bpi3 \
 @ES_TRUE@	ata beep 8042 vesa fdc fdc_diskChange sb16 cdrom \
@@ -514,8 +513,8 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @POSIX_TRUE@        partition_bind partition_over8GB partition_print
 
 @ES_TRUE@noinst_DATA = fat16.img isotest.iso \
-@ES_TRUE@	thread_smp.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
-@ES_TRUE@	context.img datetime.img thread.img thread_cancel.img \
+@ES_TRUE@	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+@ES_TRUE@	context.img datetime.img thread.img thread_cancel.img thread_smp.img \
 @ES_TRUE@	monitor0.img monitor1.img monitor2.img monitor3.img \
 @ES_TRUE@	bpi.img bpi2.img bpi3.img \
 @ES_TRUE@	ata.img beep.img 8042.img vesa.img fdc.img \

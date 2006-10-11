@@ -196,14 +196,14 @@ read(void* dst, int count)
             monitor->wait(10000);
         }
     }
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
     return ring.read(dst, count);
 }
 
 int InputLine::
 write(const void* src, int count)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
     count = ring.write(src, count);
     invoke(count);
     return count;
@@ -223,7 +223,7 @@ OutputLine::
 int OutputLine::
 read(void* dst, int count)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
     count = ring.read(dst, count);
     invoke(count);
     return count;
@@ -246,6 +246,6 @@ write(const void* src, int count)
         }
     }
     callback->invoke(1);
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
     return ring.write(src, count);
 }

@@ -34,7 +34,7 @@ protected:
     IMonitor*   monitor;
     ICallback*  callback;
 
-    SpinLock    spinLock;
+    Lock        spinLock;
     u8          buffer[8 * 1024];
     Ring        ring;
 

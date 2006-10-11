@@ -138,6 +138,7 @@ cpp_source_files += \
 	port/process.cpp \
 	port/rendezvous.cpp \
 	port/sched.cpp \
+	port/spinlock.cpp \
 	port/swap.cpp \
 	port/syscall.cpp \
 	port/thread.cpp \

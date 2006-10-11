@@ -26,8 +26,9 @@ u8 buf[2048];
 
 void testDisk(Handle<IStream> disk, long count)
 {
+    esReport("disk->read: ");
     long rc = disk->read(buf, count, 0x8000);
-    esReport("disk->read: %d\n", rc);
+    esReport("%d\n", rc);
     TEST(count == rc);
     esDump(buf, rc);
 }

@@ -84,7 +84,7 @@ bool Core::fxsr;
 bool Core::sse;
 Segdesc Core::idt[256] __attribute__ ((aligned (16)));
 SegdescLoc Core::idtLoc(sizeof idt - 1, idt);
-SpinLock Core::spinLock;
+Lock Core::spinLock;
 ICallback* Core::exceptionHandlers[255];
 IPic* Core::pic = &nullPic;
 
@@ -501,11 +501,11 @@ Core(Sched* sched) :
             case NO_MF:     // Floating-Point Error (Math Fault)
             case NO_AC:     // Alignment Check
             case NO_XF:     // SIMD Floating-Point Exception
-                desc->setTrapHandler(KCODESEL, exceptionAddr);
+                desc->setInterruptHandler(KCODESEL, exceptionAddr);
                 break;
             case 65:        // System call
             case 66:        // Upcall
-                desc->setTrapHandler(KCODESEL, exceptionAddr);
+                desc->setInterruptHandler(KCODESEL, exceptionAddr);
                 desc->setDPL(3);
                 break;
             default:
@@ -553,6 +553,7 @@ reschedule(void* param)
         Thread* current = (Thread*) core->current;
         if (current)
         {
+            core->current = 0;
             current->lock();
             switch (current->getState())
             {
@@ -565,7 +566,6 @@ reschedule(void* param)
                 current->release();
                 break;
               case IThread::RUNNING:
-                current->state = IThread::RUNNABLE;
                 current->setRun();
                 // FALL THROUGH
               default:
@@ -577,7 +577,6 @@ reschedule(void* param)
                 current->unlock();
                 break;
             }
-            core->current = 0;
         }
         core->current = current = core->sched->selectThread();
         core->currentFPU = 0;
@@ -664,7 +663,9 @@ static void kernelFault()
 void Core::
 dispatchException(Ureg* ureg)
 {
+    unsigned x = splHi();
     Core* core = getCurrentCore();
+    ICallback* callback;
 
     // esReport("Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
 
@@ -687,26 +688,29 @@ dispatchException(Ureg* ureg)
 #endif // __i386__
         if (core->currentProc)
         {
+            Process* process = core->currentProc;
+            // splLo();
+
             int rc;
             if (ureg->error & Page::PTEVALID)
             {
-                rc = core->currentProc->protectionFault((void*) cr2, ureg->error);
+                rc = process->protectionFault((void*) cr2, ureg->error);
             }
             else
             {
-                rc = core->currentProc->validityFault((void*) cr2, ureg->error);
+                rc = process->validityFault((void*) cr2, ureg->error);
             }
             if (0 <= rc)
             {
                 break;
             }
-            if (ureg->cs == KCODESEL && core->currentProc->isValid((void*) cr2, 1))
+            if (ureg->cs == KCODESEL && process->isValid((void*) cr2, 1))
             {
                 // Kernel page fault: Create a stack frame as if kernelFault() is
                 // called. By using the -fnon-call-exceptions g++ compiler option,
                 // the function incurred a kernel page fault will receive an
                 // EFFALT system exception.
-                if (core->currentProc->log)
+                if (process->log)
                 {
                     esReport("[kernel page fault at %p]", cr2);
                 }
@@ -715,6 +719,8 @@ dispatchException(Ureg* ureg)
                 u32 ret = exc->eip;
                 exc->esp = ret;     // Note &exc->esp is the new esp address after iret.
                 exc->eip = (u32) kernelFault;
+
+                splX(x);
                 exc->load();
                 break;
             }
@@ -729,17 +735,21 @@ dispatchException(Ureg* ureg)
         // ureg->esi: base
         if (core->currentProc)
         {
-            // esReport("[%p]::dispatchException: %u @ %x\n", core->currentProc, ureg->trap, ureg->eip);
+            Thread* current = core->current;
+            Process* process = core->currentProc;
+            splLo();
+
+            // esReport("[%p]::dispatchException: %u @ %x\n", process, ureg->trap, ureg->eip);
             int errorCode(0);
             long long result;
 
-            core->current->param = ureg;
+            current->param = ureg;
             try
             {
                 va_list param(reinterpret_cast<va_list>(ureg->ecx));
 
                 ureg->ecx = 0;  // To indicate this is not an exception call
-                result = core->currentProc->systemCall(
+                result = process->systemCall(
                     reinterpret_cast<void**>(ureg->eax),
                     ureg->edx,
                     param,
@@ -767,7 +777,7 @@ dispatchException(Ureg* ureg)
             ureg->eax = (u32) result;
             ureg->ecx = (u32) errorCode;
             ureg->edx = (u32) (result >> 32);
-            core->current->testCancel();
+            current->testCancel();
             break;
         }
         esPanic(__FILE__, __LINE__, "Failed Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
@@ -775,28 +785,34 @@ dispatchException(Ureg* ureg)
       case 66:  // upcall interface
         if (core->currentProc)
         {
-            // esReport("[%p]::dispatchException: %u @ %x\n", core->currentProc, ureg->trap, ureg->eip);
+            Thread* current = core->current;
+            Process* process = core->currentProc;
+            splLo();
+
+            // esReport("[%p]::dispatchException: %u @ %x\n", process, ureg->trap, ureg->eip);
             ureg->ecx = 0;  // To indicate this is not an exception call
-            core->current->param = ureg;
-            core->currentProc->returnFromUpcall(ureg);
-            core->current->testCancel();
+            current->param = ureg;
+            process->returnFromUpcall(ureg);
+            current->testCancel();
             break;
         }
         esPanic(__FILE__, __LINE__, "Failed Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
         break;
       default:
-        ICallback* callback = core->exceptionHandlers[ureg->trap];
+        callback = core->exceptionHandlers[ureg->trap];
         if (32 <= ureg->trap)
         {
             core->yieldable = false;
             int irq = ureg->trap - 32;
             if (pic->ack(irq))
             {
+                // x = splLo();    // Enable interrupts
                 if (callback)
                 {
                     callback->invoke(irq);
                 }
                 pic->end(irq);
+                // splX(x);
             }
             core->yieldable = true;
             Thread::reschedule();
@@ -808,6 +824,8 @@ dispatchException(Ureg* ureg)
         }
         break;
     }
+
+    splX(x);
 }
 
 long Core::

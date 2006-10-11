@@ -64,7 +64,6 @@ class Apic : public IPic
     Ref     ref;
     Mps*    mps;
 
-    static bool isBsp();
     static void setIoApicID(volatile u32* addr, u8 id);
     /** Get local APIC version.
      * @return 1Xh: Local APIC. 0Xh: 82489DX external APIC.

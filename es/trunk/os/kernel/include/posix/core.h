@@ -156,6 +156,16 @@ public:
     friend void esSleep(s64 timeout);
 };
 
+class Lock : public Monitor
+{
+    using Monitor::wait;
+    using Monitor::notify;
+    using Monitor::notifyAll;
+    using Monitor::queryInterface;
+    using Monitor::addRef;
+    using Monitor::release;
+};
+
 class SpinLock : public Monitor
 {
     using Monitor::wait;

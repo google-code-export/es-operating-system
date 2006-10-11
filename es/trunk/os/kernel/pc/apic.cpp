@@ -22,13 +22,6 @@ u8 Apic::idBSP = 0;     // boot-strap processor's local APIC id
 volatile u32* Apic::localApic;  // memory-mapped address of local APIC
 volatile bool Apic::online;
 
-bool Apic::
-isBsp()
-{
-    Core* core = Core::getCurrentCore();
-    return core->getID() == idBSP;
-}
-
 void Apic::
 setIoApicID(volatile u32* addr, u8 id)
 {

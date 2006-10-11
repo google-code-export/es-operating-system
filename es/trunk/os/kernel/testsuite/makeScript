@@ -20,6 +20,7 @@ echo 'RET=1' >> $SCRIPT
 echo '# Timeout after 10 seconds.' >> $SCRIPT
 echo 'while [ $TIME -lt 10 ]' >> $SCRIPT
 echo 'do' >> $SCRIPT
+echo '    sleep 1' >> $SCRIPT
 echo '    PASS=`grep done. '$DIR'/$LOG`' >> $SCRIPT
 echo '    FAIL=`grep Fail '$DIR'/$LOG`' >> $SCRIPT
 echo '    if [ -n "$FAIL" ]; then' >> $SCRIPT
@@ -33,7 +34,6 @@ echo '    RUNNING=`ps -p $QEMU | grep $QEMU`' >> $SCRIPT
 echo '    if [ -z "$RUNNING" ]; then' >> $SCRIPT
 echo '        break;' >> $SCRIPT
 echo '    fi' >> $SCRIPT
-echo '    sleep 1' >> $SCRIPT
 echo '    TIME=`expr $TIME + 1`' >> $SCRIPT
 echo 'done' >> $SCRIPT
 echo 'stty sane' >> $SCRIPT

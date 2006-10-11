@@ -33,11 +33,11 @@ class Dmac
     static const u8 ALL_MASK = 15;
     static const u8 pageOffset[4];
 
-    Ref         ref;
-    SpinLock    spinLock;
-    u8          base;
-    u8          page;
-    int         shift;
+    Ref     ref;
+    Lock    spinLock;
+    u8      base;
+    u8      page;
+    int     shift;
 
 public:
 

@@ -51,7 +51,7 @@ class Alarm : public IAlarm
 
     Queue*          current;
 
-    static SpinLock spinLock;
+    static Lock     spinLock;
     static Queue    queues[2];  // 0: abs, 1: relative
 
     bool getFlag(unsigned flag)

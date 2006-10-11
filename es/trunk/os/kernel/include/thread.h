@@ -131,7 +131,7 @@ class UpcallRecord
     }
 };
 
-class Thread : public IThread, public ICallback, public SpinLock
+class Thread : public IThread, public ICallback, public Lock
 {
     friend class Sched;
     friend class Process;
@@ -182,7 +182,7 @@ public:
         };
     };
 
-    class Rendezvous : public SpinLock
+    class Rendezvous : public Lock
     {
         Queue queue;
 
@@ -199,14 +199,12 @@ public:
     {
         friend class Thread;
 
-        Ref         ref;
-
-        Rendezvous  rendezvous;
-        int         lockCount;
-
-        Rendezvous  cv;
-
-        Thread*     owner;      // the current owner
+        Ref             ref;
+        Rendezvous      rendezvous;
+        int             lockCount;
+        Rendezvous      cv;
+        Thread*         owner;      // the current owner
+        Link<Monitor>   link;
 
         int condLock(int);
         int condTryLock(int);
@@ -216,8 +214,6 @@ public:
         int invoke(int);
 
     public:
-        Link<Monitor>   link;
-
         Monitor();
 
         int getPriority();
@@ -259,12 +255,13 @@ public:
         };
     };
 
+    typedef List<Monitor, &Monitor::link> MonitorList;
+
     Rendezvous*         rendezvous; // rendezvous currently sleeping
     Monitor*            monitor;    // monitor trying to lock
 
     Rendezvous          joinPoint;
-    List<Monitor, &Monitor::link>
-                        monitorList;
+    MonitorList         monitorList;
 
     Alarm               alarm;
     Rendezvous          sleepPoint;
@@ -303,6 +300,7 @@ public:
     int getEffectivePriority();
     void updatePriority();
     Thread* setEffectivePriority(int priority);
+    Thread* resetPriority();
 
     bool isDeadlocked();
     void unlockAllMonitors();
@@ -368,7 +366,7 @@ public:
 };
 
 class Sched : public ICurrentThread, public ICurrentProcess, public IRuntime,
-              public ICallback, public SpinLock
+              public ICallback, public Lock
 {
     friend class Thread;
     friend class SpinLock;
@@ -429,84 +427,8 @@ public:
     unsigned int release(void);
 };
 
-inline SpinLock::
-SpinLock() :
-    spin(0),
-    owner(0),
-    count(0)
-{
-}
-
-inline bool SpinLock::
-isLocked()
-{
-    if (!spin)
-    {
-        return false;
-    }
-    if (owner == Thread::getCurrentThread())
-    {
-        return false;
-    }
-    return true;
-}
-
-inline void SpinLock::
-wait()
-{
-    while (spin && owner != Thread::getCurrentThread())
-    {
-#if defined(__i386__) || defined(__x86_64__)
-        // Use the pause instruction for Hyper-Threading
-        __asm__ __volatile__ ("pause\n");
-#endif
-    }
-}
-
-inline bool SpinLock::
-tryLock()
-{
-    Thread* current = Thread::getCurrentThread();
-    if (!spin.exchange(1))
-    {
-        ++count;
-        owner = current;
-        return true;
-    }
-    if (owner == current)
-    {
-        ++count;
-        return true;
-    }
-    return false;
-}
-
-inline void SpinLock::
-lock()
-{
-    ASSERT(1 < Sched::numCores || !spin || owner == Thread::getCurrentThread());
-    do
-    {
-        wait();
-    }
-    while (!tryLock());
-    ASSERT(0 < count);
-}
-
-inline void SpinLock::
-unlock()
-{
-    ASSERT(owner == Thread::getCurrentThread());
-    ASSERT(0 < count);
-    if (--count == 0)
-    {
-        spin.exchange(0);
-    }
-}
-
 typedef Thread::Monitor     Monitor;
-typedef List<Thread::Monitor, &Thread::Monitor::link>
-                            MonitorList;
+typedef Thread::MonitorList MonitorList;
 typedef Thread::Rendezvous  Rendezvous;
 
 #endif  // __es__

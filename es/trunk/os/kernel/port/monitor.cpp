@@ -16,7 +16,9 @@
 #include "thread.h"
 
 Thread::Monitor::
-Monitor() : lockCount(0), owner(0)
+Monitor() :
+    owner(0),
+    lockCount(0)
 {
     return;
 }
@@ -31,6 +33,12 @@ void Thread::Monitor::
 spinUnlock()
 {
     rendezvous.unlock();
+}
+
+int Thread::Monitor::
+getPriority()
+{
+    return rendezvous.getPriority();
 }
 
 void Thread::Monitor::
@@ -49,7 +57,8 @@ update()
 int Thread::Monitor::
 condLock(int)
 {
-    // current is locked by sleep().
+    // current is NOT locked by sleep().
+Retry:
     Thread* current = getCurrentThread();
     current->monitor = 0;
 
@@ -69,8 +78,55 @@ condLock(int)
         return true;
     }
 
-    current->monitor = this;
-    owner->updatePriority();
+#ifdef VERBOSE
+    esReport("%s: %d\n%p\n%p\n", __func__, __LINE__, owner->func, current->func);
+#endif
+
+    // Note we cannot call owner->updatePriority() since this monitor's
+    // rendezvous is locked and owner->updatePriority() also tries to
+    // lock this rendezvous.
+    Thread* next;
+    current->lock();
+    int effective = getPriority();
+    if (effective < current->priority)
+    {
+        effective = current->priority;
+    }
+
+    if (owner->tryLock())
+    {
+        if (owner->priority < effective)
+        {
+            next = owner->setEffectivePriority(effective);
+        }
+        else
+        {
+            next = 0;
+        }
+        owner->unlock();
+        current->monitor = this;
+        current->unlock();
+    }
+    else
+    {
+        Thread* prec = owner;
+        prec->addRef();
+        current->unlock();
+        spinUnlock();
+        prec->wait();
+        // Now owner may not be equal to prec.
+        prec->release();
+        spinLock();
+        goto Retry;
+    }
+
+    if (next)
+    {
+        // next must inherit the new effective priority
+        // and since next does not own this monitor, we can finally call:
+        next->updatePriority();
+    }
+
     ASSERT(!current->isDeadlocked());
     return false;
 }
@@ -85,7 +141,7 @@ lock()
 int Thread::Monitor::
 condTryLock(int)
 {
-    // current is locked by sleep().
+    // current is NOT locked by sleep().
     Thread* current = getCurrentThread();
 
     if (owner == 0)
@@ -93,7 +149,9 @@ condTryLock(int)
         ASSERT(lockCount == 0);
         owner = current;
         ++lockCount;
+        current->lock();
         current->monitorList.addLast(this);
+        current->unlock();
         addRef();
         return true;
     }
@@ -128,7 +186,7 @@ condUnlock(int)
         return false;
     }
 
-    // Recaluculate the effective scheduling priority after
+    // Recalculate the effective scheduling priority after
     // removing the monitor from the queue.
     current->lock();
     current->monitorList.remove(this);
@@ -151,14 +209,16 @@ unlock()
 int Thread::Monitor::
 condWait(int)
 {
-    // current is locked by sleep().
+    // current is NOT locked by sleep().
     Thread* current = getCurrentThread();
     if (current == owner)
     {
         lockCount = 0;
-        current->monitorList.remove(this);
         owner = 0;
-        current->updatePriority();
+        current->lock();
+        current->monitorList.remove(this);
+        current->resetPriority();
+        current->unlock();
         rendezvous.wakeup();
         return false;
     }
@@ -238,12 +298,6 @@ void Thread::Monitor::
 notifyAll()
 {
     notify();
-}
-
-int Thread::Monitor::
-getPriority()
-{
-    return rendezvous.getPriority();
 }
 
 bool Thread::Monitor::
