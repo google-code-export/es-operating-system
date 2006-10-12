@@ -244,7 +244,7 @@ private:
     bool            log;
 
     // Upcall related fields:
-    SpinLock        spinLock;
+    Lock            spinLock;
     void*           (*focus)(void* param);
     Interlocked     upcallCount;    // Number of UpcallRecords allocated to this process
     List<UpcallRecord, &UpcallRecord::link>

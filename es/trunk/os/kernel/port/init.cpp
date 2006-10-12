@@ -66,9 +66,9 @@ void esDump(const void* ptr, s32 len)
 
 #ifdef __es__
 
-// If malloc uses synchronization primitives other than SpinLock,
+// If malloc uses synchronization primitives other than Lock,
 // the following monitorFactory lock type must also be changed.
-static SpinLock monitorFactory;
+static Lock monitorFactory;
 
 int
 esOnce(esOnceControl* control, void (*func)(void))
@@ -115,7 +115,7 @@ esCreateMonitor(esMonitor* monitor)
         return;
     }
 
-    monitor->monitor = new Monitor();
+    monitor->monitor = new Monitor;
 }
 
 void
@@ -130,10 +130,10 @@ esLockMonitor(esMonitor* monitor)
 
     if (!monitor->monitor)
     {
-        SpinLock::Synchronized method(monitorFactory);
+        Lock::Synchronized method(monitorFactory);
         if (monitor->monitor == 0)
         {
-            monitor->monitor = new Monitor();
+            monitor->monitor = new Monitor;
         }
     }
 
@@ -152,10 +152,10 @@ esTryLockMonitor(esMonitor* monitor)
 
     if (!monitor->monitor)
     {
-        SpinLock::Synchronized method(monitorFactory);
+        Lock::Synchronized method(monitorFactory);
         if (monitor->monitor == 0)
         {
-            monitor->monitor = new Monitor();
+            monitor->monitor = new Monitor;
         }
     }
 
@@ -181,10 +181,10 @@ esUnlockMonitor(esMonitor* monitor)
 
     if (!monitor->monitor)
     {
-        SpinLock::Synchronized method(monitorFactory);
+        Lock::Synchronized method(monitorFactory);
         if (monitor->monitor == 0)
         {
-            monitor->monitor = new Monitor();
+            monitor->monitor = new Monitor;
         }
     }
 

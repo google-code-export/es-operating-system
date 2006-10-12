@@ -25,35 +25,29 @@ namespace
     }
 }
 
-SpinLock::
-SpinLock() :
-    spin(0),
-    owner(0),
-    count(0)
+Lock::
+Lock() :
+    spin(0)
 {
 }
 
-bool SpinLock::
+Lock::
+~Lock()
+{
+}
+
+bool Lock::
 isLocked()
 {
-    if (!spin)
-    {
-        return false;
-    }
-    if (owner == Thread::getCurrentThread())
-    {
-        return false;
-    }
-    return true;
+    return (spin != 0) ? true : false;
 }
 
-void SpinLock::
+void Lock::
 wait()
 {
-    Thread* current = Thread::getCurrentThread();
     long long count = rdtsc();
 
-    while (spin && owner != current)
+    while (spin)
     {
         ASSERT(rdtsc() - count < 10000000000LL);
 #if defined(__i386__) || defined(__x86_64__)
@@ -63,60 +57,40 @@ wait()
     }
 }
 
-bool SpinLock::
+bool Lock::
 tryLock()
 {
-    Thread* current = Thread::getCurrentThread();
-    ASSERT(Sched::numCores == 0 || current);
-    if (!spin.exchange(1))
-    {
-        ASSERT(count == 0);
-        count = 1;
-        owner = current;
-        return true;
-    }
-    if (owner == current)
-    {
-        ++count;
-        return true;
-    }
-    return false;
+    return spin.exchange(1) ? false : true;
 }
 
-void SpinLock::
+void Lock::
 lock()
 {
-    ASSERT(1 < Sched::numCores || !spin || owner == Thread::getCurrentThread());
+    ASSERT(1 < Sched::numCores || !spin);
     do
     {
         wait();
     }
     while (!tryLock());
-    ASSERT(0 < count);
 }
 
-void SpinLock::
+void Lock::
 unlock()
 {
-    ASSERT(owner == Thread::getCurrentThread());
-    ASSERT(0 < count);
-    if (--count == 0)
-    {
-        spin.exchange(0);
-        ASSERT(count == 0);
-    }
+    ASSERT(isLocked());
+    spin.exchange(0);
 }
 
-SpinLock::Synchronized::
-Synchronized(SpinLock& spinLock) :
+Lock::
+Synchronized::Synchronized(Lock& spinLock) :
     spinLock(spinLock)
 {
     x = Core::splHi();
     spinLock.lock();
 }
 
-SpinLock::Synchronized::
-~Synchronized()
+Lock::
+Synchronized::~Synchronized()
 {
     spinLock.unlock();
     Core::splX(x);

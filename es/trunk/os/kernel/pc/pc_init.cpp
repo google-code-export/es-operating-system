@@ -332,7 +332,6 @@ void esPanic(const char* file, int line, const char* msg, ...)
     esReport(" in \"%s\" on line %d.\n", file, line);
 
     Frame* frame = (Frame*) (&file - 2);
-    esReport("%p:\n", frame);
     while (frame)
     {
         esReport("%p %p\n", frame->pc, frame->prev);
@@ -350,8 +349,11 @@ void esPanic(const char* file, int line, const char* msg, ...)
 
 int esReportv(const char* spec, va_list list)
 {
+    unsigned x = Core::splHi();
     Formatter formatter(reportStream);
-    return formatter.format(spec, list);
+    int len = formatter.format(spec, list);
+    Core::splX(x);
+    return len;
 }
 
 ICurrentProcess* esCurrentProcess()

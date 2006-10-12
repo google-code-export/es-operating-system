@@ -106,7 +106,7 @@ Apic::
 void Apic::
 startup(unsigned irq)
 {
-    setAffinity(irq, 1 << idBSP);
+    setAffinity(irq, 0xff);
     enable(irq);
 }
 
@@ -329,20 +329,23 @@ shutdownAp(u8 id, u32 hltAP)
 unsigned Apic::
 splIdle()
 {
+    unsigned x = exchange(localApic + TPR, 0 << 4);
     __asm__ __volatile__ ("sti\n");
-    return exchange(localApic + TPR, 0 << 4);
+    return x;
 }
 
 unsigned Apic::
 splLo()
 {
+    unsigned x = exchange(localApic + TPR, 1 << 4);
     __asm__ __volatile__ ("sti\n");
-    return exchange(localApic + TPR, 1 << 4);
+    return x;
 }
 
 unsigned Apic::
 splHi()
 {
+    __asm__ __volatile__ ("cli\n");
     return exchange(localApic + TPR, 15 << 4);
 }
 
@@ -350,6 +353,10 @@ void Apic::
 splX(unsigned x)
 {
     localApic[TPR] = x;
+    if (((x >> 4) & 0x0f) < 15)
+    {
+        __asm__ __volatile__ ("sti\n");
+    }
 }
 
 //

@@ -131,6 +131,7 @@ AM_CPPFLAGS += -iquote $(srcdir)/include/i386 -fnon-call-exceptions
 endif I386
 
 cpp_source_files += \
+	port/lock.cpp \
 	port/malloc.cpp \
 	port/map.cpp \
 	port/mmu.cpp \
@@ -145,11 +146,11 @@ cpp_source_files += \
 	port/upcall.cpp
 
 # c_source_files += \
-# 	pc/i386-stub.c
+#	pc/i386-stub.c
 
 cpp_source_files += \
 	pc/8042.cpp \
- 	pc/8237a.cpp \
+	pc/8237a.cpp \
 	pc/8254.cpp \
 	pc/8259.cpp \
 	pc/apic.cpp \
@@ -167,21 +168,21 @@ cpp_source_files += \
 	pc/rtc.cpp \
 	pc/sb16.cpp \
 	pc/uart.cpp \
- 	pc/vesa.cpp \
+	pc/vesa.cpp \
 	pc/xreg.cpp
 
 # cpp_source_files += \
-# 	pc/acpios.cpp
-# 	pc/dc21140.cpp
-# 	pc/elfloader.cpp
-# 	pc/pci.cpp
+#	pc/acpios.cpp
+#	pc/dc21140.cpp
+#	pc/elfloader.cpp
+#	pc/pci.cpp
 
 s_source_files = \
 	pc/label.S
 
 header_files += \
 	include/i386/8042.h \
- 	include/i386/8237a.h \
+	include/i386/8237a.h \
 	include/i386/8254.h \
 	include/i386/8259.h \
 	include/i386/apic.h \
@@ -189,18 +190,18 @@ header_files += \
 	include/i386/cga.h \
 	include/i386/core.h \
 	include/i386/cpu.h \
- 	include/i386/fdc.h \
+	include/i386/fdc.h \
 	include/i386/io.h \
 	include/i386/label.h \
 	include/i386/mps.h \
 	include/i386/rtc.h \
- 	include/i386/sb16.h \
+	include/i386/sb16.h \
 	include/i386/vesa.h
 
 # header_files += \
-# 	pc/dc21140.h
-# 	pc/elfloader.h
-# 	pc/pci.h
+#	pc/dc21140.h
+#	pc/elfloader.h
+#	pc/pci.h
 
 endif ES
 

@@ -17,6 +17,7 @@
 #include <es/types.h>
 #include <es/ref.h>
 #include <es/base/IStream.h>
+#include "spinlock.h"
 
 class Uart : public IStream
 {
@@ -28,8 +29,9 @@ class Uart : public IStream
     static const u8 LSR = 5;
     static const u8 MSR = 6;
 
-    Ref ref;
-    int baseaddr;
+    Ref  ref;
+    int  baseaddr;
+    Lock lock;
 
 public:
     Uart(int baseaddr);

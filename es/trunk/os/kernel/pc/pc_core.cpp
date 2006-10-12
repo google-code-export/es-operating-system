@@ -426,8 +426,9 @@ Core(Sched* sched) :
     tss = reinterpret_cast<Tss*>(ptr);
     ASSERT(reinterpret_cast<unsigned long>(tss) % 256 == 0);
 
-    void* stack = ptr + 256 + ((sizeof(Core) + 15) & ~15);
-    unsigned stackSize = 8192 - 256 - ((sizeof(Core) + 15) & ~15);
+    stack = ptr + 256 + ((sizeof(Core) + 15) & ~15);
+    *(int*) stack = 0xa5a5a5a5;
+    unsigned stackSize = CORE_SIZE - 256 - ((sizeof(Core) + 15) & ~15);
     label.init(stack, stackSize, reschedule, this);
 
     id = Sched::numCores - 1;
@@ -579,6 +580,7 @@ reschedule(void* param)
             }
         }
         core->current = current = core->sched->selectThread();
+        ASSERT(core->checkStack());
         core->currentFPU = 0;
         core->ktcb.tcb = current->ktcb;
 
@@ -660,21 +662,28 @@ static void kernelFault()
     throw SystemException<EFAULT>();
 }
 
+struct Frame
+{
+    Frame* prev;
+    void*  pc;
+};
+
 void Core::
 dispatchException(Ureg* ureg)
 {
     unsigned x = splHi();
     Core* core = getCurrentCore();
-    ICallback* callback;
+    Thread* current = core->current;
+    Process* process = core->currentProc;
 
     // esReport("Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
 
     switch (ureg->trap)
     {
       case NO_NM:   // Device Not Available (No Math Coprocessor)
-        if (core->current)
+        if (current)
         {
-            core->currentFPU = core->current;
+            core->currentFPU = current;
             enableFPU();
             core->current->xreg.restore();
         }
@@ -686,9 +695,8 @@ dispatchException(Ureg* ureg)
             "movl   %%cr2, %0\n"
             : "=r"(cr2));
 #endif // __i386__
-        if (core->currentProc)
+        if (process)
         {
-            Process* process = core->currentProc;
             // splLo();
 
             int rc;
@@ -712,13 +720,21 @@ dispatchException(Ureg* ureg)
                 // EFFALT system exception.
                 if (process->log)
                 {
-                    esReport("[kernel page fault at %p]", cr2);
+                    esReport("[kernel page fault at %p]\n", cr2);
+                    Frame* frame = (Frame*) (&ureg - 2);
+                    while (frame)
+                    {
+                        esReport("%p %p\n", frame->pc, frame->prev);
+                        frame = frame->prev;
+                    }
                 }
                 Ureg* exc = (Ureg*) ((char*) ureg - sizeof(u32));
                 memmove(exc, ureg, sizeof(Ureg) - 8);
                 u32 ret = exc->eip;
                 exc->esp = ret;     // Note &exc->esp is the new esp address after iret.
                 exc->eip = (u32) kernelFault;
+
+                ASSERT(!current || current->checkStack());
 
                 splX(x);
                 exc->load();
@@ -733,10 +749,8 @@ dispatchException(Ureg* ureg)
         // ureg->ecx: array of parameters
         // ureg->edx: method number
         // ureg->esi: base
-        if (core->currentProc)
+        if (process)
         {
-            Thread* current = core->current;
-            Process* process = core->currentProc;
             splLo();
 
             // esReport("[%p]::dispatchException: %u @ %x\n", process, ureg->trap, ureg->eip);
@@ -785,8 +799,6 @@ dispatchException(Ureg* ureg)
       case 66:  // upcall interface
         if (core->currentProc)
         {
-            Thread* current = core->current;
-            Process* process = core->currentProc;
             splLo();
 
             // esReport("[%p]::dispatchException: %u @ %x\n", process, ureg->trap, ureg->eip);
@@ -799,7 +811,6 @@ dispatchException(Ureg* ureg)
         esPanic(__FILE__, __LINE__, "Failed Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
         break;
       default:
-        callback = core->exceptionHandlers[ureg->trap];
         if (32 <= ureg->trap)
         {
             core->yieldable = false;
@@ -807,6 +818,7 @@ dispatchException(Ureg* ureg)
             if (pic->ack(irq))
             {
                 // x = splLo();    // Enable interrupts
+                ICallback* callback = core->exceptionHandlers[ureg->trap];
                 if (callback)
                 {
                     callback->invoke(irq);
@@ -815,6 +827,8 @@ dispatchException(Ureg* ureg)
                 // splX(x);
             }
             core->yieldable = true;
+            current = core->current;
+            ASSERT(!current || current->checkStack());
             Thread::reschedule();
         }
         else
@@ -825,6 +839,7 @@ dispatchException(Ureg* ureg)
         break;
     }
 
+    ASSERT(!current || current->checkStack());
     splX(x);
 }
 
@@ -901,6 +916,13 @@ shutdown()
     splX(x);
 }
 
+
+bool Core::
+checkStack()
+{
+    return *(int*) stack == 0xa5a5a5a5;
+}
+
 // Allocates memory for Core, Core stack, and Core TSS at the same time.
 void* Core::
 operator new(size_t size) throw(std::bad_alloc)
@@ -912,7 +934,7 @@ operator new(size_t size) throw(std::bad_alloc)
     {
         throw std::bad_alloc();
     }
-    ptr += 8192 * n;
+    ptr += CORE_SIZE * n;
     return ptr + 256;
 }
 

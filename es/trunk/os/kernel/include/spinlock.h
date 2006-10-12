@@ -21,56 +21,20 @@
 
 class Thread;
 
+/** A non-reentrant spinlock.
+ */
 class Lock
 {
     Interlocked spin;
 
 public:
-    Lock() :
-        spin(0)
-    {
-    }
-
-    bool isLocked()
-    {
-        return (spin != 0) ? true : false;
-    }
-
-    void wait()
-    {
-        int count = 0;
-
-        while (spin)
-        {
-            ++count;
-            ASSERT(count < 100000000);
-#if defined(__i386__) || defined(__x86_64__)
-            // Use the pause instruction for Hyper-Threading
-            __asm__ __volatile__ ("pause\n");
-#endif
-        }
-    }
-
-    bool tryLock()
-    {
-        return spin.exchange(1) ? false : true;
-    }
-
-    void lock()
-    {
-        // ASSERT(1 < Sched::numCores || !spin);
-        do
-        {
-            wait();
-        }
-        while (!tryLock());
-    }
-
-    void unlock()
-    {
-        ASSERT(isLocked());
-        spin.exchange(0);
-    }
+    Lock();
+    ~Lock();
+    bool isLocked();
+    void wait();
+    bool tryLock();
+    void lock();
+    void unlock();
 
     class Synchronized
     {
@@ -83,6 +47,8 @@ public:
     };
 };
 
+/** A reentrant spinlock.
+ */
 class SpinLock
 {
     Interlocked spin;

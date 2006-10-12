@@ -39,6 +39,7 @@ class Core
 
 public:
     static const int CORE_MAX = 8;
+    static const int CORE_SIZE = 16384;
 
     static const u16 KCODESEL = 8;
     static const u16 KDATASEL = 16;
@@ -58,6 +59,7 @@ private:
     Thread*             currentFPU;
     bool                yieldable;
 
+    void*               stack;
     Label               label;
     Tss*                tss;            // 256 byte aligned
     Tcb*                tcb;
@@ -94,6 +96,8 @@ public:
     {
         label.jump();     // Jump to reschedule().
     }
+
+    bool checkStack();
 
     static Core* getCurrentCore();
     static void reschedule(void* param);

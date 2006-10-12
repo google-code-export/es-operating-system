@@ -399,7 +399,7 @@ UpcallRecord* Process::
 getUpcallRecord()
 {
     {
-        SpinLock::Synchronized method(spinLock);
+        Lock::Synchronized method(spinLock);
 
         UpcallRecord* record = upcallList.removeFirst();
         if (record)
@@ -415,7 +415,7 @@ getUpcallRecord()
 void Process::
 putUpcallRecord(UpcallRecord* record)
 {
-    SpinLock::Synchronized method(spinLock);
+    Lock::Synchronized method(spinLock);
 
     upcallList.addLast(record);
 }

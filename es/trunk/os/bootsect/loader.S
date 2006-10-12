@@ -53,8 +53,8 @@
 // 0x00020000 - 0x00020fff      FDC DMA buffer
 // 0x00021000 - 0x00021fff      SB16 8-bit DMA buffer
 // 0x00022000 - 0x00023fff      SB16 16-bit DMA buffer
-// 0x00030000 - 0x0003ffff      MPS Core objects
-// 0x00040000 - 0x0007ffff      Heap
+// 0x00030000 - 0x0004ffff      MPS Core objects
+// 0x00100000 - 0x00ffffff      Heap
 // 0x01000000 -                 Kernel
 
 #include "fat.h"

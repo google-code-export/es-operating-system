@@ -278,7 +278,7 @@ public:
                         upcallList;     // List of upcall records
 
     Thread(void* (*run)(void*), void* param, int priority,
-           void* stack = 0, unsigned stackSize = 8192);
+           void* stack = 0, unsigned stackSize = 32768);
 
     ~Thread();
 
@@ -324,6 +324,8 @@ public:
     Process* returnToClient();
     Process* leapIntoServer(UpcallRecord* record);
 
+    bool checkStack();
+
     //
     // ICurrentThread (called by Sched)
     //
@@ -368,9 +370,10 @@ public:
 class Sched : public ICurrentThread, public ICurrentProcess, public IRuntime,
               public ICallback, public Lock
 {
-    friend class Thread;
-    friend class SpinLock;
     friend class Core;
+    friend class Lock;
+    friend class SpinLock;
+    friend class Thread;
 
     Ref                 ref;
     volatile unsigned   runQueueBits;

@@ -82,8 +82,9 @@ void Uart::setSize(long long size)
 int Uart::
 read(void* dst, int count)
 {
-    int n = 0;
+    Lock::Synchronized method(lock);
 
+    int n = 0;
     u8* ptr = static_cast<u8*>(dst);
     while (inpb(baseaddr + LSR) & 1)    // Check to see if char has been received.
     {
@@ -102,8 +103,9 @@ read(void* dst, int count, long long offset)
 int Uart::
 write(const void* src, int count)
 {
-    int n;
+    Lock::Synchronized method(lock);
 
+    int n;
     const u8* ptr = static_cast<const u8*>(src);
     for (n = 0; n < count; ++n, ++ptr)
     {

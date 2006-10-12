@@ -473,15 +473,26 @@ Thread(void* (*func)(void*), void* param, int priority,
         ASSERT(stack);
     }
     this->stack = stack;
+    *(int*) stack = 0xa5a5a5a5;
     sp0 = (u32) stack + stackSize - 2048;   // 2048: default kernel TLS size
-    ktcb = static_cast<u8*>(stack) + stackSize;
+    ktcb = static_cast<u8*>(stack) + stackSize - sizeof(void*);
+    *(void**) ktcb = ktcb;
     label.init(stack, stackSize - 2048 /* default kernel TLS size */, startUp, this);
+#ifdef VERBOSE
+    esReport("Thread::Thread %p %p %d\n", this, stack, stackSize);
+#endif
 }
 
 Thread::
 ~Thread()
 {
     delete[] (u8*) stack;
+}
+
+bool Thread::
+checkStack()
+{
+    return *(int*) stack == 0xa5a5a5a5;
 }
 
 bool Thread::

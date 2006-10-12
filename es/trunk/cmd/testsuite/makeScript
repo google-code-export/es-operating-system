@@ -23,12 +23,7 @@ echo '# run QEMU on the background.' >> $SCRIPT
 FAT32=`grep fat32 "$2"`
 CREATEMAX=`grep createmax "$2"`
 
-if [ -n "$FAT32" ]; then
-    echo 'vformat '$DIR'/fat32.img > /dev/null 2>&1' >> $SCRIPT
-    echo '(qemu -hda '$DIR'/fat32.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
-else
-    echo '(qemu -hda '$DIR'/disk.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
-fi
+echo '(qemu -hda '$DIR'/disk.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
 echo '' >> $SCRIPT
 echo '# Keep PID.' >> $SCRIPT
 echo 'QEMU=$!' >> $SCRIPT
@@ -48,6 +43,7 @@ echo '# Timeout after 60 seconds.' >> $SCRIPT
 echo 'while [ $TIME -lt 60 ]' >> $SCRIPT
 echo 'do' >> $SCRIPT
 fi
+echo '    sleep 1' >> $SCRIPT
 echo '    PASS=`grep done. '$DIR'/$LOG`' >> $SCRIPT
 echo '    FAIL=`grep Fail '$DIR'/$LOG`' >> $SCRIPT
 echo '    if [ -n "$FAIL" ]; then' >> $SCRIPT
@@ -61,13 +57,13 @@ echo '    RUNNING=`ps -p $QEMU | grep $QEMU`' >> $SCRIPT
 echo '    if [ -z "$RUNNING" ]; then' >> $SCRIPT
 echo '        break;' >> $SCRIPT
 echo '    fi' >> $SCRIPT
-echo '    sleep 1' >> $SCRIPT
 echo '    TIME=`expr $TIME + 1`' >> $SCRIPT
 echo 'done' >> $SCRIPT
 echo 'stty sane' >> $SCRIPT
 echo '' >> $SCRIPT
 echo 'RUNNING=`ps $QEMU | grep $QEMU`' >> $SCRIPT
 echo 'if [ -n "$RUNNING" ]; then' >> $SCRIPT
+echo '    sleep 1' >> $SCRIPT
 echo '    kill -9 $QEMU' >> $SCRIPT
 echo 'fi' >> $SCRIPT
 echo '' >> $SCRIPT

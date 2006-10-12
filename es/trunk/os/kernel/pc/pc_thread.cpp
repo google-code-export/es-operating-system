@@ -76,11 +76,12 @@ entry(unsigned long start)
 void* Thread::
 tls(unsigned size, unsigned align)
 {
-    size = (size + align - 1) & ~(align -1);
+    size = (size + sizeof(void*) + align - 1) & ~(align -1);
 
     Ureg* ureg(static_cast<Ureg*>(param));
     ureg->esp -= size;
-    tcb = reinterpret_cast<void*>(ureg->esp + size);
+    tcb = reinterpret_cast<void*>(ureg->esp + size - sizeof(void*));
+    *(void**) tcb = tcb;
     return reinterpret_cast<void*>(ureg->esp);
 }
 

@@ -100,6 +100,9 @@ selectThread()
 
     unlock();
     next->unlock();     // XXX check if we can unlock next now
+
+    ASSERT(next->checkStack());
+
     return next;
 }
 

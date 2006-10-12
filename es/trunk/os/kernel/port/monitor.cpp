@@ -270,8 +270,8 @@ wait(s64 timeout)
     ASSERT(current);
     ASSERT(current->state == IThread::RUNNING);
     current->alarm.setInterval(timeout);
-    current->alarm.setEnabled(true);
     current->alarm.setCallback(static_cast<ICallback*>(this));
+    current->alarm.setEnabled(true);
 
     wait();
 
