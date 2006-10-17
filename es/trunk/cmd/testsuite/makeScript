@@ -23,7 +23,7 @@ echo '# run QEMU on the background.' >> $SCRIPT
 FAT32=`grep fat32 "$2"`
 CREATEMAX=`grep createmax "$2"`
 
-echo '(qemu -hda '$DIR'/disk.img -serial stdio -soundhw sb16 > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
+echo '(qemu -hda '$DIR'/disk.img -serial stdio -soundhw sb16 $QFLAGS > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
 echo '' >> $SCRIPT
 echo '# Keep PID.' >> $SCRIPT
 echo 'QEMU=$!' >> $SCRIPT

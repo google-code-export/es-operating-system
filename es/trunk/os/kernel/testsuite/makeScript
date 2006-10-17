@@ -11,7 +11,7 @@ echo 'vcopy '$DIR'/2hd.img '$DIR'/../../bootsect/es.ldr > /dev/null 2>&1' >> $SC
 echo 'vcopy '$DIR'/2hd.img '$DIR'/es.img > /dev/null 2>&1' >> $SCRIPT
 echo '' >> $SCRIPT
 echo '# run QEMU on the background.' >> $SCRIPT
-echo '(qemu -fda '$DIR'/2hd.img -hda '$DIR'/fat16.img -serial stdio -boot a -soundhw sb16 -cdrom '$DIR'/isotest.iso > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
+echo '(qemu -fda '$DIR'/2hd.img -hda '$DIR'/fat16.img -serial stdio -boot a -soundhw sb16 -cdrom '$DIR'/isotest.iso $QFLAGS > '$DIR'/$LOG 2>&1) &' >> $SCRIPT
 echo '' >> $SCRIPT
 echo '# Keep PID.' >> $SCRIPT
 echo 'QEMU=$!' >> $SCRIPT
