@@ -132,6 +132,10 @@ _start:                                 // at location 3000:0000
         leaw    title, %si
         call    prtstr
 
+        // Enable A20 gate
+        movw    $0x2401, %ax
+        int     $0x15
+
         // Initialize bss
         xorw    %ax, %ax
         movw    $20, %cx
