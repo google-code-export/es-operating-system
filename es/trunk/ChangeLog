@@ -1,3 +1,8 @@
+2006-10-17  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.4 released.
+	* Support symmetric multiprocessing (SMP) systems.
+
 2006-09-28  Okasaka  <okasaka@users.sourceforge.jp>
 
 	* es 0.0.3 released.
