@@ -110,13 +110,15 @@ sync(u8 status)
 int AtaController::
 issue(AtaDevice* device, u8 cmd, void* buffer, int count, long long lba)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     using namespace Device;
     using namespace DeviceControl;
     using namespace DeviceIdentification;
     using namespace Command;
     using namespace Status;
 
-    Synchronized<IMonitor*> method(monitor);
+    Lock::Synchronized io(lock);
 
     if (device->id[FEATURES_COMMAND_SETS_SUPPORTED + 1] & 0x0400)
     {
@@ -222,10 +224,13 @@ issue(AtaDevice* device, u8 cmd, void* buffer, int count, long long lba)
         break;
     }
 
+    lock.unlock();
     while (!done)
     {
         monitor->wait(10000000);
     }
+    lock.lock();
+
     outpb(ctlPort + DEVICE_CONTROL, NIEN);
     return count;
 }
@@ -234,12 +239,12 @@ int AtaController::
 issue(AtaDevice* device, u8* packet, int packetSize,
       void* buffer, int count, u8 features)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     using namespace Device;
     using namespace DeviceControl;
     using namespace Command;
     using namespace Status;
-
-    Synchronized<IMonitor*> method(monitor);
 
     select(device->device);
 
@@ -285,6 +290,8 @@ issue(AtaDevice* device, u8* packet, int packetSize,
 int AtaController::
 invoke(int param)
 {
+    Lock::Synchronized io(lock);
+
     using namespace Command;
     using namespace Error;
     using namespace Features;

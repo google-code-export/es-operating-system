@@ -21,6 +21,7 @@ extern long hzBus;
 u8 Apic::idBSP = 0;     // boot-strap processor's local APIC id
 volatile u32* Apic::localApic;  // memory-mapped address of local APIC
 volatile bool Apic::online;
+unsigned Apic::busClock;
 
 void Apic::
 setIoApicID(volatile u32* addr, u8 id)
@@ -345,7 +346,6 @@ splLo()
 unsigned Apic::
 splHi()
 {
-    __asm__ __volatile__ ("cli\n");
     return exchange(localApic + TPR, 15 << 4);
 }
 
@@ -353,10 +353,6 @@ void Apic::
 splX(unsigned x)
 {
     localApic[TPR] = x;
-    if (((x >> 4) & 0x0f) < 15)
-    {
-        __asm__ __volatile__ ("sti\n");
-    }
 }
 
 //
@@ -401,15 +397,20 @@ release(void)
     return count;
 }
 
-#if 0
+int Apic::
+readRtcCounter(int addr)
+{
+    outpb(Rtc::PORT_ADDR, addr);
+    u8 bcd = inpb(Rtc::PORT_DATA);
+    return (bcd & 0xf) + 10 * (bcd >> 4);
+}
 
-// Determine bus/core frequency ratio
+// Determine bus clock frequency
 void Apic::
 busFreq()
 {
-    long tsc0;
-    long tsc1;
-    long cc;
+    int t0;
+    int t1;
 
     localApic[DCR] &= ~0x0b;
     localApic[DCR] |= 0x0b;         // divide by 1
@@ -417,20 +418,25 @@ busFreq()
     localApic[LVT_TR] |= 0x10000;   // mask
     localApic[LVT_TR] &= ~0x20000;  // one-shot
 
-    cc = 2 * 100000;
-    tsc0 = tsc();
-    localApic[ICR] = cc;            // start count-down
+    unsigned x = Core::splHi();
+    t0 = readRtcCounter(Rtc::SECONDS);
+    do {
+        t1 = readRtcCounter(Rtc::SECONDS);
+    } while (t0 == t1);
+    localApic[ICR] = 0xffffffff;
+    do {
+        t0 = readRtcCounter(Rtc::SECONDS);
+    } while (t0 == t1);
+    unsigned count = localApic[CCR];
+    Core::splX(x);
+
+    busClock = 0xffffffff - count;
+    busClock = (busClock + 500000) / 1000000 * 1000000;
+    esReport("Bus freq: %u\n", busClock);
+
+    localApic[ICR] = 1;
     while (0 < localApic[CCR])
     {
-    }
-    tsc1 = tsc();
-
-    m->bus = cc / 100000;
-    m->nCore = ((tsc1 - tsc0) + 50000) / 100000;
-    if (m->nCore % 2 == 0)
-    {
-        m->bus /= 2;
-        m->nCore /= 2;
     }
 }
 
@@ -439,17 +445,15 @@ void Apic::
 setTimer(int vec, long hz)
 {
     ASSERT(vec < 256);
-    ASSERT(0 < hzBus);
+    ASSERT(0 < busClock);
     localApic[LVT_TR] |= 0x10000;   // mask
     localApic[LVT_TR] &= ~0x20000;  // one-shot
     if (0 < hz)
     {
         localApic[DCR] &= ~0x0b;
         localApic[DCR] |= 0x0b;                 // divide by 1
-        localApic[ICR] = hzBus / hz;
+        localApic[ICR] = busClock / hz;
         localApic[LVT_TR] |= 0x20000 | vec;     // periodic
         localApic[LVT_TR] &= ~0x10000;          // unmask
     }
 }
-
-#endif

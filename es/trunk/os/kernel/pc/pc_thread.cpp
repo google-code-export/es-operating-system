@@ -36,23 +36,37 @@ reschedule()
 {
     unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
-    if (!core->yieldable)
+    if (core->freeze)
     {
         Core::splX(x);
         return;
     }
     Thread* current = core->current;
-    if (current)
+
+    if (!current)
     {
-        if (current->label.set())
-        {
-            // This thread resumes from here.
-            Core::splX(x);
-            return;
-        }
+        core->label.jump();     // Jump to Core::reschedule().
+        // NOT REACHED HERE
     }
-    core->label.jump();     // Jump to reschedule().
-    // NOT REACHED HERE
+
+    if (current->state == IThread::RUNNING && !core->sched->runQueueHint)
+    {
+        current->tryLock();
+        current->unlock();
+        Core::splX(x);
+        return;
+    }
+
+    ASSERT(current->core == core);
+
+    if (current->label.set() == 0)
+    {
+        core->label.jump();     // Jump to Core::reschedule().
+        // NOT REACHED HERE
+    }
+
+    // This thread resumes from here.
+    Core::splX(x);
 }
 
 void Thread::

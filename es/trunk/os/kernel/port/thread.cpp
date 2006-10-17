@@ -84,8 +84,8 @@ setPriority(int priority)
         base = priority;
         updatePriority();
     }
-    Core::splX(x);
     reschedule();
+    Core::splX(x);
 }
 
 /** Sets new effective scheduling priority to the thread.
@@ -453,6 +453,7 @@ Thread(void* (*func)(void*), void* param, int priority,
        void* stack, unsigned stackSize) :
     state(NEW),
     attr(ICurrentThread::CANCEL_DEFERRED | ICurrentThread::CANCEL_ENABLE),
+    core(0),
     base(priority),
     priority(priority),
     error(0),

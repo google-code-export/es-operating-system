@@ -22,6 +22,17 @@ class Rtc : public IRtc
 {
     friend DateTime DateTime::getNow();
 
+    Ref                 ref;
+
+    static Lock         spinLock;
+    static long long    epoch;
+
+    static int getCounter(int addr);
+    static void setCounter(int addr, int count);
+    static DateTime getTime();
+
+public:
+
     enum
     {
         PORT_ADDR = 0x70,
@@ -38,16 +49,6 @@ class Rtc : public IRtc
         YEAR_FTD = 0x32
     };
 
-    Ref                 ref;
-
-    static Lock         spinLock;
-    static long long    epoch;
-
-    static int getCounter(int addr);
-    static void setCounter(int addr, int count);
-    static DateTime getTime();
-
-public:
     Rtc();
 
     // IRtc

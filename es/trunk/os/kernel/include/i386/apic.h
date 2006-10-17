@@ -60,6 +60,7 @@ class Apic : public IPic
     static u8               idBSP;              // boot-strap processor's local APIC id
     static volatile u32*    localApic;          // memory-mapped address of local APIC
     static volatile bool    online;
+    static unsigned         busClock;
 
     Ref     ref;
     Mps*    mps;
@@ -148,6 +149,10 @@ class Apic : public IPic
 public:
     Apic(Mps* mps);
     ~Apic();
+
+    static int readRtcCounter(int addr);
+    static void busFreq();
+    static void setTimer(int vec, long hz);
 
     void startup(u32 hltAP, u32 startAP)
     {

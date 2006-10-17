@@ -57,7 +57,7 @@ private:
     Process*            currentProc;
     Thread*             current;
     Thread*             currentFPU;
-    bool                yieldable;
+    Interlocked         freeze;
 
     void*               stack;
     Label               label;
@@ -134,6 +134,7 @@ public:
     // class specific allocator
     static void* operator new(size_t size) throw(std::bad_alloc);
     static void operator delete(void*) throw();
+
 } __attribute__ ((aligned (16)));
 
 int esInit(IInterface** nameSpace);

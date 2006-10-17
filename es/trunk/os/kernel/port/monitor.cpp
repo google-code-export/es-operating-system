@@ -201,9 +201,11 @@ condUnlock(int)
 void Thread::Monitor::
 unlock()
 {
+    unsigned x = Core::splHi();
     DelegateTemplate<Monitor> d(this, &Thread::Monitor::condUnlock);
     rendezvous.wakeup(&d);
     reschedule();
+    Core::splX(x);
 }
 
 int Thread::Monitor::
@@ -284,13 +286,9 @@ wait(s64 timeout)
 void Thread::Monitor::
 notify()
 {
-    unsigned x = Core::splHi();         // Cling to the current core
+    unsigned x = Core::splHi();
     cv.wakeup();
-    Thread* current = getCurrentThread();
-    if (current && current->state == IThread::RUNNING)
-    {
-        reschedule();
-    }
+    reschedule();
     Core::splX(x);
 }
 

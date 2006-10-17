@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -26,6 +26,8 @@ _ZN5Label3setEv:
         movl    %ecx, 0(%eax)
         movl    0(%esp), %ecx
         movl    %ecx, 4(%eax)
+        movl    0(%ebp), %ecx
+        movl    %ecx, 24(%eax)
         xorl    %eax, %eax      // return 0
         ret
 

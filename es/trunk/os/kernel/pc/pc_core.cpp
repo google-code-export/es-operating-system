@@ -76,7 +76,13 @@ namespace
         }
     };
 
-    NullPic nullPic __attribute__ ((init_priority (100)));
+    NullPic nullPic __attribute__ ((init_priority (101)));
+
+    struct Frame
+    {
+        Frame* prev;
+        void*  pc;
+    };
 }
 
 Core* Core::coreTable[Core::CORE_MAX];
@@ -415,7 +421,7 @@ Core(Sched* sched) :
     currentProc(0),
     current(0),
     currentFPU(0),
-    yieldable(true),
+    freeze(0),
     gdtLoc(sizeof gdt - 1, gdt),
     tcb(0)
 {
@@ -547,15 +553,19 @@ reschedule(void* param)
     Core* core = getCurrentCore();
     for (;;)
     {
-#ifdef VERBOSE
-        esReport("reschedule: %d\n", core->id);
-#endif
         core->label.set();
-        Thread* current = (Thread*) core->current;
+        Thread* current = core->current;
         if (current)
         {
+            // Note the current has been locked when rescheduled by
+            // Rendezvous::sleep().
+            current->tryLock();
             core->current = 0;
-            current->lock();
+#ifdef VERBOSE
+            esReport("[%d:%p] Core::reschedule in. current = %p %p %p\n",
+                     core->id, &param, current, current ? current->label.esp : 0);
+#endif
+            ASSERT(current->core == core);
             switch (current->getState())
             {
               case IThread::TERMINATED:
@@ -575,6 +585,8 @@ reschedule(void* param)
                     current->xreg.save();
                     disableFPU();
                 }
+                ASSERT(current->label.isSane());
+                current->core = 0;
                 current->unlock();
                 break;
             }
@@ -602,9 +614,11 @@ reschedule(void* param)
         core->tss->sp0 = current->sp0;
 
 #ifdef VERBOSE
-        esReport("reschedule: %d %p %p\n", core->id, current, current->label.eip);
+        esReport("[%d:%p] Core::reschedule out. current = %p: %p %p\n",
+                 core->id, &param, current, current ? current->label.esp : 0);
 #endif
 
+        ASSERT(current->label.isSane());
         current->label.jump();
     }
     splX(x);
@@ -662,12 +676,6 @@ static void kernelFault()
     throw SystemException<EFAULT>();
 }
 
-struct Frame
-{
-    Frame* prev;
-    void*  pc;
-};
-
 void Core::
 dispatchException(Ureg* ureg)
 {
@@ -676,7 +684,11 @@ dispatchException(Ureg* ureg)
     Thread* current = core->current;
     Process* process = core->currentProc;
 
-    // esReport("Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
+#ifdef VERBOSE
+    esReport("[%d:%p]: dispatchException(%p:%d) at %p\n",
+              core->id, (u8*) &ureg + sizeof(Ureg) - 8,
+              ureg, ureg->trap, ureg->eip);
+#endif
 
     switch (ureg->trap)
     {
@@ -741,6 +753,7 @@ dispatchException(Ureg* ureg)
                 break;
             }
         }
+        esReport("Kernel panic [%d]\n", core->id);
         ureg->dump();
         esPanic(__FILE__, __LINE__, "Failed Core::dispatchException: %u @ %x cr2:%x\n", ureg->trap, ureg->eip, cr2);
         break;
@@ -801,7 +814,6 @@ dispatchException(Ureg* ureg)
         {
             splLo();
 
-            // esReport("[%p]::dispatchException: %u @ %x\n", process, ureg->trap, ureg->eip);
             ureg->ecx = 0;  // To indicate this is not an exception call
             current->param = ureg;
             process->returnFromUpcall(ureg);
@@ -813,8 +825,10 @@ dispatchException(Ureg* ureg)
       default:
         if (32 <= ureg->trap)
         {
-            core->yieldable = false;
+            core->freeze.increment();
+            core->current = 0;
             int irq = ureg->trap - 32;
+
             if (pic->ack(irq))
             {
                 // x = splLo();    // Enable interrupts
@@ -826,13 +840,15 @@ dispatchException(Ureg* ureg)
                 pic->end(irq);
                 // splX(x);
             }
-            core->yieldable = true;
-            current = core->current;
+
+            core->current = current;
             ASSERT(!current || current->checkStack());
+            core->freeze.decrement();
             Thread::reschedule();
         }
         else
         {
+            esReport("Kernel panic [%d]\n", core->id);
             ureg->dump();
             esPanic(__FILE__, __LINE__, "Core::dispatchException: %u @ %x\n", ureg->trap, ureg->eip);
         }

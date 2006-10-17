@@ -103,7 +103,6 @@ unlock()
     if (--count == 0)
     {
         spin.exchange(0);
-        ASSERT(count == 0);
     }
 }
 

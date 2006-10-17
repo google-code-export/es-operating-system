@@ -36,9 +36,6 @@ setRun(Thread* thread)
     runQueueBits |= 0x80000000u >> thread->priority;
     runQueueHint = true;   // Hint to scheduler to check run queue
     unlock();
-
-    // Broadcast IPI to notify the other processors that another thread becomes ready to run.
-    Apic::broadcastIPI(67);
 }
 
 void Sched::
@@ -90,18 +87,20 @@ selectThread()
         unlock();
     }
 
+    ASSERT(next->state == IThread::RUNNABLE);
     ASSERT(next->priority == priority);
     queue->remove(next);
+    ASSERT(!queue->contains(next));
     if (queue->isEmpty())
     {
         runQueueBits &= ~(0x80000000u >> priority);
     }
     next->state = IThread::RUNNING;
+    next->core = Core::getCurrentCore();
 
     unlock();
-    next->unlock();     // XXX check if we can unlock next now
-
     ASSERT(next->checkStack());
+    next->unlock();     // XXX check if we can unlock next now
 
     return next;
 }

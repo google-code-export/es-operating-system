@@ -32,6 +32,7 @@
 #include "label.h"
 #include "spinlock.h"
 
+class Core;
 class Delegate;
 class UpcallProxy;
 class Process;
@@ -146,6 +147,7 @@ public:
 
     State               state;
     unsigned            attr;
+    Core*               core;
 
     int                 base;       // base priority
 

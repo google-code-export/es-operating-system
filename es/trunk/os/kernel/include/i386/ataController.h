@@ -45,6 +45,7 @@ class AtaController : public ICallback
     friend class AtaPacketDevice;
 
     IMonitor*       monitor;
+    Lock            lock;
     Ref             ref;
 
     int             cmdPort;

@@ -124,6 +124,7 @@ static void initAP(...)
 {
     apic->enableLocalApic();
     apic->splHi();
+    apic->setTimer(67, 1000);
     Core* core = new Core(sched);
     apic->started();
     core->start();
@@ -157,11 +158,15 @@ int esInit(IInterface** nameSpace)
     }
 #endif
 
-    pic = new Pic();  // Initialize 8259 anyways.
+    // Initialize 8259 anyways.
+    pic = new Pic();
 
     // Initialize the page table
     initArena();
     ASSERT(PageTable::pageSet);
+
+    // Initialize RTC
+    rtc = new Rtc;
 
     // Create the thread scheduler
     sched = new Sched;
@@ -185,9 +190,11 @@ int esInit(IInterface** nameSpace)
         esReport("Halt: %x\n", hltAP);
 
         apic = new Apic(mps);
+        apic->busFreq();
         Core::pic = apic;
 
         Core::registerExceptionHandler(67, sched);
+        apic->setTimer(67, 1000);
 
         apic->startup(hltAP, startAP);
     }
@@ -198,10 +205,10 @@ int esInit(IInterface** nameSpace)
     thread->state = IThread::RUNNING;
     thread->sched = sched;
     thread->func = (void* (*)(void*)) main;
+    thread->core = core;
     core->current = thread;
     core->ktcb.tcb = thread->ktcb;
 
-    rtc = new Rtc;
     pit = new Pit(1000);
 
     root = new Context;
@@ -349,9 +356,12 @@ void esPanic(const char* file, int line, const char* msg, ...)
 
 int esReportv(const char* spec, va_list list)
 {
+    static Lock lock;
     unsigned x = Core::splHi();
+    lock.lock();
     Formatter formatter(reportStream);
     int len = formatter.format(spec, list);
+    lock.unlock();
     Core::splX(x);
     return len;
 }

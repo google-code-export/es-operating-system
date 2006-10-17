@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -25,6 +25,7 @@ public:
     unsigned ebx;       // 12
     unsigned esi;       // 16
     unsigned edi;       // 20
+    unsigned link;      // 24: 0(%ebp)
 
     Label() :
         esp(0),
@@ -32,7 +33,8 @@ public:
         ebp(0),
         ebx(0),
         esi(0),
-        edi(0)
+        edi(0),
+        link(0)
     {
     }
 
@@ -40,7 +42,8 @@ public:
         ebp(0),
         ebx(0),
         esi(0),
-        edi(0)
+        edi(0),
+        link(0)
     {
         init(stack, stackSize, startUp, param);
     }
@@ -58,6 +61,13 @@ public:
 
     int set();
     void jump();
+
+    /* Reports whether the stack is not broken after the label is set.
+     */
+    bool isSane()
+    {
+        return (ebp == 0 || *reinterpret_cast<void**>(ebp) == reinterpret_cast<void*>(link)) ? true : false;
+    }
 };
 
 #endif  // NINTENDO_ES_KERNEL_I386_LABEL_H_INCLUDED
