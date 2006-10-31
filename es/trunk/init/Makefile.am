@@ -3,7 +3,7 @@ SUFFIXES = .img .gz
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
 
-% : %.img
+% :: %.elf
 	$(srcdir)/makeScript "`pwd`" $@
 
 noinst_SCRIPTS = es
