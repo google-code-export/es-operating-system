@@ -103,6 +103,7 @@ setPriority(int priority)
         int err = pthread_setschedparam(thread, SCHED_RR, &param);
         switch (err)
         {
+        case 0:
         case EPERM: // XXX
             break;
         default:
