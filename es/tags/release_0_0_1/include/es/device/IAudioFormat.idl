@@ -1,0 +1,25 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *  
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+[object, uuid(839febda-25dc-11db-9c02-0009bf000001)]
+interface IAudioFormat : IInterface
+{
+    unsigned byte getBitsPerSample();
+    unsigned byte getChannels();
+    unsigned short getSamplingRate();
+    void setBitsPerSample(unsigned byte bits);
+    void setChannels(unsigned byte channels);
+    void setSamplingRate(unsigned short rate);
+}
