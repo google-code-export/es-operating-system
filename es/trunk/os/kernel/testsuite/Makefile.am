@@ -19,20 +19,20 @@ if POSIX
 AM_CPPFLAGS += -iquote $(srcdir)/../include/posix
 
 TESTS = interlocked exception utf ring \
-        heap page cache replace \
-        position size write_read write_read2 write read \
-        create_release getPageCount invalidate \
-        context datetime thread thread_cancel \
-        monitor0 monitor1 monitor2 monitor3 pageSet \
-	bpi bpi2 bpi3 \
-        partition partition_error partition_extended partition_iterator \
-        partition_bind partition_over8GB partition_print
+	heap page cache replace \
+	position size write_read write_read2 write read \
+	create_release getPageCount invalidate \
+	context datetime thread thread_cancel \
+	monitor0 monitor1 monitor2 monitor3 pageSet \
+	partition partition_error partition_extended partition_iterator \
+	partition_bind partition_over8GB partition_print \
+	loopback ethernet timer
 
 noinst_PROGRAMS = $(TESTS)
-                  
+
 noinst_DATA = fat16_32MB.img over8GB.img fat16.img
 
-LDADD += -lpthread -lrt
+LDADD += -lpthread -lrt -lstdc++
 
 endif POSIX
 
@@ -51,11 +51,12 @@ TESTS = interlocked exception utf ring fpu tsd \
 	position size write_read write_read2 \
 	write read create_release getPageCount \
 	invalidate \
-	pageSet process
+	pageSet process \
+	loopback ethernet
 
 noinst_SCRIPTS = $(TESTS)
 
-noinst_PROGRAMS = $(noinst_SCRIPTS)
+noinst_PROGRAMS = $(TESTS)
 
 noinst_DATA = fat16.img isotest.iso \
 	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
@@ -63,12 +64,13 @@ noinst_DATA = fat16.img isotest.iso \
 	monitor0.img monitor1.img monitor2.img monitor3.img \
 	bpi.img bpi2.img bpi3.img \
 	ata.img beep.img 8042.img vesa.img fdc.img \
-        fdc_diskChange.img sb16.img cdrom.img \
+	fdc_diskChange.img sb16.img cdrom.img \
 	page.img cache.img replace.img \
 	position.img size.img write_read.img write_read2.img \
 	write.img read.img create_release.img getPageCount.img \
 	invalidate.img \
-	pageSet.img process.img
+	pageSet.img process.img \
+	ethernet.img loopback.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 
@@ -174,6 +176,16 @@ partition_bind_SOURCES = partition_bind.cpp vdisk.h
 partition_over8GB_SOURCES = partition_over8GB.cpp vdisk.h
 
 partition_print_SOURCES = partition_print.cpp vdisk.h
+
+ethernet_SOURCES = ethernet.cpp
+
+loopback_SOURCES = loopback.cpp
+
+if POSIX
+
+timer_SOURCES = timer.cpp
+
+endif POSIX
 
 fat16_32MB.img: fat16_32MB.img.gz
 	gunzip -c $< > $@

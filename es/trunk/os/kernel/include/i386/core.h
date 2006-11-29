@@ -138,5 +138,6 @@ public:
 } __attribute__ ((aligned (16)));
 
 int esInit(IInterface** nameSpace);
+IThread* esCreateThread(void* (*start)(void* param), void* param);
 
 #endif  // NINTENDO_ES_KERNEL_I386_CORE_H_INCLUDED

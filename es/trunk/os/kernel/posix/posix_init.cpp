@@ -11,6 +11,15 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <new>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <es.h>
 #include <es/classFactory.h>
 #include <es/clsid.h>
@@ -24,23 +33,18 @@
 #include "cache.h"
 #include "classStore.h"
 #include "context.h"
+#include "loopback.h"
 #include "partition.h"
+#include "posix/tap.h"
 
-#include <new>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
 #include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 namespace
 {
     IContext*       root;
     IClassStore*    classStore;
     IClassFactory*  alarmFactory;
+    u8              loopbackBuffer[64 * 1024];
 };
 
 const int Page::SIZE = 4096;
@@ -82,6 +86,7 @@ int esInit(IInterface** nameSpace)
         *nameSpace = root;
     }
 
+    // Create class store
     classStore = static_cast<IClassStore*>(new ClassStore);
     IBinding* binding = root->bind("class", classStore);
     binding->release();
@@ -113,6 +118,17 @@ int esInit(IInterface** nameSpace)
     // Register CLSID_Partition
     IClassFactory* partitionFactory = new(ClassFactory<PartitionContext>);
     classStore->add(CLSID_Partition, partitionFactory);
+
+    // Create device name space
+    IContext* device = root->createSubcontext("device");
+
+    // Register the loopback interface
+    Loopback* loopback = new Loopback(loopbackBuffer, sizeof loopbackBuffer);
+    device->bind("loopback", static_cast<IStream*>(loopback));
+
+    // Register the Ethernet interface
+    Tap* tap = new Tap("tap0", "br0", "/etc/qemu-ifup");
+    device->bind("ethernet", static_cast<IStream*>(tap));
 
     return 0;
 }
@@ -154,4 +170,9 @@ void esPanic(const char* file, int line, const char* msg, ...)
     va_end(marker);
     esReport(" in \"%s\" on line %d.\n", file, line);
     exit(EXIT_FAILURE);
+}
+
+IThread* esCreateThread(void* (*start)(void* param), void* param)
+{
+    return new Thread(start, param, IThread::Normal);
 }

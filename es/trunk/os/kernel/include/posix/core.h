@@ -179,6 +179,7 @@ class SpinLock : public Monitor
 #include "cache.h"
 
 int esInit(IInterface** nameSpace);
+IThread* esCreateThread(void* (*start)(void* param), void* param);
 
 #ifdef __cplusplus
 extern "C" {

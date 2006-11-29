@@ -20,7 +20,6 @@ import "es/base/ICallback.idl";
 [object, uuid(032000e0-25db-11db-9c02-0009bf000001)]
 interface IAlarm : IInterface
 {
-
     /**
      * Gets the interval from when this alarm starts till when it fires.
      * @param interval the interval.

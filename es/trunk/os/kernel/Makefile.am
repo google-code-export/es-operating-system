@@ -54,6 +54,7 @@ nodist_libeskernel_a_SOURCES = \
 	device/IRemovableMedia.c \
 	device/IRtc.c \
 	device/IPartition.c \
+	device/IEthernet.c \
 	naming/IBinding.c \
 	naming/IContext.c \
 	util/IIterator.c \
@@ -79,6 +80,7 @@ cpp_source_files += \
 	port/cacheFactory.cpp \
 	port/heap.cpp \
 	port/line.cpp \
+	port/loopback.cpp \
 	port/page.cpp \
 	port/pageSet.cpp \
 	port/pageTable.cpp \
@@ -96,6 +98,7 @@ header_files = \
 	include/heap.h \
 	include/interfaceStore.h \
 	include/line.h \
+	include/loopback.h \
 	include/partition.h \
 	include/process.h \
 	include/spinlock.h \
@@ -169,7 +172,8 @@ cpp_source_files += \
 	pc/sb16.cpp \
 	pc/uart.cpp \
 	pc/vesa.cpp \
-	pc/xreg.cpp
+	pc/xreg.cpp \
+	pc/dp8390d.cpp
 
 # cpp_source_files += \
 #	pc/acpios.cpp
@@ -196,7 +200,8 @@ header_files += \
 	include/i386/mps.h \
 	include/i386/rtc.h \
 	include/i386/sb16.h \
-	include/i386/vesa.h
+	include/i386/vesa.h \
+	include/i386/dp8390d.h
 
 # header_files += \
 #	pc/dc21140.h
@@ -227,10 +232,12 @@ cpp_source_files += \
 	posix/posix_monitor.cpp \
 	posix/posix_core.cpp \
 	posix/posix_dateTime.cpp \
-	posix/posix_init.cpp
+	posix/posix_init.cpp \
+	posix/posix_ethernet.cpp
 
 header_files += \
-	include/posix/core.h
+	include/posix/core.h \
+	include/posix/tap.h
 
 endif POSIX
 

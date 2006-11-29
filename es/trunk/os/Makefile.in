@@ -171,7 +171,7 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-SUBDIRS = libes++ bootsect kernel fs  .
+SUBDIRS = libes++ bootsect kernel fs net .
 all: all-recursive
 
 .SUFFIXES:

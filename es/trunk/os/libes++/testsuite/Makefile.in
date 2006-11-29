@@ -47,7 +47,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-@POSIX_TRUE@am__EXEEXT_1 = list$(EXEEXT) hashtable$(EXEEXT)
+@POSIX_TRUE@am__EXEEXT_1 = list$(EXEEXT) hashtable$(EXEEXT) \
+@POSIX_TRUE@	tree$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am__hashtable_SOURCES_DIST = hashtable.cpp
 @POSIX_TRUE@am_hashtable_OBJECTS = hashtable.$(OBJEXT)
@@ -60,6 +61,11 @@ am__list_SOURCES_DIST = list.cpp
 list_OBJECTS = $(am_list_OBJECTS)
 list_LDADD = $(LDADD)
 list_DEPENDENCIES = ../libessup++.a $(am__DEPENDENCIES_1)
+am__tree_SOURCES_DIST = tree.cpp
+@POSIX_TRUE@am_tree_OBJECTS = tree.$(OBJEXT)
+tree_OBJECTS = $(am_tree_OBJECTS)
+tree_LDADD = $(LDADD)
+tree_DEPENDENCIES = ../libessup++.a $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -68,8 +74,9 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(hashtable_SOURCES) $(list_SOURCES)
-DIST_SOURCES = $(am__hashtable_SOURCES_DIST) $(am__list_SOURCES_DIST)
+SOURCES = $(hashtable_SOURCES) $(list_SOURCES) $(tree_SOURCES)
+DIST_SOURCES = $(am__hashtable_SOURCES_DIST) $(am__list_SOURCES_DIST) \
+	$(am__tree_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -181,9 +188,10 @@ AM_CPPFLAGS = \
 	-I ../../../include \
 	-I $(srcdir)/../../../include
 
-@POSIX_TRUE@TESTS = list hashtable
+@POSIX_TRUE@TESTS = list hashtable tree
 @POSIX_TRUE@list_SOURCES = list.cpp
 @POSIX_TRUE@hashtable_SOURCES = hashtable.cpp
+@POSIX_TRUE@tree_SOURCES = tree.cpp
 all: all-am
 
 .SUFFIXES:
@@ -226,6 +234,9 @@ hashtable$(EXEEXT): $(hashtable_OBJECTS) $(hashtable_DEPENDENCIES)
 list$(EXEEXT): $(list_OBJECTS) $(list_DEPENDENCIES) 
 	@rm -f list$(EXEEXT)
 	$(CXXLINK) $(list_LDFLAGS) $(list_OBJECTS) $(list_LDADD) $(LIBS)
+tree$(EXEEXT): $(tree_OBJECTS) $(tree_DEPENDENCIES) 
+	@rm -f tree$(EXEEXT)
+	$(CXXLINK) $(tree_LDFLAGS) $(tree_OBJECTS) $(tree_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -235,6 +246,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tree.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

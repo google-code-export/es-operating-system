@@ -55,7 +55,7 @@ target_triplet = @target@
 @ES_TRUE@	pc/fdc.cpp pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp \
 @ES_TRUE@	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp \
 @ES_TRUE@	pc/rtc.cpp pc/sb16.cpp pc/uart.cpp pc/vesa.cpp \
-@ES_TRUE@	pc/xreg.cpp
+@ES_TRUE@	pc/xreg.cpp pc/dp8390d.cpp
 @ES_TRUE@am__append_3 = \
 @ES_TRUE@	include/i386/8042.h \
 @ES_TRUE@	include/i386/8237a.h \
@@ -72,7 +72,8 @@ target_triplet = @target@
 @ES_TRUE@	include/i386/mps.h \
 @ES_TRUE@	include/i386/rtc.h \
 @ES_TRUE@	include/i386/sb16.h \
-@ES_TRUE@	include/i386/vesa.h
+@ES_TRUE@	include/i386/vesa.h \
+@ES_TRUE@	include/i386/dp8390d.h
 
 
 # header_files += \
@@ -95,10 +96,12 @@ target_triplet = @target@
 @POSIX_TRUE@	posix/posix_monitor.cpp \
 @POSIX_TRUE@	posix/posix_core.cpp \
 @POSIX_TRUE@	posix/posix_dateTime.cpp \
-@POSIX_TRUE@	posix/posix_init.cpp
+@POSIX_TRUE@	posix/posix_init.cpp \
+@POSIX_TRUE@	posix/posix_ethernet.cpp
 
 @POSIX_TRUE@am__append_6 = \
-@POSIX_TRUE@	include/posix/core.h
+@POSIX_TRUE@	include/posix/core.h \
+@POSIX_TRUE@	include/posix/tap.h
 
 @POSIX_TRUE@am__append_7 = -iquote $(srcdir)/include/posix
 subdir = kernel
@@ -125,9 +128,9 @@ libeskernel_a_LIBADD =
 am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	port/context.cpp port/elf.cpp port/init.cpp port/interface.cpp \
 	port/arena.cpp port/cache.cpp port/cacheFactory.cpp \
-	port/heap.cpp port/line.cpp port/page.cpp port/pageSet.cpp \
-	port/pageTable.cpp port/stream.cpp port/zero.cpp \
-	port/alarm.cpp port/partitionContext.cpp \
+	port/heap.cpp port/line.cpp port/loopback.cpp port/page.cpp \
+	port/pageSet.cpp port/pageTable.cpp port/stream.cpp \
+	port/zero.cpp port/alarm.cpp port/partitionContext.cpp \
 	port/partitionStream.cpp port/partitionIterator.cpp \
 	port/lock.cpp port/malloc.cpp port/map.cpp port/mmu.cpp \
 	port/monitor.cpp port/process.cpp port/rendezvous.cpp \
@@ -137,21 +140,23 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
 	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp \
 	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
-	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp \
+	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp \
 	windows/ref.cpp posix/posix_thread.cpp posix/posix_monitor.cpp \
 	posix/posix_core.cpp posix/posix_dateTime.cpp \
-	posix/posix_init.cpp include/alarm.h include/arena.h \
-	include/cache.h include/classStore.h include/context.h \
-	include/elfFile.h include/heap.h include/interfaceStore.h \
-	include/line.h include/partition.h include/process.h \
-	include/spinlock.h include/thread.h include/zero.h \
-	include/ata.h include/uart.h include/i386/8042.h \
-	include/i386/8237a.h include/i386/8254.h include/i386/8259.h \
-	include/i386/apic.h include/i386/ataController.h \
-	include/i386/cga.h include/i386/core.h include/i386/cpu.h \
-	include/i386/fdc.h include/i386/io.h include/i386/label.h \
-	include/i386/mps.h include/i386/rtc.h include/i386/sb16.h \
-	include/i386/vesa.h include/posix/core.h
+	posix/posix_init.cpp posix/posix_ethernet.cpp include/alarm.h \
+	include/arena.h include/cache.h include/classStore.h \
+	include/context.h include/elfFile.h include/heap.h \
+	include/interfaceStore.h include/line.h include/loopback.h \
+	include/partition.h include/process.h include/spinlock.h \
+	include/thread.h include/zero.h include/ata.h include/uart.h \
+	include/i386/8042.h include/i386/8237a.h include/i386/8254.h \
+	include/i386/8259.h include/i386/apic.h \
+	include/i386/ataController.h include/i386/cga.h \
+	include/i386/core.h include/i386/cpu.h include/i386/fdc.h \
+	include/i386/io.h include/i386/label.h include/i386/mps.h \
+	include/i386/rtc.h include/i386/sb16.h include/i386/vesa.h \
+	include/i386/dp8390d.h include/posix/core.h \
+	include/posix/tap.h
 @ES_TRUE@am__objects_1 = label.$(OBJEXT)
 am__objects_2 =
 @ES_TRUE@am__objects_3 = lock.$(OBJEXT) malloc.$(OBJEXT) map.$(OBJEXT) \
@@ -166,17 +171,18 @@ am__objects_2 =
 @ES_TRUE@	pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
 @ES_TRUE@	pc_init.$(OBJEXT) pc_thread.$(OBJEXT) rtc.$(OBJEXT) \
 @ES_TRUE@	sb16.$(OBJEXT) uart.$(OBJEXT) vesa.$(OBJEXT) \
-@ES_TRUE@	xreg.$(OBJEXT)
+@ES_TRUE@	xreg.$(OBJEXT) dp8390d.$(OBJEXT)
 @WIN32_TRUE@am__objects_4 = ref.$(OBJEXT)
 @POSIX_TRUE@am__objects_5 = posix_thread.$(OBJEXT) \
 @POSIX_TRUE@	posix_monitor.$(OBJEXT) posix_core.$(OBJEXT) \
-@POSIX_TRUE@	posix_dateTime.$(OBJEXT) posix_init.$(OBJEXT)
+@POSIX_TRUE@	posix_dateTime.$(OBJEXT) posix_init.$(OBJEXT) \
+@POSIX_TRUE@	posix_ethernet.$(OBJEXT)
 am__objects_6 = classStore.$(OBJEXT) context.$(OBJEXT) elf.$(OBJEXT) \
 	init.$(OBJEXT) interface.$(OBJEXT) arena.$(OBJEXT) \
 	cache.$(OBJEXT) cacheFactory.$(OBJEXT) heap.$(OBJEXT) \
-	line.$(OBJEXT) page.$(OBJEXT) pageSet.$(OBJEXT) \
-	pageTable.$(OBJEXT) stream.$(OBJEXT) zero.$(OBJEXT) \
-	alarm.$(OBJEXT) partitionContext.$(OBJEXT) \
+	line.$(OBJEXT) loopback.$(OBJEXT) page.$(OBJEXT) \
+	pageSet.$(OBJEXT) pageTable.$(OBJEXT) stream.$(OBJEXT) \
+	zero.$(OBJEXT) alarm.$(OBJEXT) partitionContext.$(OBJEXT) \
 	partitionStream.$(OBJEXT) partitionIterator.$(OBJEXT) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5)
 am__objects_7 = $(am__objects_2) $(am__objects_2)
@@ -191,9 +197,9 @@ nodist_libeskernel_a_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	IAudioFormat.$(OBJEXT) IBeep.$(OBJEXT) ICursor.$(OBJEXT) \
 	IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) IDmac.$(OBJEXT) \
 	IFileSystem.$(OBJEXT) IPic.$(OBJEXT) IRemovableMedia.$(OBJEXT) \
-	IRtc.$(OBJEXT) IPartition.$(OBJEXT) IBinding.$(OBJEXT) \
-	IContext.$(OBJEXT) IIterator.$(OBJEXT) ISet.$(OBJEXT) \
-	mbr.$(OBJEXT)
+	IRtc.$(OBJEXT) IPartition.$(OBJEXT) IEthernet.$(OBJEXT) \
+	IBinding.$(OBJEXT) IContext.$(OBJEXT) IIterator.$(OBJEXT) \
+	ISet.$(OBJEXT) mbr.$(OBJEXT)
 libeskernel_a_OBJECTS = $(am_libeskernel_a_OBJECTS) \
 	$(nodist_libeskernel_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -341,8 +347,9 @@ nodist_libeskernel_a_SOURCES = base/IAlarm.c base/ICache.c \
 	device/IAudioFormat.c device/IBeep.c device/ICursor.c \
 	device/IDevice.c device/IDiskManagement.c device/IDmac.c \
 	device/IFileSystem.c device/IPic.c device/IRemovableMedia.c \
-	device/IRtc.c device/IPartition.c naming/IBinding.c \
-	naming/IContext.c util/IIterator.c util/ISet.c mbr.c
+	device/IRtc.c device/IPartition.c device/IEthernet.c \
+	naming/IBinding.c naming/IContext.c util/IIterator.c \
+	util/ISet.c mbr.c
 
 #
 # port
@@ -355,11 +362,11 @@ c_source_files =
 cpp_source_files = port/classStore.cpp port/context.cpp port/elf.cpp \
 	port/init.cpp port/interface.cpp port/arena.cpp port/cache.cpp \
 	port/cacheFactory.cpp port/heap.cpp port/line.cpp \
-	port/page.cpp port/pageSet.cpp port/pageTable.cpp \
-	port/stream.cpp port/zero.cpp port/alarm.cpp \
-	port/partitionContext.cpp port/partitionStream.cpp \
-	port/partitionIterator.cpp $(am__append_2) $(am__append_4) \
-	$(am__append_5)
+	port/loopback.cpp port/page.cpp port/pageSet.cpp \
+	port/pageTable.cpp port/stream.cpp port/zero.cpp \
+	port/alarm.cpp port/partitionContext.cpp \
+	port/partitionStream.cpp port/partitionIterator.cpp \
+	$(am__append_2) $(am__append_4) $(am__append_5)
 
 # The filenames of the header files not intalled but used by the kernel
 
@@ -369,9 +376,9 @@ cpp_source_files = port/classStore.cpp port/context.cpp port/elf.cpp \
 header_files = include/alarm.h include/arena.h include/cache.h \
 	include/classStore.h include/context.h include/elfFile.h \
 	include/heap.h include/interfaceStore.h include/line.h \
-	include/partition.h include/process.h include/spinlock.h \
-	include/thread.h include/zero.h include/ata.h include/uart.h \
-	$(am__append_3) $(am__append_6)
+	include/loopback.h include/partition.h include/process.h \
+	include/spinlock.h include/thread.h include/zero.h \
+	include/ata.h include/uart.h $(am__append_3) $(am__append_6)
 
 # cpp_source_files += \
 #	pc/acpios.cpp
@@ -472,6 +479,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IDevice.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IDiskManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IDmac.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IEthernet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IFile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IFileSystem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInterface.Po@am__quote@
@@ -500,6 +508,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cga.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/classStore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/context.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dp8390d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdd.Po@am__quote@
@@ -508,6 +517,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/line.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loopback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/malloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr.Po@am__quote@
@@ -526,6 +536,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pc_thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_core.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_dateTime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_ethernet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_monitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_thread.Po@am__quote@
@@ -936,6 +947,20 @@ IPartition.obj: device/IPartition.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IPartition.obj `if test -f 'device/IPartition.c'; then $(CYGPATH_W) 'device/IPartition.c'; else $(CYGPATH_W) '$(srcdir)/device/IPartition.c'; fi`
 
+IEthernet.o: device/IEthernet.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IEthernet.o -MD -MP -MF "$(DEPDIR)/IEthernet.Tpo" -c -o IEthernet.o `test -f 'device/IEthernet.c' || echo '$(srcdir)/'`device/IEthernet.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IEthernet.Tpo" "$(DEPDIR)/IEthernet.Po"; else rm -f "$(DEPDIR)/IEthernet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='device/IEthernet.c' object='IEthernet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IEthernet.o `test -f 'device/IEthernet.c' || echo '$(srcdir)/'`device/IEthernet.c
+
+IEthernet.obj: device/IEthernet.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IEthernet.obj -MD -MP -MF "$(DEPDIR)/IEthernet.Tpo" -c -o IEthernet.obj `if test -f 'device/IEthernet.c'; then $(CYGPATH_W) 'device/IEthernet.c'; else $(CYGPATH_W) '$(srcdir)/device/IEthernet.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IEthernet.Tpo" "$(DEPDIR)/IEthernet.Po"; else rm -f "$(DEPDIR)/IEthernet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='device/IEthernet.c' object='IEthernet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IEthernet.obj `if test -f 'device/IEthernet.c'; then $(CYGPATH_W) 'device/IEthernet.c'; else $(CYGPATH_W) '$(srcdir)/device/IEthernet.c'; fi`
+
 IBinding.o: naming/IBinding.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IBinding.o -MD -MP -MF "$(DEPDIR)/IBinding.Tpo" -c -o IBinding.o `test -f 'naming/IBinding.c' || echo '$(srcdir)/'`naming/IBinding.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IBinding.Tpo" "$(DEPDIR)/IBinding.Po"; else rm -f "$(DEPDIR)/IBinding.Tpo"; exit 1; fi
@@ -1145,6 +1170,20 @@ line.obj: port/line.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/line.cpp' object='line.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o line.obj `if test -f 'port/line.cpp'; then $(CYGPATH_W) 'port/line.cpp'; else $(CYGPATH_W) '$(srcdir)/port/line.cpp'; fi`
+
+loopback.o: port/loopback.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT loopback.o -MD -MP -MF "$(DEPDIR)/loopback.Tpo" -c -o loopback.o `test -f 'port/loopback.cpp' || echo '$(srcdir)/'`port/loopback.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/loopback.Tpo" "$(DEPDIR)/loopback.Po"; else rm -f "$(DEPDIR)/loopback.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/loopback.cpp' object='loopback.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o loopback.o `test -f 'port/loopback.cpp' || echo '$(srcdir)/'`port/loopback.cpp
+
+loopback.obj: port/loopback.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT loopback.obj -MD -MP -MF "$(DEPDIR)/loopback.Tpo" -c -o loopback.obj `if test -f 'port/loopback.cpp'; then $(CYGPATH_W) 'port/loopback.cpp'; else $(CYGPATH_W) '$(srcdir)/port/loopback.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/loopback.Tpo" "$(DEPDIR)/loopback.Po"; else rm -f "$(DEPDIR)/loopback.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='port/loopback.cpp' object='loopback.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o loopback.obj `if test -f 'port/loopback.cpp'; then $(CYGPATH_W) 'port/loopback.cpp'; else $(CYGPATH_W) '$(srcdir)/port/loopback.cpp'; fi`
 
 page.o: port/page.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT page.o -MD -MP -MF "$(DEPDIR)/page.Tpo" -c -o page.o `test -f 'port/page.cpp' || echo '$(srcdir)/'`port/page.cpp; \
@@ -1748,6 +1787,20 @@ xreg.obj: pc/xreg.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xreg.obj `if test -f 'pc/xreg.cpp'; then $(CYGPATH_W) 'pc/xreg.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/xreg.cpp'; fi`
 
+dp8390d.o: pc/dp8390d.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dp8390d.o -MD -MP -MF "$(DEPDIR)/dp8390d.Tpo" -c -o dp8390d.o `test -f 'pc/dp8390d.cpp' || echo '$(srcdir)/'`pc/dp8390d.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dp8390d.Tpo" "$(DEPDIR)/dp8390d.Po"; else rm -f "$(DEPDIR)/dp8390d.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/dp8390d.cpp' object='dp8390d.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dp8390d.o `test -f 'pc/dp8390d.cpp' || echo '$(srcdir)/'`pc/dp8390d.cpp
+
+dp8390d.obj: pc/dp8390d.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dp8390d.obj -MD -MP -MF "$(DEPDIR)/dp8390d.Tpo" -c -o dp8390d.obj `if test -f 'pc/dp8390d.cpp'; then $(CYGPATH_W) 'pc/dp8390d.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/dp8390d.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dp8390d.Tpo" "$(DEPDIR)/dp8390d.Po"; else rm -f "$(DEPDIR)/dp8390d.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/dp8390d.cpp' object='dp8390d.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dp8390d.obj `if test -f 'pc/dp8390d.cpp'; then $(CYGPATH_W) 'pc/dp8390d.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/dp8390d.cpp'; fi`
+
 ref.o: windows/ref.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ref.o -MD -MP -MF "$(DEPDIR)/ref.Tpo" -c -o ref.o `test -f 'windows/ref.cpp' || echo '$(srcdir)/'`windows/ref.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ref.Tpo" "$(DEPDIR)/ref.Po"; else rm -f "$(DEPDIR)/ref.Tpo"; exit 1; fi
@@ -1831,6 +1884,20 @@ posix_init.obj: posix/posix_init.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='posix/posix_init.cpp' object='posix_init.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o posix_init.obj `if test -f 'posix/posix_init.cpp'; then $(CYGPATH_W) 'posix/posix_init.cpp'; else $(CYGPATH_W) '$(srcdir)/posix/posix_init.cpp'; fi`
+
+posix_ethernet.o: posix/posix_ethernet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT posix_ethernet.o -MD -MP -MF "$(DEPDIR)/posix_ethernet.Tpo" -c -o posix_ethernet.o `test -f 'posix/posix_ethernet.cpp' || echo '$(srcdir)/'`posix/posix_ethernet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/posix_ethernet.Tpo" "$(DEPDIR)/posix_ethernet.Po"; else rm -f "$(DEPDIR)/posix_ethernet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='posix/posix_ethernet.cpp' object='posix_ethernet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o posix_ethernet.o `test -f 'posix/posix_ethernet.cpp' || echo '$(srcdir)/'`posix/posix_ethernet.cpp
+
+posix_ethernet.obj: posix/posix_ethernet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT posix_ethernet.obj -MD -MP -MF "$(DEPDIR)/posix_ethernet.Tpo" -c -o posix_ethernet.obj `if test -f 'posix/posix_ethernet.cpp'; then $(CYGPATH_W) 'posix/posix_ethernet.cpp'; else $(CYGPATH_W) '$(srcdir)/posix/posix_ethernet.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/posix_ethernet.Tpo" "$(DEPDIR)/posix_ethernet.Po"; else rm -f "$(DEPDIR)/posix_ethernet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='posix/posix_ethernet.cpp' object='posix_ethernet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o posix_ethernet.obj `if test -f 'posix/posix_ethernet.cpp'; then $(CYGPATH_W) 'posix/posix_ethernet.cpp'; else $(CYGPATH_W) '$(srcdir)/posix/posix_ethernet.cpp'; fi`
 uninstall-info-am:
 
 # This directory's subdirectories are mostly independent; you can cd

@@ -138,6 +138,7 @@ wait(s64 timeout)
     switch (err)
     {
     case 0:
+    case EINVAL:
         return true;
     case ETIMEDOUT:
         return false;

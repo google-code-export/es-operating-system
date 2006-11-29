@@ -32,9 +32,11 @@
 #include "classStore.h"
 #include "context.h"
 #include "core.h"
+#include "dp8390d.h"
 #include "fdc.h"
 #include "heap.h"
 #include "interfaceStore.h"
+#include "loopback.h"
 #include "mps.h"
 #include "partition.h"
 #include "rtc.h"
@@ -60,6 +62,7 @@ namespace
     Pic*            pic;
     Mps*            mps;
     Apic*           apic;
+    u8              loopbackBuffer[64 * 1024];
 };
 
 const int Page::SIZE = 4096;
@@ -291,6 +294,14 @@ int esInit(IInterface** nameSpace)
     root->bind("device/soundInput", static_cast<IStream*>(&sb16->inputLine));
     root->bind("device/soundOutput", static_cast<IStream*>(&sb16->outputLine));
 
+    // Register the loopback interface
+    Loopback* loopback = new Loopback(loopbackBuffer, sizeof loopbackBuffer);
+    device->bind("loopback", static_cast<IStream*>(loopback));
+
+    // Register the Ethernet interface
+    Dp8390d* ne2000 = new Dp8390d(0xc100, 10);
+    device->bind("ethernet", static_cast<IStream*>(ne2000));
+
     Process::initialize();
 
     return 0;
@@ -379,4 +390,9 @@ IStream* esReportStream()
 Reflect::Interface& getInterface(const Guid& iid)
 {
     return interfaceStore->getInterface(iid);
+}
+
+IThread* esCreateThread(void* (*start)(void* param), void* param)
+{
+    return new Thread(start, param, IThread::Normal);
 }

@@ -8,13 +8,15 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = list hashtable
+TESTS = list hashtable tree
 
 noinst_PROGRAMS = $(TESTS)
 
 list_SOURCES = list.cpp
 
 hashtable_SOURCES = hashtable.cpp
+
+tree_SOURCES = tree.cpp
 
 LDADD += -lpthread -lrt
 

@@ -1,1 +1,1 @@
-SUBDIRS = libes++ bootsect kernel fs  .
+SUBDIRS = libes++ bootsect kernel fs net .

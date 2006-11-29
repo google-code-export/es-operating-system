@@ -41,8 +41,8 @@ host_triplet = @host@
 target_triplet = @target@
 @POSIX_TRUE@am__append_1 = -iquote $(srcdir)/../include/posix
 @ES_FALSE@@POSIX_TRUE@noinst_PROGRAMS = $(am__EXEEXT_1)
-@ES_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
-@POSIX_TRUE@am__append_2 = -lpthread -lrt
+@ES_TRUE@noinst_PROGRAMS = $(am__EXEEXT_1)
+@POSIX_TRUE@am__append_2 = -lpthread -lrt -lstdc++
 @ES_TRUE@@I386_TRUE@am__append_3 = -iquote $(srcdir)/../include/i386
 subdir = kernel/testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -66,14 +66,15 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	thread_cancel$(EXEEXT) monitor0$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	monitor1$(EXEEXT) monitor2$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	monitor3$(EXEEXT) pageSet$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	bpi$(EXEEXT) bpi2$(EXEEXT) bpi3$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_error$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_extended$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_iterator$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_bind$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_over8GB$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	partition_print$(EXEEXT)
+@ES_FALSE@@POSIX_TRUE@	partition_print$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	timer$(EXEEXT)
 @ES_TRUE@am__EXEEXT_1 = interlocked$(EXEEXT) exception$(EXEEXT) \
 @ES_TRUE@	utf$(EXEEXT) ring$(EXEEXT) fpu$(EXEEXT) tsd$(EXEEXT) \
 @ES_TRUE@	context$(EXEEXT) datetime$(EXEEXT) thread$(EXEEXT) \
@@ -87,8 +88,8 @@ CONFIG_CLEAN_FILES =
 @ES_TRUE@	position$(EXEEXT) size$(EXEEXT) write_read$(EXEEXT) \
 @ES_TRUE@	write_read2$(EXEEXT) write$(EXEEXT) read$(EXEEXT) \
 @ES_TRUE@	create_release$(EXEEXT) getPageCount$(EXEEXT) \
-@ES_TRUE@	invalidate$(EXEEXT) pageSet$(EXEEXT) process$(EXEEXT)
-@ES_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
+@ES_TRUE@	invalidate$(EXEEXT) pageSet$(EXEEXT) process$(EXEEXT) \
+@ES_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_8042_OBJECTS = 8042.$(OBJEXT)
 8042_OBJECTS = $(am_8042_OBJECTS)
@@ -146,6 +147,11 @@ datetime_OBJECTS = $(am_datetime_OBJECTS)
 datetime_LDADD = $(LDADD)
 datetime_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
 	$(am__DEPENDENCIES_1)
+am_ethernet_OBJECTS = ethernet.$(OBJEXT)
+ethernet_OBJECTS = $(am_ethernet_OBJECTS)
+ethernet_LDADD = $(LDADD)
+ethernet_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
+	$(am__DEPENDENCIES_1)
 am_exception_OBJECTS = exception.$(OBJEXT)
 exception_OBJECTS = $(am_exception_OBJECTS)
 exception_LDADD = $(LDADD)
@@ -185,6 +191,11 @@ am_invalidate_OBJECTS = invalidate.$(OBJEXT)
 invalidate_OBJECTS = $(am_invalidate_OBJECTS)
 invalidate_LDADD = $(LDADD)
 invalidate_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
+	$(am__DEPENDENCIES_1)
+am_loopback_OBJECTS = loopback.$(OBJEXT)
+loopback_OBJECTS = $(am_loopback_OBJECTS)
+loopback_LDADD = $(LDADD)
+loopback_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
 	$(am__DEPENDENCIES_1)
 am_monitor0_OBJECTS = monitor0.$(OBJEXT)
 monitor0_OBJECTS = $(am_monitor0_OBJECTS)
@@ -301,6 +312,12 @@ thread_smp_OBJECTS = $(am_thread_smp_OBJECTS)
 thread_smp_LDADD = $(LDADD)
 thread_smp_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
 	$(am__DEPENDENCIES_1)
+am__timer_SOURCES_DIST = timer.cpp
+@POSIX_TRUE@am_timer_OBJECTS = timer.$(OBJEXT)
+timer_OBJECTS = $(am_timer_OBJECTS)
+timer_LDADD = $(LDADD)
+timer_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
+	$(am__DEPENDENCIES_1)
 am_tsd_OBJECTS = tsd.$(OBJEXT)
 tsd_OBJECTS = $(am_tsd_OBJECTS)
 tsd_LDADD = $(LDADD)
@@ -348,40 +365,40 @@ SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(bpi_SOURCES) $(bpi2_SOURCES) $(bpi3_SOURCES) \
 	$(cache_SOURCES) $(cdrom_SOURCES) $(context_SOURCES) \
 	$(create_release_SOURCES) $(datetime_SOURCES) \
-	$(exception_SOURCES) $(fdc_SOURCES) $(fdc_diskChange_SOURCES) \
-	$(fpu_SOURCES) $(getPageCount_SOURCES) $(heap_SOURCES) \
-	$(interlocked_SOURCES) $(invalidate_SOURCES) \
-	$(monitor0_SOURCES) $(monitor1_SOURCES) $(monitor2_SOURCES) \
-	$(monitor3_SOURCES) $(page_SOURCES) $(pageSet_SOURCES) \
-	$(partition_SOURCES) $(partition_bind_SOURCES) \
-	$(partition_error_SOURCES) $(partition_extended_SOURCES) \
-	$(partition_iterator_SOURCES) $(partition_over8GB_SOURCES) \
-	$(partition_print_SOURCES) $(position_SOURCES) \
-	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
-	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
-	$(thread_SOURCES) $(thread_cancel_SOURCES) \
-	$(thread_smp_SOURCES) $(tsd_SOURCES) $(utf_SOURCES) \
-	$(vesa_SOURCES) $(write_SOURCES) $(write_read_SOURCES) \
-	$(write_read2_SOURCES)
+	$(ethernet_SOURCES) $(exception_SOURCES) $(fdc_SOURCES) \
+	$(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
+	$(getPageCount_SOURCES) $(heap_SOURCES) $(interlocked_SOURCES) \
+	$(invalidate_SOURCES) $(loopback_SOURCES) $(monitor0_SOURCES) \
+	$(monitor1_SOURCES) $(monitor2_SOURCES) $(monitor3_SOURCES) \
+	$(page_SOURCES) $(pageSet_SOURCES) $(partition_SOURCES) \
+	$(partition_bind_SOURCES) $(partition_error_SOURCES) \
+	$(partition_extended_SOURCES) $(partition_iterator_SOURCES) \
+	$(partition_over8GB_SOURCES) $(partition_print_SOURCES) \
+	$(position_SOURCES) $(process_SOURCES) $(read_SOURCES) \
+	$(replace_SOURCES) $(ring_SOURCES) $(sb16_SOURCES) \
+	$(size_SOURCES) $(thread_SOURCES) $(thread_cancel_SOURCES) \
+	$(thread_smp_SOURCES) $(timer_SOURCES) $(tsd_SOURCES) \
+	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
+	$(write_read_SOURCES) $(write_read2_SOURCES)
 DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(bpi_SOURCES) $(bpi2_SOURCES) $(bpi3_SOURCES) \
 	$(cache_SOURCES) $(cdrom_SOURCES) $(context_SOURCES) \
 	$(create_release_SOURCES) $(datetime_SOURCES) \
-	$(exception_SOURCES) $(fdc_SOURCES) $(fdc_diskChange_SOURCES) \
-	$(fpu_SOURCES) $(getPageCount_SOURCES) $(heap_SOURCES) \
-	$(interlocked_SOURCES) $(invalidate_SOURCES) \
-	$(monitor0_SOURCES) $(monitor1_SOURCES) $(monitor2_SOURCES) \
-	$(monitor3_SOURCES) $(page_SOURCES) $(pageSet_SOURCES) \
-	$(partition_SOURCES) $(partition_bind_SOURCES) \
-	$(partition_error_SOURCES) $(partition_extended_SOURCES) \
-	$(partition_iterator_SOURCES) $(partition_over8GB_SOURCES) \
-	$(partition_print_SOURCES) $(position_SOURCES) \
-	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
-	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
-	$(thread_SOURCES) $(thread_cancel_SOURCES) \
-	$(thread_smp_SOURCES) $(tsd_SOURCES) $(utf_SOURCES) \
-	$(vesa_SOURCES) $(write_SOURCES) $(write_read_SOURCES) \
-	$(write_read2_SOURCES)
+	$(ethernet_SOURCES) $(exception_SOURCES) $(fdc_SOURCES) \
+	$(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
+	$(getPageCount_SOURCES) $(heap_SOURCES) $(interlocked_SOURCES) \
+	$(invalidate_SOURCES) $(loopback_SOURCES) $(monitor0_SOURCES) \
+	$(monitor1_SOURCES) $(monitor2_SOURCES) $(monitor3_SOURCES) \
+	$(page_SOURCES) $(pageSet_SOURCES) $(partition_SOURCES) \
+	$(partition_bind_SOURCES) $(partition_error_SOURCES) \
+	$(partition_extended_SOURCES) $(partition_iterator_SOURCES) \
+	$(partition_over8GB_SOURCES) $(partition_print_SOURCES) \
+	$(position_SOURCES) $(process_SOURCES) $(read_SOURCES) \
+	$(replace_SOURCES) $(ring_SOURCES) $(sb16_SOURCES) \
+	$(size_SOURCES) $(thread_SOURCES) $(thread_cancel_SOURCES) \
+	$(thread_smp_SOURCES) $(am__timer_SOURCES_DIST) $(tsd_SOURCES) \
+	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
+	$(write_read_SOURCES) $(write_read2_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -500,17 +517,18 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@	position size write_read write_read2 \
 @ES_TRUE@	write read create_release getPageCount \
 @ES_TRUE@	invalidate \
-@ES_TRUE@	pageSet process
+@ES_TRUE@	pageSet process \
+@ES_TRUE@	loopback ethernet
 
 @POSIX_TRUE@TESTS = interlocked exception utf ring \
-@POSIX_TRUE@        heap page cache replace \
-@POSIX_TRUE@        position size write_read write_read2 write read \
-@POSIX_TRUE@        create_release getPageCount invalidate \
-@POSIX_TRUE@        context datetime thread thread_cancel \
-@POSIX_TRUE@        monitor0 monitor1 monitor2 monitor3 pageSet \
-@POSIX_TRUE@	bpi bpi2 bpi3 \
-@POSIX_TRUE@        partition partition_error partition_extended partition_iterator \
-@POSIX_TRUE@        partition_bind partition_over8GB partition_print
+@POSIX_TRUE@	heap page cache replace \
+@POSIX_TRUE@	position size write_read write_read2 write read \
+@POSIX_TRUE@	create_release getPageCount invalidate \
+@POSIX_TRUE@	context datetime thread thread_cancel \
+@POSIX_TRUE@	monitor0 monitor1 monitor2 monitor3 pageSet \
+@POSIX_TRUE@	partition partition_error partition_extended partition_iterator \
+@POSIX_TRUE@	partition_bind partition_over8GB partition_print \
+@POSIX_TRUE@	loopback ethernet timer
 
 @ES_TRUE@noinst_DATA = fat16.img isotest.iso \
 @ES_TRUE@	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
@@ -518,12 +536,13 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@	monitor0.img monitor1.img monitor2.img monitor3.img \
 @ES_TRUE@	bpi.img bpi2.img bpi3.img \
 @ES_TRUE@	ata.img beep.img 8042.img vesa.img fdc.img \
-@ES_TRUE@        fdc_diskChange.img sb16.img cdrom.img \
+@ES_TRUE@	fdc_diskChange.img sb16.img cdrom.img \
 @ES_TRUE@	page.img cache.img replace.img \
 @ES_TRUE@	position.img size.img write_read.img write_read2.img \
 @ES_TRUE@	write.img read.img create_release.img getPageCount.img \
 @ES_TRUE@	invalidate.img \
-@ES_TRUE@	pageSet.img process.img
+@ES_TRUE@	pageSet.img process.img \
+@ES_TRUE@	ethernet.img loopback.img
 
 @POSIX_TRUE@noinst_DATA = fat16_32MB.img over8GB.img fat16.img
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
@@ -577,6 +596,9 @@ partition_iterator_SOURCES = partition_iterator.cpp vdisk.h
 partition_bind_SOURCES = partition_bind.cpp vdisk.h
 partition_over8GB_SOURCES = partition_over8GB.cpp vdisk.h
 partition_print_SOURCES = partition_print.cpp vdisk.h
+ethernet_SOURCES = ethernet.cpp
+loopback_SOURCES = loopback.cpp
+@POSIX_TRUE@timer_SOURCES = timer.cpp
 EXTRA_DIST = fat16_32MB.img.gz over8GB.img.gz fat16.img.gz isotest.iso.gz makeScript
 all: all-am
 
@@ -647,6 +669,9 @@ create_release$(EXEEXT): $(create_release_OBJECTS) $(create_release_DEPENDENCIES
 datetime$(EXEEXT): $(datetime_OBJECTS) $(datetime_DEPENDENCIES) 
 	@rm -f datetime$(EXEEXT)
 	$(CXXLINK) $(datetime_LDFLAGS) $(datetime_OBJECTS) $(datetime_LDADD) $(LIBS)
+ethernet$(EXEEXT): $(ethernet_OBJECTS) $(ethernet_DEPENDENCIES) 
+	@rm -f ethernet$(EXEEXT)
+	$(CXXLINK) $(ethernet_LDFLAGS) $(ethernet_OBJECTS) $(ethernet_LDADD) $(LIBS)
 exception$(EXEEXT): $(exception_OBJECTS) $(exception_DEPENDENCIES) 
 	@rm -f exception$(EXEEXT)
 	$(CXXLINK) $(exception_LDFLAGS) $(exception_OBJECTS) $(exception_LDADD) $(LIBS)
@@ -671,6 +696,9 @@ interlocked$(EXEEXT): $(interlocked_OBJECTS) $(interlocked_DEPENDENCIES)
 invalidate$(EXEEXT): $(invalidate_OBJECTS) $(invalidate_DEPENDENCIES) 
 	@rm -f invalidate$(EXEEXT)
 	$(CXXLINK) $(invalidate_LDFLAGS) $(invalidate_OBJECTS) $(invalidate_LDADD) $(LIBS)
+loopback$(EXEEXT): $(loopback_OBJECTS) $(loopback_DEPENDENCIES) 
+	@rm -f loopback$(EXEEXT)
+	$(CXXLINK) $(loopback_LDFLAGS) $(loopback_OBJECTS) $(loopback_LDADD) $(LIBS)
 monitor0$(EXEEXT): $(monitor0_OBJECTS) $(monitor0_DEPENDENCIES) 
 	@rm -f monitor0$(EXEEXT)
 	$(CXXLINK) $(monitor0_LDFLAGS) $(monitor0_OBJECTS) $(monitor0_LDADD) $(LIBS)
@@ -740,6 +768,9 @@ thread_cancel$(EXEEXT): $(thread_cancel_OBJECTS) $(thread_cancel_DEPENDENCIES)
 thread_smp$(EXEEXT): $(thread_smp_OBJECTS) $(thread_smp_DEPENDENCIES) 
 	@rm -f thread_smp$(EXEEXT)
 	$(CXXLINK) $(thread_smp_LDFLAGS) $(thread_smp_OBJECTS) $(thread_smp_LDADD) $(LIBS)
+timer$(EXEEXT): $(timer_OBJECTS) $(timer_DEPENDENCIES) 
+	@rm -f timer$(EXEEXT)
+	$(CXXLINK) $(timer_LDFLAGS) $(timer_OBJECTS) $(timer_LDADD) $(LIBS)
 tsd$(EXEEXT): $(tsd_OBJECTS) $(tsd_DEPENDENCIES) 
 	@rm -f tsd$(EXEEXT)
 	$(CXXLINK) $(tsd_LDFLAGS) $(tsd_OBJECTS) $(tsd_LDADD) $(LIBS)
@@ -776,6 +807,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/context.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/create_release.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/datetime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ethernet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc_diskChange.Po@am__quote@
@@ -784,6 +816,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interlocked.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loopback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor0.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor2.Po@am__quote@
@@ -807,6 +840,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_cancel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_smp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vesa.Po@am__quote@
