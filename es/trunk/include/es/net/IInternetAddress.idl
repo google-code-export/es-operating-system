@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+/** This interface represents an internet address.
+ */
+[object, uuid(9ce16d3a-631c-11db-9c02-0009bf000001)]
+interface IInternetAddress : IInterface
+{
+    int getAddress([out, size_is(len)] void* address, unsigned int len);
+    int getAddressFamily();
+    int getCanonicalHostName([out, size_is(len)] char* hostName, unsigned int len);
+    int getHostAddress([out, size_is(len)] char* hostAddress, unsigned int len);
+    int getHostName([out, size_is(len)] char* hostName, unsigned int len);
+    int getScopeID();
+
+    boolean isUnspecified();
+    boolean isLinkLocal();
+    boolean isLoopback();
+    boolean isMulticast();
+    boolean isReachable(long timeout);
+
+    /** Checks whether this address is assigned to one of the interfaces of the host.
+     * @return  true if this address is assigned to the host.
+     */
+    boolean isLocalAddress();
+
+    IInternetAddress* getNext();
+
+    /** Creates a socket.
+     */
+    IInterface* socket(int type, int protocol);
+}

@@ -1,0 +1,37 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/net/IInternetAddress.idl";
+
+[object, uuid(ca324aba-633b-11db-9c02-0009bf000001)]
+interface ISocket : IInterface
+{
+    ISocket* accept();
+    void bind(IInternetAddress* addr, int port);
+    void close();
+    void connect(IInternetAddress* addr, int port);
+    int getAddressFamily();
+    IInternetAddress* getLocalAddress();
+    int getLocalPort();
+    int getProtocolType();
+    IInternetAddress* getRemoteAddress();
+    int getRemotePort();
+    int getSocketType();
+    void listen(int backlog);
+    int read([out, size_is(count)] void* dst, int count);
+    int recvFrom([out, size_is(count)] void* dst, int count, int flags, [out] IInternetAddress** addr, [out] int* port);
+    int sendTo([in, size_is(count)] void* src, int count, int flags, IInternetAddress* addr, int port);
+    void shutdownInput();
+    void shutdownOutput();
+    int write([in, size_is(count)] void* src, int count);
+}
