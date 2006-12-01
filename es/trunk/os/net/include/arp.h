@@ -46,7 +46,7 @@ class ARPFamily : public AddressFamily
     // ARP protocol
     ARPReceiver                 arpReceiver;
     Protocol                    arpProtocol;
-    InetRemoteAddressAccessor   arpAccessor;
+    InetLocalAddressAccessor    arpAccessor;
     Adapter                     arpAdapter;     // prototype
     ConduitFactory              arpFactory;
     Mux                         arpMux;
@@ -79,12 +79,9 @@ public:
         if (address)
         {
             InetMessenger m;
-            m.setRemote(address);
+            m.setLocal(address);
             Installer installer(&m);
             arpMux.accept(&installer, &arpProtocol);
-
-            // If address state is stateTentative, send ARP probes.
-            address->alarm(10000000);   // XXX PROBE_WAIT
         }
     }
 
@@ -94,7 +91,7 @@ public:
         if (address)
         {
             InetMessenger m;
-            m.setRemote(address);
+            m.setLocal(address);
             Uninstaller uninstaller(&m);
             arpMux.accept(&uninstaller, &arpProtocol);
 

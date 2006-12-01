@@ -78,6 +78,7 @@ class Inet4Address :
     class StateReachable : public State
     {
     public:
+        void start(Inet4Address* a);
         void expired(Inet4Address* a);
         bool input(InetMessenger* m, Inet4Address* a);
         bool output(InetMessenger* m, Inet4Address* a);

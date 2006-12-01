@@ -110,6 +110,7 @@ int main()
     InAddr addr = { htonl(169 << 24 | 254 << 16 | 0 << 8 | 1) };
     Handle<Inet4Address> host = new Inet4Address(addr, Inet4Address::stateTentative, dixID);
     inFamily->addAddress(host);
+    host->start();
     visualize();
 
     // Wait for the host address to be settled.
