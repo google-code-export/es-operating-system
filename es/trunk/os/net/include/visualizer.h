@@ -17,11 +17,11 @@
 #include <es.h>
 #include "conduit.h"
 
-class Visualizer : public Visitor
+class Visualizer : public BroadcastVisitor
 {
 public:
     Visualizer() :
-        Visitor(0)
+        BroadcastVisitor(0)
     {
         esReport("digraph {\n");
         esReport("    graph [rankdir=\"BT\"];\n");

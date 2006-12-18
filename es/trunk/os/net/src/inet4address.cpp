@@ -40,13 +40,13 @@ getNextHop()
 void Inet4Address::
 alarm(TimeSpan delay)
 {
-    inFamily->alarm(this, delay);
+    Socket::alarm(this, delay);
 }
 
 void Inet4Address::
 cancel()
 {
-    inFamily->cancel(this);
+    Socket::cancel(this);
 }
 
 // IInternetAddress

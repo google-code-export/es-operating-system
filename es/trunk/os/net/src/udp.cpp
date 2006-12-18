@@ -38,8 +38,12 @@ bool UDPReceiver::
 input(InetMessenger* m)
 {
     UDPHdr* udphdr = static_cast<UDPHdr*>(m->fix(sizeof(UDPHdr)));
+    if (!udphdr)
+    {
+        return false;   // XXX
+    }
     int len = ntohs(udphdr->len);
-    if (len < sizeof(UDPHdr) || len < m->getLength())
+    if (len < sizeof(UDPHdr) || m->getLength() < len)
     {
         return false;   // XXX
     }
@@ -75,7 +79,6 @@ output(InetMessenger* m)
     udphdr->src = htons(m->getLocalPort());
     udphdr->dst = htons(m->getRemotePort());
     udphdr->len = htons(len);   // octets in UDPHdr and user data
-    udphdr->sum = htons(0);     // zero: sum not computed
     udphdr->sum = 0;
     s16 sum = checksum(m);
     udphdr->sum = (sum == 0) ? 0xffff : sum;

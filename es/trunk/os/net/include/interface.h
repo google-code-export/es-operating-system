@@ -53,7 +53,7 @@ class Interface
                 esDump(chunk, len);
                 InetMessenger m(&InetReceiver::input, chunk, len);
                 m.setScopeID(scopeID);
-                Visitor v(&m);
+                Transporter v(&m);
                 adapter.accept(&v);
             }
         }

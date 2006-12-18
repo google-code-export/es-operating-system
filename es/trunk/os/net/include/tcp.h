@@ -18,34 +18,18 @@
 #include <es/net/tcp.h>
 #include "inet.h"
 
-class TCPReceiver :
-    public InetReceiver
+class TCPReceiver : public InetReceiver
 {
+    s16 checksum(InetMessenger* m);
+
 public:
-    /** Validates the received TCP packet.
-     */
-    bool input(InetMessenger* m)
+    bool input(InetMessenger* m);
+    bool output(InetMessenger* m);
+    bool error(InetMessenger* m);
+
+    TCPReceiver* clone(Conduit* conduit, void* key)
     {
-        TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
-        return true;
-    }
-
-    bool output(InetMessenger* m)
-    {
-        TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
-        return true;
-    }
-
-    bool error(InetMessenger* m)
-    {
-        TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
-
-        // Reverse src and dst
-        u16 tmp = tcphdr->src;
-        tcphdr->src = tcphdr->dst;
-        tcphdr->dst = tmp;
-
-        return true;
+        return new TCPReceiver;
     }
 };
 

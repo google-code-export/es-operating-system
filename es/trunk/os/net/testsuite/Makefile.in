@@ -50,20 +50,26 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-@ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = conduit$(EXEEXT) inet4$(EXEEXT)
+@ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = conduit$(EXEEXT) inet4$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	tcp$(EXEEXT)
 @ES_TRUE@am__EXEEXT_1 = inet4$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_conduit_OBJECTS = conduit.$(OBJEXT)
 conduit_OBJECTS = $(am_conduit_OBJECTS)
 conduit_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-conduit_DEPENDENCIES = ../../kernel/libeskernel.a \
-	../../libes++/libessup++.a ../libesnet.a $(am__DEPENDENCIES_1)
+conduit_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 am_inet4_OBJECTS = inet4.$(OBJEXT)
 inet4_OBJECTS = $(am_inet4_OBJECTS)
 inet4_LDADD = $(LDADD)
-inet4_DEPENDENCIES = ../../kernel/libeskernel.a \
-	../../libes++/libessup++.a ../libesnet.a $(am__DEPENDENCIES_1)
+inet4_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_tcp_OBJECTS = tcp.$(OBJEXT)
+tcp_OBJECTS = $(am_tcp_OBJECTS)
+tcp_LDADD = $(LDADD)
+tcp_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 SCRIPTS = $(noinst_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -73,8 +79,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(conduit_SOURCES) $(inet4_SOURCES)
-DIST_SOURCES = $(conduit_SOURCES) $(inet4_SOURCES)
+SOURCES = $(conduit_SOURCES) $(inet4_SOURCES) $(tcp_SOURCES)
+DIST_SOURCES = $(conduit_SOURCES) $(inet4_SOURCES) $(tcp_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -180,8 +186,8 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-LDADD = ../../kernel/libeskernel.a ../../libes++/libessup++.a \
-	../libesnet.a $(am__append_1)
+LDADD = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__append_1)
 SUFFIXES = .img
 AM_CPPFLAGS = \
 	-I $(srcdir)/../include \
@@ -190,13 +196,14 @@ AM_CPPFLAGS = \
 	-I $(srcdir)/../../../include
 
 @ES_TRUE@TESTS = inet4
-@POSIX_TRUE@TESTS = conduit inet4
+@POSIX_TRUE@TESTS = conduit inet4 tcp
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@noinst_DATA = inet4.img
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 @ES_TRUE@AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
 conduit_SOURCES = conduit.cpp
 inet4_SOURCES = inet4.cpp
+tcp_SOURCES = tcp.cpp
 EXTRA_DIST = makeScript
 all: all-am
 
@@ -240,6 +247,9 @@ conduit$(EXEEXT): $(conduit_OBJECTS) $(conduit_DEPENDENCIES)
 inet4$(EXEEXT): $(inet4_OBJECTS) $(inet4_DEPENDENCIES) 
 	@rm -f inet4$(EXEEXT)
 	$(CXXLINK) $(inet4_LDFLAGS) $(inet4_OBJECTS) $(inet4_LDADD) $(LIBS)
+tcp$(EXEEXT): $(tcp_OBJECTS) $(tcp_DEPENDENCIES) 
+	@rm -f tcp$(EXEEXT)
+	$(CXXLINK) $(tcp_LDFLAGS) $(tcp_OBJECTS) $(tcp_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -249,6 +259,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conduit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcp.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

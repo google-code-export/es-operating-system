@@ -73,9 +73,10 @@ public:
     /** Peeks data from this ring buffer.
      * @param dst       the data to be peeked.
      * @param count     the length of the data in bytes.
+     * @param offset    the position in the stored bytes from which the bytes is peeked.
      * @return          the length of the data peeked
      */
-    long peek(void* dst, long count);
+    long peek(void* dst, long count, long offset = 0) const;
 
     /** Reads data from this ring buffer.
      * @param dst       the data to be read.
@@ -83,6 +84,12 @@ public:
      * @return          the length of the data read
      */
     long read(void* dst, long count);
+
+    /** Discards data from this ring buffer.
+     * @param count     the length of the data in bytes.
+     * @return          the length of the data discarded
+     */
+    long discard(long count);
 
     /** Writes data to this ring buffer.
      * @param src       the data to be written.
@@ -107,6 +114,33 @@ public:
     long getUsed()
     {
         return used;
+    }
+
+    /**
+     * Gets the number of non-filled bytes in this ring buffer.
+     * @return the number of non-filled bytes.
+     */
+    long getUnused()
+    {
+        return size - used;
+    }
+
+    /**
+     * Gets the size of this ring buffer.
+     * @return the size of this ring buffer.
+     */
+    long getSize()
+    {
+        return size;
+    }
+
+    /**
+     * Gets the head of data in this ring buffer.
+     * @return the head of data.
+     */
+    u8* getHead()
+    {
+        return head;
     }
 
 private:

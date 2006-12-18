@@ -44,7 +44,10 @@ public:
 
 class InetMessenger : public Messenger
 {
+protected:
     InetReceiver::Command   op;
+
+private:
     int                     scopeID;
     Address*                removeAddress;
     Address*                localAddress;

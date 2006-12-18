@@ -170,4 +170,8 @@ __inline int IN_IS_ADDR_IN_NET(InAddr a, InAddr n, InAddr m)
     return ((a.addr & m.addr) == (n.addr & m.addr));
 }
 
+// Misc.
+
+#define IP_MIN_MTU          576
+
 #endif  // NINTENDO_ES_NET_INET4_H_INCLUDED

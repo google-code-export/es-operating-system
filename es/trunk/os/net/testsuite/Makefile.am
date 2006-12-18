@@ -1,4 +1,4 @@
-LDADD = ../../kernel/libeskernel.a ../../libes++/libessup++.a ../libesnet.a
+LDADD = ../libesnet.a ../../kernel/libeskernel.a ../../libes++/libessup++.a
 
 SUFFIXES = .img
 
@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = conduit inet4
+TESTS = conduit inet4 tcp
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -46,5 +46,7 @@ endif ES
 conduit_SOURCES = conduit.cpp
 
 inet4_SOURCES = inet4.cpp
+
+tcp_SOURCES = tcp.cpp
 
 EXTRA_DIST = makeScript

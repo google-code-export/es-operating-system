@@ -44,6 +44,7 @@ output(InetMessenger* m)
 bool DatagramReceiver::
 error(InetMessenger* m)
 {
+    monitor->notifyAll();
     return true;
 }
 
@@ -74,5 +75,14 @@ read(SocketMessenger* m)
 bool DatagramReceiver::
 write(SocketMessenger* m)
 {
+    m->setCommand(&InetReceiver::output);
     return true;
+}
+
+bool DatagramReceiver::
+close(SocketMessenger* m)
+{
+    SocketUninstaller uninstaller(getSocket());
+    conduit->getB()->accept(&uninstaller);
+    return false;
 }

@@ -190,6 +190,8 @@ public:
     virtual bool at(Mux* m, Conduit* c);
     virtual bool at(Protocol* p, Conduit* c);
     virtual bool at(ConduitFactory* f, Conduit* c);
+
+    virtual bool toB(Mux* m);
 };
 
 class Accessor
@@ -243,7 +245,7 @@ public:
         this->receiver = receiver;
     }
 
-    virtual bool toA(Visitor* v)
+    bool toA(Visitor* v)
     {
         if (sideA)
         {
@@ -251,7 +253,7 @@ public:
         }
         return true;
     }
-    virtual bool toB(Visitor* v)
+    bool toB(Visitor* v)
     {
         if (sideB)
         {
@@ -276,6 +278,11 @@ public:
     virtual Conduit* getB() const
     {
         return sideB;
+    }
+
+    virtual bool isEmpty() const
+    {
+        return sideB ? false : true;
     }
 
     virtual const char* getName() const
@@ -321,18 +328,15 @@ public:
     }
     bool accept(Visitor* v, Conduit* sender = 0)
     {
+        // Determine the direction to forward the messenger before calling the
+        // at() method as sideB can be reset in the at() method.
+        bool (Protocol::*to)(Visitor*);
+        to = (sender == sideB) ? &Protocol::toA : &Protocol::toB;
         if (!v->at(this, sender))
         {
             return false;
         }
-        if (sender == sideB)
-        {
-            return toA(v);
-        }
-        else
-        {
-            return toB(v);
-        }
+        (this->*to)(v);
     }
 
     Protocol* clone(void* key)
@@ -406,6 +410,14 @@ public:
 
 class Adapter : public Conduit
 {
+    Conduit* getB() const
+    {
+        return 0;
+    }
+    void setB(Conduit* c)
+    {
+    }
+
 public:
     bool accept(Messenger* m)
     {
@@ -449,9 +461,12 @@ class Mux : public Conduit
     ConduitFactory*         factory;
     Tree<void*, Conduit*>   sideB;
 
+    Conduit* getB() const
+    {
+        return 0;
+    }
     void setB(Conduit* c)
     {
-        ASSERT(0);
     }
 
 public:
@@ -498,44 +513,12 @@ public:
         {
             ASSERT(sideA);
             ASSERT(sender);
-            return sideA->accept(v, this);
+            return toA(v);
         }
         else
         {
-            return toB(v);
+            return v->toB(this);
         }
-    }
-    bool toB(Visitor* v)
-    {
-        void* key = getKey(v->getMessenger());
-        do
-        {
-            try
-            {
-                Conduit* b = sideB.get(key);
-                if (b->accept(v, this))
-                {
-                    return true;
-                }
-            }
-            catch (SystemException<ENOENT>)
-            {
-            }
-            if (!key)
-            {
-                Tree<void*, Conduit*>::Node* node;
-                Tree<void*, Conduit*>::Iterator iter = sideB.begin();
-                while ((node = iter.next()))
-                {
-                    Conduit* b = node->getValue();
-                    if (node->getKey() && b->accept(v, this))
-                    {
-                        return true;
-                    }
-                }
-            }
-        } while (!factory->accept(v, this));  // Have factory added a new conduit to sideB?
-        return false;
     }
     void addB(void* key, Conduit* c)
     {
@@ -544,6 +527,21 @@ public:
     void removeB(void* key)
     {
         sideB.remove(key);
+    }
+
+    bool isEmpty() const
+    {
+        return sideB.isEmpty();
+    }
+
+    Conduit* getB(void* key) const
+    {
+        return sideB.get(key);
+    }
+
+    Tree<void*, Conduit*>::Iterator list()
+    {
+        return sideB.begin();
     }
 
     Mux* clone(void* key)
@@ -677,6 +675,91 @@ inline bool Visitor::at(ConduitFactory* f, Conduit* c)
 {
     return messenger->apply(f);
 }
+
+inline bool Visitor::toB(Mux* m)
+{
+    void* key = m->getKey(getMessenger());
+    do
+    {
+        try
+        {
+            Conduit* b = m->getB(key);
+            if (b->accept(this, m))
+            {
+                return true;
+            }
+        }
+        catch (SystemException<ENOENT>)
+        {
+        }
+    } while (!m->getFactory()->accept(this, m));    // Have factory added a new conduit to sideB?
+    return false;
+}
+
+class BroadcastVisitor : public Visitor
+{
+public:
+    BroadcastVisitor(Messenger* messenger) :
+        Visitor(messenger)
+    {
+    }
+
+    bool toB(Mux* m)
+    {
+        Tree<void*, Conduit*>::Node* node;
+        Tree<void*, Conduit*>::Iterator iter = m->list();
+        while ((node = iter.next()))
+        {
+            Conduit* b = node->getValue();
+            b->accept(this, m);
+        }
+        return true;
+    }
+};
+
+class Transporter : public Visitor
+{
+public:
+    Transporter(Messenger* messenger) :
+        Visitor(messenger)
+    {
+    }
+
+    bool toB(Mux* m)
+    {
+        void* key = m->getKey(getMessenger());
+
+esReport("transport: %p (%ld)\n", key, (long) key);
+
+        do
+        {
+            try
+            {
+                Conduit* b = m->getB(key);
+                if (b->accept(this, m))
+                {
+                    return true;
+                }
+            }
+            catch (SystemException<ENOENT>)
+            {
+                // Try any key
+                try
+                {
+                    Conduit* b = m->getB(0);
+                    if (b->accept(this, m))
+                    {
+                        return true;
+                    }
+                }
+                catch (SystemException<ENOENT>)
+                {
+                }
+            }
+        } while (!m->getFactory()->accept(this, m));    // Have factory added a new conduit to sideB?
+        return false;
+    }
+};
 
 inline void Conduit::
 connectAB(Conduit* x, Mux* y, void* keyX)

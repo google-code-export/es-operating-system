@@ -19,7 +19,6 @@
 #include <es/ring.h>
 #include <es/synchronized.h>
 #include <es/base/IMonitor.h>
-#include <es/net/udp.h>
 #include "inet.h"
 #include "socket.h"
 
@@ -31,6 +30,7 @@ class DatagramReceiver :
     Ring        recvRing;
     u8          sendBuf[128 * 1024];
     Ring        sendRing;
+    Conduit*    conduit;
 
     struct RingHdr
     {
@@ -42,15 +42,28 @@ class DatagramReceiver :
         }
     };
 
+    Socket* getSocket()
+    {
+        Conduit* adapter = conduit->getB();
+        if (!adapter)
+        {
+            return 0;
+        }
+        return dynamic_cast<Socket*>(adapter->getReceiver());
+    }
+
 public:
-    DatagramReceiver() :
+    DatagramReceiver(Conduit* conduit = 0) :
+        monitor(0),
         recvRing(recvBuf, sizeof recvBuf),
-        sendRing(sendBuf, sizeof sendBuf)
+        sendRing(sendBuf, sizeof sendBuf),
+        conduit(conduit)
     {
         esCreateInstance(CLSID_Monitor,
                          IID_IMonitor,
                          reinterpret_cast<void**>(&monitor));
     }
+
     ~DatagramReceiver()
     {
         if (monitor)
@@ -65,10 +78,11 @@ public:
 
     bool read(SocketMessenger* m);
     bool write(SocketMessenger* m);
+    bool close(SocketMessenger* m);
 
     DatagramReceiver* clone(Conduit* conduit, void* key)
     {
-        return new DatagramReceiver;
+        return new DatagramReceiver(conduit);
     }
 };
 

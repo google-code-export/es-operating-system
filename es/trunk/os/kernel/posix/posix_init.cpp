@@ -136,7 +136,9 @@ int esInit(IInterface** nameSpace)
 int esReportv(const char* spec, va_list list)
 {
     Formatter formatter((int (*)(int, void*)) putc, stdout);
-    return formatter.format(spec, list);
+    int len = formatter.format(spec, list);
+    fflush(stdout);
+    return len;
 }
 
 bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)

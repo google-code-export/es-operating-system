@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -16,47 +16,54 @@
 #include <es/ring.h>
 
 long Ring::
-peek(void* dst, long count)
+peek(void* dst, long count, long offset) const
 {
-    u8* ptr(static_cast<u8*>(dst));
-    u8* end;
-
-    if (used < count)
+    ASSERT(0 <= offset);
+    if (used < offset + count)
     {
-        count = used;
+        count = used - offset;
     }
     if (count <= 0)
     {
         return 0;
     }
+    ASSERT(offset < used);
 
-    end = buf + size;
+    u8* ptr = static_cast<u8*>(dst);
+    const u8* end = buf + size;
     ASSERT(buf <= head && head < end);
 
-    if (head + count < end)
+    const u8* src = head + offset;
+    if (end <= src)
     {
-        //  buf      head         tail      end
-        //  |        |            |         |
-        //  +--------XXXXXXXXXXXXX----------+
-        //  |        |<- count ->|            |
-        memmove(ptr, head, count);
+        src = buf + (offset - (end - src));
     }
-    else    // (end <= head + count)
+    ASSERT(buf <= src && src < end);
+
+    if (src + count < end)
     {
-        //  buf      tail     head         end
+        //  buf      src            tail    end
+        //  |        |              |       |
+        //  +--------XXXXXXXXXXXXXXXX-------+
+        //  |        |<- count ->|          |
+        memmove(ptr, src, count);
+    }
+    else    // (end <= src + count)
+    {
+        //  buf      tail     src           end
         //  |        |        |             |
         //  XXXXXXXXX---------XXXXXXXXXXXXXXX
         //  +->|              |<-- count ---+
         //
         //                or
         //
-        //  buf      tail     head         end
+        //  buf      tail     src           end
         //  |        |        |             |
         //  XXXXXXXXX---------XXXXXXXXXXXXXXX
         //  |                 |<-- count -->|
-        long snip = end - head;
+        long snip = end - src;
         ASSERT(snip <= count);
-        memmove(ptr, head, snip);
+        memmove(ptr, src, snip);
         memmove(ptr + snip, buf, count - snip);
     }
     return count;
@@ -106,6 +113,53 @@ read(void* dst, long count)
         ASSERT(snip <= count);
         memmove(ptr, head, snip);
         memmove(ptr + size, buf, count - snip);
+        head = buf + count - snip;
+    }
+    ASSERT(buf <= head && head < end);
+    used -= count;
+    return count;
+}
+
+long Ring::
+discard(long count)
+{
+    u8* end;
+
+    if (used < count)
+    {
+        count = used;
+    }
+    if (count <= 0)
+    {
+        return 0;
+    }
+
+    end = buf + size;
+    ASSERT(buf <= head && head < end);
+
+    if (head + count < end)
+    {
+        //  buf      head         tail      end
+        //  |        |            |         |
+        //  +--------XXXXXXXXXXXXX----------+
+        //  |        |<- count ->|            |
+        head += count;
+    }
+    else    // (end <= head + count)
+    {
+        //  buf      tail     head         end
+        //  |        |        |             |
+        //  XXXXXXXXX---------XXXXXXXXXXXXXXX
+        //  +->|              |<-- count ---+
+        //
+        //                or
+        //
+        //  buf      tail     head         end
+        //  |        |        |             |
+        //  XXXXXXXXX---------XXXXXXXXXXXXXXX
+        //  |                 |<-- count -->|
+        long snip = end - head;
+        ASSERT(snip <= count);
         head = buf + count - snip;
     }
     ASSERT(buf <= head && head < end);

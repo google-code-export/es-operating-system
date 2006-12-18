@@ -16,7 +16,6 @@
 
 #include <es/endian.h>
 #include <es/handle.h>
-#include <es/timer.h>
 #include <es/tree.h>
 #include <es/net/inet4.h>
 #include "arp.h"
@@ -26,6 +25,7 @@
 #include "inet4address.h"
 #include "scope.h"
 #include "socket.h"
+#include "stream.h"
 #include "tcp.h"
 #include "udp.h"
 
@@ -67,8 +67,6 @@ public:
 
 class InFamily : public AddressFamily
 {
-    Timer*                      timer;
-
     // Scope demultiplexer
     ScopeAccessor               scopeAccessor;
     ConduitFactory              scopeFactory;
@@ -130,7 +128,22 @@ class InFamily : public AddressFamily
     Protocol                    udpProtocol;
 
     // TCP
-    // ...
+    StreamReceiver              streamReceiver;
+    Protocol                    streamProtocol;
+    InetRemoteAddressAccessor   tcpRemoteAddressAccessor;
+    ConduitFactory              tcpRemoteAddressFactory;
+    Mux                         tcpRemoteAddressMux;
+    InetRemotePortAccessor      tcpRemotePortAccessor;
+    ConduitFactory              tcpRemotePortFactory;
+    Mux                         tcpRemotePortMux;
+    InetLocalAddressAccessor    tcpLocalAddressAccessor;
+    ConduitFactory              tcpLocalAddressFactory;
+    Mux                         tcpLocalAddressMux;
+    InetLocalPortAccessor       tcpLocalPortAccessor;
+    ConduitFactory              tcpLocalPortFactory;
+    Mux                         tcpLocalPortMux;
+    TCPReceiver                 tcpReceiver;
+    Protocol                    tcpProtocol;
 
     // Inet4Address tree
     Tree<InAddr, Inet4Address*> addressTable[Socket::INTERFACE_MAX];
@@ -153,7 +166,7 @@ public:
             switch (socket->getSocketType())
             {
             case Socket::SOCK_STREAM:
-                // return &tcpProtocol;
+                return &tcpProtocol;
                 break;
             case Socket::SOCK_DGRAM:
                 return &udpProtocol;
@@ -181,16 +194,6 @@ public:
     Inet4Address* selectSourceAddress(Inet4Address* dst);
 
     bool isReachable(Inet4Address* address, long long timeout);
-
-    void alarm(TimerTask* timerTask, TimeSpan delay)
-    {
-        timer->schedule(timerTask, DateTime::getNow() + delay);
-    }
-
-    void cancel(TimerTask* timerTask)
-    {
-        timer->cancel(timerTask);
-    }
 
     // Inet4Address
     Inet4Address                addressAny;     // InAddrAny

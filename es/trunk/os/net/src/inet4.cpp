@@ -34,23 +34,35 @@ InFamily::InFamily() :
     udpLocalAddressMux(&udpLocalAddressAccessor, &udpLocalAddressFactory),
     udpLocalPortFactory(&udpLocalAddressMux),
     udpLocalPortMux(&udpLocalPortAccessor, &udpLocalPortFactory),
+
+    streamReceiver(&tcpProtocol),
+    tcpRemoteAddressFactory(&streamProtocol),
+    tcpRemoteAddressMux(&tcpRemoteAddressAccessor, &tcpRemoteAddressFactory),
+    tcpRemotePortFactory(&tcpRemoteAddressMux),
+    tcpRemotePortMux(&tcpRemotePortAccessor, &tcpRemotePortFactory),
+    tcpLocalAddressFactory(&tcpRemotePortMux),
+    tcpLocalAddressMux(&tcpLocalAddressAccessor, &tcpLocalAddressFactory),
+    tcpLocalPortFactory(&tcpLocalAddressMux),
+    tcpLocalPortMux(&tcpLocalPortAccessor, &tcpLocalPortFactory),
+
     addressAny(InAddrAny, Inet4Address::statePreferred),
     arpFamily(this)
 {
-    timer = new Timer;
-
     inProtocol.setReceiver(&inReceiver);
     icmpProtocol.setReceiver(&icmpReceiver);
     echoRequestAdapter.setReceiver(&echoRequestReceiver);
     igmpProtocol.setReceiver(&igmpReceiver);
     udpProtocol.setReceiver(&udpReceiver);
     datagramProtocol.setReceiver(&datagramReceiver);
+    tcpProtocol.setReceiver(&tcpReceiver);
+    streamProtocol.setReceiver(&streamReceiver);
 
     Conduit::connectAA(&scopeMux, &inProtocol);
     Conduit::connectBA(&inProtocol, &inMux);
     Conduit::connectBA(&inMux, &icmpProtocol, reinterpret_cast<void*>(IPPROTO_ICMP));
     Conduit::connectBA(&inMux, &igmpProtocol, reinterpret_cast<void*>(IPPROTO_IGMP));
     Conduit::connectBA(&inMux, &udpProtocol, reinterpret_cast<void*>(IPPROTO_UDP));
+    Conduit::connectBA(&inMux, &tcpProtocol, reinterpret_cast<void*>(IPPROTO_TCP));
 
     // ICMP
     Conduit::connectBA(&icmpProtocol, &icmpMux);
@@ -62,6 +74,13 @@ InFamily::InFamily() :
 
     // UDP
     Conduit::connectBA(&udpProtocol, &udpLocalPortMux);
+
+    // TCP
+    tcpRemoteAddressFactory.setReceiver(&streamReceiver);
+    tcpRemotePortFactory.setReceiver(&streamReceiver);
+    tcpLocalAddressFactory.setReceiver(&streamReceiver);
+    tcpLocalPortFactory.setReceiver(&streamReceiver);
+    Conduit::connectBA(&tcpProtocol, &tcpLocalPortMux);
 
     Socket::addAddressFamily(this);
 }

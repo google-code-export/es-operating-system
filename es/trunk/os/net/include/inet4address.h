@@ -53,7 +53,6 @@ class Inet4Address :
         virtual bool input(InetMessenger* m, Inet4Address* a) = 0;
         virtual bool output(InetMessenger* m, Inet4Address* a) = 0;
         virtual bool error(InetMessenger* m, Inet4Address* a) = 0;
-
     };
 
     // The following for states are used for ARP cache. [RFC 826]

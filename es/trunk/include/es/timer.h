@@ -44,6 +44,16 @@ public:
         return executionTime;
     }
 
+    bool isEnabled()
+    {
+        return (executionTime != 0) ? true : false;
+    }
+
+    bool isPeriodic()
+    {
+        return (period != 0) ? true : false;
+    }
+
     virtual void run() = 0;
 };
 
@@ -98,6 +108,10 @@ class Timer
                 else
                 {
                     queue.remove(node->getKey());
+                    if (task->period == 0)
+                    {
+                        task->executionTime = 0;
+                    }
                     task->run();
                     if (0 < task->period)
                     {
@@ -195,12 +209,25 @@ public:
         monitor->notifyAll();
     }
 
+    void schedule(TimerTask* timerTask, TimeSpan delay)
+    {
+        schedule(timerTask, DateTime::getNow() + delay);
+    }
+
+    void schedule(TimerTask* timerTask, TimeSpan delay, TimeSpan period)
+    {
+        schedule(timerTask, DateTime::getNow() + delay, period);
+    }
+
     void cancel(TimerTask* timerTask)
     {
         Synchronized<IMonitor*> method(monitor);
-
-        queue.remove(timerTask->executionTime);
-        timerTask->period = 0;  // Stop periodic timer
+        if (timerTask->isEnabled())
+        {
+            queue.remove(timerTask->executionTime);
+            timerTask->executionTime = 0;
+            timerTask->period = 0;  // Stop periodic timer
+        }
     }
 };
 

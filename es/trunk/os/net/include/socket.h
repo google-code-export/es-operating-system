@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <es/endian.h>
 #include <es/ref.h>
+#include <es/timer.h>
 #include <es/base/IStream.h>
 #include <es/net/ISocket.h>
 #include <es/net/udp.h>
@@ -51,6 +52,7 @@ public:
 private:
     static AddressFamily::List  addressFamilyList;
     static Interface*           interfaces[INTERFACE_MAX];
+    static Timer*               timer;
 
     Ref             ref;
     int             family;
@@ -63,6 +65,11 @@ public:
     static const int SOCK_STREAM = 1;
     static const int SOCK_DGRAM = 2;
     static const int SOCK_RAW = 3;
+
+    static void initialize()
+    {
+        timer = new Timer;
+    }
 
     static void addAddressFamily(AddressFamily* af)
     {
@@ -88,6 +95,11 @@ public:
         return 0;
     }
 
+    Conduit* getProtocol()
+    {
+        return af->getProtocol(this);
+    }
+
     static int addInterface(IStream* stream, int hrd);
     static void removeInterface(IStream* stream);
     static Interface* getInterface(int scopeID)
@@ -98,6 +110,17 @@ public:
         }
         return interfaces[scopeID];
     }
+
+    static void alarm(TimerTask* timerTask, TimeSpan delay)
+    {
+        timer->schedule(timerTask, delay);
+    }
+
+    static void cancel(TimerTask* timerTask)
+    {
+        timer->cancel(timerTask);
+    }
+
 
     Socket(int family, int type, int protocol = 0);
     ~Socket();
@@ -113,6 +136,20 @@ public:
     void setAdapter(Adapter* adapter)
     {
         this->adapter = adapter;
+    }
+
+    Receiver* getReceiver()
+    {
+        if (!adapter)
+        {
+            return 0;
+        }
+        Conduit* conduit = adapter->getA();
+        if (!conduit)
+        {
+            return 0;
+        }
+        return conduit->getReceiver();
     }
 
     //
@@ -168,13 +205,13 @@ public:
     unsigned int release();
 };
 
-class SocketBinder : public Visitor
+class SocketInstaller : public Visitor
 {
     Socket* socket;
     int     code;
 
 public:
-    SocketBinder(Socket* s) :
+    SocketInstaller(Socket* s) :
         Visitor(s),
         socket(s),
         code(0)
@@ -215,6 +252,55 @@ public:
     }
 };
 
+class SocketUninstaller : public Visitor
+{
+    Socket* socket;
+
+public:
+    SocketUninstaller(Socket* s) :
+        Visitor(s),
+        socket(s)
+    {
+    }
+
+    bool at(Adapter* a, Conduit* c)
+    {
+        a->setReceiver(0);
+        return true;
+    }
+
+    bool at(Protocol* p, Conduit* c)
+    {
+        if (socket->getProtocol() == p)
+        {
+            return false;   // To stop this visitor
+        }
+
+        Receiver* receiver = p->getReceiver();
+        if (receiver)
+        {
+            p->setReceiver(0);
+            delete receiver;
+        }
+        c->setA(0);
+        p->setB(0);
+        delete c;
+        return true;
+    }
+
+    bool at(Mux* mux, Conduit* c)
+    {
+        if (c->isEmpty())
+        {
+            c->setA(0);
+            mux->removeB(mux->getKey(getMessenger()));
+            delete c;
+            return true;
+        }
+        return false;       // To stop this visitor
+    }
+};
+
 class SocketDisconnector : public Visitor
 {
     Socket*     socket;
@@ -227,14 +313,34 @@ public:
         protocol(0)
     {
     }
+
+    bool at(Protocol* p, Conduit* c)
+    {
+        if (socket->getProtocol() == p)
+        {
+            return false;   // To stop this visitor
+        }
+
+        ASSERT(protocol == 0);
+        protocol = p;
+        return true;
+    }
+
     bool at(Mux* mux, Conduit* c)
     {
-        ASSERT(c->getA() == mux);
-        c->setA(0);
-        mux->removeB(mux->getKey(getMessenger()));
-        protocol = c;
-        return false;   // To stop this visitor
+        if (c->isEmpty() || c == protocol)
+        {
+            c->setA(0);
+            mux->removeB(mux->getKey(getMessenger()));
+            if (c != protocol)
+            {
+                delete c;
+            }
+            return true;
+        }
+        return false;       // To stop this visitor
     }
+
     Conduit* getProtocol() const
     {
         return protocol;
@@ -301,9 +407,35 @@ public:
     {
         return true;
     }
+
     virtual bool write(SocketMessenger* m)
     {
         return true;
+    }
+
+    virtual bool accept(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool connect(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool close(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool shutdownOutput(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool shutdownInput(SocketMessenger* m)
+    {
+        return false;
     }
 
     typedef bool (SocketReceiver::*Command)(SocketMessenger*);
@@ -312,12 +444,14 @@ public:
 class SocketMessenger : public InetMessenger
 {
     SocketReceiver::Command op;
+    Socket* socket;
 
 public:
     SocketMessenger(SocketReceiver::Command op,
                     void* chunk = 0, long len = 0, long pos = 0) :
         InetMessenger(0, chunk, len, pos),
-        op(op)
+        op(op),
+        socket(0)
     {
     }
 
@@ -325,13 +459,34 @@ public:
     {
         if (op)
         {
-            SocketReceiver* receiver = dynamic_cast<SocketReceiver*>(c->getReceiver());
-            if (receiver)
+            if (SocketReceiver* receiver = dynamic_cast<SocketReceiver*>(c->getReceiver()))
             {
                 return (receiver->*op)(this);
             }
         }
+        if (InetMessenger::op)
+        {
+            if (InetReceiver* receiver = dynamic_cast<InetReceiver*>(c->getReceiver()))
+            {
+                return (receiver->*InetMessenger::op)(this);
+            }
+        }
         return Messenger::apply(c);
+    }
+
+    void setCommand(InetReceiver::Command op)
+    {
+        InetMessenger::op = op;
+        op = 0;
+    }
+
+    Socket* getSocket()
+    {
+        return socket;
+    }
+    void setSocket(Socket* socket)
+    {
+        this->socket = socket;
     }
 };
 

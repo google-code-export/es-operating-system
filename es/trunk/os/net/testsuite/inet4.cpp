@@ -47,6 +47,8 @@ int main()
     esInit(&root);
     Handle<IContext> context(root);
 
+    Socket::initialize();
+
     esDump(&InAddrAny, 4);
     esDump(&InAddrLoopback, 4);
     esDump(&InBroadcast, 4);
@@ -96,6 +98,10 @@ int main()
     socket.read(input, 4);
     esReport("'%s'\n", input);
 
+    // Test close operation
+    socket.close();
+    visualize();
+
     // Test ICMP echo
     localhost->isReachable(10000000);
 
@@ -130,7 +136,7 @@ int main()
 #endif
 
     esSleep(100000000);
-
     nic->stop();
+
     esReport("done.\n");
 }

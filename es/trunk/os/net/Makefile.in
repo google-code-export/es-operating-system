@@ -62,7 +62,10 @@ am__objects_1 =
 am__objects_2 = arp.$(OBJEXT) conduit.$(OBJEXT) datagram.$(OBJEXT) \
 	dix.$(OBJEXT) icmp4.$(OBJEXT) igmp.$(OBJEXT) \
 	inet4address.$(OBJEXT) inet4.$(OBJEXT) inet6address.$(OBJEXT) \
-	inet6.$(OBJEXT) socket.$(OBJEXT) udp.$(OBJEXT)
+	inet6.$(OBJEXT) socket.$(OBJEXT) stream.$(OBJEXT) \
+	streamInput.$(OBJEXT) streamOutput.$(OBJEXT) \
+	streamScoreboard.$(OBJEXT) streamTimer.$(OBJEXT) tcp.$(OBJEXT) \
+	udp.$(OBJEXT)
 am_libesnet_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_1)
 libesnet_a_OBJECTS = $(am_libesnet_a_OBJECTS)
@@ -211,6 +214,12 @@ cpp_source_files = \
 	src/inet6address.cpp \
 	src/inet6.cpp \
 	src/socket.cpp \
+	src/stream.cpp \
+	src/streamInput.cpp \
+	src/streamOutput.cpp \
+	src/streamScoreboard.cpp \
+	src/streamTimer.cpp \
+	src/tcp.cpp \
 	src/udp.cpp
 
 header_files = \
@@ -320,6 +329,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet6address.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/streamInput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/streamOutput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/streamScoreboard.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/streamTimer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/udp.Po@am__quote@
 
 .cpp.o:
@@ -489,6 +504,90 @@ socket.obj: src/socket.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/socket.cpp' object='socket.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o socket.obj `if test -f 'src/socket.cpp'; then $(CYGPATH_W) 'src/socket.cpp'; else $(CYGPATH_W) '$(srcdir)/src/socket.cpp'; fi`
+
+stream.o: src/stream.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT stream.o -MD -MP -MF "$(DEPDIR)/stream.Tpo" -c -o stream.o `test -f 'src/stream.cpp' || echo '$(srcdir)/'`src/stream.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/stream.Tpo" "$(DEPDIR)/stream.Po"; else rm -f "$(DEPDIR)/stream.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/stream.cpp' object='stream.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o stream.o `test -f 'src/stream.cpp' || echo '$(srcdir)/'`src/stream.cpp
+
+stream.obj: src/stream.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT stream.obj -MD -MP -MF "$(DEPDIR)/stream.Tpo" -c -o stream.obj `if test -f 'src/stream.cpp'; then $(CYGPATH_W) 'src/stream.cpp'; else $(CYGPATH_W) '$(srcdir)/src/stream.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/stream.Tpo" "$(DEPDIR)/stream.Po"; else rm -f "$(DEPDIR)/stream.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/stream.cpp' object='stream.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o stream.obj `if test -f 'src/stream.cpp'; then $(CYGPATH_W) 'src/stream.cpp'; else $(CYGPATH_W) '$(srcdir)/src/stream.cpp'; fi`
+
+streamInput.o: src/streamInput.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamInput.o -MD -MP -MF "$(DEPDIR)/streamInput.Tpo" -c -o streamInput.o `test -f 'src/streamInput.cpp' || echo '$(srcdir)/'`src/streamInput.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamInput.Tpo" "$(DEPDIR)/streamInput.Po"; else rm -f "$(DEPDIR)/streamInput.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamInput.cpp' object='streamInput.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamInput.o `test -f 'src/streamInput.cpp' || echo '$(srcdir)/'`src/streamInput.cpp
+
+streamInput.obj: src/streamInput.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamInput.obj -MD -MP -MF "$(DEPDIR)/streamInput.Tpo" -c -o streamInput.obj `if test -f 'src/streamInput.cpp'; then $(CYGPATH_W) 'src/streamInput.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamInput.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamInput.Tpo" "$(DEPDIR)/streamInput.Po"; else rm -f "$(DEPDIR)/streamInput.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamInput.cpp' object='streamInput.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamInput.obj `if test -f 'src/streamInput.cpp'; then $(CYGPATH_W) 'src/streamInput.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamInput.cpp'; fi`
+
+streamOutput.o: src/streamOutput.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamOutput.o -MD -MP -MF "$(DEPDIR)/streamOutput.Tpo" -c -o streamOutput.o `test -f 'src/streamOutput.cpp' || echo '$(srcdir)/'`src/streamOutput.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamOutput.Tpo" "$(DEPDIR)/streamOutput.Po"; else rm -f "$(DEPDIR)/streamOutput.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamOutput.cpp' object='streamOutput.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamOutput.o `test -f 'src/streamOutput.cpp' || echo '$(srcdir)/'`src/streamOutput.cpp
+
+streamOutput.obj: src/streamOutput.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamOutput.obj -MD -MP -MF "$(DEPDIR)/streamOutput.Tpo" -c -o streamOutput.obj `if test -f 'src/streamOutput.cpp'; then $(CYGPATH_W) 'src/streamOutput.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamOutput.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamOutput.Tpo" "$(DEPDIR)/streamOutput.Po"; else rm -f "$(DEPDIR)/streamOutput.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamOutput.cpp' object='streamOutput.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamOutput.obj `if test -f 'src/streamOutput.cpp'; then $(CYGPATH_W) 'src/streamOutput.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamOutput.cpp'; fi`
+
+streamScoreboard.o: src/streamScoreboard.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamScoreboard.o -MD -MP -MF "$(DEPDIR)/streamScoreboard.Tpo" -c -o streamScoreboard.o `test -f 'src/streamScoreboard.cpp' || echo '$(srcdir)/'`src/streamScoreboard.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamScoreboard.Tpo" "$(DEPDIR)/streamScoreboard.Po"; else rm -f "$(DEPDIR)/streamScoreboard.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamScoreboard.cpp' object='streamScoreboard.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamScoreboard.o `test -f 'src/streamScoreboard.cpp' || echo '$(srcdir)/'`src/streamScoreboard.cpp
+
+streamScoreboard.obj: src/streamScoreboard.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamScoreboard.obj -MD -MP -MF "$(DEPDIR)/streamScoreboard.Tpo" -c -o streamScoreboard.obj `if test -f 'src/streamScoreboard.cpp'; then $(CYGPATH_W) 'src/streamScoreboard.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamScoreboard.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamScoreboard.Tpo" "$(DEPDIR)/streamScoreboard.Po"; else rm -f "$(DEPDIR)/streamScoreboard.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamScoreboard.cpp' object='streamScoreboard.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamScoreboard.obj `if test -f 'src/streamScoreboard.cpp'; then $(CYGPATH_W) 'src/streamScoreboard.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamScoreboard.cpp'; fi`
+
+streamTimer.o: src/streamTimer.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamTimer.o -MD -MP -MF "$(DEPDIR)/streamTimer.Tpo" -c -o streamTimer.o `test -f 'src/streamTimer.cpp' || echo '$(srcdir)/'`src/streamTimer.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamTimer.Tpo" "$(DEPDIR)/streamTimer.Po"; else rm -f "$(DEPDIR)/streamTimer.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamTimer.cpp' object='streamTimer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamTimer.o `test -f 'src/streamTimer.cpp' || echo '$(srcdir)/'`src/streamTimer.cpp
+
+streamTimer.obj: src/streamTimer.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT streamTimer.obj -MD -MP -MF "$(DEPDIR)/streamTimer.Tpo" -c -o streamTimer.obj `if test -f 'src/streamTimer.cpp'; then $(CYGPATH_W) 'src/streamTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamTimer.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/streamTimer.Tpo" "$(DEPDIR)/streamTimer.Po"; else rm -f "$(DEPDIR)/streamTimer.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/streamTimer.cpp' object='streamTimer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o streamTimer.obj `if test -f 'src/streamTimer.cpp'; then $(CYGPATH_W) 'src/streamTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/src/streamTimer.cpp'; fi`
+
+tcp.o: src/tcp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tcp.o -MD -MP -MF "$(DEPDIR)/tcp.Tpo" -c -o tcp.o `test -f 'src/tcp.cpp' || echo '$(srcdir)/'`src/tcp.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tcp.Tpo" "$(DEPDIR)/tcp.Po"; else rm -f "$(DEPDIR)/tcp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/tcp.cpp' object='tcp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tcp.o `test -f 'src/tcp.cpp' || echo '$(srcdir)/'`src/tcp.cpp
+
+tcp.obj: src/tcp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tcp.obj -MD -MP -MF "$(DEPDIR)/tcp.Tpo" -c -o tcp.obj `if test -f 'src/tcp.cpp'; then $(CYGPATH_W) 'src/tcp.cpp'; else $(CYGPATH_W) '$(srcdir)/src/tcp.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tcp.Tpo" "$(DEPDIR)/tcp.Po"; else rm -f "$(DEPDIR)/tcp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/tcp.cpp' object='tcp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tcp.obj `if test -f 'src/tcp.cpp'; then $(CYGPATH_W) 'src/tcp.cpp'; else $(CYGPATH_W) '$(srcdir)/src/tcp.cpp'; fi`
 
 udp.o: src/udp.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT udp.o -MD -MP -MF "$(DEPDIR)/udp.Tpo" -c -o udp.o `test -f 'src/udp.cpp' || echo '$(srcdir)/'`src/udp.cpp; \

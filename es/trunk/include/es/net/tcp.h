@@ -14,21 +14,101 @@
 #ifndef NINTENDO_ES_NET_TCP_H_INCLUDED
 #define NINTENDO_ES_NET_TCP_H_INCLUDED
 
+#include <es.h>
 #include <es/endian.h>
+#include <es/ring.h>
 
 //
 // TCP RFC 793
 //
 
-typedef struct TCPHdr
+class TCPSeq
 {
+    s32 seq;    // sequence number
+public:
+    TCPSeq(s32 seq = 0) : seq(seq)
+    {
+    }
+
+    TCPSeq& operator=(s32 seq)
+    {
+        this->seq = seq;
+        return *this;
+    }
+
+    TCPSeq& operator+=(s32 octets)
+    {
+        seq += octets;
+        return *this;
+    }
+
+    TCPSeq& operator++()
+    {
+        ++seq;
+        return *this;
+    }
+
+    operator s32() const
+    {
+        return seq;
+    }
+};
+
+inline bool operator<(TCPSeq a, TCPSeq b)
+{
+    return 0 < b - a;
+}
+
+inline bool operator<=(TCPSeq a, TCPSeq b)
+{
+    return 0 <= b - a;
+}
+
+inline bool operator>(TCPSeq a, TCPSeq b)
+{
+    return 0 < a - b;
+}
+
+inline bool operator>=(TCPSeq a, TCPSeq b)
+{
+    return 0 <= a - b;
+}
+
+struct TCPHdr
+{
+    static const int MIN_HLEN = 20;
+    static const int MAX_HLEN = 60;
+
+    static const u16 FIN = 0x0001;      // No more data from sender
+    static const u16 SYN = 0x0002;      // Synchronize sequence numbers
+    static const u16 RST = 0x0004;      // Reset the connection
+    static const u16 PSH = 0x0008;      // Push function
+    static const u16 ACK = 0x0010;      // Acknowledgment field significant
+    static const u16 URG = 0x0020;      // Urgent pointer field significant
+
+    static const u16 ECE = 0x0040;      // [RFC 3168]
+    static const u16 CWR = 0x0080;      // [RFC 3168]
+
+    // Option kind
+    static const u8 OPT_EOL = 0;        // End of option list
+    static const u8 OPT_NOP = 1;        // No-Operation.
+    static const u8 OPT_MSS = 2;        // Maximum Segment Size (length = 4, can only apper in SYNs)
+
+    // RFC 1323 TCP Extensions for High Performance
+    static const u8 OPT_WS = 3;         // Window scale (length = 3)
+    static const u8 OPT_TS = 8;         // Timestamps (length = 10)
+
+    // RFC 2018 TCP Selective Acknowledgement Options
+    static const u8 OPT_SACKP = 4;      // Sack-Permitted (length = 2)
+    static const u8 OPT_SACK = 5;       // Sack (length = variable)
+    static const int ASB_MAX = 4;       // 8 * ASB_MAX + 2 < 40
+
     u16 src;    // source port
     u16 dst;    // destination port
-
     s32 seq;    // sequence number
     s32 ack;    // acknowledgment number
-
-    u16 flag;   // 4:data offset, 6:reserved, 1:URG, 1:ACK, 1:PSH, 1:RST, 1:SYN, 1:FIN
+    u16 flag;   // 4:data offset, 4:reserved, 1:CWR, 1:ECE,
+                // 1:URG, 1:ACK, 1:PSH, 1:RST, 1:SYN, 1:FIN
     u16 win;    // window
     u16 sum;    // checksum
     u16 urg;    // urgent pointer
@@ -43,68 +123,98 @@ typedef struct TCPHdr
         return ((size & 0xf000) >> 10);
     }
 
-} TCPHdr;
+    void setHdrSize(int size)
+    {
+        ASSERT(MIN_HLEN <= size && size <= MAX_HLEN && (size & 3) == 0);
+        flag &= htons(0x0fff);
+        flag |= htons(size << 10);
+    }
+};
 
-#define TCP_MIN_HLEN        20
-#define TCP_MAX_HLEN        60
+struct TCPOpt
+{
+    u8  kind;
+};
 
-#define TCP_IIS_CLOCK       (1000000 / 4)   // incremented every 4 usec following RFC793.
+struct TCPOptEol
+{
+    u8  kind;
 
-#define TCP_FLAG_FIN        0x0001  // No more data from sender
-#define TCP_FLAG_SYN        0x0002  // Synchronize sequence numbers
-#define TCP_FLAG_RST        0x0004  // Reset the connection
-#define TCP_FLAG_PSH        0x0008  // Push function
-#define TCP_FLAG_ACK        0x0010  // Acknowledgment field significant
-#define TCP_FLAG_URG        0x0020  // Urgent pointer field significant
-#define TCP_FLAG_793        0x003f
+    TCPOptEol() : kind(TCPHdr::OPT_EOL) {}
+};
 
-#define TCP_FLAG_ECE        0x0040  // [RFC 3168]
-#define TCP_FLAG_CWR        0x0080  // [RFC 3168]
-#define TCP_FLAG_3168       0x00ff
+struct TCPOptNop
+{
+    u8  kind;
 
-#define TCP_FLAG_DATAOFFSET 0xf000
+    TCPOptNop() : kind(TCPHdr::OPT_NOP) {}
+};
 
-// Option kind
-#define TCP_OPT_EOL         0       // End of option list
-#define TCP_OPT_NOP         1       // No-Operation.
-#define TCP_OPT_MSS         2       // Maximum Segment Size (length = 4, can only apper in SYNs)
+struct TCPOptMss
+{
+    u8  kind;
+    u8  len;
+    u16 mss;
 
-// RFC 1323 TCP Extensions for High Performance
-#define TCP_OPT_WS          3       // Window scale (length = 3)
-#define TCP_OPT_TS          8       // Timestamps (length = 10)
+    TCPOptMss(u16 mss) :
+        kind(TCPHdr::OPT_MSS),
+        len(4),
+        mss(htons(mss))
+    {
+    }
+};
 
-// RFC 2018 TCP Selective Acknowledgement Options
-#define TCP_OPT_SACKP       4       // Sack-Permitted (length = 2)
-#define TCP_OPT_SACK        5       // Sack (length = variable)
+struct TCPOptSackPermitted
+{
+    u8  kind;
+    u8  len;
 
-#define TCP_DEF_SSTHRESH    65535           // Default slow start threshold value
-#define TCP_MSL             120             // Maximum segment lifetime in second
-#define TCP_MIN_RTT         1000            // Minimum value of restransmission timer in millisecond
-                                            // It must be larger than delayed ACK time + RTT.
-                                            // RFC 2988 requires 1 second [SHOULD].
-#define TCP_MAX_RTT         (2 * TCP_MSL)   // Maximum value of restransmission timer in second
-#define TCP_DEF_RTT         3               // Default RTT in second
-#define TCP_R1              3               // At least 3 retransmissions [RFC 1122]
-#define TCP_PMTUD_BACKOFF   4               // Path MTU discovery blackhole detection
-#define TCP_MAX_BACKOFF     16              // Maximum retransmission count allowed.
-                                            // Must be more than R1, add less than 31.
-#define TCP_MAX_PERSIST     (TCP_MAX_BACKOFF * TCP_MAX_RTT)
-                                            // Maximum idle time in persist state
-#define TCP_RXMIT_THRESH    3               // Fast restransmission threshold
-#define TCP_LIMITED_THRESH  2               // Limited Transmit threshold
+    TCPOptSackPermitted() :
+        kind(TCPHdr::OPT_SACKP),
+        len(2)
+    {
+    }
+};
 
-#define TCP_DACK_TIME       200             // Delayed ACK timer in millisecond
+struct TCPOptSack
+{
+    u8  kind;
+    u8  len;
+    struct
+    {
+        s32 left;
+        s32 right;
+    }   edge[1];
 
-// a < b
-#define TCP_SEQ_GT(a, b)    (0 < ((b) - (a)))
+    TCPOptSack(u8* head, long size, Ring::Vec* asb, s32 offset) :
+        kind(TCPHdr::OPT_SACK)
+    {
+        Ring::Vec* block;
+        int i;
+        for (block = &asb[TCPHdr::ASB_MAX - 1], i = 0; asb <= block; --block, ++i)
+        {
+            if (block->data)
+            {
+                s32 left;
+                s32 right;
 
-// a <= b
-#define TCP_SEQ_GE(a, b)    (0 <= ((b) - (a)))
+                if (head <= block->data)
+                {
+                    left = (u8*) block->data - head;
+                }
+                else
+                {
+                    left = (u8*) block->data + size - head;
+                }
+                left += offset;
+                right = left + block->count;
 
-// max(a, b)
-#define TCP_SEQ_MAX(a, b)   (TCP_SEQ_GT((a), (b)) ? (b) : (a))
-
-// min(a, b)
-#define TCP_SEQ_MIN(a, b)   (TCP_SEQ_GT((a), (b)) ? (a) : (b))
+                edge[i].left = htonl(left);
+                edge[i].right = htonl(right);
+            }
+        }
+        len = 8 * i + 2;
+    }
+};
 
 #endif  // NINTENDO_ES_NET_TCP_H_INCLUDED

@@ -21,6 +21,12 @@ cpp_source_files = \
 	src/inet6address.cpp \
 	src/inet6.cpp \
 	src/socket.cpp \
+	src/stream.cpp \
+	src/streamInput.cpp \
+	src/streamOutput.cpp \
+	src/streamScoreboard.cpp \
+	src/streamTimer.cpp \
+	src/tcp.cpp \
 	src/udp.cpp
 
 header_files = \
