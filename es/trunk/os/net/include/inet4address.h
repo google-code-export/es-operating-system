@@ -119,6 +119,7 @@ class Inet4Address :
         {
             return true;
         }
+        void start(Inet4Address* a);
         void expired(Inet4Address* a);
         bool input(InetMessenger* m, Inet4Address* a);
         bool output(InetMessenger* m, Inet4Address* a);
@@ -184,19 +185,22 @@ class Inet4Address :
     State*      state;
     InAddr      addr;
     int         scopeID;
+    int         prefix;
     InFamily*   inFamily;
     Conduit*    adapter;
     int         timeoutCount;
 
 public:
-    Inet4Address(InAddr addr, State& state, int scopeID = 0) :
+    Inet4Address(InAddr addr, State& state, int scopeID = 0, int prefix = 0) :
         state(&state),
         addr(addr),
         scopeID(scopeID),
+        prefix(prefix),
         inFamily(0),
         adapter(0),
         timeoutCount(0)
     {
+        ASSERT(0 <= prefix && prefix < 32);
     }
 
     virtual ~Inet4Address()
@@ -224,6 +228,22 @@ public:
     InAddr getAddress()
     {
         return addr;
+    }
+
+    int getPrefix()
+    {
+        return prefix;
+    }
+    void setPrefix(int prefix)
+    {
+        this->prefix = prefix;
+    }
+
+    InAddr getMask()
+    {
+        InAddr mask;
+        mask.addr = htonl(0xffffffffu << (32 - prefix));
+        return mask;
     }
 
     Inet4Address* clone(Conduit* conduit, void* key)
@@ -306,7 +326,7 @@ public:
 
     IInternetAddress* getNext();
 
-    IInterface* socket(int type, int protocol);
+    IInterface* socket(int type, int protocol, int port);
 
     // IInterface
     bool queryInterface(const Guid& riid, void** objectPtr);

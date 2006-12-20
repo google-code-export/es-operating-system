@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = conduit inet4 tcp
+TESTS = conduit inet4 tcp config
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -26,13 +26,13 @@ endif POSIX
 
 if ES
 
-TESTS = inet4
+TESTS = config
 
 noinst_SCRIPTS = $(TESTS)
 
 noinst_PROGRAMS = $(TESTS)
 
-noinst_DATA = inet4.img
+noinst_DATA = config.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 
@@ -48,5 +48,7 @@ conduit_SOURCES = conduit.cpp
 inet4_SOURCES = inet4.cpp
 
 tcp_SOURCES = tcp.cpp
+
+config_SOURCES = config.cpp
 
 EXTRA_DIST = makeScript

@@ -151,6 +151,9 @@ class InFamily : public AddressFamily
     // ARP family
     ARPFamily                   arpFamily;
 
+    // Default Router List
+    RouterList<Inet4Address>    routerList;
+
 public:
     InFamily();
 
@@ -165,13 +168,13 @@ public:
         {
             switch (socket->getSocketType())
             {
-            case Socket::SOCK_STREAM:
+            case ISocket::STREAM:
                 return &tcpProtocol;
                 break;
-            case Socket::SOCK_DGRAM:
+            case ISocket::DGRAM:
                 return &udpProtocol;
                 break;
-            case Socket::SOCK_RAW:
+            case ISocket::RAW:
                 return &inProtocol;
                 break;
             default:
@@ -191,12 +194,35 @@ public:
     void addAddress(Inet4Address* address);
     void removeAddress(Inet4Address* address);
 
+    void addRouter(Inet4Address* addr)
+    {
+        Handle<Inet4Address> local;
+        local = onLink(addr->getAddress(), addr->getScopeID());
+        if (local)
+        {
+            routerList.addRouter(addr);
+        }
+    }
+
+    void removeRouter(Inet4Address* addr)
+    {
+        routerList.removeRouter(addr);
+    }
+
+    Inet4Address* onLink(InAddr addr, int scopeID = 0);
+
+    Inet4Address* getNextHop(Inet4Address* dst);
     Inet4Address* selectSourceAddress(Inet4Address* dst);
 
     bool isReachable(Inet4Address* address, long long timeout);
 
     // Inet4Address
     Inet4Address                addressAny;     // InAddrAny
+
+    friend class Inet4Address;
+    friend class Inet4Address::StateInit;
+    friend class Inet4Address::StateTentative;
+    friend class Inet4Address::StatePreferred;
 };
 
 #endif  // INET4_H_INCLUDED

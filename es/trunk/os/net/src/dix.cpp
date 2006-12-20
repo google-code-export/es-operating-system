@@ -97,6 +97,7 @@ bool DIXARPReceiver::output(InetMessenger* m)
 
     m->movePosition(-sizeof(DIXHdr));
     DIXHdr* dixhdr = static_cast<DIXHdr*>(m->fix(sizeof(DIXHdr)));
+    dix->getMacAddress(dixhdr->src);
     if (IN_IS_ADDR_LINKLOCAL(arphdr->spa))
     {
         // All ARP packets (*replies* as well as requests) that contain a Link-
@@ -105,7 +106,7 @@ bool DIXARPReceiver::output(InetMessenger* m)
         // duplicate addresses. [RFC 3927]
         memset(dixhdr->dst, 0xff, 6);   // bcast
     }
-    else if (memcmp(zero, arphdr->tha, 6))
+    else if (memcmp(zero, arphdr->tha, 6) && memcmp(dixhdr->src, arphdr->tha, 6))
     {
         memmove(dixhdr->dst, arphdr->tha, 6);
     }
@@ -113,7 +114,6 @@ bool DIXARPReceiver::output(InetMessenger* m)
     {
         memset(dixhdr->dst, 0xff, 6);   // bcast
     }
-    dix->getMacAddress(dixhdr->src);
     dixhdr->type = htons(DIXHdr::DIX_ARP);
 
     return true;

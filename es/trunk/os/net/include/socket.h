@@ -62,10 +62,6 @@ private:
     AddressFamily*  af;
 
 public:
-    static const int SOCK_STREAM = 1;
-    static const int SOCK_DGRAM = 2;
-    static const int SOCK_RAW = 3;
-
     static void initialize()
     {
         timer = new Timer;

@@ -16,6 +16,10 @@ import "es/net/IInternetAddress.idl";
 [object, uuid(ca324aba-633b-11db-9c02-0009bf000001)]
 interface ISocket : IInterface
 {
+    const int STREAM = 1;
+    const int DGRAM = 2;
+    const int RAW = 3;
+
     ISocket* accept();
     void bind(IInternetAddress* addr, int port);
     void close();

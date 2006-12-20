@@ -49,7 +49,7 @@ protected:
 
 private:
     int                     scopeID;
-    Address*                removeAddress;
+    Address*                remoteAddress;
     Address*                localAddress;
     u16                     remotePort;
     u16                     localPort;
@@ -60,7 +60,7 @@ public:
                   void* chunk = 0, long len = 0, long pos = 0) :
         Messenger(chunk, len, pos),
         op(op),
-        removeAddress(0),
+        remoteAddress(0),
         localAddress(0),
         remotePort(0),
         localPort(0),
@@ -101,19 +101,19 @@ public:
         {
             addr->addRef();
         }
-        if (removeAddress)
+        if (remoteAddress)
         {
-            removeAddress->release();
+            remoteAddress->release();
         }
-        removeAddress = addr;
+        remoteAddress = addr;
     }
     Address* getRemote() const
     {
-        if (removeAddress)
+        if (remoteAddress)
         {
-            removeAddress->addRef();
+            remoteAddress->addRef();
         }
-        return removeAddress;
+        return remoteAddress;
     }
     void setLocal(Address* addr)
     {

@@ -53,6 +53,8 @@ bool ICMPReceiver::output(InetMessenger* m)
 
 bool ICMPEchoRequestReceiver::input(InetMessenger* m)
 {
+    esReport("ICMPEchoRequestReceiver::input\n");
+
     int len = m->getLength();
     ICMPEcho* icmphdr = static_cast<ICMPEcho*>(m->fix(len));
 

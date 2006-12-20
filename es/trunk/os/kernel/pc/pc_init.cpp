@@ -230,6 +230,10 @@ int esInit(IInterface** nameSpace)
     binding->release();
     device->release();
 
+    // Create network name space
+    IContext* network = root->createSubcontext("network");
+    network->release();
+
     // Create class store
     classStore = static_cast<IClassStore*>(new ClassStore);
     binding = root->bind("class", classStore);

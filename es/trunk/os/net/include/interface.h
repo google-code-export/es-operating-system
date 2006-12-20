@@ -97,6 +97,15 @@ public:
         }
     }
 
+    IStream* getStream()
+    {
+        if (stream)
+        {
+            stream->addRef();
+        }
+        return stream;
+    }
+
     Adapter* getAdapter()
     {
         return &adapter;

@@ -62,7 +62,8 @@ am__objects_1 =
 am__objects_2 = arp.$(OBJEXT) conduit.$(OBJEXT) datagram.$(OBJEXT) \
 	dix.$(OBJEXT) icmp4.$(OBJEXT) igmp.$(OBJEXT) \
 	inet4address.$(OBJEXT) inet4.$(OBJEXT) inet6address.$(OBJEXT) \
-	inet6.$(OBJEXT) socket.$(OBJEXT) stream.$(OBJEXT) \
+	inet6.$(OBJEXT) inetConfig.$(OBJEXT) inet.$(OBJEXT) \
+	resolver.$(OBJEXT) socket.$(OBJEXT) stream.$(OBJEXT) \
 	streamInput.$(OBJEXT) streamOutput.$(OBJEXT) \
 	streamScoreboard.$(OBJEXT) streamTimer.$(OBJEXT) tcp.$(OBJEXT) \
 	udp.$(OBJEXT)
@@ -213,6 +214,9 @@ cpp_source_files = \
 	src/inet4.cpp \
 	src/inet6address.cpp \
 	src/inet6.cpp \
+	src/inetConfig.cpp \
+	src/inet.cpp \
+	src/resolver.cpp \
 	src/socket.cpp \
 	src/stream.cpp \
 	src/streamInput.cpp \
@@ -234,9 +238,11 @@ header_files = \
 	include/inet4address.h \
 	include/inet6.h \
 	include/inet6address.h \
+	include/inetConfig.h \
 	include/inet.h \
 	include/interface.h \
 	include/loopback.h \
+	include/resolver.h \
 	include/scope.h \
 	include/socket.h \
 	include/stream.h \
@@ -324,10 +330,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icmp4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/igmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet4address.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet6address.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inetConfig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/streamInput.Po@am__quote@
@@ -490,6 +499,48 @@ inet6.obj: src/inet6.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/inet6.cpp' object='inet6.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o inet6.obj `if test -f 'src/inet6.cpp'; then $(CYGPATH_W) 'src/inet6.cpp'; else $(CYGPATH_W) '$(srcdir)/src/inet6.cpp'; fi`
+
+inetConfig.o: src/inetConfig.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT inetConfig.o -MD -MP -MF "$(DEPDIR)/inetConfig.Tpo" -c -o inetConfig.o `test -f 'src/inetConfig.cpp' || echo '$(srcdir)/'`src/inetConfig.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/inetConfig.Tpo" "$(DEPDIR)/inetConfig.Po"; else rm -f "$(DEPDIR)/inetConfig.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/inetConfig.cpp' object='inetConfig.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o inetConfig.o `test -f 'src/inetConfig.cpp' || echo '$(srcdir)/'`src/inetConfig.cpp
+
+inetConfig.obj: src/inetConfig.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT inetConfig.obj -MD -MP -MF "$(DEPDIR)/inetConfig.Tpo" -c -o inetConfig.obj `if test -f 'src/inetConfig.cpp'; then $(CYGPATH_W) 'src/inetConfig.cpp'; else $(CYGPATH_W) '$(srcdir)/src/inetConfig.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/inetConfig.Tpo" "$(DEPDIR)/inetConfig.Po"; else rm -f "$(DEPDIR)/inetConfig.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/inetConfig.cpp' object='inetConfig.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o inetConfig.obj `if test -f 'src/inetConfig.cpp'; then $(CYGPATH_W) 'src/inetConfig.cpp'; else $(CYGPATH_W) '$(srcdir)/src/inetConfig.cpp'; fi`
+
+inet.o: src/inet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT inet.o -MD -MP -MF "$(DEPDIR)/inet.Tpo" -c -o inet.o `test -f 'src/inet.cpp' || echo '$(srcdir)/'`src/inet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/inet.Tpo" "$(DEPDIR)/inet.Po"; else rm -f "$(DEPDIR)/inet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/inet.cpp' object='inet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o inet.o `test -f 'src/inet.cpp' || echo '$(srcdir)/'`src/inet.cpp
+
+inet.obj: src/inet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT inet.obj -MD -MP -MF "$(DEPDIR)/inet.Tpo" -c -o inet.obj `if test -f 'src/inet.cpp'; then $(CYGPATH_W) 'src/inet.cpp'; else $(CYGPATH_W) '$(srcdir)/src/inet.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/inet.Tpo" "$(DEPDIR)/inet.Po"; else rm -f "$(DEPDIR)/inet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/inet.cpp' object='inet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o inet.obj `if test -f 'src/inet.cpp'; then $(CYGPATH_W) 'src/inet.cpp'; else $(CYGPATH_W) '$(srcdir)/src/inet.cpp'; fi`
+
+resolver.o: src/resolver.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT resolver.o -MD -MP -MF "$(DEPDIR)/resolver.Tpo" -c -o resolver.o `test -f 'src/resolver.cpp' || echo '$(srcdir)/'`src/resolver.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/resolver.Tpo" "$(DEPDIR)/resolver.Po"; else rm -f "$(DEPDIR)/resolver.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/resolver.cpp' object='resolver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o resolver.o `test -f 'src/resolver.cpp' || echo '$(srcdir)/'`src/resolver.cpp
+
+resolver.obj: src/resolver.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT resolver.obj -MD -MP -MF "$(DEPDIR)/resolver.Tpo" -c -o resolver.obj `if test -f 'src/resolver.cpp'; then $(CYGPATH_W) 'src/resolver.cpp'; else $(CYGPATH_W) '$(srcdir)/src/resolver.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/resolver.Tpo" "$(DEPDIR)/resolver.Po"; else rm -f "$(DEPDIR)/resolver.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/resolver.cpp' object='resolver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o resolver.obj `if test -f 'src/resolver.cpp'; then $(CYGPATH_W) 'src/resolver.cpp'; else $(CYGPATH_W) '$(srcdir)/src/resolver.cpp'; fi`
 
 socket.o: src/socket.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT socket.o -MD -MP -MF "$(DEPDIR)/socket.Tpo" -c -o socket.o `test -f 'src/socket.cpp' || echo '$(srcdir)/'`src/socket.cpp; \

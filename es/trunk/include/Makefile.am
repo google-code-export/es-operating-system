@@ -80,6 +80,7 @@ nobase_nodist_include_HEADERS = \
 	es/naming/IBinding.h \
 	es/naming/IContext.h \
 	es/net/IInternetAddress.h \
+	es/net/IInternetConfig.h \
 	es/net/IResolver.h \
 	es/net/ISocket.h \
 	es/util/IIterator.h \
@@ -116,6 +117,7 @@ nobase_nodist_include_HEADERS += \
 	es/naming/IBinding.ird \
 	es/naming/IContext.ird \
 	es/net/IInternetAddress.ird \
+	es/net/IInternetConfig.ird \
 	es/net/IResolver.ird \
 	es/net/ISocket.ird \
 	es/util/IIterator.ird \
@@ -152,6 +154,7 @@ nobase_include_HEADERS += \
 	es/naming/IBinding.idl \
 	es/naming/IContext.idl \
 	es/net/IInternetAddress.idl \
+	es/net/IInternetConfig.idl \
 	es/net/IResolver.idl \
 	es/net/ISocket.idl \
 	es/util/IIterator.idl \

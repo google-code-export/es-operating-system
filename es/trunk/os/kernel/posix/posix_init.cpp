@@ -130,6 +130,12 @@ int esInit(IInterface** nameSpace)
     Tap* tap = new Tap("tap0", "br0", "/etc/qemu-ifup");
     device->bind("ethernet", static_cast<IStream*>(tap));
 
+    device->release();
+
+    // Create network name space
+    IContext* network = root->createSubcontext("network");
+    network->release();
+
     return 0;
 }
 

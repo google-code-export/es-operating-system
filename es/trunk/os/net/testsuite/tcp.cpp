@@ -99,7 +99,7 @@ int main()
     InFamily* inFamily = new InFamily;
     esReport("AF: %d\n", inFamily->getAddressFamily());
 
-    Socket raw(AF_INET, Socket::SOCK_RAW);
+    Socket raw(AF_INET, ISocket::RAW);
     inProtocol = inFamily->getProtocol(&raw);
     visualize();
 
@@ -110,9 +110,10 @@ int main()
     // Register localhost address
     Handle<Inet4Address> localhost = new Inet4Address(InAddrLoopback, Inet4Address::statePreferred, scopeID);
     inFamily->addAddress(localhost);
+    localhost->start();
     visualize();
 
-    Socket socket(AF_INET, Socket::SOCK_STREAM);
+    Socket socket(AF_INET, ISocket::STREAM);
     socket.bind(localhost, 54);
     visualize();
 
@@ -122,7 +123,7 @@ int main()
     esSleep(10000000);
 
     // Test bind and connect operations
-    Socket client(AF_INET, Socket::SOCK_STREAM);
+    Socket client(AF_INET, ISocket::STREAM);
     client.bind(localhost, 53);
     visualize();
 

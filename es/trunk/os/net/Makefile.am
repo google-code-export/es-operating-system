@@ -20,6 +20,9 @@ cpp_source_files = \
 	src/inet4.cpp \
 	src/inet6address.cpp \
 	src/inet6.cpp \
+	src/inetConfig.cpp \
+	src/inet.cpp \
+	src/resolver.cpp \
 	src/socket.cpp \
 	src/stream.cpp \
 	src/streamInput.cpp \
@@ -41,9 +44,11 @@ header_files = \
 	include/inet4address.h \
 	include/inet6.h \
 	include/inet6address.h \
+	include/inetConfig.h \
 	include/inet.h \
 	include/interface.h \
 	include/loopback.h \
+	include/resolver.h \
 	include/scope.h \
 	include/socket.h \
 	include/stream.h \

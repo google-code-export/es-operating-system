@@ -25,7 +25,9 @@
 #include "inet4address.h"
 #include "inet6.h"
 #include "inet6address.h"
+#include "inetConfig.h"
 #include "loopback.h"
+#include "resolver.h"
 #include "scope.h"
 #include "tcp.h"
 #include "udp.h"
@@ -71,7 +73,7 @@ int main()
     InFamily* inFamily = new InFamily;
     esReport("AF: %d\n", inFamily->getAddressFamily());
 
-    Socket raw(AF_INET, Socket::SOCK_RAW);
+    Socket raw(AF_INET, ISocket::RAW);
     inProtocol = inFamily->getProtocol(&raw);
     visualize();
 
@@ -80,12 +82,19 @@ int main()
     int scopeID = Socket::addInterface(loopbackStream, ARPHdr::HRD_LOOPBACK);
 
     // Register localhost address
-    Handle<Inet4Address> localhost = new Inet4Address(InAddrLoopback, Inet4Address::statePreferred, scopeID);
+    Handle<Inet4Address> localhost = new Inet4Address(InAddrLoopback, Inet4Address::statePreferred, scopeID, 8);
     inFamily->addAddress(localhost);
+    localhost->start();
     visualize();
 
+    // Create resolver object
+    Resolver resolver;
+
+    // Create internet config object
+    InternetConfig ipconfig;
+
     // Test bind and connect operations
-    Socket socket(AF_INET, Socket::SOCK_DGRAM);
+    Socket socket(AF_INET, ISocket::DGRAM);
     socket.bind(localhost, 53);
     visualize();
     socket.connect(localhost, 53);
@@ -102,7 +111,7 @@ int main()
     socket.close();
     visualize();
 
-    // Test ICMP echo
+    // Test local ping
     localhost->isReachable(10000000);
 
     // Setup DIX interface
@@ -112,11 +121,10 @@ int main()
     int dixID = Socket::addInterface(ethernetStream, ARPHdr::HRD_ETHERNET);
     esReport("dixID: %d\n", dixID);
 
-    // Register host address 169.254.0.1
-    InAddr addr = { htonl(169 << 24 | 254 << 16 | 0 << 8 | 1) };
-    Handle<Inet4Address> host = new Inet4Address(addr, Inet4Address::stateTentative, dixID);
-    inFamily->addAddress(host);
-    host->start();
+    // Register host address (192.168.2.40)
+    InAddr addr = { htonl(192 << 24 | 168 << 16 | 2 << 8 | 40) };
+    Handle<Inet4Address> host = resolver.getHostByAddress(&addr.addr, sizeof addr, dixID);
+    ipconfig.addAddress(host, 16);
     visualize();
 
     // Wait for the host address to be settled.
@@ -127,13 +135,37 @@ int main()
     ASSERT(arpFamily);
 
 #if 0
-    // Test ARP to 169.254.88.46
-    InAddr addrRemote = { htonl(169 << 24 | 254 << 16 | 88 << 8 | 46) };
+    // Test ARP to 192.168.2.20 (169.254.88.46)
+    InAddr addrRemote = { htonl(192 << 24 | 168 << 16 | 2 << 8 | 20) };
     Handle<Inet4Address> dst = new Inet4Address(addrRemote, Inet4Address::stateInit, dixID);
     inFamily->addAddress(dst);
     arpFamily->addAddress(dst);
     dst->start();
 #endif
+
+    // Register a default router (192.168.2.1)
+    InAddr addrRouter = { htonl(192 << 24 | 168 << 16 | 2 << 8 | 1) };
+    Handle<Inet4Address> router = resolver.getHostByAddress(&addrRouter.addr, sizeof addr, dixID);
+    ipconfig.addRouter(router);
+
+#if 0
+    esReport("ping #1\n");
+    router->isReachable(10000000);
+    esReport("ping #2\n");
+    router->isReachable(10000000);
+    esReport("ping #3\n");
+    router->isReachable(10000000);
+#endif
+
+    // Test remote ping (192.195.204.26 / www.nintendo.com)
+    InAddr addrRemote = { htonl(192 << 24 | 195 << 16 | 204 << 8 | 26) };
+    Handle<Inet4Address> remote = resolver.getHostByAddress(&addrRemote.addr, sizeof addr, 0);
+    esReport("ping #1\n");
+    remote->isReachable(10000000);
+    esReport("ping #2\n");
+    remote->isReachable(10000000);
+    esReport("ping #3\n");
+    remote->isReachable(10000000);
 
     esSleep(100000000);
     nic->stop();

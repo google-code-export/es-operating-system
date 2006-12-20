@@ -34,7 +34,13 @@ Inet4Address::StatePrefix           Inet4Address::statePrefix;
 Address* Inet4Address::
 getNextHop()
 {
-    return this;    // XXX
+    if (state != &stateDestination && state != &statePrefix)
+    {
+        addRef();
+        return this;
+    }
+
+    return inFamily->getNextHop(this);
 }
 
 void Inet4Address::
@@ -95,9 +101,23 @@ getNext()
 }
 
 IInterface* Inet4Address::
-socket(int type, int protocol)
+socket(int type, int protocol, int port)
 {
-    return 0;
+    Socket* socket = new Socket(type, protocol);
+    if (isUnspecified() || port == 0)
+    {
+        return socket;
+    }
+
+    if (isLocalAddress())
+    {
+        socket->bind(this, port);
+    }
+    else
+    {
+        socket->connect(this, port);
+    }
+    return socket;
 }
 
 // IInterface

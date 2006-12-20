@@ -39,6 +39,9 @@ ARPFamily::ARPFamily(InFamily* inFamily) :
 void Inet4Address::
 StateInit::start(Inet4Address* a)
 {
+    // Install ARP cache for this address.
+    a->inFamily->arpFamily.addAddress(a);
+
     a->setState(stateIncomplete);
     a->run();   // Invoke expired
 }
@@ -125,7 +128,7 @@ StateIncomplete::error(InetMessenger* m, Inet4Address* a)
 void Inet4Address::
 StateReachable::start(Inet4Address* a)
 {
-    a->alarm(20 * 60 * 10000000L);
+    a->alarm(20 * 60 * 10000000LL);
 }
 
 void Inet4Address::
@@ -217,6 +220,16 @@ StateProbe::error(InetMessenger* m, Inet4Address* a)
 void Inet4Address::
 StateTentative::start(Inet4Address* a)
 {
+    // Set the interface MAC address to this address.
+    Interface* nic = Socket::getInterface(a->getScopeID());
+    ASSERT(nic);
+    u8 mac[6];
+    nic->getMacAddress(mac);
+    a->setMacAddress(mac);
+
+    // Install ARP cache for this address.
+    a->inFamily->arpFamily.addAddress(a);
+
     a->alarm(10000000);   // PROBE_WAIT
 }
 
@@ -247,6 +260,8 @@ StateTentative::expired(Inet4Address* a)
     else
     {
         a->setState(statePreferred);
+        a->start();
+        a->run();
     }
 }
 
@@ -271,11 +286,23 @@ StateTentative::error(InetMessenger* m, Inet4Address* a)
 // StatePreferred
 
 void Inet4Address::
+StatePreferred::start(Inet4Address* a)
+{
+    // Install an ICMP echo request adapter for this address.
+    InetMessenger m;
+    m.setLocal(a);
+    Installer installer(&m);
+    a->inFamily->echoRequestMux.accept(&installer, &a->inFamily->icmpMux);
+}
+
+void Inet4Address::
 StatePreferred::expired(Inet4Address* a)
 {
     ASSERT(a->adapter);
     if (++a->timeoutCount <= ARPHdr::ANNOUNCE_NUM)
     {
+        esReport("StatePreferred::timeoutCount: %d\n", a->timeoutCount);
+
         // Send announcement
         u8 chunk[sizeof(DIXHdr) + sizeof(ARPHdr)];
         InetMessenger m(&InetReceiver::output, chunk, sizeof chunk, sizeof(DIXHdr));

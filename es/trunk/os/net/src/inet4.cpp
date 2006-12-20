@@ -125,34 +125,6 @@ void InFamily::addAddress(Inet4Address* address)
     addressTable[scopeID].add(address->getAddress(), address);
     address->addRef();
     address->inFamily = this;
-
-    // If address is for one of the IP address assigned to this host, ...
-    if (address->isLocalAddress())
-    {
-        // Install an ICMP echo request adapter for this address.
-        InetMessenger m;
-        m.setLocal(address);
-        Installer installer(&m);
-        echoRequestMux.accept(&installer, &icmpMux);
-
-        if (!address->isLoopback()) // XXX we should check if the address uses ARP or not.
-        {
-            // Set the interface MAC address to this address.
-            Interface* nic = Socket::getInterface(scopeID);
-            ASSERT(nic);
-            u8 mac[6];
-            nic->getMacAddress(mac);
-            address->setMacAddress(mac);
-
-            // Install ARP cache for this address.
-            arpFamily.addAddress(address);
-            address->start();
-        }
-    }
-    else if (1 < scopeID)   // XXX
-    {
-        arpFamily.addAddress(address);
-    }
 }
 
 void InFamily::removeAddress(Inet4Address* address)
@@ -163,6 +135,44 @@ void InFamily::removeAddress(Inet4Address* address)
     address->release();
 }
 
+Inet4Address* InFamily::onLink(InAddr addr, int scopeID)
+{
+    Tree<void*, Conduit*>::Node* node;
+    Tree<void*, Conduit*>::Iterator iter = echoRequestMux.list();
+    while ((node = iter.next()))
+    {
+        Conduit* conduit = node->getValue();
+        ICMPEchoRequestReceiver* receiver = dynamic_cast<ICMPEchoRequestReceiver*>(conduit->getReceiver());
+        ASSERT(receiver);
+        Inet4Address* local = receiver->getAddress();
+        ASSERT(local);
+        if (local->getPrefix() &&
+            IN_IS_ADDR_IN_NET(addr, local->getAddress(), local->getMask()) &&
+            (scopeID == 0 || scopeID == local->getScopeID()))
+        {
+            return local;
+        }
+        local->release();
+    }
+    return 0;
+}
+
+Inet4Address* InFamily::getNextHop(Inet4Address* dst)
+{
+    int scopeID = dst->getScopeID();
+    if (scopeID == 0)
+    {
+        Inet4Address* router = routerList.getRouter();
+        if (router)
+        {
+            return router;
+        }
+    }
+
+    dst->addRef();
+    return dst;
+}
+
 Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
 {
     if (dst->isLoopback())
@@ -170,15 +180,32 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
         return getAddress(InAddrLoopback, 1);
     }
 
+    Inet4Address* src = 0;
+    src = onLink(dst->getAddress(), dst->getScopeID());
+    if (src)
+    {
+        return src;
+    }
+
+    // XXX Check destination cache
+
     int scopeID = dst->getScopeID();
     if (scopeID == 0)
     {
-        // XXX Select a router
-
+        Inet4Address* router = routerList.getRouter();
+        if (router)
+        {
+            src = onLink(router->getAddress(), router->getScopeID());
+            router->release();
+            if (src)
+            {
+                return src;
+            }
+        }
+        scopeID = 2;    // default
     }
 
     // Look up preferred address of the same scope ID.
-    Inet4Address* src = 0;
     Tree<InAddr, Inet4Address*>::Node* node;
     Tree<InAddr, Inet4Address*>::Iterator iter = addressTable[scopeID].begin();
     while ((node = iter.next()))
@@ -186,7 +213,8 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
         Inet4Address* address = node->getValue();
         if (address->isPreferred())
         {
-            src = address;  // XXX Check link-local
+            src = address;
+            src->addRef();
             break;
         }
     }
@@ -194,20 +222,20 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
     return src;
 }
 
-bool InFamily::isReachable(Inet4Address* address, long long timeout)
+bool InFamily::isReachable(Inet4Address* dst, long long timeout)
 {
-    Handle<Inet4Address> src = selectSourceAddress(address);
+    Handle<Inet4Address> src = selectSourceAddress(dst);
     if (!src)
     {
         return false;
     }
 
     Adapter* adapter = new Adapter;
-    ICMPEchoReplyReceiver* receiver = new ICMPEchoReplyReceiver(adapter, address);
+    ICMPEchoReplyReceiver* receiver = new ICMPEchoReplyReceiver(adapter, dst);
     adapter->setReceiver(receiver);
-    Conduit::connectBA(&echoReplyMux, adapter, address);
+    Conduit::connectBA(&echoReplyMux, adapter, dst);
 
-    // Send ICMP Echo request to this address
+    // Send ICMP Echo request to dst
     int pos = 14 + 60;      // XXX Assume MAC, IPv4
     int len = sizeof(ICMPEcho) + 10;
     u8 chunk[pos + len];
@@ -219,20 +247,22 @@ bool InFamily::isReachable(Inet4Address* address, long long timeout)
     icmphdr->seq = 0;   // XXX
 
     InetMessenger m(&InetReceiver::output, chunk, pos + len, pos);
-    m.setRemote(src);
-    m.setLocal(address);
+    m.setRemote(dst);
+    m.setLocal(src);
     m.setType(IPPROTO_ICMP);
 
     Visitor v(&m);
     adapter->accept(&v);
 
-    receiver->wait();
+    receiver->wait(timeout);
 
-    echoReplyMux.removeB(address);
+    bool replied = receiver->isReplied();
+
+    echoReplyMux.removeB(dst);
     delete adapter;
     delete receiver;
 
-    return true;
+    return replied;
 }
 
 s16 InReceiver::
@@ -274,9 +304,25 @@ input(InetMessenger* m)
     addr = inFamily->getAddress(iphdr->src, scopeID);
     if (!addr)
     {
-        // XXX scopeID should be zero when forwarded by a router
-        addr = new Inet4Address(iphdr->src, Inet4Address::stateInit, scopeID);
+        Handle<Inet4Address> onLink;
+        if (IN_IS_ADDR_LOOPBACK(iphdr->src))
+        {
+            return false;
+        }
+        else if (IN_IS_ADDR_MULTICAST(iphdr->src))
+        {
+            addr = new Inet4Address(iphdr->src, Inet4Address::stateNonMember, scopeID);
+        }
+        else if (onLink = inFamily->onLink(iphdr->src))
+        {
+            addr = new Inet4Address(iphdr->src, Inet4Address::stateInit, onLink->getScopeID());
+        }
+        else
+        {
+            addr = new Inet4Address(iphdr->src, Inet4Address::stateDestination, 0);
+        }
         inFamily->addAddress(addr);
+        addr->start();
     }
     m->setRemote(addr);
 
@@ -314,8 +360,9 @@ output(InetMessenger* m)
     iphdr->sum = checksum(m, iphdr->getHdrSize());
     m->setType(AF_INET);
 
-    // XXX Set the remote address to the next hop router address
-    //     if necessary.
+    // Set the remote address to the next hop router address
+    // if necessary.
+    m->setRemote(m->getRemote()->getNextHop());
 
     return true;
 }

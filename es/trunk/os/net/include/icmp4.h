@@ -69,6 +69,15 @@ public:
 
     bool input(InetMessenger* m);
 
+    Inet4Address* getAddress()
+    {
+        if (addr)
+        {
+            addr->addRef();
+        }
+        return addr;
+    }
+
     ICMPEchoRequestReceiver* clone(Conduit* conduit, void* key)
     {
         return new ICMPEchoRequestReceiver(conduit, static_cast<Inet4Address*>(key));
@@ -101,13 +110,10 @@ public:
 
     bool input(InetMessenger* m);
 
-    bool wait()
+    bool wait(s64 timeout)
     {
         Synchronized<IMonitor*> method(monitor);
-        while (!replied)
-        {
-            monitor->wait();
-        }
+        monitor->wait(timeout);
     }
 
     void notify()
@@ -115,6 +121,11 @@ public:
         Synchronized<IMonitor*> method(monitor);
         replied = true;
         monitor->notifyAll();
+    }
+
+    bool isReplied()
+    {
+        return replied;
     }
 };
 

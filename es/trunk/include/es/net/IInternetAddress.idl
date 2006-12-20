@@ -15,7 +15,7 @@ import "es/base/IInterface.idl";
 
 /** This interface represents an internet address.
  */
-[object, uuid(9ce16d3a-631c-11db-9c02-0009bf000001)]
+[object, uuid(272349ba-8fd1-11db-9c02-0009bf000001)]
 interface IInternetAddress : IInterface
 {
     int getAddress([out, size_is(len)] void* address, unsigned int len);
@@ -40,5 +40,5 @@ interface IInternetAddress : IInterface
 
     /** Creates a socket.
      */
-    IInterface* socket(int type, int protocol);
+    IInterface* socket(int type, int protocol, int port);
 }

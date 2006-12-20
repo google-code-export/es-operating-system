@@ -652,7 +652,7 @@ StateListen::input(InetMessenger* m, StreamReceiver* s)
 
     // Clone new socket
     Handle<Address> addr;
-    Socket* socket = new Socket(s->getSocket()->getAddressFamily(), Socket::SOCK_STREAM);
+    Socket* socket = new Socket(s->getSocket()->getAddressFamily(), ISocket::STREAM);
     socket->setLocal(addr = m->getLocal());
     socket->setLocalPort(m->getLocalPort());
     socket->setRemote(addr = m->getRemote());
