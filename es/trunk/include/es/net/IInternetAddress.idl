@@ -18,27 +18,85 @@ import "es/base/IInterface.idl";
 [object, uuid(272349ba-8fd1-11db-9c02-0009bf000001)]
 interface IInternetAddress : IInterface
 {
+    /** Gets the raw IP address of this internet address.
+     * @param address the IP address.
+     * @param len     the length of the buffer to contain the IP address.
+     */
     int getAddress([out, size_is(len)] void* address, unsigned int len);
+
+    /** Gets the address family of this internet address.
+     * @return AF_INET or AF_INET6.
+     */
     int getAddressFamily();
+
+    /** Gets the canonical host name which is a fully qualified domain name for this internet address.
+     * @param hostName this canonical host name.
+     * @param len      the length of the buffer to contain the canonical host name.
+     */
     int getCanonicalHostName([out, size_is(len)] char* hostName, unsigned int len);
+
+    /** Gets the host address of this internet address.
+     * A host address specifies the computer in a single network.
+     * @param hostAddress this host address.
+     * @param len         the length of the buffer to contain the host address.
+     */
     int getHostAddress([out, size_is(len)] char* hostAddress, unsigned int len);
+
+    /** Gets the host name for this internet address.
+     * @param hostName this host name.
+     * @param len      the length of the buffer to contain the host name.
+     */
     int getHostName([out, size_is(len)] char* hostName, unsigned int len);
+
+    /** Gets this scope identifier which refers to an interface on the local system.
+     * @return this scope identifier, or zero if not set.
+     */
     int getScopeID();
 
+    /** Checks whether this address is unspecified.
+     * @return true if this address is unspecified.
+     */
     boolean isUnspecified();
+
+    /** Checks whether this address is a link-local address.
+     * @return true if this address is a link-local address.
+     */
     boolean isLinkLocal();
+
+    /** Checks whether this address is a loopback address.
+     * @return true if this address is a loopback address.
+     */
     boolean isLoopback();
+
+    /** Checks whether this address is a multicast address.
+     * @return true if this address is a multicast address.
+     */
     boolean isMulticast();
+
+    /** Sends an ICMP echo request message to this internet address, and waits for the ICMP echo reply message.
+     * @param timeout the time before the call aborts.
+     * @return true if the reply is received before the timeout. Otherwise, false.
+     */
     boolean isReachable(long timeout);
 
     /** Checks whether this address is assigned to one of the interfaces of the host.
-     * @return  true if this address is assigned to the host.
+     * @return true if this address is assigned to the host.
      */
     boolean isLocalAddress();
 
+    /** Gets the next internet address
+     * @return the next internet address.
+     */
     IInternetAddress* getNext();
 
     /** Creates a socket.
+     * <code>socket</code> binds the socket to this internet address if the address is a local address,
+     * while connects the socket to this internet address if the address is a remote address.
+     * Otherwise, <code>socket</code> does nothing.
+     * @param type     the type of this socket.
+     * @param protocol the protocol of this socket.
+     * @param port     the port number.
+     * @return <code>ISocket</code> interface of the new socket.
      */
     IInterface* socket(int type, int protocol, int port);
 }

@@ -49,18 +49,54 @@ interface IEthernet : IInterface
         MODE_UNKNOWN
     };
 
+    /** Tests whether this ethernet adapter is available.
+     * @return zero, if available.
+     */
     int probe();
+
+    /** Starts this ethernet adapter.
+     */
     int start();
+
+    /** Stops this ethernet adapter.
+     */
     int stop();
 
+    /** Enables or disables the promiscuous mode of this ethernet adapter.
+     * @param on the boolean if the promiscuous mode is to be enabled or not.
+     */
     void setPromiscuousMode(boolean on);
+
+    /** Checks if the promiscuous mode of this ethernet adapter is enabled or not.
+     */
     boolean getPromiscuousMode();
+
+    /** Allows this ethernet adapter to receive ethernet frames sent to the specified multicast MAC address.
+     * @param macaddr the MAC address.
+     */
     int addMulticastAddress([in] unsigned byte macaddr[6]);
+
+    /** Forbids this ethernet adapter to receive ethernet frames sent to the specified multicast MAC address.
+     * @param macaddr the MAC address.
+     */
     int removeMulticastAddress([in] unsigned byte macaddr[6]);
 
+    /** Gets the MAC address of this ethernet adapter.
+     * @param macaddr the MAC address.
+     */
     void getMacAddress([out] unsigned byte macaddr[6]);
+
+    /** Gets the current link state of this ethernet adapter.
+     */
     boolean getLinkState();
+
+    /** Gets the speed and duplex mode of this ethernet adapter.
+     * @return the number of the speed and duplex mode (IEthernet::MODE_*).
+     */
     int getMode();
 
+    /** Gets the statistics of this ethernet adapter.
+     * @param statistics the interface statistics.
+     */
     void getStatistics([out] InterfaceStatistics* statistics);
 }

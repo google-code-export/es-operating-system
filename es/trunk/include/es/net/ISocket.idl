@@ -13,29 +13,125 @@
 
 import "es/net/IInternetAddress.idl";
 
+/**
+ * This interface represents a socket.
+ */
 [object, uuid(ca324aba-633b-11db-9c02-0009bf000001)]
 interface ISocket : IInterface
 {
+    // socket type
     const int STREAM = 1;
     const int DGRAM = 2;
     const int RAW = 3;
 
+    /** Extracts the first connection on the queue of pending connections,
+     * creates a new socket with the same socket type,
+     * protocol and address family as the specified socket.
+     * The original socket remains open for further connection requests.
+     * @return a new socket.
+     */
     ISocket* accept();
+
+    /** Assigns the specified local internet address and the specified port to this socket that
+     *  has no local socket address assigned.
+     * @param addr the internet address to be assigned.
+     * @param port the port number.
+     */
     void bind(IInternetAddress* addr, int port);
+
+    /** Closes this socket.
+     */
     void close();
+
+    /** Attempts to make a connection to the specified server on this socket.
+     * If this socket has not already been bound to a local address,
+     * <code>connect</code> binds it to an address which is unused and local.
+     * @param addr the internet address of the server
+     * @param port the port number of the server.
+     */
     void connect(IInternetAddress* addr, int port);
+
+    /** Gets the address family of this socket.
+     * @retern the address family.
+     */
     int getAddressFamily();
+
+    /** Gets the local address to which this socket is bound.
+     * @return the local internet address.
+     */
     IInternetAddress* getLocalAddress();
+
+    /** Gets the local port to which this socket is bound.
+     * @return the local port number.
+     */
     int getLocalPort();
+
+    /** Gets the protocol of this socket.
+     * @return the protocol value.
+     */
     int getProtocolType();
+
+    /** Gets the remote internet address to which this socket is connected.
+     * @return the remote internet address.
+     */
     IInternetAddress* getRemoteAddress();
+
+    /** Gets the remote port to which this socket is connected.
+     * @return the port number.
+     */
     int getRemotePort();
+
+    /** Gets the type of this socket.
+     * @return the remote socket type.
+     */
     int getSocketType();
+
+    /** Enables the connection-mode socket to accept connections.
+     * @param backlog The maximum number of pending connections in the socket's listen backlog queue.
+     * If <code>backlog</code> is less than or equal to zero, backlog is set to one.
+     */
     void listen(int backlog);
+
+    /** Attempt to read the specified bytes of data from the other end of this socket.
+     * @param dst   the receive buffer.
+     * @param count the number of bytes of the receive buffer.
+     * @return the number of bytes received in the buffer.
+     */
     int read([out, size_is(count)] void* dst, int count);
+
+    /** Attempt to read the specified bytes of data from the other end of this socket and stores the internet address and port of the source.
+     * @param dst   the receive buffer.
+     * @param count the number of bytes of the receive buffer.
+     * @param flag  the flag which specifies the type of message reception.
+     * @param addr  the internet address of the peer.
+     * @param port  the port number of the peer.
+     * @return the number of bytes received in the buffer.
+     */
     int recvFrom([out, size_is(count)] void* dst, int count, int flags, [out] IInternetAddress** addr, [out] int* port);
+
+    /** Sends a message to the specified destination through this socket.
+     * @param src   the buffer containing the message to send.
+     * @param count the length of the message to be sent in bytes.
+     * @param flags the type of message transmission.
+     * @param addr  the internet address of the the destination.
+     * @param port  the port number of the destination.
+     * @return      the number of bytes sent.
+     */
     int sendTo([in, size_is(count)] void* src, int count, int flags, IInternetAddress* addr, int port);
+
+    /** Disables read-half of this socket connection.
+     * Any data sent to the input side of this socket is discarded
+     */
     void shutdownInput();
+
+    /** Disables write-half of this socket connection.
+     */
     void shutdownOutput();
+
+    /** Sends a message through this socket.
+     * @param src   the buffer containing the message to send.
+     * @param count the length of the message to be sent in bytes.
+     * @return      the number of bytes sent.
+     */
     int write([in, size_is(count)] void* src, int count);
 }
