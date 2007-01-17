@@ -9,6 +9,7 @@ AM_CPPFLAGS = \
 
 c_source_files = \
 	src/md5.c \
+	src/rand48.c \
 	src/string.c \
 	src/utf.c
 

@@ -89,6 +89,9 @@ void esUnlockMonitor(esMonitor* monitor);
 
 #endif  // !__es__
 
+// Misc.
+long long rand48(void);
+
 #ifdef __cplusplus
 }
 #endif

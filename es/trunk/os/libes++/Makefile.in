@@ -59,10 +59,11 @@ AR = ar
 ARFLAGS = cru
 libes___a_AR = $(AR) $(ARFLAGS)
 libes___a_LIBADD =
-am__libes___a_SOURCES_DIST = src/md5.c src/string.c src/utf.c \
-	src/dateTime.cpp src/throw.cpp src/formatter.cpp src/ring.cpp \
-	src/system.cpp
-am__objects_1 = md5.$(OBJEXT) string.$(OBJEXT) utf.$(OBJEXT)
+am__libes___a_SOURCES_DIST = src/md5.c src/rand48.c src/string.c \
+	src/utf.c src/dateTime.cpp src/throw.cpp src/formatter.cpp \
+	src/ring.cpp src/system.cpp
+am__objects_1 = md5.$(OBJEXT) rand48.$(OBJEXT) string.$(OBJEXT) \
+	utf.$(OBJEXT)
 am__objects_2 = dateTime.$(OBJEXT) throw.$(OBJEXT) formatter.$(OBJEXT) \
 	ring.$(OBJEXT)
 am__objects_3 =
@@ -208,6 +209,7 @@ AM_CPPFLAGS = \
 
 c_source_files = \
 	src/md5.c \
+	src/rand48.c \
 	src/string.c \
 	src/utf.c
 
@@ -300,6 +302,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dateTime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/formatter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rand48.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/system.Po@am__quote@
@@ -333,6 +336,20 @@ md5.obj: src/md5.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/md5.c' object='md5.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o md5.obj `if test -f 'src/md5.c'; then $(CYGPATH_W) 'src/md5.c'; else $(CYGPATH_W) '$(srcdir)/src/md5.c'; fi`
+
+rand48.o: src/rand48.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rand48.o -MD -MP -MF "$(DEPDIR)/rand48.Tpo" -c -o rand48.o `test -f 'src/rand48.c' || echo '$(srcdir)/'`src/rand48.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/rand48.Tpo" "$(DEPDIR)/rand48.Po"; else rm -f "$(DEPDIR)/rand48.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/rand48.c' object='rand48.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rand48.o `test -f 'src/rand48.c' || echo '$(srcdir)/'`src/rand48.c
+
+rand48.obj: src/rand48.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rand48.obj -MD -MP -MF "$(DEPDIR)/rand48.Tpo" -c -o rand48.obj `if test -f 'src/rand48.c'; then $(CYGPATH_W) 'src/rand48.c'; else $(CYGPATH_W) '$(srcdir)/src/rand48.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/rand48.Tpo" "$(DEPDIR)/rand48.Po"; else rm -f "$(DEPDIR)/rand48.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/rand48.c' object='rand48.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rand48.obj `if test -f 'src/rand48.c'; then $(CYGPATH_W) 'src/rand48.c'; else $(CYGPATH_W) '$(srcdir)/src/rand48.c'; fi`
 
 string.o: src/string.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT string.o -MD -MP -MF "$(DEPDIR)/string.Tpo" -c -o string.o `test -f 'src/string.c' || echo '$(srcdir)/'`src/string.c; \
