@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -15,12 +15,17 @@
 #define ADDRESS_H_INCLUDED
 
 #include <string.h>
+#include <es/collection.h>
+#include <es/list.h>
 #include <es/net/IInternetAddress.h>
 #include "conduit.h"
 
+class Socket;
+
 class Address : public IInternetAddress
 {
-    u8  mac[6];
+    u8                  mac[6];
+    Collection<Socket*> sockets;
 
 public:
     Address()
@@ -40,14 +45,31 @@ public:
         memmove(this->mac, mac, sizeof this->mac);
     }
 
+    void addSocket(Socket* socket)
+    {
+        sockets.addLast(socket);
+        start();
+    }
+
+    void removeSocket(Socket* socket)
+    {
+        sockets.remove(socket);
+        if (sockets.isEmpty())
+        {
+            stop();
+        }
+    }
+
     virtual s32 sumUp() = 0;
 
     virtual void start() = 0;
+    virtual void stop() = 0;
 
     virtual Address* getNextHop() = 0;
 
     // void hold(Messenger* m);
 
+    friend class UDPReceiver;
 };
 
 template <class Address>

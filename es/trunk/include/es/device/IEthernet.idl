@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -14,7 +14,7 @@
 import "es/base/IInterface.idl";
 
 /**
- * This interface represents an ethernet adapter.
+ * This interface represents an Ethernet adapter.
  */
 [object, uuid(6498dfe6-4ed4-11db-9c02-0009bf000001)]
 interface IEthernet : IInterface
@@ -49,53 +49,56 @@ interface IEthernet : IInterface
         MODE_UNKNOWN
     };
 
-    /** Tests whether this ethernet adapter is available.
+    /** Tests whether this Ethernet adapter is available.
      * @return zero, if available.
      */
     int probe();
 
-    /** Starts this ethernet adapter.
+    /** Starts this Ethernet adapter.
      */
     int start();
 
-    /** Stops this ethernet adapter.
+    /** Stops this Ethernet adapter.
      */
     int stop();
 
-    /** Enables or disables the promiscuous mode of this ethernet adapter.
+    /** Enables or disables the promiscuous mode of this Ethernet adapter.
      * @param on the boolean if the promiscuous mode is to be enabled or not.
      */
     void setPromiscuousMode(boolean on);
 
-    /** Checks if the promiscuous mode of this ethernet adapter is enabled or not.
+    /** Checks if the promiscuous mode of this Ethernet adapter is enabled or
+     * not.
      */
     boolean getPromiscuousMode();
 
-    /** Allows this ethernet adapter to receive ethernet frames sent to the specified multicast MAC address.
-     * @param macaddr the MAC address.
+    /** Allows this Ethernet adapter to receive Ethernet frames sent to the
+     * specified multicast MAC address.
+     * @param mac the MAC address.
      */
-    int addMulticastAddress([in] unsigned byte macaddr[6]);
+    int addMulticastAddress([in] unsigned byte mac[6]);
 
-    /** Forbids this ethernet adapter to receive ethernet frames sent to the specified multicast MAC address.
-     * @param macaddr the MAC address.
+    /** Forbids this Ethernet adapter to receive Ethernet frames sent to the
+     * specified multicast MAC address.
+     * @param mac the MAC address.
      */
-    int removeMulticastAddress([in] unsigned byte macaddr[6]);
+    int removeMulticastAddress([in] unsigned byte mac[6]);
 
-    /** Gets the MAC address of this ethernet adapter.
-     * @param macaddr the MAC address.
+    /** Gets the MAC address of this Ethernet adapter.
+     * @param mac the MAC address.
      */
-    void getMacAddress([out] unsigned byte macaddr[6]);
+    void getMacAddress([out] unsigned byte mac[6]);
 
-    /** Gets the current link state of this ethernet adapter.
+    /** Gets the current link state of this Ethernet adapter.
      */
     boolean getLinkState();
 
-    /** Gets the speed and duplex mode of this ethernet adapter.
+    /** Gets the speed and duplex mode of this Ethernet adapter.
      * @return the number of the speed and duplex mode (IEthernet::MODE_*).
      */
     int getMode();
 
-    /** Gets the statistics of this ethernet adapter.
+    /** Gets the statistics of this Ethernet adapter.
      * @param statistics the interface statistics.
      */
     void getStatistics([out] InterfaceStatistics* statistics);

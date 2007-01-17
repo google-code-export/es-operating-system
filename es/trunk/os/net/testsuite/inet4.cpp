@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -53,7 +53,7 @@ int main()
 
     esDump(&InAddrAny, 4);
     esDump(&InAddrLoopback, 4);
-    esDump(&InBroadcast, 4);
+    esDump(&InAddrBroadcast, 4);
 
     u32 test = INADDR_LOOPBACK;
     esDump(&test, 4);
@@ -73,7 +73,7 @@ int main()
     InFamily* inFamily = new InFamily;
     esReport("AF: %d\n", inFamily->getAddressFamily());
 
-    Socket raw(AF_INET, ISocket::RAW);
+    Socket raw(AF_INET, ISocket::Raw);
     inProtocol = inFamily->getProtocol(&raw);
     visualize();
 
@@ -94,7 +94,7 @@ int main()
     InternetConfig ipconfig;
 
     // Test bind and connect operations
-    Socket socket(AF_INET, ISocket::DGRAM);
+    Socket socket(AF_INET, ISocket::Datagram);
     socket.bind(localhost, 53);
     visualize();
     socket.connect(localhost, 53);

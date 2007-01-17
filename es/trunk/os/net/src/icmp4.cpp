@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -44,6 +44,7 @@ bool ICMPReceiver::output(InetMessenger* m)
     ICMPHdr* icmphdr = static_cast<ICMPHdr*>(m->fix(sizeof(ICMPHdr)));
     icmphdr->sum = 0;
     icmphdr->sum = checksum(m);
+    m->setType(IPPROTO_ICMP);
     return true;
 }
 
@@ -62,12 +63,11 @@ bool ICMPEchoRequestReceiver::input(InetMessenger* m)
     u8 chunk[pos + len];
     memmove(chunk + pos, icmphdr, len);
     icmphdr = reinterpret_cast<ICMPEcho*>(chunk + pos);
-    icmphdr->type = ICMP_ECHO_REPLY;
+    icmphdr->type = ICMPHdr::EchoReply;
 
     InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
     r.setRemote(m->getRemote());
     r.setLocal(m->getLocal());
-    r.setType(IPPROTO_ICMP);
 
     Visitor v(&r);
     adapter->accept(&v);
@@ -83,6 +83,42 @@ bool ICMPEchoReplyReceiver::input(InetMessenger* m)
 {
     // Resume Inet4Address::isReachable()
     notify();
+
+    return true;
+}
+
+//
+// ICMPEchoRequestReceiver
+//
+
+bool ICMPUnreachReceiver::input(InetMessenger* m)
+{
+    esReport("ICMPUnreachReceiver::input\n");
+
+    int len = m->getLength();
+    if (len < sizeof(ICMPUnreach))
+    {
+        return false;
+    }
+    ICMPUnreach* icmphdr = static_cast<ICMPUnreach*>(m->fix(sizeof(ICMPUnreach)));
+
+    m->movePosition(sizeof(ICMPUnreach));
+    m->setCommand(&InetReceiver::error);
+
+    return true;
+}
+
+bool ICMPUnreachReceiver::output(InetMessenger* m)
+{
+    esReport("ICMPUnreachReceiver::output\n");
+
+    m->movePosition(-sizeof(ICMPUnreach));
+    ICMPUnreach* icmphdr = static_cast<ICMPUnreach*>(m->fix(sizeof(ICMPUnreach)));
+    icmphdr->type = ICMPHdr::Unreach;
+    icmphdr->code = ICMPUnreach::Port;
+    icmphdr->sum = 0;
+    icmphdr->unused = 0;
+    icmphdr->mtu = 0;
 
     return true;
 }

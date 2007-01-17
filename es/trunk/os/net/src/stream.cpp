@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -244,6 +244,7 @@ connect(SocketMessenger* m)
 bool StreamReceiver::
 close(SocketMessenger* m)
 {
+    shutrd = shutwr = true;
     if (state->close(m, this))
     {
         int size = 14 + 60 + 60 + mss;  // XXX Assume MAC, IPv4, TCP
@@ -258,18 +259,36 @@ close(SocketMessenger* m)
         Visitor v(&seg);
         conduit->accept(&v, conduit->getB());
     }
+    monitor->notifyAll();
     return true;
 }
 
 bool StreamReceiver::
 shutdownOutput(SocketMessenger* m)
 {
+    shutwr = true;
+    if (state->close(m, this))
+    {
+        int size = 14 + 60 + 60 + mss;  // XXX Assume MAC, IPv4, TCP
+        u8 chunk[size];
+        InetMessenger seg(&InetReceiver::output, chunk, size, size);
+        Handle<Address> addr;
+        seg.setLocal(addr = m->getLocal());
+        seg.setRemote(addr = m->getRemote());
+        seg.setLocalPort(m->getLocalPort());
+        seg.setRemotePort(m->getRemotePort());
+        seg.setType(IPPROTO_TCP);
+        Visitor v(&seg);
+        conduit->accept(&v, conduit->getB());
+    }
     return false;
 }
 
 bool StreamReceiver::
 shutdownInput(SocketMessenger* m)
 {
+    shutrd = true;
+    monitor->notifyAll();
     return false;
 }
 
@@ -326,12 +345,15 @@ StateListen::accept(SocketMessenger* m, StreamReceiver* s)
 {
     Synchronized<IMonitor*> method(s->monitor);
 
-    while (s->accepted.isEmpty())
+    while (s->state == &stateListen && s->accepted.isEmpty())
     {
         s->monitor->wait();
     }
-    StreamReceiver* accepted = s->accepted.removeFirst();
-    ASSERT(accepted);
-    m->setSocket(accepted->getSocket());
+    if (s->state == &stateListen && !s->accepted.isEmpty())
+    {
+        StreamReceiver* accepted = s->accepted.removeFirst();
+        ASSERT(accepted);
+        m->setSocket(accepted->getSocket());
+    }
     return false;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -42,6 +42,7 @@ public:
         ASSERT(m);
 
         IPHdr* iphdr = static_cast<IPHdr*>(m->fix(sizeof(IPHdr)));
+        m->savePosition();
         m->movePosition(iphdr->getHdrSize());
         return reinterpret_cast<void*>(iphdr->proto);
     }
@@ -99,13 +100,17 @@ class InFamily : public AddressFamily
     Mux                         echoRequestMux;
 
     // ICMP Unreach
+    ICMPUnreachReceiver         unreachReceiver;
+    Protocol                    unreachProtocol;
+
     // ICMP Redirect
     // ...
 
     // IGMP
     IGMPReceiver                igmpReceiver;
     Protocol                    igmpProtocol;
-    IGMPAccessor                igmpAccessor;
+    InetLocalAddressAccessor    igmpAccessor;
+    Adapter                     igmpAdapter;            // prototype
     ConduitFactory              igmpFactory;
     Mux                         igmpMux;
 
@@ -126,6 +131,8 @@ class InFamily : public AddressFamily
     Mux                         udpLocalPortMux;
     UDPReceiver                 udpReceiver;
     Protocol                    udpProtocol;
+    int                         udpLast;
+    UDPUnreachReceiver          udpUnreachReceiver;
 
     // TCP
     StreamReceiver              streamReceiver;
@@ -144,6 +151,7 @@ class InFamily : public AddressFamily
     Mux                         tcpLocalPortMux;
     TCPReceiver                 tcpReceiver;
     Protocol                    tcpProtocol;
+    int                         tcpLast;
 
     // Inet4Address tree
     Tree<InAddr, Inet4Address*> addressTable[Socket::INTERFACE_MAX];
@@ -168,13 +176,13 @@ public:
         {
             switch (socket->getSocketType())
             {
-            case ISocket::STREAM:
+            case ISocket::Stream:
                 return &tcpProtocol;
                 break;
-            case ISocket::DGRAM:
+            case ISocket::Datagram:
                 return &udpProtocol;
                 break;
-            case ISocket::RAW:
+            case ISocket::Raw:
                 return &inProtocol;
                 break;
             default:
@@ -182,6 +190,50 @@ public:
             }
         }
         return 0;
+    }
+
+    int selectEphemeralPort(Socket* socket)
+    {
+        int* port;
+        Mux* mux;
+        if (socket->getAddressFamily() == AF_INET)
+        {
+            switch (socket->getSocketType())
+            {
+            case ISocket::Stream:
+                port = &tcpLast;
+                mux = &tcpLocalPortMux;
+                break;
+            case ISocket::Datagram:
+                port = &udpLast;
+                mux = &udpLocalPortMux;
+                break;
+            default:
+                return 0;
+                break;
+            }
+        }
+        // cf. http://www.iana.org/assignments/port-numbers
+        int anon = *port;
+        for (int i = 0; i <= 65535 - 49152; ++i)
+        {
+            if (65535 < anon)
+            {
+                anon = 49152;
+            }
+            if (!mux->contains(reinterpret_cast<void*>(anon)))
+            {
+                *port = anon + 1;
+                return anon;
+            }
+            ++anon;
+        }
+        return 0;
+    }
+
+    IInternetAddress* selectSourceAddress(IInternetAddress* dst)
+    {
+        return selectSourceAddress(dynamic_cast<Inet4Address*>(dst));
     }
 
     void addInterface(Interface* interface)
@@ -203,11 +255,13 @@ public:
             routerList.addRouter(addr);
         }
     }
-
     void removeRouter(Inet4Address* addr)
     {
         routerList.removeRouter(addr);
     }
+
+    void joinGroup(Inet4Address* addr);
+    void leaveGroup(Inet4Address* addr);
 
     Inet4Address* onLink(InAddr addr, int scopeID = 0);
 
@@ -217,7 +271,8 @@ public:
     bool isReachable(Inet4Address* address, long long timeout);
 
     // Inet4Address
-    Inet4Address                addressAny;     // InAddrAny
+    Inet4Address                addressAny;         // InAddrAny
+    Inet4Address                addressAllRouters;  // InAddrAny
 
     friend class Inet4Address;
     friend class Inet4Address::StateInit;

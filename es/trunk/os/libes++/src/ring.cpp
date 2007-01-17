@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <algorithm>
 #include <string.h>
 #include <es.h>
 #include <es/ring.h>
@@ -121,7 +122,7 @@ read(void* dst, long count)
 }
 
 long Ring::
-discard(long count)
+skip(long count)
 {
     u8* end;
 
@@ -242,7 +243,7 @@ marge(u8* adv, long count, Vec* blocks, long maxblock, u8* tail)
             pb = pos(tail, (u8*) block->data);
             if (pb <= pr)
             {
-                pr = max(pb + block->count, pr);
+                pr = std::max(pb + block->count, pr);
                 count = pr - pl;
                 // Delete block
                 memmove(block, block + 1, (u8*) end - (u8*) (block + 1));
@@ -261,7 +262,7 @@ marge(u8* adv, long count, Vec* blocks, long maxblock, u8* tail)
         pb = pos(tail, (u8*) block->data);
         if (pl <= pb + block->count && pb <= pr)
         {
-            pr = max(pb + block->count, pr);
+            pr = std::max(pb + block->count, pr);
             if (pb < pl)
             {
                 pl = pb;

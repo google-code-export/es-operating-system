@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -26,11 +26,12 @@ class DatagramReceiver :
     public SocketReceiver
 {
     IMonitor*   monitor;
-    u8          recvBuf[128 * 1024];
+    u8*         recvBuf;
     Ring        recvRing;
-    u8          sendBuf[128 * 1024];
+    u8*         sendBuf;
     Ring        sendRing;
     Conduit*    conduit;
+    int         errorCode;
 
     struct RingHdr
     {
@@ -55,9 +56,10 @@ class DatagramReceiver :
 public:
     DatagramReceiver(Conduit* conduit = 0) :
         monitor(0),
-        recvRing(recvBuf, sizeof recvBuf),
-        sendRing(sendBuf, sizeof sendBuf),
-        conduit(conduit)
+        recvBuf(0),
+        sendBuf(0),
+        conduit(conduit),
+        errorCode(0)
     {
         esCreateInstance(CLSID_Monitor,
                          IID_IMonitor,
@@ -66,10 +68,27 @@ public:
 
     ~DatagramReceiver()
     {
+        if (recvBuf)
+        {
+            delete[] recvBuf;
+        }
+        if (sendBuf)
+        {
+            delete[] sendBuf;
+        }
         if (monitor)
         {
             monitor->release();
         }
+    }
+
+    bool initialize(Socket* socket)
+    {
+        recvBuf = new u8[socket->getReceiveBufferSize()];
+        recvRing.initialize(recvBuf, socket->getReceiveBufferSize());
+        sendBuf = new u8[socket->getSendBufferSize()];
+        sendRing.initialize(sendBuf, socket->getSendBufferSize());
+        return true;
     }
 
     bool input(InetMessenger* m);

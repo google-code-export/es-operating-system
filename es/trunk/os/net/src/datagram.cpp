@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -23,7 +23,7 @@ input(InetMessenger* m)
 
     // Copy-in data
     Synchronized<IMonitor*> method(monitor);
-    if (sizeof recvBuf - recvRing.getUsed() < sizeof ringhdr + len)
+    if (recvRing.getUnused() < sizeof ringhdr + len)
     {
         // Ins. space in recvRing.
         // XXX record error code.
@@ -44,6 +44,10 @@ output(InetMessenger* m)
 bool DatagramReceiver::
 error(InetMessenger* m)
 {
+    Synchronized<IMonitor*> method(monitor);
+
+    esReport("DatagramReceiver::error()\n");
+    errorCode = ECONNREFUSED;
     monitor->notifyAll();
     return true;
 }
@@ -53,15 +57,26 @@ read(SocketMessenger* m)
 {
     Synchronized<IMonitor*> method(monitor);
 
+    esReport("DatagramReceiver::read()\n");
+
     // Copy-out data
     RingHdr ringhdr;
     long len;
-    while ((len = recvRing.peek(&ringhdr, sizeof ringhdr)) == 0)
+    while ((len = recvRing.peek(&ringhdr, sizeof ringhdr)) == 0 && errorCode == 0)
     {
         monitor->wait();
     }
+
     if (len < 0)
     {
+        return false;
+    }
+
+    if (errorCode)
+    {
+        m->setErrorCode(errorCode);
+        errorCode = 0;
+        m->setPosition(m->getSize());
         return false;
     }
 

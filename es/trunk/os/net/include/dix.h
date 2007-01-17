@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -110,6 +110,12 @@ public:
         switch (af->getAddressFamily())
         {
         case AF_INET:
+            if (Handle<IEthernet> nic = stream)
+            {
+                // Join all hosts group by default
+                const u8 mac[6] = { 0x01, 0x00, 0x5e, 0x00, 0x00, 0x01 };
+                nic->addMulticastAddress(mac);
+            }
             inProtocol.setB(c);
             return &inProtocol;
             break;

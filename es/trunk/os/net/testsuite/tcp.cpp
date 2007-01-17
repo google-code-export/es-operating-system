@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -99,7 +99,7 @@ int main()
     InFamily* inFamily = new InFamily;
     esReport("AF: %d\n", inFamily->getAddressFamily());
 
-    Socket raw(AF_INET, ISocket::RAW);
+    Socket raw(AF_INET, ISocket::Raw);
     inProtocol = inFamily->getProtocol(&raw);
     visualize();
 
@@ -113,7 +113,7 @@ int main()
     localhost->start();
     visualize();
 
-    Socket socket(AF_INET, ISocket::STREAM);
+    Socket socket(AF_INET, ISocket::Stream);
     socket.bind(localhost, 54);
     visualize();
 
@@ -123,7 +123,7 @@ int main()
     esSleep(10000000);
 
     // Test bind and connect operations
-    Socket client(AF_INET, ISocket::STREAM);
+    Socket client(AF_INET, ISocket::Stream);
     client.bind(localhost, 53);
     visualize();
 

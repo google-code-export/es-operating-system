@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -16,7 +16,9 @@
 
 const InAddr InAddrAny = { htonl(INADDR_ANY) };
 const InAddr InAddrLoopback = { htonl(INADDR_LOOPBACK) };
-const InAddr InBroadcast = { htonl(INADDR_BROADCAST) };
+const InAddr InAddrBroadcast = { htonl(INADDR_BROADCAST) };
+const InAddr InAddrAllHost = { htonl(INADDR_ALLHOSTS_GROUP) };
+const InAddr InAddrAllRouters = { htonl(INADDR_ALLROUTERS_GROUP) };
 
 Inet4Address::StateInit             Inet4Address::stateInit;
 Inet4Address::StateIncomplete       Inet4Address::stateIncomplete;
@@ -112,6 +114,11 @@ socket(int type, int protocol, int port)
     if (isLocalAddress())
     {
         socket->bind(this, port);
+    }
+    else if (isMulticast())
+    {
+        socket->bind(this, port);
+        socket->joinGroup(this);
     }
     else
     {

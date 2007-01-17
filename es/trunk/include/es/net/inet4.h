@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -36,6 +36,7 @@
 #define INADDR_LOOPBACK         ((u32) 0x7f000001)  // 127.0.0.1
 #define INADDR_UNSPEC_GROUP     ((u32) 0xe0000000)  // 224.0.0.0
 #define INADDR_ALLHOSTS_GROUP   ((u32) 0xe0000001)  // 224.0.0.1
+#define INADDR_ALLROUTERS_GROUP ((u32) 0xe0000002)  // 224.0.0.2
 #define INADDR_MAX_LOCAL_GROUP  ((u32) 0xe00000ff)  // 224.0.0.255
 
 struct InAddr
@@ -129,43 +130,45 @@ struct IPHdr
 
 extern const InAddr InAddrAny;
 extern const InAddr InAddrLoopback;
-extern const InAddr InBroadcast;
+extern const InAddr InAddrBroadcast;
+extern const InAddr InAddrAllHosts;
+extern const InAddr InAddrAllRouters;
 
-__inline int IN_ARE_ADDR_EQUAL(InAddr a, InAddr b)
+inline int IN_ARE_ADDR_EQUAL(InAddr a, InAddr b)
 {
     return a == b;
 }
 
-__inline int IN_IS_ADDR_UNSPECIFIED(InAddr a)
+inline int IN_IS_ADDR_UNSPECIFIED(InAddr a)
 {
     return a == InAddrAny;
 }
 
-__inline int IN_IS_ADDR_LOOPBACK(InAddr a)
+inline int IN_IS_ADDR_LOOPBACK(InAddr a)
 {
     u8* bytes = (u8*) &a.addr;
     return bytes[0] == 127;
 }
 
-__inline int IN_IS_ADDR_MULTICAST(InAddr a)
+inline int IN_IS_ADDR_MULTICAST(InAddr a)
 {
     u8* bytes = (u8*) &a.addr;
     return (bytes[0] & 0xf0) == 0xe0;   // class D address?
 }
 
-__inline int IN_IS_ADDR_RESERVED(InAddr a)
+inline int IN_IS_ADDR_RESERVED(InAddr a)
 {
     u8* bytes = (u8*) &a.addr;
     return (bytes[0] & 0xf8) == 0xf0;   // class E address?
 }
 
-__inline int IN_IS_ADDR_LINKLOCAL(InAddr a)
+inline int IN_IS_ADDR_LINKLOCAL(InAddr a)
 {
     u8* bytes = (u8*) &a.addr;
     return (bytes[0] == 169) && (bytes[1] == 254);
 }
 
-__inline int IN_IS_ADDR_IN_NET(InAddr a, InAddr n, InAddr m)
+inline int IN_IS_ADDR_IN_NET(InAddr a, InAddr n, InAddr m)
 {
     return ((a.addr & m.addr) == (n.addr & m.addr));
 }

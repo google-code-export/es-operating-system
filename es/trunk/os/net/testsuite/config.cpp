@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -63,7 +63,7 @@ int main()
     loopback->isReachable(10000000);
 
     // Test bind and connect operations
-    Handle<ISocket> socket = loopback->socket(AF_INET, ISocket::DGRAM, 53);
+    Handle<ISocket> socket = loopback->socket(AF_INET, ISocket::Datagram, 53);
     socket->connect(loopback, 53);
 
     // Test read and write operations

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -90,9 +90,10 @@ interface IInternetAddress : IInterface
     IInternetAddress* getNext();
 
     /** Creates a socket.
-     * <code>socket</code> binds the socket to this internet address if the address is a local address,
-     * while connects the socket to this internet address if the address is a remote address.
-     * Otherwise, <code>socket</code> does nothing.
+     * If this is a local address or a multicast address, the created socket
+     * is bound to this address. If this is a remote address, the created
+     * socket is connected to this address by using an ephemeral local port.
+     * Otherwise, the socket is neither bound nor connected to any address.
      * @param type     the type of this socket.
      * @param protocol the protocol of this socket.
      * @param port     the port number.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -186,8 +186,7 @@ class StreamReceiver :
         bool close(SocketMessenger* m, StreamReceiver* s)
         {
             // Note TCP still needs to transmit SYN before FIN
-            // to switch to stateFinWait1. Just set shutwr here.
-            s->shutrd = s->shutwr = true;
+            // to switch to stateFinWait1.
             return true;
         }
         bool hasBeenEstablished()
@@ -318,9 +317,9 @@ class StreamReceiver :
 
     State*      state;
     IMonitor*   monitor;
-    u8          recvBuf[8 * 1024];
+    u8*         recvBuf;
     Ring        recvRing;
-    u8          sendBuf[8 * 1024];
+    u8*         sendBuf;
     Ring        sendRing;
     Conduit*    conduit;
     int         err;
@@ -525,8 +524,8 @@ public:
     StreamReceiver(Conduit* conduit = 0) :
         state(&stateClosed),
         monitor(0),
-        recvRing(recvBuf, sizeof recvBuf),
-        sendRing(sendBuf, sizeof sendBuf),
+        recvBuf(0),
+        sendBuf(0),
         conduit(conduit),
         err(0),
 
@@ -565,6 +564,14 @@ public:
 
     ~StreamReceiver()
     {
+        if (recvBuf)
+        {
+            delete[] recvBuf;
+        }
+        if (sendBuf)
+        {
+            delete[] sendBuf;
+        }
         if (monitor)
         {
             monitor->release();
@@ -585,6 +592,15 @@ public:
             this->state = &state;
             state.start(this);
         }
+    }
+
+    bool initialize(Socket* socket)
+    {
+        recvBuf = new u8[socket->getReceiveBufferSize()];
+        recvRing.initialize(recvBuf, socket->getReceiveBufferSize());
+        sendBuf = new u8[socket->getSendBufferSize()];
+        sendRing.initialize(sendBuf, socket->getSendBufferSize());
+        return true;
     }
 
     bool input(InetMessenger* m);

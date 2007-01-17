@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -12,6 +12,7 @@
  */
 
 #include <new>
+#include <stdlib.h>
 #include <string.h>
 #include <es/net/arp.h>
 #include "dix.h"
@@ -25,6 +26,14 @@ Interface*          Socket::interfaces[Socket::INTERFACE_MAX];
 Timer*              Socket::timer;
 
 LoopbackAccessor    LoopbackInterface::loopbackAccessor;
+
+void Socket::
+initialize()
+{
+    DateTime seed = DateTime::getNow();
+    srand48(seed.getTicks());
+    timer = new Timer;
+}
 
 int Socket::addInterface(IStream* stream, int hrd)
 {
@@ -118,7 +127,9 @@ Socket(int family, int type, int protocol) :
     family(family),
     type(type),
     protocol(protocol),
-    adapter(0)
+    adapter(0),
+    recvBufferSize(8192),
+    sendBufferSize(8192)
 {
     af = getAddressFamily(family);
 }
@@ -126,6 +137,8 @@ Socket(int family, int type, int protocol) :
 Socket::
 ~Socket()
 {
+    // Leave from multicast groups XXX
+
 }
 
 bool Socket::
@@ -150,9 +163,81 @@ error(InetMessenger* m)
 // ISocket
 //
 
+bool Socket::
+isBound()
+{
+    return getAdapter();    // installed?
+}
+
+bool Socket::
+isClosed()
+{
+}
+
+bool Socket::
+isConnected()
+{
+    return getRemotePort();
+}
+
+int Socket::
+getHops()
+{
+}
+
+void Socket::
+setHops(int limit)
+{
+}
+
+int Socket::
+getReceiveBufferSize()
+{
+    return recvBufferSize;
+}
+
+void Socket::
+setReceiveBufferSize(int size)
+{
+    if (!isBound())
+    {
+        recvBufferSize = size;
+    }
+}
+
+int Socket::
+getSendBufferSize()
+{
+    return sendBufferSize;
+}
+
+void Socket::
+setSendBufferSize(int size)
+{
+    if (!isBound())
+    {
+        sendBufferSize = size;
+    }
+}
+
+bool Socket::
+isReuseAddress()
+{
+}
+
+void Socket::
+setReuseAddress(bool on)
+{
+}
+
 void Socket::
 bind(IInternetAddress* addr, int port)
 {
+    if (isBound())
+    {
+        return;
+    }
+
     Conduit* protocol = af->getProtocol(this);
     if (!protocol)
     {
@@ -169,27 +254,78 @@ bind(IInternetAddress* addr, int port)
 void Socket::
 connect(IInternetAddress* addr, int port)
 {
+    if (isConnected() || addr == 0 || port == 0)
+    {
+        return;
+    }
+
     Conduit* protocol = af->getProtocol(this);
     if (!protocol)
     {
         return;
     }
 
-    SocketDisconnector disconnector(this);
-    adapter->accept(&disconnector);
+    int anon = 0;
+    if (getLocalPort() == 0)
+    {
+        anon = af->selectEphemeralPort(this);
+        if (anon == 0)
+        {
+            return;
+        }
+        // XXX Reserve anon from others
+    }
 
-    setRemote(dynamic_cast<Address*>(addr));   // XXX
-    setRemotePort(port);
+    IInternetAddress* src = 0;
+    if (!getLocal())    // XXX any
+    {
+        src = af->selectSourceAddress(addr);
+        if (!src)
+        {
+            return;
+        }
+    }
 
-    SocketConnector connector(this, disconnector.getProtocol());
-    protocol->accept(&connector);
+    if (isBound())
+    {
+        SocketDisconnector disconnector(this);
+        adapter->accept(&disconnector);
+
+        if (anon)
+        {
+            setLocalPort(anon);
+        }
+        if (src)
+        {
+            setLocal(dynamic_cast<Address*>(src));
+        }
+
+        setRemote(dynamic_cast<Address*>(addr));   // XXX
+        setRemotePort(port);
+
+        SocketConnector connector(this, disconnector.getProtocol());
+        protocol->accept(&connector);
+    }
+    else
+    {
+        if (anon)
+        {
+            setLocalPort(anon);
+        }
+        if (src)
+        {
+            setLocal(dynamic_cast<Address*>(src));
+        }
+
+        setRemote(dynamic_cast<Address*>(addr));   // XXX
+        setRemotePort(port);
+
+        SocketInstaller installer(this);
+        protocol->accept(&installer);
+    }
 
     // Request connect
-    SocketMessenger m(&SocketReceiver::connect);
-    m.setLocal(getLocal());
-    m.setRemote(getRemote());
-    m.setLocalPort(getLocalPort());
-    m.setRemotePort(getRemotePort());
+    SocketMessenger m(this, &SocketReceiver::connect);
     Visitor v(&m);
     adapter->accept(&v);
 }
@@ -197,7 +333,7 @@ connect(IInternetAddress* addr, int port)
 ISocket* Socket::
 accept()
 {
-    SocketMessenger m(&SocketReceiver::accept);
+    SocketMessenger m(this, &SocketReceiver::accept);
     Visitor v(&m);
     adapter->accept(&v);
     return m.getSocket();
@@ -211,11 +347,7 @@ close()
         return;
     }
 
-    SocketMessenger m(&SocketReceiver::close);
-    m.setLocal(getLocal());
-    m.setRemote(getRemote());
-    m.setLocalPort(getLocalPort());
-    m.setRemotePort(getRemotePort());
+    SocketMessenger m(this, &SocketReceiver::close);
     Visitor v(&m);
     adapter->accept(&v);
 }
@@ -238,12 +370,7 @@ read(void* dst, int count)
         return -1;
     }
 
-    SocketMessenger m(&SocketReceiver::read, dst, count);
-    m.setLocal(getLocal());
-    m.setRemote(getRemote());
-    m.setLocalPort(getLocalPort());
-    m.setRemotePort(getRemotePort());
-
+    SocketMessenger m(this, &SocketReceiver::read, dst, count);
     Visitor v(&m);
     adapter->accept(&v);
     return m.getLength();
@@ -262,11 +389,27 @@ sendTo(const void* src, int count, int flags, IInternetAddress* addr, int port)
 void Socket::
 shutdownInput()
 {
+    if (!adapter)
+    {
+        return;
+    }
+
+    SocketMessenger m(this, &SocketReceiver::shutdownInput);
+    Visitor v(&m);
+    adapter->accept(&v);
 }
 
 void Socket::
 shutdownOutput()
 {
+    if (!adapter)
+    {
+        return;
+    }
+
+    SocketMessenger m(this, &SocketReceiver::shutdownOutput);
+    Visitor v(&m);
+    adapter->accept(&v);
 }
 
 int Socket::
@@ -280,17 +423,47 @@ write(const void* src, int count)
     int pos = 14 + 60 + 60; // XXX Assume MAC, IPv4, TCP
     u8 chunk[pos + count];  // XXX count
 
-    SocketMessenger m(&SocketReceiver::write, chunk, pos + count, pos);
-
+    SocketMessenger m(this, &SocketReceiver::write, chunk, pos + count, pos);
     m.write(src, count, pos);
-    m.setLocal(getLocal());
-    m.setRemote(getRemote());
-    m.setLocalPort(getLocalPort());
-    m.setRemotePort(getRemotePort());
-
     Visitor v(&m);
     adapter->accept(&v);
     return m.getLength();
+}
+
+//
+// IMulticastSocket
+//
+
+int Socket::
+getLoopbackMode()
+{
+}
+
+void Socket::
+setLoopbackMode(bool disable)
+{
+}
+
+void Socket::
+joinGroup(IInternetAddress* addr)
+{
+    Address* address = static_cast<Address*>(addr);
+    if (address->isMulticast())
+    {
+        addresses.addLast(address);
+        address->addSocket(this);
+    }
+}
+
+void Socket::
+leaveGroup(IInternetAddress* addr)
+{
+    Address* address = static_cast<Address*>(addr);
+    if (addresses.contains(address))
+    {
+        addresses.remove(address);
+        address->removeSocket(this);
+    }
 }
 
 //
@@ -307,6 +480,10 @@ queryInterface(const Guid& riid, void** objectPtr)
     else if (riid == IID_IInterface)
     {
         *objectPtr = static_cast<ISocket*>(this);
+    }
+    else if (riid == IID_IMulticastSocket && type == ISocket::Datagram)
+    {
+        *objectPtr = static_cast<Socket*>(this);
     }
     else
     {

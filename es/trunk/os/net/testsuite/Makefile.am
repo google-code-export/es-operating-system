@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = conduit inet4 tcp config
+TESTS = conduit inet4 tcp config anon unreach mcast
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -43,12 +43,18 @@ AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map
 
 endif ES
 
+anon_SOURCES = anon.cpp
+
 conduit_SOURCES = conduit.cpp
 
 inet4_SOURCES = inet4.cpp
 
+mcast_SOURCES = mcast.cpp
+
 tcp_SOURCES = tcp.cpp
 
 config_SOURCES = config.cpp
+
+unreach_SOURCES = unreach.cpp
 
 EXTRA_DIST = makeScript

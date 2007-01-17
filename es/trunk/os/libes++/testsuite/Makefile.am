@@ -8,13 +8,17 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = list hashtable tree
+TESTS = collection list hashtable tree rand
 
 noinst_PROGRAMS = $(TESTS)
+
+collection_SOURCES = collection.cpp
 
 list_SOURCES = list.cpp
 
 hashtable_SOURCES = hashtable.cpp
+
+rand_SOURCES = rand.cpp
 
 tree_SOURCES = tree.cpp
 

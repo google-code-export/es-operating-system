@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -96,7 +96,7 @@ StateIncomplete::expired(Inet4Address* a)
 
         Visitor v(&m);
         a->adapter->accept(&v);
-        a->alarm(5000000 << a->timeoutCount);
+        a->alarm(5000000LL << a->timeoutCount);
     }
     else
     {
@@ -188,7 +188,7 @@ StateProbe::expired(Inet4Address* a)
 
         Visitor v(&m);
         a->adapter->accept(&v);
-        a->alarm(5000000 << a->timeoutCount);
+        a->alarm(5000000LL << a->timeoutCount);
     }
     else
     {
@@ -230,7 +230,7 @@ StateTentative::start(Inet4Address* a)
     // Install ARP cache for this address.
     a->inFamily->arpFamily.addAddress(a);
 
-    a->alarm(10000000);   // PROBE_WAIT
+    a->alarm(rand48() % (ARPHdr::PROBE_WAIT * 10000000LL));
 }
 
 void Inet4Address::
@@ -255,7 +255,14 @@ StateTentative::expired(Inet4Address* a)
 
         Visitor v(&m);
         a->adapter->accept(&v);
-        a->alarm(10000000);     // XXX PROBE_MIN to PROBE_MAX, ANNOUNCE_WAIT
+        if (a->timeoutCount < ARPHdr::PROBE_NUM)
+        {
+            a->alarm(ARPHdr::PROBE_MIN * 10000000LL + rand48() % (ARPHdr::PROBE_MAX * 10000000LL));
+        }
+        else
+        {
+            a->alarm(ARPHdr::ANNOUNCE_WAIT * 10000000LL);
+        }
     }
     else
     {
@@ -318,7 +325,7 @@ StatePreferred::expired(Inet4Address* a)
 
         Visitor v(&m);
         a->adapter->accept(&v);
-        a->alarm(20000000);     // XXX ANNOUNCE_INTERVAL
+        a->alarm(ARPHdr::ANNOUNCE_INTERVAL * 10000000LL);
     }
 }
 

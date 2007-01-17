@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -39,12 +39,21 @@ bool TCPReceiver::input(InetMessenger* m)
     TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
     if (!tcphdr)
     {
-        return false;   // XXX
+        return false;
     }
     int hlen = tcphdr->getHdrSize();
     if (hlen < sizeof(TCPHdr) || m->getLength() < hlen)
     {
-        return false;   // XXX
+        return false;
+    }
+
+    // Drop broadcast or multicast
+    Handle<Address> src = m->getRemote();
+    Handle<Address> dst = m->getLocal();
+    if (src->isUnspecified() || src->isMulticast() ||
+        dst->isUnspecified() || dst->isMulticast()) // XXX check for bcast
+    {
+        return false;
     }
 
     // Verify the sum

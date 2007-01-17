@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -14,8 +14,10 @@
 #ifndef INTERFACE_H_INCLUDED
 #define INTERFACE_H_INCLUDED
 
+#include <es/handle.h>
 #include <es/base/IStream.h>
 #include <es/base/IThread.h>
+#include <es/device/IEthernet.h>
 #include "inet.h"
 #include "interface.h"
 #include "address.h"
@@ -128,6 +130,22 @@ public:
     void setMacAddress(u8 mac[6])
     {
         memmove(this->mac, mac, sizeof this->mac);
+    }
+
+    void addMulticastAddress(u8 mac[6])
+    {
+        if (Handle<IEthernet> nic = stream)
+        {
+            nic->addMulticastAddress(mac);
+        }
+    }
+
+    void removeMulticastAddress(u8 mac[6])
+    {
+        if (Handle<IEthernet> nic = stream)
+        {
+            nic->removeMulticastAddress(mac);
+        }
     }
 
     /** Run a thread that reads from the stream and creates an input

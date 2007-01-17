@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -21,11 +21,15 @@ InFamily::InFamily() :
     inReceiver(this),
     inMux(&inAccessor, &inFactory),
     icmpMux(&icmpAccessor, &icmpFactory),
-    igmpMux(&igmpAccessor, &igmpFactory),
     echoReplyMux(&echoReplyAccessor, &echoReplyFactory),
     echoRequestReceiver(&echoRequestAdapter, 0),
     echoRequestFactory(&echoRequestAdapter),
     echoRequestMux(&echoRequestAccessor, &echoRequestFactory),
+
+    igmpReceiver(this),
+    igmpFactory(&igmpAdapter),
+    igmpMux(&igmpAccessor, &igmpFactory),
+
     udpRemoteAddressFactory(&datagramProtocol),
     udpRemoteAddressMux(&udpRemoteAddressAccessor, &udpRemoteAddressFactory),
     udpRemotePortFactory(&udpRemoteAddressMux),
@@ -34,6 +38,8 @@ InFamily::InFamily() :
     udpLocalAddressMux(&udpLocalAddressAccessor, &udpLocalAddressFactory),
     udpLocalPortFactory(&udpLocalAddressMux),
     udpLocalPortMux(&udpLocalPortAccessor, &udpLocalPortFactory),
+    udpLast(49152),
+    udpUnreachReceiver(&unreachProtocol),
 
     streamReceiver(&tcpProtocol),
     tcpRemoteAddressFactory(&streamProtocol),
@@ -44,8 +50,11 @@ InFamily::InFamily() :
     tcpLocalAddressMux(&tcpLocalAddressAccessor, &tcpLocalAddressFactory),
     tcpLocalPortFactory(&tcpLocalAddressMux),
     tcpLocalPortMux(&tcpLocalPortAccessor, &tcpLocalPortFactory),
+    tcpLast(49152),
 
     addressAny(InAddrAny, Inet4Address::statePreferred),
+    addressAllRouters(InAddrAllRouters, Inet4Address::stateNonMember),
+
     arpFamily(this)
 {
     inProtocol.setReceiver(&inReceiver);
@@ -53,9 +62,11 @@ InFamily::InFamily() :
     echoRequestAdapter.setReceiver(&echoRequestReceiver);
     igmpProtocol.setReceiver(&igmpReceiver);
     udpProtocol.setReceiver(&udpReceiver);
+
     datagramProtocol.setReceiver(&datagramReceiver);
     tcpProtocol.setReceiver(&tcpReceiver);
     streamProtocol.setReceiver(&streamReceiver);
+    unreachProtocol.setReceiver(&unreachReceiver);
 
     Conduit::connectAA(&scopeMux, &inProtocol);
     Conduit::connectBA(&inProtocol, &inMux);
@@ -66,13 +77,20 @@ InFamily::InFamily() :
 
     // ICMP
     Conduit::connectBA(&icmpProtocol, &icmpMux);
-    Conduit::connectBA(&icmpMux, &echoReplyMux, reinterpret_cast<void*>(ICMP_ECHO_REPLY));
-    Conduit::connectBA(&icmpMux, &echoRequestMux, reinterpret_cast<void*>(ICMP_ECHO_REQUEST));
+    Conduit::connectBA(&icmpMux, &echoReplyMux, reinterpret_cast<void*>(ICMPHdr::EchoReply));
+    Conduit::connectBA(&icmpMux, &echoRequestMux, reinterpret_cast<void*>(ICMPHdr::EchoRequest));
+    Conduit::connectBA(&icmpMux, &unreachProtocol, reinterpret_cast<void*>(ICMPHdr::Unreach));
+    unreachProtocol.setB(&inProtocol);  // loop
 
     // IGMP
+    igmpAdapter.setReceiver(&addressAny);
     Conduit::connectBA(&igmpProtocol, &igmpMux);
 
     // UDP
+    udpRemoteAddressFactory.setReceiver(&udpUnreachReceiver);
+    udpRemotePortFactory.setReceiver(&udpUnreachReceiver);
+    udpLocalAddressFactory.setReceiver(&udpUnreachReceiver);
+    udpLocalPortFactory.setReceiver(&udpUnreachReceiver);
     Conduit::connectBA(&udpProtocol, &udpLocalPortMux);
 
     // TCP
@@ -175,6 +193,11 @@ Inet4Address* InFamily::getNextHop(Inet4Address* dst)
 
 Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
 {
+    if (!dst)
+    {
+        return 0;
+    }
+
     if (dst->isLoopback())
     {
         return getAddress(InAddrLoopback, 1);
@@ -219,6 +242,11 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
         }
     }
 
+    if (!src)
+    {
+        // Use 0.0.0.0 as default XXX
+    }
+
     return src;
 }
 
@@ -241,7 +269,7 @@ bool InFamily::isReachable(Inet4Address* dst, long long timeout)
     u8 chunk[pos + len];
     memmove(chunk + pos + sizeof(ICMPEcho), "0123456789", 10);
     ICMPEcho* icmphdr = reinterpret_cast<ICMPEcho*>(chunk + pos);
-    icmphdr->type = ICMP_ECHO_REQUEST;
+    icmphdr->type = ICMPHdr::EchoRequest;
     icmphdr->code = 0;
     icmphdr->id = 0;    // XXX
     icmphdr->seq = 0;   // XXX
@@ -265,6 +293,53 @@ bool InFamily::isReachable(Inet4Address* dst, long long timeout)
     return replied;
 }
 
+void InFamily::joinGroup(Inet4Address* address)
+{
+    ASSERT(address->isMulticast());
+
+    InetMessenger m;
+    m.setLocal(address);
+    Installer installer(&m);
+    igmpMux.accept(&installer, &igmpProtocol);
+
+    // Add address to NIC mcast table
+    int scopeID = address->getScopeID();
+    Interface* interface = Socket::getInterface(scopeID);
+    if (interface)
+    {
+        u8 mac[6];
+        address->getMacAddress(mac);
+        interface->addMulticastAddress(mac);
+    }
+}
+
+void InFamily::leaveGroup(Inet4Address* address)
+{
+    ASSERT(address->isMulticast());
+
+    InetMessenger m;
+    m.setLocal(address);
+    Uninstaller uninstaller(&m);
+    igmpMux.accept(&uninstaller, &igmpProtocol);
+
+    Adapter* adapter = dynamic_cast<Adapter*>(uninstaller.getConduit());
+    if (adapter)
+    {
+        delete adapter;
+        address->release();
+    }
+
+    // Remove address from NIC mcast table
+    int scopeID = address->getScopeID();
+    Interface* interface = Socket::getInterface(scopeID);
+    if (interface)
+    {
+        u8 mac[6];
+        address->getMacAddress(mac);
+        interface->removeMulticastAddress(mac);
+    }
+}
+
 s16 InReceiver::
 checksum(const InetMessenger* m, int hlen)
 {
@@ -284,12 +359,12 @@ input(InetMessenger* m)
     IPHdr* iphdr = static_cast<IPHdr*>(m->fix(sizeof(IPHdr)));
     if (!iphdr)
     {
-        return false;   // XXX
+        return false;
     }
     int hlen = iphdr->getHdrSize();
     if (m->getLength() < hlen || checksum(m, hlen) != 0)
     {
-        return false;   // XXX
+        return false;
     }
 
     int scopeID = m->getScopeID();
@@ -297,7 +372,7 @@ input(InetMessenger* m)
     addr = inFamily->getAddress(iphdr->dst, scopeID);
     if (!addr)
     {
-        return false;   // XXX
+        return false;
     }
     m->setLocal(addr);
 
@@ -322,7 +397,6 @@ input(InetMessenger* m)
             addr = new Inet4Address(iphdr->src, Inet4Address::stateDestination, 0);
         }
         inFamily->addAddress(addr);
-        addr->start();
     }
     m->setRemote(addr);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -40,12 +40,15 @@ public: // XXX
     long    position;
     int     type;       // type of data pointed by position
 
+    long    saved;
+
 public:
     Messenger(void* chunk = 0, long len = 0, long pos = 0) :
         chunk(chunk),
         len(len),
         position(pos),
-        type(0)
+        type(0),
+        saved(0)
     {
     }
     virtual ~Messenger()
@@ -88,6 +91,15 @@ public:
         }
         position += delta;
         return position;
+    }
+
+    void savePosition()
+    {
+        saved = position;
+    }
+    void restorePosition()
+    {
+        position = saved;
     }
 
     long getLength() const
@@ -329,7 +341,8 @@ public:
     bool accept(Visitor* v, Conduit* sender = 0)
     {
         // Determine the direction to forward the messenger before calling the
-        // at() method as sideB can be reset in the at() method.
+        // at() method as sideB can be reset in the at() method. Note the
+        // default direction is to B.
         bool (Protocol::*to)(Visitor*);
         to = (sender == sideB) ? &Protocol::toA : &Protocol::toB;
         if (!v->at(this, sender))
@@ -537,6 +550,11 @@ public:
     Conduit* getB(void* key) const
     {
         return sideB.get(key);
+    }
+
+    bool contains(void* key) const
+    {
+        return sideB.contains(key);
     }
 
     Tree<void*, Conduit*>::Iterator list()

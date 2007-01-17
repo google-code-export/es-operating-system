@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -15,6 +15,7 @@
 #define SOCKET_H_INCLUDED
 
 #include <errno.h>
+#include <es/collection.h>
 #include <es/endian.h>
 #include <es/ref.h>
 #include <es/timer.h>
@@ -35,14 +36,22 @@ class AddressFamily
 public:
     virtual int getAddressFamily() = 0;
     virtual Conduit* getProtocol(Socket* socket) = 0;
+    virtual int selectEphemeralPort(Socket* socket)
+    {
+        return 0;
+    };
     virtual void addInterface(Interface* interface) = 0;
+    virtual IInternetAddress* selectSourceAddress(IInternetAddress* dst)
+    {
+        return 0;
+    }
 
     friend class Socket;
     typedef List<AddressFamily, &AddressFamily::link> List;
 };
 
 class Socket :
-    public ISocket,
+    public IMulticastSocket,
     public InetReceiver,
     public InetMessenger
 {
@@ -60,12 +69,12 @@ private:
     int             protocol;
     Adapter*        adapter;
     AddressFamily*  af;
+    int             recvBufferSize;
+    int             sendBufferSize;
+    Collection<Address*>    addresses;
 
 public:
-    static void initialize()
-    {
-        timer = new Timer;
-    }
+    static void initialize();
 
     static void addAddressFamily(AddressFamily* af)
     {
@@ -181,6 +190,22 @@ public:
         return type;
     }
 
+    bool isBound();
+    bool isClosed();
+    bool isConnected();
+
+    int getHops();
+    void setHops(int limit);
+
+    int getReceiveBufferSize();
+    void setReceiveBufferSize(int size);
+
+    int getSendBufferSize();
+    void setSendBufferSize(int size);
+
+    bool isReuseAddress();
+    void setReuseAddress(bool on);
+
     ISocket* accept();
     void bind(IInternetAddress* addr, int port);
     void close();
@@ -193,12 +218,142 @@ public:
     void shutdownOutput();
     int write(const void* src, int count);
 
+    // IMulticastSocket
+    int getLoopbackMode();
+    void setLoopbackMode(bool disable);
+    void joinGroup(IInternetAddress* addr);
+    void leaveGroup(IInternetAddress* addr);
+
     //
     // IInterface
     //
     bool queryInterface(const Guid& riid, void** objectPtr);
     unsigned int addRef();
     unsigned int release();
+};
+
+class SocketMessenger;
+class SocketReceiver : public InetReceiver
+{
+public:
+    virtual bool initialize(Socket* socket)
+    {
+        return true;
+    }
+
+    virtual bool read(SocketMessenger* m)
+    {
+        return true;
+    }
+
+    virtual bool write(SocketMessenger* m)
+    {
+        return true;
+    }
+
+    virtual bool accept(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool connect(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool close(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool shutdownOutput(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    virtual bool shutdownInput(SocketMessenger* m)
+    {
+        return false;
+    }
+
+    typedef bool (SocketReceiver::*Command)(SocketMessenger*);
+};
+
+class SocketMessenger : public InetMessenger
+{
+    Socket* socket;
+    SocketReceiver::Command op;
+
+public:
+    SocketMessenger(Socket* socket, SocketReceiver::Command op,
+                    void* chunk = 0, long len = 0, long pos = 0) :
+        InetMessenger(0, chunk, len, pos),
+        socket(socket),
+        op(op)
+    {
+        if (socket)
+        {
+            socket->addRef();
+            setLocal(socket->getLocal());
+            setRemote(socket->getRemote());
+            setLocalPort(socket->getLocalPort());
+            setRemotePort(socket->getRemotePort());
+        }
+    }
+
+    ~SocketMessenger()
+    {
+        if (socket)
+        {
+            socket->release();
+        }
+    }
+
+    virtual bool apply(Conduit* c)
+    {
+        if (op)
+        {
+            if (SocketReceiver* receiver = dynamic_cast<SocketReceiver*>(c->getReceiver()))
+            {
+                return (receiver->*op)(this);
+            }
+        }
+        if (InetMessenger::op)
+        {
+            if (InetReceiver* receiver = dynamic_cast<InetReceiver*>(c->getReceiver()))
+            {
+                return (receiver->*InetMessenger::op)(this);
+            }
+        }
+        return Messenger::apply(c);
+    }
+
+    void setCommand(InetReceiver::Command op)
+    {
+        InetMessenger::op = op;
+        op = 0;
+    }
+
+    Socket* getSocket()
+    {
+        if (socket)
+        {
+            socket->addRef();
+        }
+        return socket;
+    }
+    void setSocket(Socket* socket)
+    {
+        if (socket)
+        {
+            socket->addRef();
+        }
+        if (this->socket)
+        {
+            this->socket->release();
+        }
+        this->socket = socket;
+    }
 };
 
 class SocketInstaller : public Visitor
@@ -224,6 +379,11 @@ public:
         adapter->setReceiver(socket);
         socket->setAdapter(adapter);
         Conduit::connectAB(adapter, p);
+
+        SocketReceiver* receiver = dynamic_cast<SocketReceiver*>(p->getReceiver());
+        ASSERT(receiver);
+        receiver->initialize(socket);
+
         return true;
     }
     bool at(ConduitFactory* f, Conduit* c)
@@ -232,7 +392,7 @@ public:
         if (mux)
         {
             ASSERT(mux->getFactory() == f);
-            void* key = mux->getKey(getMessenger());
+            void* key = mux->getKey(socket);
             Conduit* e = f->create(key);
             if (e)
             {
@@ -289,7 +449,7 @@ public:
         if (c->isEmpty())
         {
             c->setA(0);
-            mux->removeB(mux->getKey(getMessenger()));
+            mux->removeB(mux->getKey(socket));
             delete c;
             return true;
         }
@@ -327,7 +487,7 @@ public:
         if (c->isEmpty() || c == protocol)
         {
             c->setA(0);
-            mux->removeB(mux->getKey(getMessenger()));
+            mux->removeB(mux->getKey(socket));
             if (c != protocol)
             {
                 delete c;
@@ -371,7 +531,7 @@ public:
         if (mux)
         {
             ASSERT(mux->getFactory() == f);
-            void* key = mux->getKey(getMessenger());
+            void* key = mux->getKey(socket);
             if (dynamic_cast<InetRemoteAddressAccessor*>(mux->getAccessor()))
             {
                 Conduit::connectAB(protocol, mux, key);
@@ -392,97 +552,6 @@ public:
     int getErrorCode() const
     {
         return code;
-    }
-};
-
-class SocketMessenger;
-class SocketReceiver : public InetReceiver
-{
-public:
-    virtual bool read(SocketMessenger* m)
-    {
-        return true;
-    }
-
-    virtual bool write(SocketMessenger* m)
-    {
-        return true;
-    }
-
-    virtual bool accept(SocketMessenger* m)
-    {
-        return false;
-    }
-
-    virtual bool connect(SocketMessenger* m)
-    {
-        return false;
-    }
-
-    virtual bool close(SocketMessenger* m)
-    {
-        return false;
-    }
-
-    virtual bool shutdownOutput(SocketMessenger* m)
-    {
-        return false;
-    }
-
-    virtual bool shutdownInput(SocketMessenger* m)
-    {
-        return false;
-    }
-
-    typedef bool (SocketReceiver::*Command)(SocketMessenger*);
-};
-
-class SocketMessenger : public InetMessenger
-{
-    SocketReceiver::Command op;
-    Socket* socket;
-
-public:
-    SocketMessenger(SocketReceiver::Command op,
-                    void* chunk = 0, long len = 0, long pos = 0) :
-        InetMessenger(0, chunk, len, pos),
-        op(op),
-        socket(0)
-    {
-    }
-
-    virtual bool apply(Conduit* c)
-    {
-        if (op)
-        {
-            if (SocketReceiver* receiver = dynamic_cast<SocketReceiver*>(c->getReceiver()))
-            {
-                return (receiver->*op)(this);
-            }
-        }
-        if (InetMessenger::op)
-        {
-            if (InetReceiver* receiver = dynamic_cast<InetReceiver*>(c->getReceiver()))
-            {
-                return (receiver->*InetMessenger::op)(this);
-            }
-        }
-        return Messenger::apply(c);
-    }
-
-    void setCommand(InetReceiver::Command op)
-    {
-        InetMessenger::op = op;
-        op = 0;
-    }
-
-    Socket* getSocket()
-    {
-        return socket;
-    }
-    void setSocket(Socket* socket)
-    {
-        this->socket = socket;
     }
 };
 

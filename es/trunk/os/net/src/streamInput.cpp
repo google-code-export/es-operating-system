@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -393,7 +393,7 @@ ack(TCPSeq seq, TCPSeq ack, s32 win, s32 sent, long len)
     if (0 < sent && 0 < sendLen)
     {
         s32 len = std::min(sent, sendLen);
-        sendRing.discard(len);
+        sendRing.skip(len);
         sendLen -= len;
         sent -= len;
 
@@ -652,7 +652,7 @@ StateListen::input(InetMessenger* m, StreamReceiver* s)
 
     // Clone new socket
     Handle<Address> addr;
-    Socket* socket = new Socket(s->getSocket()->getAddressFamily(), ISocket::STREAM);
+    Socket* socket = new Socket(s->getSocket()->getAddressFamily(), ISocket::Stream);
     socket->setLocal(addr = m->getLocal());
     socket->setLocalPort(m->getLocalPort());
     socket->setRemote(addr = m->getRemote());

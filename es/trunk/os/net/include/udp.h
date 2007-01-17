@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -21,17 +21,35 @@
 // IPv4 UDP Receiver
 class UDPReceiver : public InetReceiver
 {
+    Conduit* conduit;
+
     s16 checksum(InetMessenger* m);
 
 public:
+    UDPReceiver(Conduit* conduit = 0) : conduit(conduit)
+    {
+    }
+
     bool input(InetMessenger* m);
     bool output(InetMessenger* m);
     bool error(InetMessenger* m);
 
     UDPReceiver* clone(Conduit* conduit, void* key)
     {
-        return new UDPReceiver;
+        return new UDPReceiver(conduit);
     }
+};
+
+class UDPUnreachReceiver : public InetReceiver
+{
+    Protocol*   unreachProtocol;
+
+public:
+    UDPUnreachReceiver(Protocol* unreachProtocol) :
+        unreachProtocol(unreachProtocol)
+    {
+    }
+    bool input(InetMessenger* m);
 };
 
 #endif  // UDP_H_INCLUDED

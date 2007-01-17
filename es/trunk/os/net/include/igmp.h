@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -18,37 +18,20 @@
 #include <es/net/igmp.h>
 #include "inet.h"
 
-class IGMPAccessor : public Accessor
-{
-public:
-    /** @return the addr field of IGMPHdr as the key.
-     */
-    void* getKey(Messenger* m)
-    {
-        ASSERT(m);
-
-        IGMPHdr* igmphdr = static_cast<IGMPHdr*>(m->fix(sizeof(IGMPHdr)));
-        return reinterpret_cast<void*>(igmphdr->addr.addr);
-    }
-};
-
 class IGMPReceiver :
     public InetReceiver
 {
+    InFamily*   inFamily;
+
 public:
-    /** Validates the received IGMP packet.
-     */
-    bool input(InetMessenger* m)
+    IGMPReceiver(InFamily* inFamily) :
+        inFamily(inFamily)
     {
-        IGMPHdr* igmphdr = static_cast<IGMPHdr*>(m->fix(sizeof(IGMPHdr)));
-        return true;
     }
 
-    bool output(InetMessenger* m)
-    {
-        IGMPHdr* igmphdr = static_cast<IGMPHdr*>(m->fix(sizeof(IGMPHdr)));
-        return true;
-    }
+    s16 checksum(InetMessenger* m);
+    bool input(InetMessenger* m);
+    bool output(InetMessenger* m);
 };
 
 #endif  // IGMP_H_INCLUDED
