@@ -33,7 +33,7 @@ readProm()
 {
     Lock::Synchronized method(spinLock);
 
-    unsigned char buf[32];
+    u8 buf[32];
     readNicMemory(0, buf, sizeof(buf));
 
     // check data bus type.
@@ -79,7 +79,7 @@ initializeRing()
     esReport("ring.nextPacket: %d\n", ring.nextPacket);
 #endif // VERBOSE
 
-    unsigned char buf[PAGE_SIZE];
+    u8 buf[PAGE_SIZE];
     memset(buf, 0, sizeof(buf));
     int page;
 
@@ -113,7 +113,7 @@ initializeMacAddress()
 {
     Lock::Synchronized method(spinLock);
 
-    unsigned char cr = setPage(CR_PAGE1);
+    u8 cr = setPage(CR_PAGE1);
 
     outpb(base + PAR0, mac[0]);
     outpb(base + PAR1, mac[1]);
@@ -133,7 +133,7 @@ initializeMulticastAddress()
     Lock::Synchronized method(spinLock);
 
     // Program Command Register for page 1
-    unsigned char cr = setPage(CR_PAGE1);
+    u8 cr = setPage(CR_PAGE1);
 
     int i;
     for (i = 0; i < NUM_HASH_REGISTER; ++i)
@@ -230,7 +230,7 @@ reset()
 int Dp8390d::
 writeLocked(const void* src, int count)
 {
-    writeToNicMemory(txPageStart * PAGE_SIZE, (unsigned char*) src, count);
+    writeToNicMemory(txPageStart * PAGE_SIZE, (u8*) src, count);
 
     {
         Lock::Synchronized method(spinLock);
@@ -243,7 +243,7 @@ writeLocked(const void* src, int count)
         // update statistics.
         statistics.outOctets += (unsigned long long) count;
 
-        if (*((unsigned char*) src) & 0x01)
+        if (*((u8*) src) & 0x01)
         {
             ++statistics.outNUcastPkts;
         }
@@ -373,7 +373,7 @@ updateReceiveStatistics(RingHeader* header, int len)
 int Dp8390d::
 readLocked(void* dst, int count)
 {
-    unsigned char* buf = static_cast<unsigned char*>(dst);
+    u8* buf = static_cast<u8*>(dst);
     int total = 0;
     RingHeader header;
     unsigned short nextPacketAddress;
@@ -385,7 +385,7 @@ readLocked(void* dst, int count)
 
             nextPacketAddress = ring.nextPacket * PAGE_SIZE;
             // read a packet status.
-            readNicMemory(nextPacketAddress, (unsigned char*) &header, sizeof(header));
+            readNicMemory(nextPacketAddress, (u8*) &header, sizeof(header));
         }
         int len = getPacketSize(&header);
 
@@ -442,7 +442,7 @@ readLocked(void* dst, int count)
 }
 
 unsigned int Dp8390d::
-generateCrc(const unsigned char* mca)
+generateCrc(const u8* mca)
 {
     unsigned idx;
     unsigned bit;
@@ -471,7 +471,7 @@ issueStopCommand()
 int Dp8390d::
 recoverFromOverflow()
 {
-    unsigned char cr;
+    u8 cr;
     {
         Lock::Synchronized method(spinLock);
 
@@ -519,9 +519,9 @@ recoverFromOverflow()
 }
 
 int Dp8390d::
-readNicMemory(unsigned short src, unsigned char* buf, unsigned short len)
+readNicMemory(unsigned short src, u8* buf, unsigned short len)
 {
-    unsigned char cr = inpb(base + CR) & ~CR_TXP; // save
+    u8 cr = inpb(base + CR) & ~CR_TXP; // save
 
     // select page 0 registers
     outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
@@ -546,7 +546,7 @@ readNicMemory(unsigned short src, unsigned char* buf, unsigned short len)
 }
 
 int Dp8390d::
-writeToNicMemory(unsigned short dst, unsigned char* buf, unsigned short len)
+writeToNicMemory(unsigned short dst, u8* buf, unsigned short len)
 {
     {
         Lock::Synchronized method(spinLock);
@@ -581,33 +581,33 @@ writeToNicMemory(unsigned short dst, unsigned char* buf, unsigned short len)
     return 0;
 }
 
-unsigned char Dp8390d::
+u8 Dp8390d::
 setPage(int page)
 {
     // page: CR_PAGE[0-2]
-    unsigned char cr = inpb(base + CR) & ~CR_TXP;
+    u8 cr = inpb(base + CR) & ~CR_TXP;
     outpb(base + CR, (cr & ~(CR_PS0 | CR_PS1)) | page);
     return cr;
 }
 
-unsigned char Dp8390d::
+u8 Dp8390d::
 getIsr()
 {
     Lock::Synchronized method(spinLock);
     return inpb(base + ISR);
 }
 
-unsigned char Dp8390d::
+u8 Dp8390d::
 getCurr()
 {
-    unsigned char cr = setPage(CR_PAGE1);
-    unsigned char curr = inpb(base + CURR);
+    u8 cr = setPage(CR_PAGE1);
+    u8 curr = inpb(base + CURR);
     restorePage(cr);
     return curr;
 }
 
 void Dp8390d::
-restorePage(unsigned char cr)
+restorePage(u8 cr)
 {
     outpb(base + CR, cr);
 }
@@ -628,7 +628,7 @@ Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
      * Reset the board. This is done by doing a read
      * followed by a write to the Reset address.
      */
-    unsigned char tmp = inpb(base + RESET);
+    u8 tmp = inpb(base + RESET);
     esSleep(20000);    // wait for 2 milliseconds
     outpb(base + RESET, tmp);
     esSleep(20000);
@@ -749,8 +749,8 @@ probe()
     }
 
     // check if the parameters are valid.
-    unsigned char testPattern[] = "Write this pattern, then read the memory and compare them.";
-    unsigned char buf[64];
+    u8 testPattern[] = "Write this pattern, then read the memory and compare them.";
+    u8 buf[64];
     memset(buf, 0, sizeof(buf));
 
     writeToNicMemory(reservedPage, testPattern, sizeof(testPattern));
@@ -785,7 +785,7 @@ setPromiscuousMode(bool on)
         return;
     }
 
-    unsigned char cr = setPage(CR_PAGE0);
+    u8 cr = setPage(CR_PAGE0);
     if (on)
     {
         rcr = (rcr | RCR_PRO) & ~RCR_AM;
@@ -818,10 +818,10 @@ setPromiscuousMode(bool on)
 }
 
 int Dp8390d::
-addMulticastAddress(unsigned char macaddr[6])
+addMulticastAddress(const u8 macaddr[6])
 {
     Lock::Synchronized method(spinLock);
-    unsigned char* multicast = macaddr;
+    const u8* multicast = macaddr;
     if (!(*multicast & 0x01))
     {
         return -1;
@@ -837,10 +837,10 @@ addMulticastAddress(unsigned char macaddr[6])
     if (++hashRef[msb] == 1)
     {
         // Program Command Register for page 1
-        unsigned char cr = setPage(CR_PAGE1);
+        u8 cr = setPage(CR_PAGE1);
 
-        unsigned char mar = inpb(base + MAR0 + msb/8);
-        unsigned char bit = 1<<(msb % 8);
+        u8 mar = inpb(base + MAR0 + msb/8);
+        u8 bit = 1<<(msb % 8);
 
         if (!(mar & bit))
         {
@@ -856,11 +856,11 @@ addMulticastAddress(unsigned char macaddr[6])
 }
 
 int Dp8390d::
-removeMulticastAddress(unsigned char macaddr[6])
+removeMulticastAddress(const u8 macaddr[6])
 {
     Lock::Synchronized method(spinLock);
 
-    unsigned char* multicast = macaddr;
+    const u8* multicast = macaddr;
     if (!(*multicast & 0x01))
     {
         return -1;
@@ -877,9 +877,9 @@ removeMulticastAddress(unsigned char macaddr[6])
         hashRef[msb] = 0;
 
         // Program Command Register for page 1
-        unsigned char cr = setPage(CR_PAGE1);
-        unsigned char mar = inpb(base + MAR0 + msb/8);
-        unsigned char bit = 1<<(msb % 8);
+        u8 cr = setPage(CR_PAGE1);
+        u8 mar = inpb(base + MAR0 + msb/8);
+        u8 bit = 1<<(msb % 8);
 
         if (mar & bit)
         {
@@ -895,7 +895,7 @@ removeMulticastAddress(unsigned char macaddr[6])
 }
 
 void Dp8390d::
-getMacAddress(unsigned char mac[6])
+getMacAddress(u8 mac[6])
 {
     Lock::Synchronized method(spinLock);
     memmove(mac, this->mac, sizeof(this->mac));
@@ -978,7 +978,7 @@ invoke(int irq)
 
     outpb(base + IMR, 0x00); // disable interrupts.
 
-    unsigned char isr;
+    u8 isr;
     while ((isr = inpb(base + ISR)) & (ISR_CNT | ISR_OVW | ISR_TXE | ISR_RXE | ISR_PTX | ISR_PRX))
     {
         if (isr & (ISR_TXE | ISR_PTX))

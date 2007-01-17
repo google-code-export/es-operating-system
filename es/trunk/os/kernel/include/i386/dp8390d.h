@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -31,7 +31,7 @@ class Dp8390d : public IEthernet, public IStream, public ICallback
     unsigned        base;    // I/O base address
     int             irq;     // IRQ
 
-    unsigned char   mac[6];
+    u8              mac[6];
 
     unsigned int    nicMemSize;   // total NIC memory size
     unsigned int    reservedPage; // reserved memory size
@@ -50,27 +50,27 @@ class Dp8390d : public IEthernet, public IStream, public ICallback
     // Receive
     struct RingHeader
     {
-        unsigned char status;
-        unsigned char nextPage;
-        unsigned char lenLow;
-        unsigned char lenHigh;
+        u8 status;
+        u8 nextPage;
+        u8 lenLow;
+        u8 lenHigh;
     };
 
     struct Ring
     {
-        unsigned char pageStart;
-        unsigned char pageStop;
-        unsigned char nextPacket;
+        u8 pageStart;
+        u8 pageStop;
+        u8 nextPacket;
     };
     Ring ring;
 
     // Send
-    unsigned char txPageStart;
+    u8 txPageStart;
 
     // Multicast
-    unsigned char hashTable[NUM_HASH_REGISTER];
+    u8 hashTable[NUM_HASH_REGISTER];
     int hashRef[8 * NUM_HASH_REGISTER];   // reference count of an entry in the hash table.
-    unsigned char rcr; // keep RCR register value. (because no register for page 2 works properly).
+    u8 rcr; // keep RCR register value. (because no register for page 2 works properly).
 
     // initialization
     int readProm();
@@ -89,19 +89,19 @@ class Dp8390d : public IEthernet, public IStream, public ICallback
     bool isRingEmpty();
     void updateReceiveStatistics(RingHeader* header, int len);
     int readLocked(void* dst, int count);
-    unsigned int generateCrc(const unsigned char* mca);
+    unsigned int generateCrc(const u8* mca);
 
     // error
     int recoverFromOverflow();
     void issueStopCommand();
 
     // misc
-    int readNicMemory(unsigned short src, unsigned char* buf, unsigned short len);
-    int writeToNicMemory(unsigned short dst, unsigned char* buf, unsigned short len);
-    unsigned char setPage(int page);
-    void restorePage(unsigned char cr);
-    unsigned char getIsr();
-    unsigned char getCurr();
+    int readNicMemory(unsigned short src, u8* buf, unsigned short len);
+    int writeToNicMemory(unsigned short dst, u8* buf, unsigned short len);
+    u8 setPage(int page);
+    void restorePage(u8 cr);
+    u8 getIsr();
+    u8 getCurr();
 
 public:
     Dp8390d(unsigned base, int irq);
@@ -114,10 +114,10 @@ public:
 
     bool getPromiscuousMode();
     void setPromiscuousMode(bool on);
-    int addMulticastAddress(unsigned char mac[6]);
-    int removeMulticastAddress(unsigned char mac[6]);
+    int addMulticastAddress(const u8 mac[6]);
+    int removeMulticastAddress(const u8 mac[6]);
 
-    void getMacAddress(unsigned char mac[6]);
+    void getMacAddress(u8 mac[6]);
     bool getLinkState();
     int getMode();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -193,7 +193,7 @@ setPosition(int x, int y)
 }
 
 void Vesa::
-setPattern(u32 data[32], u32 mask[32], u16 xHotSpot, u16 yHotSpot)
+setPattern(const u32 data[32], const u32 mask[32], u16 xHotSpot, u16 yHotSpot)
 {
     if (0 < count)
     {
