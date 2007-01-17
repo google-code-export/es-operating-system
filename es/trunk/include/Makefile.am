@@ -17,6 +17,7 @@ nobase_include_HEADERS = \
 	es/broker.h \
 	es/classFactory.h \
 	es/clsid.h \
+	es/collection.h \
 	es/dateTime.h \
 	es/elf.h \
 	es/endian.h \
