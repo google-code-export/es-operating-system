@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -16,6 +16,76 @@
 
 #include <stddef.h>
 #include <es/base/IInterface.h>
+
+/** Common base class for boolean type traits.
+ */
+template <bool C>
+struct BooleanType
+{
+    static const bool Value = C;
+};
+
+/** Base class for type traits that are true.
+ */
+typedef BooleanType<true>   TrueType;
+
+/** Base class for type traits that are false.
+ */
+typedef BooleanType<false>  FalseType;
+
+template <typename T>
+class IsInterfaceImp
+{
+    // sizeof(YesType) != sizeof(NoType)
+    typedef char YesType;
+    class NoType
+    {
+        char    padding[2];
+    };
+
+    // With a compiler that supports DR 337, e.g., GCC 3.4 and later, the
+    // template type argument deduction fails when attempting to create
+    // an array with an abstract class type.
+    template<typename U>
+    static NoType isAbstract(U (*array)[1]);
+    template<typename U>
+    static YesType isAbstract(...);
+
+    static const bool IsAbstract = sizeof(isAbstract<T>(0)) == sizeof(YesType);
+
+    // IsObject has to deal with ambiguous 'IInterface' base classes.
+    // See http://groups.google.com/group/comp.lang.c++.moderated/msg/dd6c4e4d5160bd83
+    struct C
+    {
+        operator IInterface const volatile *() const;
+        operator T const volatile *();
+    };
+
+    static C getObject();
+
+    template <typename U>
+    static YesType isObject(T const volatile *, U);
+    static NoType isObject(IInterface const volatile *, int);
+
+    static const bool IsObject = sizeof(isObject(getObject(), 0)) == sizeof(YesType);
+
+public:
+    static const bool Value = IsAbstract && IsObject;
+};
+
+/** If <code>T</code> is an abstruct interface that inherits
+ * <code>IInterface</code> then <code>IsInterface</code> inherits from
+ * <code>TrueType</code>, otherwise inherits from <code>FalseType</code>.
+ */
+template <typename T>
+struct IsInterface : BooleanType<IsInterfaceImp<T>::Value>
+{
+    /** <code>true</code> if <code>T</code> is an abstruct interface
+     * that inherits from <code>IInterface</code>, otherwise
+     * <code>false</code>.
+     */
+    static const bool Value = IsInterfaceImp<T>::Value;
+};
 
 /** This template class provides a smart pointer for managing
  * interface pointers.
@@ -118,6 +188,39 @@ class Handle
                      // necessary.
     };
 
+    /** Casts unknown to I*, where I is an abstract interface.
+     */
+    template<class J>
+    static I* cast(J* unknown, TrueType)
+    {
+        if (!unknown)
+        {
+            return 0;
+        }
+        else
+        {
+            void* to;
+            if (!unknown->queryInterface(I::interfaceID(), &to))
+            {
+                to = 0;
+            }
+            return static_cast<I*>(to);
+        }
+    }
+
+    /** Casts unknown to I*, where I is an interface implementation.
+     */
+    template<class J>
+    static I* cast(J* unknown, FalseType)
+    {
+        I* to = dynamic_cast<I*>(unknown);
+        if (to)
+        {
+            to->addRef();
+        }
+        return to;
+    }
+
 public:
     /** Default constructor
      */
@@ -133,22 +236,10 @@ public:
     template<class J>
     Handle(J* unknown, bool addRef = false)
     {
-        if (!unknown)
+        object = cast(unknown, IsInterface<J>());
+        if (object && !addRef)
         {
-            object = 0;
-        }
-        else
-        {
-            void* newPtr;
-            if (!unknown->queryInterface(I::interfaceID(), &newPtr))
-            {
-                newPtr = 0;
-            }
-            else if (!addRef)
-            {
-                unknown->release();
-            }
-            object = static_cast<I*>(newPtr);
+            object->release();
         }
     }
 
@@ -170,19 +261,7 @@ public:
     Handle(const Handle<J>& comptr)
     {
         IInterface* unknown = comptr.get();
-        if (!unknown)
-        {
-            object = 0;
-        }
-        else
-        {
-            void* newPtr;
-            if (!unknown->queryInterface(I::interfaceID(), &newPtr))
-            {
-                newPtr = 0;
-            }
-            object = static_cast<I*>(newPtr);
-        }
+        object = cast(unknown, IsInterface<J>());
     }
 
     /** Copy-constructor.
