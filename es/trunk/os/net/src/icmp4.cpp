@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <es/handle.h>
 #include "icmp4.h"
 
 //
@@ -29,7 +30,7 @@ s16 ICMPReceiver::checksum(InetMessenger* m)
     return ~sum;
 }
 
-bool ICMPReceiver::input(InetMessenger* m)
+bool ICMPReceiver::input(InetMessenger* m, Conduit* c)
 {
     int len = m->getLength();
     if (len < sizeof(ICMPHdr) || checksum(m) != 0)
@@ -39,7 +40,7 @@ bool ICMPReceiver::input(InetMessenger* m)
     return true;
 }
 
-bool ICMPReceiver::output(InetMessenger* m)
+bool ICMPReceiver::output(InetMessenger* m, Conduit* c)
 {
     ICMPHdr* icmphdr = static_cast<ICMPHdr*>(m->fix(sizeof(ICMPHdr)));
     icmphdr->sum = 0;
@@ -52,24 +53,22 @@ bool ICMPReceiver::output(InetMessenger* m)
 // ICMPEchoRequestReceiver
 //
 
-bool ICMPEchoRequestReceiver::input(InetMessenger* m)
+bool ICMPEchoRequestReceiver::input(InetMessenger* m, Conduit* c)
 {
     esReport("ICMPEchoRequestReceiver::input\n");
 
     int len = m->getLength();
-    ICMPEcho* icmphdr = static_cast<ICMPEcho*>(m->fix(len));
-
     int pos = 14 + 60;      // XXX Assume MAC, IPv4
-    u8 chunk[pos + len];
-    memmove(chunk + pos, icmphdr, len);
-    icmphdr = reinterpret_cast<ICMPEcho*>(chunk + pos);
+    Handle<InetMessenger> r = new InetMessenger(&InetReceiver::output, pos + len, pos);
+
+    ICMPEcho* icmphdr = reinterpret_cast<ICMPEcho*>(r->fix(len));
+    memmove(icmphdr, m->fix(len), len);
     icmphdr->type = ICMPHdr::EchoReply;
 
-    InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
-    r.setRemote(m->getRemote());
-    r.setLocal(m->getLocal());
+    r->setRemote(m->getRemote());
+    r->setLocal(m->getLocal());
 
-    Visitor v(&r);
+    Visitor v(r);
     adapter->accept(&v);
 
     return true;
@@ -79,7 +78,7 @@ bool ICMPEchoRequestReceiver::input(InetMessenger* m)
 // ICMPEchoReplyReceiver
 //
 
-bool ICMPEchoReplyReceiver::input(InetMessenger* m)
+bool ICMPEchoReplyReceiver::input(InetMessenger* m, Conduit* c)
 {
     // Resume Inet4Address::isReachable()
     notify();
@@ -88,10 +87,10 @@ bool ICMPEchoReplyReceiver::input(InetMessenger* m)
 }
 
 //
-// ICMPEchoRequestReceiver
+// ICMPUnreachReceiver
 //
 
-bool ICMPUnreachReceiver::input(InetMessenger* m)
+bool ICMPUnreachReceiver::input(InetMessenger* m, Conduit* c)
 {
     esReport("ICMPUnreachReceiver::input\n");
 
@@ -108,7 +107,7 @@ bool ICMPUnreachReceiver::input(InetMessenger* m)
     return true;
 }
 
-bool ICMPUnreachReceiver::output(InetMessenger* m)
+bool ICMPUnreachReceiver::output(InetMessenger* m, Conduit* c)
 {
     esReport("ICMPUnreachReceiver::output\n");
 
@@ -119,6 +118,41 @@ bool ICMPUnreachReceiver::output(InetMessenger* m)
     icmphdr->sum = 0;
     icmphdr->unused = 0;
     icmphdr->mtu = 0;
+
+    return true;
+}
+
+//
+// ICMPTimeExceededReceiver
+//
+
+bool ICMPTimeExceededReceiver::input(InetMessenger* m, Conduit* c)
+{
+    esReport("ICMPTimeExceededReceiver::input\n");
+
+    int len = m->getLength();
+    if (len < sizeof(ICMPTimeExceeded))
+    {
+        return false;
+    }
+    ICMPTimeExceeded* icmphdr = static_cast<ICMPTimeExceeded*>(m->fix(sizeof(ICMPTimeExceeded)));
+
+    m->movePosition(sizeof(ICMPTimeExceeded));
+    m->setCommand(&InetReceiver::error);
+
+    return true;
+}
+
+bool ICMPTimeExceededReceiver::output(InetMessenger* m, Conduit* c)
+{
+    esReport("ICMPTimeExceededReceiver::output\n");
+
+    m->movePosition(-sizeof(ICMPTimeExceeded));
+    ICMPTimeExceeded* icmphdr = static_cast<ICMPTimeExceeded*>(m->fix(sizeof(ICMPTimeExceeded)));
+    icmphdr->type = ICMPHdr::TimeExceeded;
+    icmphdr->code = m->getType();
+    icmphdr->sum = 0;
+    icmphdr->unused = 0;
 
     return true;
 }

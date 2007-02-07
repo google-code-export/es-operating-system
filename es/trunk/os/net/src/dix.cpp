@@ -40,12 +40,12 @@ DIXInterface::DIXInterface(IStream* stream) :
     Conduit::connectBA(&mux, &in6Protocol, reinterpret_cast<void*>(DIXHdr::DIX_IPv6));
 }
 
-bool DIXReceiver::input(InetMessenger* m)
+bool DIXReceiver::input(InetMessenger* m, Conduit* c)
 {
     return true;
 }
 
-bool DIXReceiver::output(InetMessenger* m)
+bool DIXReceiver::output(InetMessenger* m, Conduit* c)
 {
     static const u8 zero[6] = { 0, 0, 0, 0, 0, 0 };
 
@@ -62,7 +62,7 @@ bool DIXReceiver::output(InetMessenger* m)
     return true;
 }
 
-bool DIXInReceiver::output(InetMessenger* m)
+bool DIXInReceiver::output(InetMessenger* m, Conduit* c)
 {
     static const u8 zero[6] = { 0, 0, 0, 0, 0, 0 };
     ASSERT(m);
@@ -73,21 +73,20 @@ bool DIXInReceiver::output(InetMessenger* m)
     dixhdr->type = htons(DIXHdr::DIX_IP);
 
     // Fill in dixhdr->dst
-    Address* nextHop = m->getRemote();
+    Handle<Address> nextHop = m->getRemote();
     nextHop->getMacAddress(dixhdr->dst);
     if (memcmp(zero, dixhdr->dst, 6) == 0)
     {
         // Try to resolve the link layer address of nextHop.
         nextHop->start();
-
-        // Shold keep m...
+        m->restorePosition();
+        nextHop->hold(m);
+        return false;
     }
-    nextHop->release();
-
     return true;
 }
 
-bool DIXARPReceiver::output(InetMessenger* m)
+bool DIXARPReceiver::output(InetMessenger* m, Conduit* c)
 {
     static const u8 zero[6] = { 0, 0, 0, 0, 0, 0 };
     ASSERT(m);

@@ -123,7 +123,6 @@ void Socket::removeInterface(IStream* stream)
 
 Socket::
 Socket(int family, int type, int protocol) :
-    InetMessenger(0, chunk, sizeof chunk, 0),
     family(family),
     type(type),
     protocol(protocol),
@@ -142,19 +141,19 @@ Socket::
 }
 
 bool Socket::
-input(InetMessenger* m)
+input(InetMessenger* m, Conduit* c)
 {
     return true;
 }
 
 bool Socket::
-output(InetMessenger* m)
+output(InetMessenger* m, Conduit* c)
 {
     return true;
 }
 
 bool Socket::
-error(InetMessenger* m)
+error(InetMessenger* m, Conduit* c)
 {
     return true;
 }
@@ -420,11 +419,7 @@ write(const void* src, int count)
         return -1;
     }
 
-    int pos = 14 + 60 + 60; // XXX Assume MAC, IPv4, TCP
-    u8 chunk[pos + count];  // XXX count
-
-    SocketMessenger m(this, &SocketReceiver::write, chunk, pos + count, pos);
-    m.write(src, count, pos);
+    SocketMessenger m(this, &SocketReceiver::write, const_cast<void*>(src), count);
     Visitor v(&m);
     adapter->accept(&v);
     return m.getLength();

@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = conduit inet4 tcp config anon unreach mcast
+TESTS = inet4 tcp config anon unreach mcast frag
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -45,7 +45,7 @@ endif ES
 
 anon_SOURCES = anon.cpp
 
-conduit_SOURCES = conduit.cpp
+frag_SOURCES = frag.cpp
 
 inet4_SOURCES = inet4.cpp
 

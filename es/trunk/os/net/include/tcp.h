@@ -23,9 +23,9 @@ class TCPReceiver : public InetReceiver
     s16 checksum(InetMessenger* m);
 
 public:
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
-    bool error(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+    bool error(InetMessenger* m, Conduit* c);
 
     TCPReceiver* clone(Conduit* conduit, void* key)
     {

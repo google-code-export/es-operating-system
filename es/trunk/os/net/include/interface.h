@@ -31,8 +31,9 @@ IThread* esCreateThread(void* (*start)(void* param), void* param);
  */
 class Interface
 {
+    static const int MRU = 1518;
+
     IThread*        thread;
-    u8              chunk[1500];
 
     u8              mac[6];     // MAC address
 
@@ -46,17 +47,21 @@ class Interface
 
     void* vent()
     {
+        Handle<InetMessenger> m = new InetMessenger(&InetReceiver::input, MRU);
         while (stream)
         {
-            int len = stream->read(chunk, sizeof(chunk));
+            int len = stream->read(m->fix(MRU), MRU);
             if (0 < len)
             {
                 esReport("# input\n");
-                esDump(chunk, len);
-                InetMessenger m(&InetReceiver::input, chunk, len);
-                m.setScopeID(scopeID);
-                Transporter v(&m);
+                esDump(m->fix(len), len);
+
+                m->setSize(len);
+                m->setScopeID(scopeID);
+                Transporter v(m);
                 adapter.accept(&v);
+                m->setSize(MRU);    // Restore the size
+                m->setPosition(0);
             }
         }
         return 0;

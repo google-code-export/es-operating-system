@@ -198,15 +198,14 @@ expired()
 
     // Retransmit a packet
     int size = 14 + 60 + 60 + mss;  // XXX Assume MAC, IPv4, TCP
-    u8 chunk[size];
-    InetMessenger m(&InetReceiver::output, chunk, size, size);
+    Handle<InetMessenger> m = new InetMessenger(&InetReceiver::output, size, size);
     Handle<Address> addr;
-    m.setLocal(addr = socket->getLocal());
-    m.setRemote(addr = socket->getRemote());
-    m.setLocalPort(socket->getLocalPort());
-    m.setRemotePort(socket->getRemotePort());
-    m.setType(IPPROTO_TCP);
-    Visitor v(&m);
+    m->setLocal(addr = socket->getLocal());
+    m->setRemote(addr = socket->getRemote());
+    m->setLocalPort(socket->getLocalPort());
+    m->setRemotePort(socket->getRemotePort());
+    m->setType(IPPROTO_TCP);
+    Visitor v(m);
     conduit->accept(&v, conduit->getB());
 }
 
@@ -241,15 +240,14 @@ delayedAck()
         // Send ACK
         ackNow = true;
         int size = 14 + 60 + 60 + mss;  // XXX Assume MAC, IPv4, TCP
-        u8 chunk[size];
-        InetMessenger m(&InetReceiver::output, chunk, size, size);
+        Handle<InetMessenger> m = new InetMessenger(&InetReceiver::output, size, size);
         Handle<Address> addr;
-        m.setLocal(addr = socket->getLocal());
-        m.setRemote(addr = socket->getRemote());
-        m.setLocalPort(socket->getLocalPort());
-        m.setRemotePort(socket->getRemotePort());
-        m.setType(IPPROTO_TCP);
-        Visitor v(&m);
+        m->setLocal(addr = socket->getLocal());
+        m->setRemote(addr = socket->getRemote());
+        m->setLocalPort(socket->getLocalPort());
+        m->setRemotePort(socket->getRemotePort());
+        m->setType(IPPROTO_TCP);
+        Visitor v(m);
         conduit->accept(&v, conduit->getB());
     }
 }

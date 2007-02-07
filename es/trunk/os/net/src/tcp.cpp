@@ -34,7 +34,7 @@ checksum(InetMessenger* m)
     return ~sum;
 }
 
-bool TCPReceiver::input(InetMessenger* m)
+bool TCPReceiver::input(InetMessenger* m, Conduit* c)
 {
     TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
     if (!tcphdr)
@@ -68,7 +68,7 @@ bool TCPReceiver::input(InetMessenger* m)
     return true;
 }
 
-bool TCPReceiver::output(InetMessenger* m)
+bool TCPReceiver::output(InetMessenger* m, Conduit* c)
 {
     // Update TCPHdr
     TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
@@ -81,7 +81,7 @@ bool TCPReceiver::output(InetMessenger* m)
     return true;
 }
 
-bool TCPReceiver::error(InetMessenger* m)
+bool TCPReceiver::error(InetMessenger* m, Conduit* c)
 {
     TCPHdr* tcphdr = static_cast<TCPHdr*>(m->fix(sizeof(TCPHdr)));
 

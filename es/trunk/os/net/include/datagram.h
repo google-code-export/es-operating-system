@@ -91,13 +91,13 @@ public:
         return true;
     }
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
-    bool error(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+    bool error(InetMessenger* m, Conduit* c);
 
-    bool read(SocketMessenger* m);
-    bool write(SocketMessenger* m);
-    bool close(SocketMessenger* m);
+    bool read(SocketMessenger* m, Conduit* c);
+    bool write(SocketMessenger* m, Conduit* c);
+    bool close(SocketMessenger* m, Conduit* c);
 
     DatagramReceiver* clone(Conduit* conduit, void* key)
     {

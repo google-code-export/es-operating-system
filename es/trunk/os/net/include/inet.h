@@ -26,20 +26,20 @@ class InetMessenger;
 class InetReceiver : public virtual Receiver
 {
 public:
-    virtual bool input(InetMessenger* m)
+    virtual bool input(InetMessenger* m, Conduit* c)
     {
         return true;
     }
-    virtual bool output(InetMessenger* m)
+    virtual bool output(InetMessenger* m, Conduit* c)
     {
         return true;
     }
-    virtual bool error(InetMessenger* m)
+    virtual bool error(InetMessenger* m, Conduit* c)
     {
         return true;
     }
 
-    typedef bool (InetReceiver::*Command)(InetMessenger* m);
+    typedef bool (InetReceiver::*Command)(InetMessenger* m, Conduit* c);
 };
 
 class InetMessenger : public Messenger
@@ -57,8 +57,8 @@ private:
 
 public:
     InetMessenger(InetReceiver::Command op = 0,
-                  void* chunk = 0, long len = 0, long pos = 0) :
-        Messenger(chunk, len, pos),
+                  long len = 0, long pos = 0, void* chunk = 0) :
+        Messenger(len, pos, chunk),
         op(op),
         remoteAddress(0),
         localAddress(0),
@@ -80,7 +80,7 @@ public:
             InetReceiver* receiver = dynamic_cast<InetReceiver*>(c->getReceiver());
             if (receiver)
             {
-                return (receiver->*op)(this);
+                return (receiver->*op)(this, c);
             }
         }
         return Messenger::apply(c);

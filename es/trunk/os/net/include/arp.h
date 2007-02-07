@@ -31,7 +31,7 @@ public:
     {
     }
 
-    bool input(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
 };
 
 class ARPFamily : public AddressFamily
@@ -90,15 +90,13 @@ public:
         ASSERT(address);
         if (address)
         {
-            InetMessenger m;
-            m.setLocal(address);
-            Uninstaller uninstaller(&m);
-            arpMux.accept(&uninstaller, &arpProtocol);
-
-            Adapter* adapter = dynamic_cast<Adapter*>(uninstaller.getConduit());
+            Adapter* adapter = dynamic_cast<Adapter*>(address->getAdapter());
             if (adapter)
             {
-                delete adapter;
+                InetMessenger m;
+                m.setLocal(address);
+                Uninstaller uninstaller(&m);
+                adapter->accept(&uninstaller);
                 address->release();
             }
         }

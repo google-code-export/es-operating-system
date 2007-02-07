@@ -17,6 +17,7 @@ cpp_source_files = \
 	src/icmp4.cpp \
 	src/igmp.cpp \
 	src/inet4address.cpp \
+	src/inet4reass.cpp \
 	src/inet4.cpp \
 	src/inet6address.cpp \
 	src/inet6.cpp \
@@ -40,10 +41,11 @@ header_files = \
 	include/dix.h \
 	include/icmp4.h \
 	include/igmp.h \
-	include/inet4.h \
 	include/inet4address.h \
-	include/inet6.h \
+	include/inet4reass.h \
+	include/inet4.h \
 	include/inet6address.h \
+	include/inet6.h \
 	include/inetConfig.h \
 	include/inet.h \
 	include/interface.h \

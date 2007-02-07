@@ -15,7 +15,7 @@ import "es/base/IInterface.idl";
 
 /** This interface represents an internet address.
  */
-[object, uuid(272349ba-8fd1-11db-9c02-0009bf000001)]
+[object, uuid(5e951e76-b27e-11db-9c02-0009bf000001)]
 interface IInternetAddress : IInterface
 {
     /** Gets the raw IP address of this internet address.
@@ -47,6 +47,11 @@ interface IInternetAddress : IInterface
      * @param len      the length of the buffer to contain the host name.
      */
     int getHostName([out, size_is(len)] char* hostName, unsigned int len);
+
+    /** Gets the path MTU to this internet address.
+     * @return the path MTU.
+     */
+    int getPathMTU();
 
     /** Gets this scope identifier which refers to an interface on the local system.
      * @return this scope identifier, or zero if not set.

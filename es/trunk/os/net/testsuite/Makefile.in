@@ -50,10 +50,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-@ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = conduit$(EXEEXT) inet4$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	tcp$(EXEEXT) config$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	anon$(EXEEXT) unreach$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	mcast$(EXEEXT)
+@ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = inet4$(EXEEXT) tcp$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	config$(EXEEXT) anon$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	unreach$(EXEEXT) mcast$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	frag$(EXEEXT)
 @ES_TRUE@am__EXEEXT_1 = config$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_anon_OBJECTS = anon.$(OBJEXT)
@@ -62,15 +62,15 @@ anon_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 anon_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
-am_conduit_OBJECTS = conduit.$(OBJEXT)
-conduit_OBJECTS = $(am_conduit_OBJECTS)
-conduit_LDADD = $(LDADD)
-conduit_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
-	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 am_config_OBJECTS = config.$(OBJEXT)
 config_OBJECTS = $(am_config_OBJECTS)
 config_LDADD = $(LDADD)
 config_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_frag_OBJECTS = frag.$(OBJEXT)
+frag_OBJECTS = $(am_frag_OBJECTS)
+frag_LDADD = $(LDADD)
+frag_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 am_inet4_OBJECTS = inet4.$(OBJEXT)
 inet4_OBJECTS = $(am_inet4_OBJECTS)
@@ -101,10 +101,10 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(anon_SOURCES) $(conduit_SOURCES) $(config_SOURCES) \
+SOURCES = $(anon_SOURCES) $(config_SOURCES) $(frag_SOURCES) \
 	$(inet4_SOURCES) $(mcast_SOURCES) $(tcp_SOURCES) \
 	$(unreach_SOURCES)
-DIST_SOURCES = $(anon_SOURCES) $(conduit_SOURCES) $(config_SOURCES) \
+DIST_SOURCES = $(anon_SOURCES) $(config_SOURCES) $(frag_SOURCES) \
 	$(inet4_SOURCES) $(mcast_SOURCES) $(tcp_SOURCES) \
 	$(unreach_SOURCES)
 DATA = $(noinst_DATA)
@@ -222,13 +222,13 @@ AM_CPPFLAGS = \
 	-I $(srcdir)/../../../include
 
 @ES_TRUE@TESTS = config
-@POSIX_TRUE@TESTS = conduit inet4 tcp config anon unreach mcast
+@POSIX_TRUE@TESTS = inet4 tcp config anon unreach mcast frag
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@noinst_DATA = config.img
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 @ES_TRUE@AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
 anon_SOURCES = anon.cpp
-conduit_SOURCES = conduit.cpp
+frag_SOURCES = frag.cpp
 inet4_SOURCES = inet4.cpp
 mcast_SOURCES = mcast.cpp
 tcp_SOURCES = tcp.cpp
@@ -274,12 +274,12 @@ clean-noinstPROGRAMS:
 anon$(EXEEXT): $(anon_OBJECTS) $(anon_DEPENDENCIES) 
 	@rm -f anon$(EXEEXT)
 	$(CXXLINK) $(anon_LDFLAGS) $(anon_OBJECTS) $(anon_LDADD) $(LIBS)
-conduit$(EXEEXT): $(conduit_OBJECTS) $(conduit_DEPENDENCIES) 
-	@rm -f conduit$(EXEEXT)
-	$(CXXLINK) $(conduit_LDFLAGS) $(conduit_OBJECTS) $(conduit_LDADD) $(LIBS)
 config$(EXEEXT): $(config_OBJECTS) $(config_DEPENDENCIES) 
 	@rm -f config$(EXEEXT)
 	$(CXXLINK) $(config_LDFLAGS) $(config_OBJECTS) $(config_LDADD) $(LIBS)
+frag$(EXEEXT): $(frag_OBJECTS) $(frag_DEPENDENCIES) 
+	@rm -f frag$(EXEEXT)
+	$(CXXLINK) $(frag_LDFLAGS) $(frag_OBJECTS) $(frag_LDADD) $(LIBS)
 inet4$(EXEEXT): $(inet4_OBJECTS) $(inet4_DEPENDENCIES) 
 	@rm -f inet4$(EXEEXT)
 	$(CXXLINK) $(inet4_LDFLAGS) $(inet4_OBJECTS) $(inet4_LDADD) $(LIBS)
@@ -300,8 +300,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anon.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conduit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frag.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mcast.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcp.Po@am__quote@

@@ -14,30 +14,32 @@
 #ifndef NINTENDO_ES_NET_INET4_H_INCLUDED
 #define NINTENDO_ES_NET_INET4_H_INCLUDED
 
+#include <es.h>
+#include <es/endian.h>
 #include <es/types.h>
 
-#define INET_ADDRSTRLEN     16
+static const int INET_ADDRSTRLEN = 16;
 
-#define IPPROTO_ICMP        1
-#define IPPROTO_IGMP        2
-#define IPPROTO_TCP         6
-#define IPPROTO_UDP         17
+static const int IPPROTO_ICMP = 1;
+static const int IPPROTO_IGMP = 2;
+static const int IPPROTO_TCP = 6;
+static const int IPPROTO_UDP = 17;
 
-#define AF_UNSPEC           0       // Unspecified
-#define AF_INET             2       // ARPA Internet protocols
-#define AF_ARP              28      // ARP (RFC 826)
+static const int AF_UNSPEC = 0;     // Unspecified
+static const int AF_INET = 2;       // ARPA Internet protocols
+static const int AF_ARP = 28;       // ARP (RFC 826)
 
-#define PF_UNSPEC           AF_UNSPEC
-#define PF_INET             AF_INET
-#define PF_ARP              AF_ARP
+static const int PF_UNSPEC = AF_UNSPEC;
+static const int PF_INET = AF_INET;
+static const int PF_ARP = AF_ARP;
 
-#define INADDR_ANY              ((u32) 0x00000000)  // 0.0.0.0
-#define INADDR_BROADCAST        ((u32) 0xffffffff)  // 255.255.255.255
-#define INADDR_LOOPBACK         ((u32) 0x7f000001)  // 127.0.0.1
-#define INADDR_UNSPEC_GROUP     ((u32) 0xe0000000)  // 224.0.0.0
-#define INADDR_ALLHOSTS_GROUP   ((u32) 0xe0000001)  // 224.0.0.1
-#define INADDR_ALLROUTERS_GROUP ((u32) 0xe0000002)  // 224.0.0.2
-#define INADDR_MAX_LOCAL_GROUP  ((u32) 0xe00000ff)  // 224.0.0.255
+static const u32 INADDR_ANY = 0x00000000;               // 0.0.0.0
+static const u32 INADDR_BROADCAST = 0xffffffff;         // 255.255.255.255
+static const u32 INADDR_LOOPBACK = 0x7f000001;          // 127.0.0.1
+static const u32 INADDR_UNSPEC_GROUP = 0xe0000000;      // 224.0.0.0
+static const u32 INADDR_ALLHOSTS_GROUP = 0xe0000001;    // 224.0.0.1
+static const u32 INADDR_ALLROUTERS_GROUP = 0xe0000002;  // 224.0.0.2
+static const u32 INADDR_MAX_LOCAL_GROUP = 0xe00000ff;   // 224.0.0.255
 
 struct InAddr
 {
@@ -79,6 +81,13 @@ struct IPMreq
 
 struct IPHdr
 {
+    static const int MinHdrSize = 20;
+    static const int MaxHdrSize = 60;
+
+    static const u16 DontFragment = 0x4000;
+    static const u16 MoreFragments = 0x2000;
+    static const u16 FragmentOffset = 0x1fff;
+
     u8      verlen;         // Version and header length
     u8      tos;            // Type of service
     u16     len;            // packet length
@@ -95,38 +104,73 @@ struct IPHdr
         return (verlen >> 4);
     }
 
+    void setVersion()
+    {
+        verlen &= 0x0f;
+        verlen |= 0x40;
+    }
+
     int getHdrSize() const
     {
         return ((verlen & 0x0f) << 2);
     }
 
+    void setHdrSize(int hlen)
+    {
+        ASSERT(MinHdrSize <= hlen && hlen <= MaxHdrSize && ((hlen & 3) == 0));
+        verlen &= ~0x0f;
+        verlen |= hlen >> 2;
+    }
+
     int getSize() const
     {
-        return len;
+        return ntohs(len);
+    }
+
+    void setSize(int len)
+    {
+        this->len = htons(len);
+    }
+
+    int getOffset() const
+    {
+        int offset = ntohs(frag);
+        return (offset & FragmentOffset) << 3;
+    }
+
+    void setOffset(u16 offset)
+    {
+        ASSERT((offset & 7) == 0 && offset <= 65512);
+        offset >>= 3;
+        offset |= (ntohs(frag) & FragmentOffset);
+        frag = htons(offset);
+    }
+
+    bool moreFragments()
+    {
+        return ntohs(frag) & MoreFragments;
+    }
+
+    bool dontFragment()
+    {
+        return ntohs(frag) & DontFragment;
+    }
+
+    u16 getId()
+    {
+        return ntohs(id);
     }
 };
 
-#define IP_VER              0x4     // IP version 4
-#define IP_VERHLEN          0x45    // Default 20 bytes header
-
-// Fragment information
-#define IP_DF               0x4000  // Don't fragment
-#define IP_MF               0x2000  // More fragments
-#define IP_FO               0x1fff  // Fragment offset
-
-#define IP_FRAG(ip)         (((ip)->frag & IP_FO) << 3)
-
-#define IP_MIN_HLEN         20
-#define IP_MAX_HLEN         60
-
 // Options
-#define IPOPT_EOOL          0x00    // End of Option List
-#define IPOPT_NOP           0x01    // No Operation
-#define IPOPT_SEC           0x82    // Security
-#define IPOPT_LSRR          0x83    // Loose Source and Record Route
-#define IPOPT_SSRR          0x89    // Strict Source and Record Route
-#define IPOPT_RR            0x07    // Record Route
-#define IPOPT_TS            0x44    // Internet Timestamp
+static const int IPOPT_COPIED = 0x80;   // Copied flag
+static const int IPOPT_EOOL = 0x00;     // End of Option List
+static const int IPOPT_NOP = 0x01;      // No Operation
+static const int IPOPT_SEC = 0x82;      // Security
+static const int IPOPT_LSRR = 0x83;     // Loose Source and Record Route
+static const int IPOPT_SSRR = 0x89;     // Strict Source and Record Route
+static const int IPOPT_RR = 0x07;       // Record Route
+static const int IPOPT_TS = 0x44;       // Internet Timestamp
 
 extern const InAddr InAddrAny;
 extern const InAddr InAddrLoopback;
@@ -175,6 +219,6 @@ inline int IN_IS_ADDR_IN_NET(InAddr a, InAddr n, InAddr m)
 
 // Misc.
 
-#define IP_MIN_MTU          576
+static const int IP_MIN_MTU = 576;
 
 #endif  // NINTENDO_ES_NET_INET4_H_INCLUDED

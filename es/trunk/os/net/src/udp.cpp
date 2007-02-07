@@ -38,7 +38,7 @@ checksum(InetMessenger* m)
 }
 
 bool UDPReceiver::
-input(InetMessenger* m)
+input(InetMessenger* m, Conduit* c)
 {
     UDPHdr* udphdr = static_cast<UDPHdr*>(m->fix(sizeof(UDPHdr)));
     if (!udphdr)
@@ -85,7 +85,7 @@ input(InetMessenger* m)
 }
 
 bool UDPReceiver::
-output(InetMessenger* m)
+output(InetMessenger* m, Conduit* c)
 {
     long len = sizeof(UDPHdr) + m->getLength();
     if (65535 - sizeof(UDPHdr) < len)
@@ -109,7 +109,7 @@ output(InetMessenger* m)
 }
 
 bool UDPReceiver::
-error(InetMessenger* m)
+error(InetMessenger* m, Conduit* c)
 {
     UDPHdr* udphdr = static_cast<UDPHdr*>(m->fix(sizeof(UDPHdr)));
 
@@ -121,7 +121,7 @@ error(InetMessenger* m)
 }
 
 bool UDPUnreachReceiver::
-input(InetMessenger* m)
+input(InetMessenger* m, Conduit* c)
 {
     // Now we need to access the original IP header.
     m->restorePosition();
@@ -150,12 +150,12 @@ input(InetMessenger* m)
     {
         int len = iphdr->getHdrSize() + 8;
         int pos = 14 + 60 + sizeof(ICMPUnreach);    // XXX Assume MAC, IPv4
-        u8 chunk[pos + len];
-        memmove(chunk + pos, iphdr, len);
-        InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
-        r.setRemote(m->getRemote());
-        r.setLocal(m->getLocal());
-        Visitor v(&r);
+        Handle<InetMessenger> r = new InetMessenger(&InetReceiver::output, pos + len, pos);
+
+        memmove(r->fix(len), iphdr, len);
+        r->setRemote(m->getRemote());
+        r->setLocal(m->getLocal());
+        Visitor v(r);
         unreachProtocol->accept(&v, unreachProtocol->getB());
     }
 

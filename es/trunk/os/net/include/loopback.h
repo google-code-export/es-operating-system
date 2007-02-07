@@ -59,7 +59,7 @@ public:
         }
     }
 
-    bool output(InetMessenger* m)
+    bool output(InetMessenger* m, Conduit* c)
     {
         int af = m->getType();
         m->movePosition(-sizeof(int));

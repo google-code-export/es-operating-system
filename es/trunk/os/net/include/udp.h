@@ -30,9 +30,9 @@ public:
     {
     }
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
-    bool error(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+    bool error(InetMessenger* m, Conduit* c);
 
     UDPReceiver* clone(Conduit* conduit, void* key)
     {
@@ -49,7 +49,7 @@ public:
         unreachProtocol(unreachProtocol)
     {
     }
-    bool input(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
 };
 
 #endif  // UDP_H_INCLUDED

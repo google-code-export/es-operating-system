@@ -130,9 +130,9 @@ public:
     Socket(int family, int type, int protocol = 0);
     ~Socket();
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
-    bool error(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+    bool error(InetMessenger* m, Conduit* c);
 
     Adapter* getAdapter() const
     {
@@ -241,42 +241,42 @@ public:
         return true;
     }
 
-    virtual bool read(SocketMessenger* m)
+    virtual bool read(SocketMessenger* m, Conduit* c)
     {
         return true;
     }
 
-    virtual bool write(SocketMessenger* m)
+    virtual bool write(SocketMessenger* m, Conduit* c)
     {
         return true;
     }
 
-    virtual bool accept(SocketMessenger* m)
+    virtual bool accept(SocketMessenger* m, Conduit* c)
     {
         return false;
     }
 
-    virtual bool connect(SocketMessenger* m)
+    virtual bool connect(SocketMessenger* m, Conduit* c)
     {
         return false;
     }
 
-    virtual bool close(SocketMessenger* m)
+    virtual bool close(SocketMessenger* m, Conduit* c)
     {
         return false;
     }
 
-    virtual bool shutdownOutput(SocketMessenger* m)
+    virtual bool shutdownOutput(SocketMessenger* m, Conduit* c)
     {
         return false;
     }
 
-    virtual bool shutdownInput(SocketMessenger* m)
+    virtual bool shutdownInput(SocketMessenger* m, Conduit* c)
     {
         return false;
     }
 
-    typedef bool (SocketReceiver::*Command)(SocketMessenger*);
+    typedef bool (SocketReceiver::*Command)(SocketMessenger*, Conduit*);
 };
 
 class SocketMessenger : public InetMessenger
@@ -287,7 +287,7 @@ class SocketMessenger : public InetMessenger
 public:
     SocketMessenger(Socket* socket, SocketReceiver::Command op,
                     void* chunk = 0, long len = 0, long pos = 0) :
-        InetMessenger(0, chunk, len, pos),
+        InetMessenger(0, len, pos, chunk),
         socket(socket),
         op(op)
     {
@@ -315,17 +315,10 @@ public:
         {
             if (SocketReceiver* receiver = dynamic_cast<SocketReceiver*>(c->getReceiver()))
             {
-                return (receiver->*op)(this);
+                return (receiver->*op)(this, c);
             }
         }
-        if (InetMessenger::op)
-        {
-            if (InetReceiver* receiver = dynamic_cast<InetReceiver*>(c->getReceiver()))
-            {
-                return (receiver->*InetMessenger::op)(this);
-            }
-        }
-        return Messenger::apply(c);
+        return InetMessenger::apply(c);
     }
 
     void setCommand(InetReceiver::Command op)

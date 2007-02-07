@@ -603,19 +603,19 @@ public:
         return true;
     }
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
-    bool error(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+    bool error(InetMessenger* m, Conduit* c);
 
-    bool read(SocketMessenger* m);
-    bool write(SocketMessenger* m);
+    bool read(SocketMessenger* m, Conduit* c);
+    bool write(SocketMessenger* m, Conduit* c);
 
-    bool accept(SocketMessenger* m);
-    bool listen(SocketMessenger* m);
-    bool connect(SocketMessenger* m);
-    bool close(SocketMessenger* m);
-    bool shutdownOutput(SocketMessenger* m);
-    bool shutdownInput(SocketMessenger* m);
+    bool accept(SocketMessenger* m, Conduit* c);
+    bool listen(SocketMessenger* m, Conduit* c);
+    bool connect(SocketMessenger* m, Conduit* c);
+    bool close(SocketMessenger* m, Conduit* c);
+    bool shutdownOutput(SocketMessenger* m, Conduit* c);
+    bool shutdownInput(SocketMessenger* m, Conduit* c);
 
     void expired();
     void abort();

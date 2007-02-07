@@ -23,6 +23,7 @@
 #include "icmp4.h"
 #include "igmp.h"
 #include "inet4address.h"
+#include "inet4reass.h"
 #include "scope.h"
 #include "socket.h"
 #include "stream.h"
@@ -32,22 +33,6 @@
 class ARPFamily;
 class InFamily;
 
-class InAccessor : public Accessor
-{
-public:
-    /** @return the protocol field of IPHdr as the key.
-     */
-    void* getKey(Messenger* m)
-    {
-        ASSERT(m);
-
-        IPHdr* iphdr = static_cast<IPHdr*>(m->fix(sizeof(IPHdr)));
-        m->savePosition();
-        m->movePosition(iphdr->getHdrSize());
-        return reinterpret_cast<void*>(iphdr->proto);
-    }
-};
-
 class InReceiver : public InetReceiver
 {
     static u16  identification;
@@ -55,15 +40,16 @@ class InReceiver : public InetReceiver
     InFamily*   inFamily;
 
     s16 checksum(const InetMessenger* m, int hlen);
+    void fragment(const InetMessenger* m, int mtu, Address* nextHop);
 
 public:
     InReceiver(InFamily* inFamily) : inFamily(inFamily)
     {
     }
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
-    bool error(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+    bool error(InetMessenger* m, Conduit* c);
 };
 
 class InFamily : public AddressFamily
@@ -76,7 +62,7 @@ class InFamily : public AddressFamily
     // In protocol
     InReceiver                  inReceiver;
     Protocol                    inProtocol;
-    InAccessor                  inAccessor;
+    TypeAccessor                inAccessor;
     ConduitFactory              inFactory;
     Mux                         inMux;
 
@@ -102,6 +88,10 @@ class InFamily : public AddressFamily
     // ICMP Unreach
     ICMPUnreachReceiver         unreachReceiver;
     Protocol                    unreachProtocol;
+
+    // ICMP Time Exceeded
+    ICMPTimeExceededReceiver    timeExceededReceiver;
+    Protocol                    timeExceededProtocol;
 
     // ICMP Redirect
     // ...
@@ -152,6 +142,21 @@ class InFamily : public AddressFamily
     TCPReceiver                 tcpReceiver;
     Protocol                    tcpProtocol;
     int                         tcpLast;
+
+    // Fragment Reassemble
+    ReassReceiver               reassReceiver;
+    Adapter                     reassAdapter;
+    InetRemotePortAccessor      reassIdAccessor;
+    ConduitFactory              reassIdFactory;
+    Mux                         reassIdMux;
+    InetRemoteAddressAccessor   reassRemoteAddressAccessor;
+    ConduitFactory              reassRemoteAddressFactory;
+    Mux                         reassRemoteAddressMux;
+    InetLocalAddressAccessor    reassLocalAddressAccessor;
+    ConduitFactory              reassLocalAddressFactory;
+    Mux                         reassLocalAddressMux;
+    Protocol                    reassProtocol;
+    ReassFactoryReceiver        reassFactoryReceiver;
 
     // Inet4Address tree
     Tree<InAddr, Inet4Address*> addressTable[Socket::INTERFACE_MAX];
@@ -278,6 +283,8 @@ public:
     friend class Inet4Address::StateInit;
     friend class Inet4Address::StateTentative;
     friend class Inet4Address::StatePreferred;
+    friend class Inet4Address::StateReachable;
+    friend class InReceiver;
 };
 
 #endif  // INET4_H_INCLUDED

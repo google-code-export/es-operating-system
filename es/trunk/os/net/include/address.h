@@ -24,8 +24,9 @@ class Socket;
 
 class Address : public IInternetAddress
 {
-    u8                  mac[6];
-    Collection<Socket*> sockets;
+    u8                      mac[6];
+    Collection<Socket*>     sockets;
+    Collection<Messenger*>  packets;
 
 public:
     Address()
@@ -67,7 +68,20 @@ public:
 
     virtual Address* getNextHop() = 0;
 
-    // void hold(Messenger* m);
+    void hold(Messenger* m)
+    {
+        m->addRef();
+        packets.addLast(m);
+    }
+
+    Messenger* retrieve()
+    {
+        if (packets.isEmpty())
+        {
+            return 0;
+        }
+        return packets.removeFirst();
+    }
 
     friend class UDPReceiver;
 };

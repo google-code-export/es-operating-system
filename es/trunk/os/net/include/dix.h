@@ -52,8 +52,8 @@ public:
     {
     }
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
 };
 
 class DIXInReceiver : public InetReceiver
@@ -66,7 +66,7 @@ public:
     {
     }
 
-    bool output(InetMessenger* m);
+    bool output(InetMessenger* m, Conduit* c);
 };
 
 class DIXARPReceiver : public InetReceiver
@@ -79,7 +79,7 @@ public:
     {
     }
 
-    bool output(InetMessenger* m);
+    bool output(InetMessenger* m, Conduit* c);
 };
 
 class DIXInterface : public Interface

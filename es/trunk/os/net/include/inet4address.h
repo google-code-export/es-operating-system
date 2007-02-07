@@ -283,6 +283,11 @@ public:
         return address;
     }
 
+    Conduit* getAdapter() const
+    {
+        return adapter;
+    }
+
     void start()
     {
         return state->start(this);
@@ -293,17 +298,17 @@ public:
         return state->stop(this);
     }
 
-    bool input(InetMessenger* m)
+    bool input(InetMessenger* m, Conduit* c)
     {
         return state->input(m, this);
     }
 
-    bool output(InetMessenger* m)
+    bool output(InetMessenger* m, Conduit* c)
     {
         return state->output(m, this);
     }
 
-    bool error(InetMessenger* m)
+    bool error(InetMessenger* m, Conduit* c)
     {
         return state->error(m, this);
     }
@@ -353,6 +358,11 @@ public:
     bool isPreferred()
     {
         return state->isPreferred();
+    }
+
+    int getPathMTU()
+    {
+        return 1500;    // XXX
     }
 
     IInternetAddress* getNext();

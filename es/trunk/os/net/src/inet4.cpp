@@ -52,6 +52,14 @@ InFamily::InFamily() :
     tcpLocalPortMux(&tcpLocalPortAccessor, &tcpLocalPortFactory),
     tcpLast(49152),
 
+    reassReceiver(&inProtocol, &timeExceededProtocol, &reassAdapter),
+    reassIdFactory(&reassAdapter),
+    reassIdMux(&reassIdAccessor, &reassIdFactory),
+    reassRemoteAddressFactory(&reassIdMux),
+    reassRemoteAddressMux(&reassRemoteAddressAccessor, &reassRemoteAddressFactory),
+    reassLocalAddressFactory(&reassRemoteAddressMux),
+    reassLocalAddressMux(&reassLocalAddressAccessor, &reassLocalAddressFactory),
+
     addressAny(InAddrAny, Inet4Address::statePreferred),
     addressAllRouters(InAddrAllRouters, Inet4Address::stateNonMember),
 
@@ -67,6 +75,7 @@ InFamily::InFamily() :
     tcpProtocol.setReceiver(&tcpReceiver);
     streamProtocol.setReceiver(&streamReceiver);
     unreachProtocol.setReceiver(&unreachReceiver);
+    timeExceededProtocol.setReceiver(&timeExceededReceiver);
 
     Conduit::connectAA(&scopeMux, &inProtocol);
     Conduit::connectBA(&inProtocol, &inMux);
@@ -74,13 +83,16 @@ InFamily::InFamily() :
     Conduit::connectBA(&inMux, &igmpProtocol, reinterpret_cast<void*>(IPPROTO_IGMP));
     Conduit::connectBA(&inMux, &udpProtocol, reinterpret_cast<void*>(IPPROTO_UDP));
     Conduit::connectBA(&inMux, &tcpProtocol, reinterpret_cast<void*>(IPPROTO_TCP));
+    Conduit::connectBA(&inMux, &reassProtocol, reinterpret_cast<void*>(IPPROTO_FRAGMENT));
 
     // ICMP
     Conduit::connectBA(&icmpProtocol, &icmpMux);
     Conduit::connectBA(&icmpMux, &echoReplyMux, reinterpret_cast<void*>(ICMPHdr::EchoReply));
     Conduit::connectBA(&icmpMux, &echoRequestMux, reinterpret_cast<void*>(ICMPHdr::EchoRequest));
     Conduit::connectBA(&icmpMux, &unreachProtocol, reinterpret_cast<void*>(ICMPHdr::Unreach));
-    unreachProtocol.setB(&inProtocol);  // loop
+    Conduit::connectBA(&icmpMux, &timeExceededProtocol, reinterpret_cast<void*>(ICMPHdr::TimeExceeded));
+    unreachProtocol.setB(&inProtocol);      // loop
+    timeExceededProtocol.setB(&inProtocol); // loop
 
     // IGMP
     igmpAdapter.setReceiver(&addressAny);
@@ -99,6 +111,13 @@ InFamily::InFamily() :
     tcpLocalAddressFactory.setReceiver(&streamReceiver);
     tcpLocalPortFactory.setReceiver(&streamReceiver);
     Conduit::connectBA(&tcpProtocol, &tcpLocalPortMux);
+
+    // Fragment Reassemble
+    reassAdapter.setReceiver(&reassReceiver);
+    reassIdFactory.setReceiver(&reassFactoryReceiver);
+    reassRemoteAddressFactory.setReceiver(&reassFactoryReceiver);
+    reassLocalAddressFactory.setReceiver(&reassFactoryReceiver);
+    Conduit::connectBA(&reassProtocol, &reassLocalAddressMux);
 
     Socket::addAddressFamily(this);
 }
@@ -266,20 +285,19 @@ bool InFamily::isReachable(Inet4Address* dst, long long timeout)
     // Send ICMP Echo request to dst
     int pos = 14 + 60;      // XXX Assume MAC, IPv4
     int len = sizeof(ICMPEcho) + 10;
-    u8 chunk[pos + len];
-    memmove(chunk + pos + sizeof(ICMPEcho), "0123456789", 10);
-    ICMPEcho* icmphdr = reinterpret_cast<ICMPEcho*>(chunk + pos);
+    Handle<InetMessenger> m = new InetMessenger(&InetReceiver::output, pos + len, pos);
+    ICMPEcho* icmphdr = reinterpret_cast<ICMPEcho*>(m->fix(len));
+    memmove(&icmphdr[1], "0123456789", 10);
     icmphdr->type = ICMPHdr::EchoRequest;
     icmphdr->code = 0;
     icmphdr->id = 0;    // XXX
     icmphdr->seq = 0;   // XXX
 
-    InetMessenger m(&InetReceiver::output, chunk, pos + len, pos);
-    m.setRemote(dst);
-    m.setLocal(src);
-    m.setType(IPPROTO_ICMP);
+    m->setRemote(dst);
+    m->setLocal(src);
+    m->setType(IPPROTO_ICMP);
 
-    Visitor v(&m);
+    Visitor v(m);
     adapter->accept(&v);
 
     receiver->wait(timeout);
@@ -317,15 +335,13 @@ void InFamily::leaveGroup(Inet4Address* address)
 {
     ASSERT(address->isMulticast());
 
-    InetMessenger m;
-    m.setLocal(address);
-    Uninstaller uninstaller(&m);
-    igmpMux.accept(&uninstaller, &igmpProtocol);
-
-    Adapter* adapter = dynamic_cast<Adapter*>(uninstaller.getConduit());
+    Adapter* adapter = dynamic_cast<Adapter*>(address->getAdapter());
     if (adapter)
     {
-        delete adapter;
+        InetMessenger m;
+        m.setLocal(address);
+        Uninstaller uninstaller(&m);
+        adapter->accept(&uninstaller);
         address->release();
     }
 
@@ -352,7 +368,7 @@ checksum(const InetMessenger* m, int hlen)
 }
 
 bool InReceiver::
-input(InetMessenger* m)
+input(InetMessenger* m, Conduit* c)
 {
     Handle<Inet4Address> addr;
 
@@ -400,11 +416,34 @@ input(InetMessenger* m)
     }
     m->setRemote(addr);
 
+    if (iphdr->getOffset() == 0 && !iphdr->moreFragments())
+    {
+        m->setType(iphdr->proto);
+    }
+    else
+    {
+        // RFC 1858
+        if (iphdr->proto == IPPROTO_TCP && iphdr->getOffset() == 8)
+        {
+            return false;
+        }
+
+        m->setType(IPPROTO_FRAGMENT);
+        int id = iphdr->getId();
+        if (id == 0)
+        {
+            id = 65536;
+        }
+        m->setRemotePort(id);
+    }
+    m->savePosition();
+    m->movePosition(iphdr->getHdrSize());
+
     return true;
 }
 
 bool InReceiver::
-output(InetMessenger* m)
+output(InetMessenger* m, Conduit* c)
 {
     Handle<Address> addr;
 
@@ -418,6 +457,7 @@ output(InetMessenger* m)
 
     // Add IPHdr
     m->movePosition(-sizeof(IPHdr));
+    m->savePosition();
     IPHdr* iphdr = static_cast<IPHdr*>(m->fix(sizeof(IPHdr)));
     iphdr->verlen = 0x45;
     iphdr->tos = 0;
@@ -434,6 +474,20 @@ output(InetMessenger* m)
     iphdr->sum = checksum(m, iphdr->getHdrSize());
     m->setType(AF_INET);
 
+    int mtu = addr->getPathMTU();
+    if (mtu < m->getLength())
+    {
+        if (iphdr->dontFragment())
+        {
+            // XXX Notify an error
+            return false;
+        }
+
+        // Fragmentation Procedure [RFC 791]
+        fragment(m, mtu, m->getRemote()->getNextHop());
+        return false;
+    }
+
     // Set the remote address to the next hop router address
     // if necessary.
     m->setRemote(m->getRemote()->getNextHop());
@@ -442,7 +496,7 @@ output(InetMessenger* m)
 }
 
 bool InReceiver::
-error(InetMessenger* m)
+error(InetMessenger* m, Conduit* c)
 {
     IPHdr* iphdr = static_cast<IPHdr*>(m->fix(sizeof(IPHdr)));
 
@@ -454,4 +508,114 @@ error(InetMessenger* m)
     m->setRemote(addr);
 
     return true;
+}
+
+void InReceiver::
+fragment(const InetMessenger* m, int mtu, Address* nextHop)
+{
+    Handle<Inet4Address> addr;
+
+    IPHdr* org = static_cast<IPHdr*>(m->fix(sizeof(IPHdr)));
+    int hlen = org->getHdrSize();
+    int offset = ((mtu - hlen) & ~7);
+
+    //
+    // Copy the first NFB*8 data octets
+    //
+    int pos = 14;  // XXX Assume MAC
+    int len = hlen + offset;
+    Handle<InetMessenger> d = new InetMessenger(&InetReceiver::output, pos + len, pos);
+    memmove(d->fix(len), m->fix(len), len);
+
+    // Correct the header: MF <- 1, TL <- (IHL*4)+(NFB*8)
+    IPHdr* frag = static_cast<IPHdr*>(d->fix(sizeof(IPHdr)));
+    frag->setSize(len);
+    frag->frag = htons(IPHdr::MoreFragments);
+    frag->sum = 0;
+    frag->sum = checksum(d, frag->getHdrSize());
+
+    d->setType(AF_INET);
+    d->setRemote(nextHop);
+    addr = m->getLocal();
+    d->setLocal(addr);
+
+    esReport("frag size = %d\n", frag->getSize());
+    Visitor v(d);
+    inFamily->scopeMux.accept(&v, &inFamily->inProtocol);
+
+    //
+    // Selectively copy the internet header options
+    //
+    u8 option[IPHdr::MaxHdrSize - IPHdr::MinHdrSize];
+    u8* opt = (u8*) &org[1];
+    int optlen = org->getHdrSize() - sizeof(IPHdr);
+    ASSERT(0 <= optlen);
+    u8* ptr = option;
+    for (int i = 0; i < optlen && opt[i] != IPOPT_EOOL; i += len)
+    {
+        switch (opt[i])
+        {
+          case IPOPT_EOOL:
+          case IPOPT_NOP:
+            len = 1;
+            break;
+          default:
+            len = opt[i + 1];
+            break;
+        }
+        if (opt[i] & IPOPT_COPIED)
+        {
+            memmove(ptr, opt + i, len);
+            ptr += len;
+        }
+    }
+    optlen = ptr - option;
+    while (optlen % 4)
+    {
+        *ptr++ = IPOPT_EOOL;
+        ++optlen;
+    }
+
+    //
+    // Send the remaining data
+    //
+    hlen = sizeof(IPHdr) + optlen;
+    while (offset < org->getSize() - org->getHdrSize())
+    {
+        int pos = 14;  // XXX Assume MAC
+        len = (mtu - hlen) & ~7;
+        len = std::min(len, org->getSize() - org->getHdrSize() - offset);
+        Handle<InetMessenger> d = new InetMessenger(&InetReceiver::output, pos + hlen + len, pos);
+
+        IPHdr* frag = static_cast<IPHdr*>(d->fix(sizeof(IPHdr)));
+        memmove(frag, org, sizeof(IPHdr));
+        memmove(&frag[1], option, optlen);
+        memmove((u8*) &frag[1] + optlen, (u8*) org + org->getHdrSize() + offset, len);
+
+        // Correct the header:
+        // IHL <- (((OIHL*4)-(length of options not copied))+3)/4;
+        // TL <- OTL - NFB*8 - (OIHL-IHL)*4);
+        // FO <- OFO + NFB;  MF <- OMF;
+        frag->setHdrSize(hlen);
+        frag->setSize(hlen + len);
+        frag->setOffset(offset);
+        if (org->getHdrSize() + offset + len < org->getSize())
+        {
+            frag->frag |= htons(IPHdr::MoreFragments);
+        }
+
+        frag->sum = 0;
+        frag->sum = checksum(d, frag->getHdrSize());
+
+        d->setType(AF_INET);
+        d->setRemote(nextHop);
+        addr = m->getLocal();
+        d->setLocal(addr);
+
+        esReport("frag size = %d\n", frag->getSize());
+        Visitor v(d);
+        inFamily->scopeMux.accept(&v, &inFamily->inProtocol);
+
+        offset += len;
+    }
 }

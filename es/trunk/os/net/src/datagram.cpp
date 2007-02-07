@@ -15,8 +15,10 @@
 #include "datagram.h"
 
 bool DatagramReceiver::
-input(InetMessenger* m)
+input(InetMessenger* m, Conduit* c)
 {
+    esReport("DatagramReceiver::input\n");
+
     long len = m->getLength();
 
     RingHdr ringhdr(len);
@@ -36,13 +38,13 @@ input(InetMessenger* m)
 }
 
 bool DatagramReceiver::
-output(InetMessenger* m)
+output(InetMessenger* m, Conduit* c)
 {
     return true;
 }
 
 bool DatagramReceiver::
-error(InetMessenger* m)
+error(InetMessenger* m, Conduit* c)
 {
     Synchronized<IMonitor*> method(monitor);
 
@@ -53,7 +55,7 @@ error(InetMessenger* m)
 }
 
 bool DatagramReceiver::
-read(SocketMessenger* m)
+read(SocketMessenger* m, Conduit* c)
 {
     Synchronized<IMonitor*> method(monitor);
 
@@ -88,14 +90,26 @@ read(SocketMessenger* m)
 }
 
 bool DatagramReceiver::
-write(SocketMessenger* m)
+write(SocketMessenger* m, Conduit* c)
 {
-    m->setCommand(&InetReceiver::output);
+    int pos = 14 + 60 + 60;  // XXX Assume MAC, IPv4
+    int len = m->getSize();
+    Handle<InetMessenger> d = new InetMessenger(&InetReceiver::output, pos + len, pos);
+    memmove(d->fix(len), m->fix(len), len);
+
+    Handle<Address> addr;
+    d->setLocal(addr = m->getLocal());
+    d->setRemote(addr = m->getRemote());
+    d->setLocalPort(m->getLocalPort());
+    d->setRemotePort(m->getRemotePort());
+    d->setType(IPPROTO_UDP);
+    Visitor v(d);
+    conduit->accept(&v, conduit->getB());
     return true;
 }
 
 bool DatagramReceiver::
-close(SocketMessenger* m)
+close(SocketMessenger* m, Conduit* c)
 {
     SocketUninstaller uninstaller(getSocket());
     conduit->getB()->accept(&uninstaller);

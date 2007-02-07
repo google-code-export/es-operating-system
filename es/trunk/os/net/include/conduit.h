@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <es.h>
+#include <es/ref.h>
 #include <es/types.h>
 #include <es/tree.h>
 
@@ -34,25 +35,39 @@ class Visitor;
 
 class Messenger
 {
-public: // XXX
-    void*   chunk;
+    Ref     ref;
+
+    char*   chunk;
     long    len;
     long    position;
     int     type;       // type of data pointed by position
 
-    long    saved;
+    long    saved;      // saved position
+    bool    internal;   // true if chunk is allocated internally
 
 public:
-    Messenger(void* chunk = 0, long len = 0, long pos = 0) :
-        chunk(chunk),
+    Messenger(long len = 0, long pos = 0, void* chunk = 0) :
+        chunk(static_cast<char*>(chunk)),
         len(len),
         position(pos),
         type(0),
-        saved(0)
+        saved(0),
+        internal(false)
     {
+        ASSERT(0 <= len);
+        if (0 < len && this->chunk == 0)
+        {
+            this->chunk = new char[len];
+            internal = true;
+        }
     }
     virtual ~Messenger()
     {
+        ASSERT(0 <= len);
+        if (internal)
+        {
+            delete[] chunk;
+        }
     }
 
     virtual bool apply(Conduit* c)
@@ -64,6 +79,11 @@ public:
     {
         return len;
     }
+    void setSize(long len)
+    {
+        this->len = len;
+    }
+
     long getPosition() const
     {
         return position;
@@ -127,7 +147,7 @@ public:
         {
             count = len - offset;
         }
-        memmove(dst, static_cast<char*>(chunk) + offset, count);
+        memmove(dst, chunk + offset, count);
         return count;
     }
     int write(const void* src, int count, long offset)
@@ -140,7 +160,7 @@ public:
         {
             count = len - offset;
         }
-        memmove(static_cast<char*>(chunk) + offset, src, count);
+        memmove(chunk + offset, src, count);
         return count;
     }
 
@@ -151,7 +171,7 @@ public:
         {
             return 0;
         }
-        return static_cast<char*>(chunk) + offset;
+        return chunk + offset;
     }
     void* fix(long count) const
     {
@@ -177,6 +197,21 @@ public:
         }
 
         return sum;
+    }
+
+    unsigned int addRef()
+    {
+        return ref.addRef();
+    }
+
+    unsigned int release()
+    {
+        unsigned int count = ref.release();
+        if (count == 0)
+        {
+            delete this;
+        }
+        return count;
     }
 };
 
@@ -438,11 +473,12 @@ public:
     }
     bool accept(Visitor* v, Conduit* sender = 0)
     {
+        Conduit* conduit = sideA;
         if (!v->at(this, sender))
         {
             return false;
         }
-        if (sender != sideA)
+        if (sender != conduit)
         {
             return toA(v);
         }
@@ -489,7 +525,15 @@ public:
     {
         factory->setA(this);
     }
-    ~Mux() {}
+    ~Mux()
+    {
+#if 0   // XXX
+        if (factory)
+        {
+            delete factory;
+        }
+#endif
+    }
 
     ConduitFactory* getFactory() const
     {
@@ -572,105 +616,93 @@ public:
     {
         return "Mux";
     }
+
+    void* getKey(Conduit* b)
+    {
+        Tree<void*, Conduit*>::Node* node;
+        Tree<void*, Conduit*>::Iterator iter = list();
+        while ((node = iter.next()))
+        {
+            if (node->getValue() == b)
+            {
+                return node->getKey();
+            }
+        }
+        return 0;
+    }
 };
 
 class Installer : public Visitor
 {
-    Conduit* conduit;
-
 public:
     Installer(Messenger* messenger) :
-        Visitor(messenger),
-        conduit(0)
-    {
-    }
-
-    bool at(ConduitFactory* f, Conduit* c)
-    {
-        if (conduit)
-        {
-            return true;
-        }
-
-        Mux* mux = dynamic_cast<Mux*>(c);
-        if (mux)
-        {
-            ASSERT(mux->getFactory() == f);
-            void* key = mux->getKey(getMessenger());
-            conduit = f->create(key);
-            if (conduit)
-            {
-                Conduit::connectAB(conduit, mux, key);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    Conduit* getConduit() const
-    {
-        return conduit;
-    }
-};
-
-class Uninstaller : public Visitor
-{
-    Conduit*    conduit;
-    Mux*        mux;
-
-    // Detach c from mux.
-    void detach(Conduit* c)
-    {
-        ASSERT(c->getA() == mux);
-        c->setA(0);
-        mux->removeB(mux->getKey(getMessenger()));
-        conduit = c;
-    }
-
-public:
-    Uninstaller(Messenger* messenger) :
-        Visitor(messenger),
-        conduit(0),
-        mux(0)
+        Visitor(messenger)
     {
     }
 
     bool at(Adapter* a, Conduit* c)
     {
-        if (c && c == mux)
-        {
-            detach(a);
-            return false;
-        }
         return true;
     }
 
     bool at(Mux* m, Conduit* c)
     {
-        if (mux == 0 && c == m->getA())
-        {
-            mux = m;
-        }
+        return true;
     }
 
     bool at(Protocol* p, Conduit* c)
     {
-        if (c && c == mux)
-        {
-            detach(p);
-            return false;
-        }
         return true;
     }
 
     bool at(ConduitFactory* f, Conduit* c)
     {
+        Mux* mux = dynamic_cast<Mux*>(c);
+        ASSERT(mux);
+        ASSERT(mux->getFactory() == f);
+        void* key = mux->getKey(getMessenger());
+        if (Conduit* conduit = f->create(key))
+        {
+            Conduit::connectAB(conduit, mux, key);
+            return false;
+        }
+        return true;
+    }
+};
+
+class Uninstaller : public Visitor
+{
+public:
+    Uninstaller(Messenger* messenger) :
+        Visitor(messenger)
+    {
+    }
+
+    bool at(Adapter* a, Conduit* c)
+    {
         return true;
     }
 
-    Conduit* getConduit() const
+    bool at(Mux* mux, Conduit* c)
     {
-        return conduit;
+        if (c->isEmpty())
+        {
+            c->setA(0);
+            mux->removeB(mux->getKey(getMessenger()));
+            delete c;
+            return true;
+        }
+        return false;       // To stop this visitor
+    }
+
+    bool at(Protocol* p, Conduit* c)
+    {
+        return false;       // To stop this visitor
+    }
+
+    bool at(ConduitFactory* f, Conduit* c)
+    {
+        return true;
     }
 };
 
@@ -776,6 +808,15 @@ esReport("transport: %p (%ld)\n", key, (long) key);
             }
         } while (!m->getFactory()->accept(this, m));    // Have factory added a new conduit to sideB?
         return false;
+    }
+};
+
+class TypeAccessor : public Accessor
+{
+public:
+    void* getKey(Messenger* m)
+    {
+        return reinterpret_cast<void*>(m->getType());
     }
 };
 

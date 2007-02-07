@@ -98,6 +98,10 @@ struct ICMPTimeExceeded
     u8       code;      // 0: ttl reaches zero. 1: fragment timeout
     u16      sum;
     u32      unused;    // must be zero
+
+    // Codes:
+    static const u8 TTLReachesZero = 0;
+    static const u8 FragmentTimeout = 1;
 };
 
 struct ICMPParamProb

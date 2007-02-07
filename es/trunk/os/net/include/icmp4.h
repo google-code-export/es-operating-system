@@ -39,8 +39,8 @@ class ICMPReceiver : public InetReceiver
 {
     s16 checksum(InetMessenger* m);
 public:
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
 };
 
 class ICMPEchoRequestReceiver : public InetReceiver
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    bool input(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
 
     Inet4Address* getAddress()
     {
@@ -108,7 +108,7 @@ public:
         }
     }
 
-    bool input(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
 
     bool wait(s64 timeout)
     {
@@ -140,8 +140,23 @@ public:
     {
     }
 
-    bool input(InetMessenger* m);
-    bool output(InetMessenger* m);
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
+};
+
+class ICMPTimeExceededReceiver : public InetReceiver
+{
+public:
+    ICMPTimeExceededReceiver()
+    {
+    }
+
+    ~ICMPTimeExceededReceiver()
+    {
+    }
+
+    bool input(InetMessenger* m, Conduit* c);
+    bool output(InetMessenger* m, Conduit* c);
 };
 
 #endif  // ICMP4_H_INCLUDED

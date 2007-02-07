@@ -28,18 +28,18 @@ StateNonMember::start(Inet4Address* a)
     // Immediately send report
     int len = sizeof(IGMPHdr);
     int pos = 14 + 60;          // XXX Assume MAC, IPv4
-    u8 chunk[pos + len];
-    IGMPHdr* igmphdr = reinterpret_cast<IGMPHdr*>(chunk + pos);
+    Handle<InetMessenger> r = new InetMessenger(&InetReceiver::output, pos + len, pos);
+
+    IGMPHdr* igmphdr = static_cast<IGMPHdr*>(r->fix(sizeof(IGMPHdr)));
     igmphdr->type = IGMPHdr::ReportVer2;    // XXX v1 case
     igmphdr->maxRespTime = 0;
     igmphdr->addr = a->getAddress();
 
-    InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
-    r.setRemote(a);
+    r->setRemote(a);
     Handle<Inet4Address> src = a->inFamily->selectSourceAddress(a);
-    r.setLocal(src);
+    r->setLocal(src);
 
-    Visitor v(&r);
+    Visitor v(r);
     a->adapter->accept(&v);
 
     // Repeat once after a short delay.
@@ -71,18 +71,18 @@ StateDelayingMember::stop(Inet4Address* a)
     // Send leave if flag set
     int len = sizeof(IGMPHdr);
     int pos = 14 + 60;          // XXX Assume MAC, IPv4
-    u8 chunk[pos + len];
-    IGMPHdr* igmphdr = reinterpret_cast<IGMPHdr*>(chunk + pos);
+    Handle<InetMessenger> r = new InetMessenger(&InetReceiver::output, pos + len, pos);
+
+    IGMPHdr* igmphdr = static_cast<IGMPHdr*>(r->fix(sizeof(IGMPHdr)));
     igmphdr->type = IGMPHdr::Leave;
     igmphdr->maxRespTime = 0;
     igmphdr->addr = a->getAddress();
 
-    InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
-    r.setRemote(&a->inFamily->addressAllRouters);
+    r->setRemote(&a->inFamily->addressAllRouters);
     Handle<Inet4Address> src = a->inFamily->selectSourceAddress(a);
-    r.setLocal(src);
+    r->setLocal(src);
 
-    Visitor v(&r);
+    Visitor v(r);
     a->adapter->accept(&v);
 
     ASSERT(a->inFamily);
@@ -98,18 +98,18 @@ StateDelayingMember::expired(Inet4Address* a)
     // Send report
     int len = sizeof(IGMPHdr);
     int pos = 14 + 60;          // XXX Assume MAC, IPv4
-    u8 chunk[pos + len];
-    IGMPHdr* igmphdr = reinterpret_cast<IGMPHdr*>(chunk + pos);
+    Handle<InetMessenger> r = new InetMessenger(&InetReceiver::output, pos + len, pos);
+
+    IGMPHdr* igmphdr = static_cast<IGMPHdr*>(r->fix(sizeof(IGMPHdr)));
     igmphdr->type = IGMPHdr::ReportVer2;    // XXX v1 case
     igmphdr->maxRespTime = 0;
     igmphdr->addr = a->getAddress();
 
-    InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
-    r.setRemote(a);
+    r->setRemote(a);
     Handle<Inet4Address> src = a->inFamily->selectSourceAddress(a);
-    r.setLocal(src);
+    r->setLocal(src);
 
-    Visitor v(&r);
+    Visitor v(r);
     a->adapter->accept(&v);
 
     a->setState(Inet4Address::stateIdleMember);
@@ -147,18 +147,18 @@ StateIdleMember::stop(Inet4Address* a)
     // Send leave if flag set
     int len = sizeof(IGMPHdr);
     int pos = 14 + 60;          // XXX Assume MAC, IPv4
-    u8 chunk[pos + len];
-    IGMPHdr* igmphdr = reinterpret_cast<IGMPHdr*>(chunk + pos);
+    Handle<InetMessenger> r = new InetMessenger(&InetReceiver::output, pos + len, pos);
+
+    IGMPHdr* igmphdr = static_cast<IGMPHdr*>(r->fix(sizeof(IGMPHdr)));
     igmphdr->type = IGMPHdr::Leave;
     igmphdr->maxRespTime = 0;
     igmphdr->addr = a->getAddress();
 
-    InetMessenger r(&InetReceiver::output, chunk, pos + len, pos);
-    r.setRemote(&a->inFamily->addressAllRouters);
+    r->setRemote(&a->inFamily->addressAllRouters);
     Handle<Inet4Address> src = a->inFamily->selectSourceAddress(a);
-    r.setLocal(src);
+    r->setLocal(src);
 
-    Visitor v(&r);
+    Visitor v(r);
     a->adapter->accept(&v);
 
     ASSERT(a->inFamily);

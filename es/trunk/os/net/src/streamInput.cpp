@@ -32,10 +32,9 @@ sendReset(InetMessenger* m)
     }
 
     int size = 14 + 60 + sizeof(TCPHdr);  // XXX Assume MAC, IPv4
-    u8 chunk[size];
-    InetMessenger rst(&InetReceiver::output, chunk, size, size - sizeof(TCPHdr));
+    Handle<InetMessenger> rst = new InetMessenger(&InetReceiver::output, size, size - sizeof(TCPHdr));
 
-    tcphdr = static_cast<TCPHdr*>(rst.fix(sizeof(TCPHdr)));
+    tcphdr = static_cast<TCPHdr*>(rst->fix(sizeof(TCPHdr)));
     tcphdr->src = htons(m->getLocalPort());
     tcphdr->dst = htons(m->getRemotePort());
     if (!(flag & TCPHdr::ACK))
@@ -56,12 +55,12 @@ sendReset(InetMessenger* m)
     tcphdr->setHdrSize(sizeof(TCPHdr));
 
     Handle<Address> addr;
-    rst.setLocal(addr = m->getLocal());
-    rst.setRemote(addr = m->getRemote());
-    rst.setLocalPort(m->getLocalPort());
-    rst.setRemotePort(m->getRemotePort());
-    rst.setType(IPPROTO_TCP);
-    Visitor v(&rst);
+    rst->setLocal(addr = m->getLocal());
+    rst->setRemote(addr = m->getRemote());
+    rst->setLocalPort(m->getLocalPort());
+    rst->setRemotePort(m->getRemotePort());
+    rst->setType(IPPROTO_TCP);
+    Visitor v(rst);
     conduit->accept(&v, conduit->getB());
 }
 
