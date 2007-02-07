@@ -38,7 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 @POSIX_TRUE@noinst_PROGRAMS = $(am__EXEEXT_1)
-@POSIX_TRUE@am__append_1 = -lpthread -lrt
+@POSIX_TRUE@am__append_1 = -lpthread -lrt 
 subdir = libes++/testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -48,7 +48,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 @POSIX_TRUE@am__EXEEXT_1 = collection$(EXEEXT) list$(EXEEXT) \
-@POSIX_TRUE@	hashtable$(EXEEXT) tree$(EXEEXT) rand$(EXEEXT)
+@POSIX_TRUE@	hashtable$(EXEEXT) tree$(EXEEXT) rand$(EXEEXT) \
+@POSIX_TRUE@	smartptr$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am__collection_SOURCES_DIST = collection.cpp
 @POSIX_TRUE@am_collection_OBJECTS = collection.$(OBJEXT)
@@ -71,6 +72,11 @@ am__rand_SOURCES_DIST = rand.cpp
 rand_OBJECTS = $(am_rand_OBJECTS)
 rand_LDADD = $(LDADD)
 rand_DEPENDENCIES = ../libessup++.a $(am__DEPENDENCIES_1)
+am__smartptr_SOURCES_DIST = smartptr.cpp
+@POSIX_TRUE@am_smartptr_OBJECTS = smartptr.$(OBJEXT)
+smartptr_OBJECTS = $(am_smartptr_OBJECTS)
+smartptr_LDADD = $(LDADD)
+smartptr_DEPENDENCIES = ../libessup++.a $(am__DEPENDENCIES_1)
 am__tree_SOURCES_DIST = tree.cpp
 @POSIX_TRUE@am_tree_OBJECTS = tree.$(OBJEXT)
 tree_OBJECTS = $(am_tree_OBJECTS)
@@ -85,10 +91,11 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(collection_SOURCES) $(hashtable_SOURCES) $(list_SOURCES) \
-	$(rand_SOURCES) $(tree_SOURCES)
+	$(rand_SOURCES) $(smartptr_SOURCES) $(tree_SOURCES)
 DIST_SOURCES = $(am__collection_SOURCES_DIST) \
 	$(am__hashtable_SOURCES_DIST) $(am__list_SOURCES_DIST) \
-	$(am__rand_SOURCES_DIST) $(am__tree_SOURCES_DIST)
+	$(am__rand_SOURCES_DIST) $(am__smartptr_SOURCES_DIST) \
+	$(am__tree_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -200,11 +207,12 @@ AM_CPPFLAGS = \
 	-I ../../../include \
 	-I $(srcdir)/../../../include
 
-@POSIX_TRUE@TESTS = collection list hashtable tree rand
+@POSIX_TRUE@TESTS = collection list hashtable tree rand smartptr 
 @POSIX_TRUE@collection_SOURCES = collection.cpp
 @POSIX_TRUE@list_SOURCES = list.cpp
 @POSIX_TRUE@hashtable_SOURCES = hashtable.cpp
 @POSIX_TRUE@rand_SOURCES = rand.cpp
+@POSIX_TRUE@smartptr_SOURCES = smartptr.cpp
 @POSIX_TRUE@tree_SOURCES = tree.cpp
 all: all-am
 
@@ -254,6 +262,9 @@ list$(EXEEXT): $(list_OBJECTS) $(list_DEPENDENCIES)
 rand$(EXEEXT): $(rand_OBJECTS) $(rand_DEPENDENCIES) 
 	@rm -f rand$(EXEEXT)
 	$(CXXLINK) $(rand_LDFLAGS) $(rand_OBJECTS) $(rand_LDADD) $(LIBS)
+smartptr$(EXEEXT): $(smartptr_OBJECTS) $(smartptr_DEPENDENCIES) 
+	@rm -f smartptr$(EXEEXT)
+	$(CXXLINK) $(smartptr_LDFLAGS) $(smartptr_OBJECTS) $(smartptr_LDADD) $(LIBS)
 tree$(EXEEXT): $(tree_OBJECTS) $(tree_DEPENDENCIES) 
 	@rm -f tree$(EXEEXT)
 	$(CXXLINK) $(tree_LDFLAGS) $(tree_OBJECTS) $(tree_LDADD) $(LIBS)
@@ -268,6 +279,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rand.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smartptr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tree.Po@am__quote@
 
 .cpp.o:
