@@ -369,6 +369,7 @@ public:
             return true;
         }
         Adapter* adapter = new Adapter;
+        socket->addRef();
         adapter->setReceiver(socket);
         socket->setAdapter(adapter);
         Conduit::connectAB(adapter, p);
@@ -414,7 +415,6 @@ public:
 
     bool at(Adapter* a, Conduit* c)
     {
-        a->setReceiver(0);
         return true;
     }
 
@@ -425,15 +425,9 @@ public:
             return false;   // To stop this visitor
         }
 
-        Receiver* receiver = p->getReceiver();
-        if (receiver)
-        {
-            p->setReceiver(0);
-            delete receiver;
-        }
         c->setA(0);
         p->setB(0);
-        delete c;
+        c->release();
         return true;
     }
 
@@ -443,7 +437,7 @@ public:
         {
             c->setA(0);
             mux->removeB(mux->getKey(socket));
-            delete c;
+            c->release();
             return true;
         }
         return false;       // To stop this visitor
@@ -483,7 +477,7 @@ public:
             mux->removeB(mux->getKey(socket));
             if (c != protocol)
             {
-                delete c;
+                c->release();
             }
             return true;
         }

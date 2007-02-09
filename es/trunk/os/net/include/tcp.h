@@ -26,11 +26,6 @@ public:
     bool input(InetMessenger* m, Conduit* c);
     bool output(InetMessenger* m, Conduit* c);
     bool error(InetMessenger* m, Conduit* c);
-
-    TCPReceiver* clone(Conduit* conduit, void* key)
-    {
-        return new TCPReceiver;
-    }
 };
 
 #endif  // TCP_H_INCLUDED

@@ -254,8 +254,12 @@ public:
     virtual ~Receiver() {}
     virtual Receiver* clone(Conduit* conduit, void* key)
     {
-        return 0;
+        return this;
     };
+    virtual unsigned int release()
+    {
+        return 1;
+    }
 };
 
 class Conduit
@@ -276,12 +280,20 @@ public:
     {
     }
 
-    virtual bool accept(Messenger* m) = 0;
-    virtual bool accept(Visitor* v, Conduit* sender = 0) = 0;
-    virtual Conduit* clone(void* key)
+    virtual unsigned int release()
     {
+        if (receiver)
+        {
+            receiver->release();
+            receiver = 0;
+        }
+        delete this;
         return 0;
     }
+
+    virtual bool accept(Messenger* m) = 0;
+    virtual bool accept(Visitor* v, Conduit* sender = 0) = 0;
+    virtual Conduit* clone(void* key) = 0;
 
     Receiver* getReceiver() const
     {
@@ -289,6 +301,7 @@ public:
     }
     void setReceiver(Receiver* receiver)
     {
+        ASSERT(receiver);
         this->receiver = receiver;
     }
 
@@ -413,24 +426,29 @@ public:
     {
     }
 
+    unsigned int release()
+    {
+        if (prototype)
+        {
+            prototype->release();
+            prototype = 0;
+        }
+        return Conduit::release();
+    }
+
     bool accept(Messenger* m)
     {
         return m->apply(this);
     }
     bool accept(Visitor* v, Conduit* sender = 0)
     {
+        bool (ConduitFactory::*to)(Visitor*);
+        to = (sender == sideB) ? &ConduitFactory::toA : &ConduitFactory::toB;
         if (!v->at(this, sender))
         {
             return false;
         }
-        if (sender != sideA)
-        {
-            return toA(v);
-        }
-        else
-        {
-            return toB(v);
-        }
+        (this->*to)(v);
     }
     Conduit* create(void* key)
     {
@@ -443,11 +461,12 @@ public:
 
     ConduitFactory* clone(void* key)
     {
-        if (!prototype)
+        ConduitFactory* f = new ConduitFactory(prototype ? prototype->clone(key) : 0);
+        if (receiver)
         {
-            return 0;
+            f->setReceiver(receiver->clone(f, key));
         }
-        return new ConduitFactory(prototype->clone(key));
+        return f;
     }
 
     const char* getName() const
@@ -527,12 +546,16 @@ public:
     }
     ~Mux()
     {
-#if 0   // XXX
+    }
+
+    unsigned int release()
+    {
         if (factory)
         {
-            delete factory;
+            factory->release();
+            factory = 0;
         }
-#endif
+        return Conduit::release();
     }
 
     ConduitFactory* getFactory() const
@@ -562,11 +585,12 @@ public:
     }
     bool accept(Visitor* v, Conduit* sender = 0)
     {
+        Conduit* conduit = sideA;
         if (!v->at(this, sender))
         {
             return false;
         }
-        if (sender != sideA)
+        if (sender != conduit)
         {
             ASSERT(sideA);
             ASSERT(sender);
@@ -609,6 +633,10 @@ public:
     Mux* clone(void* key)
     {
         Mux* m = new Mux(accessor, factory->clone(key));
+        if (receiver)
+        {
+            m->setReceiver(receiver->clone(m, key));
+        }
         return m;
     }
 
@@ -689,7 +717,7 @@ public:
         {
             c->setA(0);
             mux->removeB(mux->getKey(getMessenger()));
-            delete c;
+            c->release();
             return true;
         }
         return false;       // To stop this visitor

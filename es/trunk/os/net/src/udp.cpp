@@ -75,7 +75,7 @@ input(InetMessenger* m, Conduit* c)
                 Handle<Inet4Address> address = socket->getLocal();
                 m->setLocal(address);
                 Visitor v(m);
-                conduit->accept(&v);
+                c->accept(&v);
             }
         }
     }

@@ -25,8 +25,8 @@ bool ReassReceiver::input(InetMessenger* m, Conduit* c)
     {
         list = 0;
         firstFragment[0] = 0;
-        setRemote(m->getRemote());
-        setLocal(m->getLocal());
+        setRemote(Handle<Address>(m->getRemote()));
+        setLocal(Handle<Address>(m->getLocal()));
         setRemotePort(m->getRemotePort());
 
         r = new InetMessenger(&InetReceiver::input, 65535); // XXX
@@ -142,8 +142,8 @@ bool ReassReceiver::input(InetMessenger* m, Conduit* c)
 
         // Send r
         r->setSize(iphdr->getSize());
-        r->setLocal(getLocal());
-        r->setRemote(getRemote());
+        r->setLocal(Handle<Address>(getLocal()));
+        r->setRemote(Handle<Address>(getRemote()));
         r->setType(iphdr->proto);
         r->savePosition();
         r->movePosition(iphdr->getHdrSize());
@@ -178,8 +178,8 @@ void ReassReceiver::run()
             Handle<InetMessenger> e = new InetMessenger(&InetReceiver::output, pos + len, pos);
 
             memmove(e->fix(len), first, len);
-            e->setRemote(getRemote());
-            e->setLocal(getLocal());
+            e->setRemote(Handle<Address>(getRemote()));
+            e->setLocal(Handle<Address>(getLocal()));
             e->setType(ICMPTimeExceeded::FragmentTimeout);
             Visitor v(e);
             timeExceededProtocol->accept(&v, timeExceededProtocol->getB());
@@ -197,7 +197,6 @@ void ReassReceiver::run()
 // c is a pointer to a conduit factory.
 bool ReassFactoryReceiver::input(InetMessenger* m, Conduit* c)
 {
-    // Add a new conduit to the Mux.
     Installer installer(m);
     Conduit* mux = c->getA();
     mux->accept(&installer, mux->getA());

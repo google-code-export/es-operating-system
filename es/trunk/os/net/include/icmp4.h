@@ -45,12 +45,10 @@ public:
 
 class ICMPEchoRequestReceiver : public InetReceiver
 {
-    Conduit*        adapter;
     Inet4Address*   addr;
 
 public:
-    ICMPEchoRequestReceiver(Conduit* adapter, Inet4Address* addr) :
-        adapter(adapter),
+    ICMPEchoRequestReceiver(Inet4Address* addr) :
         addr(addr)
     {
         if (addr)
@@ -80,7 +78,13 @@ public:
 
     ICMPEchoRequestReceiver* clone(Conduit* conduit, void* key)
     {
-        return new ICMPEchoRequestReceiver(conduit, static_cast<Inet4Address*>(key));
+        return new ICMPEchoRequestReceiver(static_cast<Inet4Address*>(key));
+    }
+
+    unsigned int release()
+    {
+        delete this;
+        return 0;
     }
 };
 

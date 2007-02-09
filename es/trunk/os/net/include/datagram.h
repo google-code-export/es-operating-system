@@ -103,6 +103,12 @@ public:
     {
         return new DatagramReceiver(conduit);
     }
+
+    unsigned int release()
+    {
+        delete this;
+        return 0;
+    }
 };
 
 #endif  // DATAGRAM_H_INCLUDED

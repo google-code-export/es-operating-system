@@ -69,7 +69,7 @@ bool ICMPEchoRequestReceiver::input(InetMessenger* m, Conduit* c)
     r->setLocal(m->getLocal());
 
     Visitor v(r);
-    adapter->accept(&v);
+    c->accept(&v);
 
     return true;
 }

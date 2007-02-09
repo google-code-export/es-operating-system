@@ -21,23 +21,12 @@
 // IPv4 UDP Receiver
 class UDPReceiver : public InetReceiver
 {
-    Conduit* conduit;
-
     s16 checksum(InetMessenger* m);
 
 public:
-    UDPReceiver(Conduit* conduit = 0) : conduit(conduit)
-    {
-    }
-
     bool input(InetMessenger* m, Conduit* c);
     bool output(InetMessenger* m, Conduit* c);
     bool error(InetMessenger* m, Conduit* c);
-
-    UDPReceiver* clone(Conduit* conduit, void* key)
-    {
-        return new UDPReceiver(conduit);
-    }
 };
 
 class UDPUnreachReceiver : public InetReceiver
@@ -49,6 +38,7 @@ public:
         unreachProtocol(unreachProtocol)
     {
     }
+
     bool input(InetMessenger* m, Conduit* c);
 };
 

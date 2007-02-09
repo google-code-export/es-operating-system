@@ -625,6 +625,12 @@ public:
         return new StreamReceiver(conduit);
     }
 
+    unsigned int release()
+    {
+        delete this;
+        return 0;
+    }
+
     static class StateClosed        stateClosed;
     static class StateListen        stateListen;
     static class StateSynSent       stateSynSent;

@@ -22,7 +22,7 @@ InFamily::InFamily() :
     inMux(&inAccessor, &inFactory),
     icmpMux(&icmpAccessor, &icmpFactory),
     echoReplyMux(&echoReplyAccessor, &echoReplyFactory),
-    echoRequestReceiver(&echoRequestAdapter, 0),
+    echoRequestReceiver(0),
     echoRequestFactory(&echoRequestAdapter),
     echoRequestMux(&echoRequestAccessor, &echoRequestFactory),
 

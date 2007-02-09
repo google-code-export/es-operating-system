@@ -58,6 +58,12 @@ public:
         return new ReassReceiver(inProtocol, timeExceededProtocol, conduit);
     }
 
+    unsigned int release()
+    {
+        delete this;
+        return 0;
+    }
+
     void run();
 };
 
@@ -65,11 +71,6 @@ class ReassFactoryReceiver : public InetReceiver
 {
 public:
     bool input(InetMessenger* m, Conduit* c);
-
-    virtual ReassFactoryReceiver* clone(Conduit* conduit, void* key)
-    {
-        return this;
-    };
 };
 
 #endif  // INET4REASS_H_INCLUDED
