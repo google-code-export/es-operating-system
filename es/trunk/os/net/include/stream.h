@@ -412,7 +412,8 @@ class StreamReceiver :
     }
 
     TCPSeq isn(InetMessenger* m);
-    s32 getDefaultMSS();
+    int getDefaultMSS();
+    int getDefaultMSS(int mtu);
 
     s32 getInitialCongestionWindowSize()
     {

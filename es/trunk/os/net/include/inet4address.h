@@ -14,6 +14,7 @@
 #ifndef INET4ADDRESS_H_INCLUDED
 #define INET4ADDRESS_H_INCLUDED
 
+#include <algorithm>
 #include <es/collection.h>
 #include <es/endian.h>
 #include <es/list.h>
@@ -199,6 +200,7 @@ class Inet4Address :
     InFamily*   inFamily;
     Conduit*    adapter;
     int         timeoutCount;
+    int         pathMTU;
 
 public:
     Inet4Address(InAddr addr, State& state, int scopeID = 0, int prefix = 0) :
@@ -208,7 +210,8 @@ public:
         prefix(prefix),
         inFamily(0),
         adapter(0),
-        timeoutCount(0)
+        timeoutCount(0),
+        pathMTU(1500)
     {
         ASSERT(0 <= prefix && prefix < 32);
         u8 mac[6];
@@ -362,7 +365,12 @@ public:
 
     int getPathMTU()
     {
-        return 1500;    // XXX
+        return pathMTU;
+    }
+
+    void setPathMTU(int mtu)
+    {
+        pathMTU = std::max(68, mtu);
     }
 
     IInternetAddress* getNext();

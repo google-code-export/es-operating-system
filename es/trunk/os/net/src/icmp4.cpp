@@ -11,8 +11,10 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <algorithm>
 #include <es/handle.h>
 #include "icmp4.h"
+#include "inet4address.h"
 
 //
 // ICMPReceiver
@@ -101,6 +103,53 @@ bool ICMPUnreachReceiver::input(InetMessenger* m, Conduit* c)
     }
     ICMPUnreach* icmphdr = static_cast<ICMPUnreach*>(m->fix(sizeof(ICMPUnreach)));
 
+    Handle<Inet4Address> addr;
+    switch (icmphdr->type)
+    {
+    case ICMPUnreach::NeedFragment:
+        // Any packetization layer instance (for example, a TCP
+        // connection) that is actively using the path must be notified if the
+        // PMTU estimate is decreased. [RFC 1191]
+        addr = m->getRemote();
+        addr->setPathMTU(std::min(icmphdr->getMTU(), addr->getPathMTU()));
+        m->setErrorCode(ENETUNREACH);
+        break;
+
+    // Soft error condition
+    //
+    // A Destination Unreachable message that is received with code
+    // 0 (Net), 1 (Host), or 5 (Bad Source Route) may result from a
+    // routing transient and MUST therefore be interpreted as only
+    // a hint, not proof, that the specified destination is
+    // unreachable [IP:11].  For example, it MUST NOT be used as
+    // proof of a dead gateway (see Section 3.3.1). [RFC 1122]
+    case ICMPUnreach::Net:
+    case ICMPUnreach::Host:
+    case ICMPUnreach::SrcFail:
+    case ICMPUnreach::NetUnknown:
+    case ICMPUnreach::HostUnknown:
+    case ICMPUnreach::Isolated:
+    case ICMPUnreach::NetProhibited:
+    case ICMPUnreach::HostProhibited:
+    case ICMPUnreach::NetTOS:
+    case ICMPUnreach::HostTOS:
+    case ICMPUnreach::Prohibited:
+        // Since these Unreachable messages indicate soft error
+        // conditions, TCP MUST NOT abort the connection, and it
+        // SHOULD make the information available to the
+        // application.
+        m->setErrorCode(ENETUNREACH);
+        break;
+
+    // Hard error condition
+    case ICMPUnreach::Protocol:
+    case ICMPUnreach::Port:
+        // These are hard error conditions, so TCP SHOULD abort
+        // the connection. [RFC 1122|
+        m->setErrorCode(ECONNREFUSED);
+        break;
+    }
+
     m->movePosition(sizeof(ICMPUnreach));
     m->setCommand(&InetReceiver::error);
 
@@ -118,6 +167,41 @@ bool ICMPUnreachReceiver::output(InetMessenger* m, Conduit* c)
     icmphdr->sum = 0;
     icmphdr->unused = 0;
     icmphdr->mtu = 0;
+
+    return true;
+}
+
+//
+// ICMPSourceQuenchReceiver
+//
+
+bool ICMPSourceQuenchReceiver::input(InetMessenger* m, Conduit* c)
+{
+    esReport("ICMPSourceQuenchReceiver::input\n");
+
+    int len = m->getLength();
+    if (len < sizeof(ICMPSourceQuench))
+    {
+        return false;
+    }
+    ICMPSourceQuench* icmphdr = static_cast<ICMPSourceQuench*>(m->fix(sizeof(ICMPSourceQuench)));
+
+    m->movePosition(sizeof(ICMPSourceQuench));
+    m->setCommand(&InetReceiver::error);
+
+    return true;
+}
+
+bool ICMPSourceQuenchReceiver::output(InetMessenger* m, Conduit* c)
+{
+    esReport("ICMPSourceQuenchReceiver::output\n");
+
+    m->movePosition(-sizeof(ICMPSourceQuench));
+    ICMPSourceQuench* icmphdr = static_cast<ICMPSourceQuench*>(m->fix(sizeof(ICMPSourceQuench)));
+    icmphdr->type = ICMPHdr::SourceQuench;
+    icmphdr->code = m->getType();
+    icmphdr->sum = 0;
+    icmphdr->unused = 0;
 
     return true;
 }
@@ -153,6 +237,42 @@ bool ICMPTimeExceededReceiver::output(InetMessenger* m, Conduit* c)
     icmphdr->code = m->getType();
     icmphdr->sum = 0;
     icmphdr->unused = 0;
+
+    return true;
+}
+
+//
+// ICMPParamProbReceiver
+//
+
+bool ICMPParamProbReceiver::input(InetMessenger* m, Conduit* c)
+{
+    esReport("ICMPParamProbReceiver::input\n");
+
+    int len = m->getLength();
+    if (len < sizeof(ICMPParamProb))
+    {
+        return false;
+    }
+    ICMPParamProb* icmphdr = static_cast<ICMPParamProb*>(m->fix(sizeof(ICMPParamProb)));
+
+    m->movePosition(sizeof(ICMPParamProb));
+    m->setCommand(&InetReceiver::error);
+
+    return true;
+}
+
+bool ICMPParamProbReceiver::output(InetMessenger* m, Conduit* c)
+{
+    esReport("ICMPParamProbReceiver::output\n");
+
+    m->movePosition(-sizeof(ICMPParamProb));
+    ICMPParamProb* icmphdr = static_cast<ICMPParamProb*>(m->fix(sizeof(ICMPParamProb)));
+    icmphdr->type = ICMPHdr::ParamProb;
+    icmphdr->code = m->getType();
+    icmphdr->sum = 0;
+    icmphdr->ptr = 0;   // XXX
+    icmphdr->unused0 = icmphdr->unused1 = icmphdr->unused2 = 0;
 
     return true;
 }

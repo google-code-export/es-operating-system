@@ -527,7 +527,7 @@ bool StreamReceiver::
 option(TCPHdr* tcphdr)
 {
     u16 flag = ntohs(tcphdr->flag);
-    s32 mss = getDefaultMSS();
+    int mss = getDefaultMSS();
 
     int optlen = tcphdr->getHdrSize() - sizeof(TCPHdr);
     u8* opt = reinterpret_cast<u8*>(tcphdr) + sizeof(TCPHdr);   // XXX use m->fix
@@ -560,8 +560,8 @@ option(TCPHdr* tcphdr)
             {
                 return false;
             }
-            mss = reinterpret_cast<TCPOptMss*>(opt)->mss;
-            if (mss == 0)
+            mss = reinterpret_cast<TCPOptMss*>(opt)->getMSS();
+            if (mss <= 0)
             {
                 return false;
             }
@@ -649,12 +649,13 @@ StateListen::input(InetMessenger* m, StreamReceiver* s)
         return false;
     }
 
+    Handle<Address> local = m->getLocal();
+
     // Clone new socket
-    Handle<Address> addr;
     Socket* socket = new Socket(s->getSocket()->getAddressFamily(), ISocket::Stream);
-    socket->setLocal(addr = m->getLocal());
+    socket->setLocal(local);
     socket->setLocalPort(m->getLocalPort());
-    socket->setRemote(addr = m->getRemote());
+    socket->setRemote(Handle<Address>(m->getRemote()));
     socket->setRemotePort(m->getRemotePort());
 
     SocketInstaller installer(socket);
@@ -664,6 +665,7 @@ StateListen::input(InetMessenger* m, StreamReceiver* s)
     ASSERT(accepted);
 
     // Initialize ISS and sequence number variables
+    accepted->mss = accepted->getDefaultMSS(local->getPathMTU());
     accepted->cWin = accepted->getInitialCongestionWindowSize();
     accepted->ssThresh = DEF_SSTHRESH;
     accepted->iss = accepted->isn(m);

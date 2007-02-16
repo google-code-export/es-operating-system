@@ -75,7 +75,9 @@ InFamily::InFamily() :
     tcpProtocol.setReceiver(&tcpReceiver);
     streamProtocol.setReceiver(&streamReceiver);
     unreachProtocol.setReceiver(&unreachReceiver);
+    sourceQuenchProtocol.setReceiver(&sourceQuenchReceiver);
     timeExceededProtocol.setReceiver(&timeExceededReceiver);
+    paramProbProtocol.setReceiver(&paramProbReceiver);
 
     Conduit::connectAA(&scopeMux, &inProtocol);
     Conduit::connectBA(&inProtocol, &inMux);
@@ -90,9 +92,13 @@ InFamily::InFamily() :
     Conduit::connectBA(&icmpMux, &echoReplyMux, reinterpret_cast<void*>(ICMPHdr::EchoReply));
     Conduit::connectBA(&icmpMux, &echoRequestMux, reinterpret_cast<void*>(ICMPHdr::EchoRequest));
     Conduit::connectBA(&icmpMux, &unreachProtocol, reinterpret_cast<void*>(ICMPHdr::Unreach));
+    Conduit::connectBA(&icmpMux, &sourceQuenchProtocol, reinterpret_cast<void*>(ICMPHdr::SourceQuench));
     Conduit::connectBA(&icmpMux, &timeExceededProtocol, reinterpret_cast<void*>(ICMPHdr::TimeExceeded));
+    Conduit::connectBA(&icmpMux, &paramProbProtocol, reinterpret_cast<void*>(ICMPHdr::ParamProb));
     unreachProtocol.setB(&inProtocol);      // loop
+    sourceQuenchProtocol.setB(&inProtocol); // loop
     timeExceededProtocol.setB(&inProtocol); // loop
+    paramProbProtocol.setB(&inProtocol);    // loop
 
     // IGMP
     igmpAdapter.setReceiver(&addressAny);
@@ -506,6 +512,10 @@ error(InetMessenger* m, Conduit* c)
     m->setLocal(addr);
     addr = inFamily->getAddress(iphdr->dst, m->getScopeID());
     m->setRemote(addr);
+
+    m->setType(iphdr->proto);
+    m->savePosition();
+    m->movePosition(iphdr->getHdrSize());
 
     return true;
 }

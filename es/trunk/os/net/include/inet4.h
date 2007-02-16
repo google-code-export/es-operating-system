@@ -89,9 +89,17 @@ class InFamily : public AddressFamily
     ICMPUnreachReceiver         unreachReceiver;
     Protocol                    unreachProtocol;
 
+    // ICMP Source Quench
+    ICMPSourceQuenchReceiver    sourceQuenchReceiver;
+    Protocol                    sourceQuenchProtocol;
+
     // ICMP Time Exceeded
     ICMPTimeExceededReceiver    timeExceededReceiver;
     Protocol                    timeExceededProtocol;
+
+    // ICMP ParamProb
+    ICMPParamProbReceiver       paramProbReceiver;
+    Protocol                    paramProbProtocol;
 
     // ICMP Redirect
     // ...

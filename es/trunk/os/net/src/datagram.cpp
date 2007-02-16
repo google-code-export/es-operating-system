@@ -49,7 +49,7 @@ error(InetMessenger* m, Conduit* c)
     Synchronized<IMonitor*> method(monitor);
 
     esReport("DatagramReceiver::error()\n");
-    errorCode = ECONNREFUSED;
+    errorCode = m->getErrorCode();
     monitor->notifyAll();
     return true;
 }

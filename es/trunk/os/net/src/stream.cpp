@@ -74,7 +74,7 @@ isn(InetMessenger* m)
     return TCPSeq(isn);
 }
 
-s32 StreamReceiver::
+int StreamReceiver::
 getDefaultMSS()
 {
     Socket* socket = getSocket();
@@ -86,6 +86,23 @@ getDefaultMSS()
             return IP_MIN_MTU - sizeof(IPHdr) - sizeof(TCPHdr);
           case AF_INET6:
             return IP6_MIN_MTU - sizeof(IP6Hdr) - sizeof(TCPHdr);
+        }
+    }
+    return 0;
+}
+
+int StreamReceiver::
+getDefaultMSS(int mtu)
+{
+    Socket* socket = getSocket();
+    if (socket)
+    {
+        switch (socket->getAddressFamily())
+        {
+          case AF_INET:
+            return mtu - sizeof(IPHdr) - sizeof(TCPHdr);
+          case AF_INET6:
+            return mtu - sizeof(IP6Hdr) - sizeof(TCPHdr);
         }
     }
     return 0;
@@ -122,8 +139,13 @@ output(InetMessenger* m, Conduit* c)
 bool StreamReceiver::
 error(InetMessenger* m, Conduit* c)
 {
-    // monitor->notifyAll();
-    return state->error(m, this);
+    int code = m->getErrorCode();
+    if (code != ENETUNREACH)
+    {
+        err = code;
+        abort();
+    }
+    return true;
 }
 
 void StreamReceiver::
@@ -154,7 +176,7 @@ read(SocketMessenger* m, Conduit* c)
     Synchronized<IMonitor*> method(monitor);
 
     long len;
-    while ((len = recvRing.getUsed()) == 0 && !isShutdownInput())
+    while ((len = recvRing.getUsed()) == 0 && !isShutdownInput() && err == 0)
     {
         monitor->wait();
     }
@@ -190,7 +212,7 @@ write(SocketMessenger* m, Conduit* c)
 {
     Synchronized<IMonitor*> method(monitor);
     long len;
-    while ((len = sizeof sendBuf - sendRing.getUsed()) == 0 && !isShutdownOutput())
+    while ((len = sizeof sendBuf - sendRing.getUsed()) == 0 && !isShutdownOutput() && err == 0)
     {
         monitor->wait();
     }
@@ -310,23 +332,23 @@ StateClosed::connect(SocketMessenger* m, StreamReceiver* s)
     s->lastSack = s->sendUna;
 #endif  // TCP_SACK
 
-    // ++interface->tcpStat.activeOpens;
+    Handle<Address> local = m->getLocal();
+    s->mss = s->getDefaultMSS(local->getPathMTU());
 
     s->setState(stateSynSent);
 
     // Send SYN
     int size = 14 + 60 + 60;      // XXX Assume MAC, IPv4, TCP
     Handle<InetMessenger> seg = new InetMessenger(&InetReceiver::output, size, size);
-    Handle<Address> addr;
-    seg->setLocal(addr = m->getLocal());
-    seg->setRemote(addr = m->getRemote());
+    seg->setLocal(local);
+    seg->setRemote(Handle<Address>(m->getRemote()));
     seg->setLocalPort(m->getLocalPort());
     seg->setRemotePort(m->getRemotePort());
     seg->setType(IPPROTO_TCP);
     Visitor v(seg);
     s->conduit->accept(&v, s->conduit->getB());
 
-    while (s->state == &stateSynSent)
+    while (s->state == &stateSynSent && s->err == 0)
     {
         s->monitor->wait();
     }
@@ -339,7 +361,7 @@ StateListen::accept(SocketMessenger* m, StreamReceiver* s)
 {
     Synchronized<IMonitor*> method(s->monitor);
 
-    while (s->state == &stateListen && s->accepted.isEmpty())
+    while (s->state == &stateListen && s->accepted.isEmpty() && s->err == 0)
     {
         s->monitor->wait();
     }
