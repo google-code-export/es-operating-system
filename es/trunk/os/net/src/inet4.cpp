@@ -106,16 +106,22 @@ InFamily::InFamily() :
 
     // UDP
     udpRemoteAddressFactory.setReceiver(&udpUnreachReceiver);
+    udpRemoteAddressFactory.addDefaultKey(0);
     udpRemotePortFactory.setReceiver(&udpUnreachReceiver);
+    udpRemotePortFactory.addDefaultKey(0);
     udpLocalAddressFactory.setReceiver(&udpUnreachReceiver);
     udpLocalPortFactory.setReceiver(&udpUnreachReceiver);
+    udpLocalPortFactory.addDefaultKey(0);
     Conduit::connectBA(&udpProtocol, &udpLocalPortMux);
 
     // TCP
     tcpRemoteAddressFactory.setReceiver(&streamReceiver);
+    tcpRemoteAddressFactory.addDefaultKey(0);
     tcpRemotePortFactory.setReceiver(&streamReceiver);
+    tcpRemotePortFactory.addDefaultKey(0);
     tcpLocalAddressFactory.setReceiver(&streamReceiver);
     tcpLocalPortFactory.setReceiver(&streamReceiver);
+    tcpLocalPortFactory.addDefaultKey(0);
     Conduit::connectBA(&tcpProtocol, &tcpLocalPortMux);
 
     // Fragment Reassemble
@@ -254,6 +260,7 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
     }
 
     // Look up preferred address of the same scope ID.
+    Inet4Address* any = 0;
     Tree<InAddr, Inet4Address*>::Node* node;
     Tree<InAddr, Inet4Address*>::Iterator iter = addressTable[scopeID].begin();
     while ((node = iter.next()))
@@ -261,15 +268,24 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
         Inet4Address* address = node->getValue();
         if (address->isPreferred())
         {
-            src = address;
-            src->addRef();
-            break;
+            if (address->isUnspecified())
+            {
+                any = address;
+            }
+            else
+            {
+                src = address;
+                src->addRef();
+                break;
+            }
         }
     }
 
     if (!src)
     {
-        // Use 0.0.0.0 as default XXX
+        // Use 0.0.0.0 as default
+        src = any;
+        src->addRef();
     }
 
     return src;
@@ -362,6 +378,29 @@ void InFamily::leaveGroup(Inet4Address* address)
     }
 }
 
+void InFamily::addInterface(Interface* interface)
+{
+    int scopeID = interface->getScopeID();
+
+    scopeMux.addB(reinterpret_cast<void*>(scopeID), interface->addAddressFamily(this, &scopeMux));
+
+    if (1 < scopeID)
+    {
+        // Register InAddrAny
+        Inet4Address* any = new Inet4Address(InAddrAny, Inet4Address::statePreferred, scopeID, 0);
+        addAddress(any);
+        any->start();
+
+        // UDP
+        udpLocalAddressFactory.addDefaultKey(any);
+
+        // TCP
+        tcpLocalAddressFactory.addDefaultKey(any);
+
+        any->release();
+    }
+}
+
 s16 InReceiver::
 checksum(const InetMessenger* m, int hlen)
 {
@@ -394,7 +433,25 @@ input(InetMessenger* m, Conduit* c)
     addr = inFamily->getAddress(iphdr->dst, scopeID);
     if (!addr)
     {
-        return false;
+        // In case DHCPOFFER, etc.
+        Handle<Inet4Address> onLink;
+        if (IN_IS_ADDR_LOOPBACK(iphdr->dst))
+        {
+            return false;
+        }
+        else if (IN_IS_ADDR_MULTICAST(iphdr->dst))
+        {
+            return false;
+        }
+        else if (onLink = inFamily->onLink(iphdr->dst))
+        {
+            addr = new Inet4Address(iphdr->dst, Inet4Address::stateDeprecated, onLink->getScopeID());
+        }
+        else
+        {
+            addr = new Inet4Address(iphdr->dst, Inet4Address::stateDestination, scopeID);
+        }
+        inFamily->addAddress(addr);
     }
     m->setLocal(addr);
 
@@ -473,11 +530,15 @@ output(InetMessenger* m, Conduit* c)
     iphdr->ttl = 64;
     iphdr->proto = m->getType();
     iphdr->sum = 0;
+
     addr = m->getLocal();
     addr->getAddress(&iphdr->src, sizeof(InAddr));
+    m->setScopeID(addr->getScopeID());
+
     addr = m->getRemote();
     addr->getAddress(&iphdr->dst, sizeof(InAddr));
     iphdr->sum = checksum(m, iphdr->getHdrSize());
+
     m->setType(AF_INET);
 
     int mtu = addr->getPathMTU();

@@ -14,6 +14,7 @@
 #include <string.h>
 #include <new>
 #include <es/handle.h>
+#include <es/net/dix.h>
 #include "inet4.h"
 
 ARPFamily::ARPFamily(InFamily* inFamily) :

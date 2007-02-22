@@ -219,6 +219,18 @@ setSendBufferSize(int size)
     }
 }
 
+long long Socket::
+getTimeout()
+{
+    return timeout;
+}
+
+void Socket::
+setTimeout(long long timeSpan)
+{
+    timeout = timeSpan;
+}
+
 bool Socket::
 isReuseAddress()
 {
@@ -383,6 +395,19 @@ recvFrom(void* dst, int count, int flags, IInternetAddress** addr, int* port)
 int Socket::
 sendTo(const void* src, int count, int flags, IInternetAddress* addr, int port)
 {
+    if (!adapter)
+    {
+        return -1;
+    }
+
+    SocketMessenger m(this, &SocketReceiver::write, const_cast<void*>(src), count);
+
+    m.setRemote(dynamic_cast<Inet4Address*>(addr));
+    m.setRemotePort(port);
+
+    Visitor v(&m);
+    adapter->accept(&v);
+    return m.getLength();
 }
 
 void Socket::
@@ -459,6 +484,18 @@ leaveGroup(IInternetAddress* addr)
         addresses.remove(address);
         address->removeSocket(this);
     }
+}
+
+void Socket::notify()
+{
+    if (!adapter)
+    {
+        return;
+    }
+
+    SocketMessenger m(this, &SocketReceiver::notify);
+    Visitor v(&m);
+    adapter->accept(&v);
 }
 
 //

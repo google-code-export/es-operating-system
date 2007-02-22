@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -129,12 +129,22 @@ wait(s64 timeout)
     struct timespec ts;
     Thread* current(Thread::getCurrentThread());
 
-    clock_gettime(CLOCK_REALTIME, &ts);
-    ts.tv_sec += timeout / 10000000;
-    ts.tv_nsec += (timeout % 10000000) * 100;
-    current->state = IThread::TIMED_WAITING;
-    int err = pthread_cond_timedwait(&cond, &mutex, &ts);
-    current->state = IThread::RUNNABLE;
+    int err;
+    if (0 < timeout)
+    {
+        clock_gettime(CLOCK_REALTIME, &ts);
+        ts.tv_sec += timeout / 10000000;
+        ts.tv_nsec += (timeout % 10000000) * 100;
+        current->state = IThread::TIMED_WAITING;
+        err = pthread_cond_timedwait(&cond, &mutex, &ts);
+        current->state = IThread::RUNNABLE;
+    }
+    else
+    {
+        current->state = IThread::WAITING;
+        err = pthread_cond_wait(&cond, &mutex);
+        current->state = IThread::RUNNABLE;
+    }
     switch (err)
     {
     case 0:

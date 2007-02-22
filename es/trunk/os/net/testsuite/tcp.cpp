@@ -27,7 +27,6 @@
 #include "inet6.h"
 #include "inet6address.h"
 #include "loopback.h"
-#include "scope.h"
 #include "tcp.h"
 #include "udp.h"
 #include "visualizer.h"

@@ -24,7 +24,6 @@
 #include "igmp.h"
 #include "inet4address.h"
 #include "inet4reass.h"
-#include "scope.h"
 #include "socket.h"
 #include "stream.h"
 #include "tcp.h"
@@ -55,7 +54,7 @@ public:
 class InFamily : public AddressFamily
 {
     // Scope demultiplexer
-    ScopeAccessor               scopeAccessor;
+    InetScopeAccessor           scopeAccessor;
     ConduitFactory              scopeFactory;
     Mux                         scopeMux;
 
@@ -249,11 +248,7 @@ public:
         return selectSourceAddress(dynamic_cast<Inet4Address*>(dst));
     }
 
-    void addInterface(Interface* interface)
-    {
-        scopeMux.addB(reinterpret_cast<void*>(interface->getScopeID()),
-                      interface->addAddressFamily(this, &scopeMux));
-    }
+    void addInterface(Interface* interface);
 
     Inet4Address* getAddress(InAddr addr, int scopeID = 0);
     void addAddress(Inet4Address* address);
@@ -292,6 +287,7 @@ public:
     friend class Inet4Address::StateTentative;
     friend class Inet4Address::StatePreferred;
     friend class Inet4Address::StateReachable;
+    friend class Inet4Address::StateDestination;
     friend class InReceiver;
 };
 

@@ -71,6 +71,7 @@ private:
     AddressFamily*  af;
     int             recvBufferSize;
     int             sendBufferSize;
+    TimeSpan        timeout;
     Collection<Address*>    addresses;
 
 public:
@@ -206,6 +207,9 @@ public:
     bool isReuseAddress();
     void setReuseAddress(bool on);
 
+    long long getTimeout();
+    void setTimeout(long long timeSpan);
+
     ISocket* accept();
     void bind(IInternetAddress* addr, int port);
     void close();
@@ -217,6 +221,8 @@ public:
     void shutdownInput();
     void shutdownOutput();
     int write(const void* src, int count);
+
+    void notify();
 
     // IMulticastSocket
     int getLoopbackMode();
@@ -272,6 +278,11 @@ public:
     }
 
     virtual bool shutdownInput(SocketMessenger* m, Conduit* c)
+    {
+        return false;
+    }
+
+    virtual bool notify(SocketMessenger* m, Conduit* c)
     {
         return false;
     }

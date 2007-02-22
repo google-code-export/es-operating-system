@@ -73,11 +73,15 @@ bool DIXInReceiver::output(InetMessenger* m, Conduit* c)
     dixhdr->type = htons(DIXHdr::DIX_IP);
 
     // Fill in dixhdr->dst
-    Handle<Address> nextHop = m->getRemote();
+    Handle<Inet4Address> nextHop = m->getRemote();
     nextHop->getMacAddress(dixhdr->dst);
     if (memcmp(zero, dixhdr->dst, 6) == 0)
     {
         // Try to resolve the link layer address of nextHop.
+        if (nextHop->getScopeID() == 0)
+        {
+            nextHop->setScopeID(m->getScopeID());
+        }
         nextHop->start();
         m->restorePosition();
         nextHop->hold(m);

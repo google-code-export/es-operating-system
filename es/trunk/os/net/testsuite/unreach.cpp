@@ -28,7 +28,6 @@
 #include "inetConfig.h"
 #include "loopback.h"
 #include "resolver.h"
-#include "scope.h"
 #include "tcp.h"
 #include "udp.h"
 #include "visualizer.h"

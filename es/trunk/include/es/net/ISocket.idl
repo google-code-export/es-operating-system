@@ -16,7 +16,7 @@ import "es/net/IInternetAddress.idl";
 /**
  * This interface represents a socket.
  */
-[object, uuid(3035fe50-9f8d-11db-8100-0009bf000001)]
+[object, uuid(bc43020a-c21d-11db-9c02-0009bf000001)]
 interface ISocket : IInterface
 {
     // socket type
@@ -92,6 +92,8 @@ interface ISocket : IInterface
      */
     int getSocketType();
 
+    long getTimeout();
+
     boolean isBound();
 
     boolean isClosed();
@@ -105,6 +107,8 @@ interface ISocket : IInterface
      * If <code>backlog</code> is less than or equal to zero, backlog is set to one.
      */
     void listen(int backlog);
+
+    void notify();
 
     /** Attempt to read the specified bytes of data from the other end of this socket.
      * @param dst   the receive buffer.
@@ -135,11 +139,13 @@ interface ISocket : IInterface
 
     void setHops(int limit);
 
-    void setSendBufferSize(int size);
-
     void setReceiveBufferSize(int size);
 
     void setReuseAddress(boolean on);
+
+    void setSendBufferSize(int size);
+
+    void setTimeout(long timeSpan);
 
     /** Disables read-half of this socket connection.
      * Any data sent to the input side of this socket is discarded

@@ -51,7 +51,6 @@ header_files = \
 	include/interface.h \
 	include/loopback.h \
 	include/resolver.h \
-	include/scope.h \
 	include/socket.h \
 	include/stream.h \
 	include/tcp.h \

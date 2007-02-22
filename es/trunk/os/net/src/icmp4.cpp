@@ -175,6 +175,9 @@ bool ICMPUnreachReceiver::output(InetMessenger* m, Conduit* c)
 // ICMPSourceQuenchReceiver
 //
 
+// TCP MUST react to a Source Quench by slowing transmission on the connection.
+// The RECOMMENDED procedure is for a Source Quench to trigger a "slow
+// start," as if a retransmission timeout had occurred. [RFC 1122]
 bool ICMPSourceQuenchReceiver::input(InetMessenger* m, Conduit* c)
 {
     esReport("ICMPSourceQuenchReceiver::input\n");
@@ -210,6 +213,8 @@ bool ICMPSourceQuenchReceiver::output(InetMessenger* m, Conduit* c)
 // ICMPTimeExceededReceiver
 //
 
+// This should be handled the same way as Destination
+// Unreachable codes 0, 1, 5 [RFC 1122]
 bool ICMPTimeExceededReceiver::input(InetMessenger* m, Conduit* c)
 {
     esReport("ICMPTimeExceededReceiver::input\n");
@@ -221,6 +226,7 @@ bool ICMPTimeExceededReceiver::input(InetMessenger* m, Conduit* c)
     }
     ICMPTimeExceeded* icmphdr = static_cast<ICMPTimeExceeded*>(m->fix(sizeof(ICMPTimeExceeded)));
 
+    m->setErrorCode(ENETUNREACH);
     m->movePosition(sizeof(ICMPTimeExceeded));
     m->setCommand(&InetReceiver::error);
 
@@ -245,6 +251,8 @@ bool ICMPTimeExceededReceiver::output(InetMessenger* m, Conduit* c)
 // ICMPParamProbReceiver
 //
 
+// This should be handled the same way as Destination
+// Unreachable codes 0, 1, 5 [RFC 1122]
 bool ICMPParamProbReceiver::input(InetMessenger* m, Conduit* c)
 {
     esReport("ICMPParamProbReceiver::input\n");
@@ -256,6 +264,7 @@ bool ICMPParamProbReceiver::input(InetMessenger* m, Conduit* c)
     }
     ICMPParamProb* icmphdr = static_cast<ICMPParamProb*>(m->fix(sizeof(ICMPParamProb)));
 
+    m->setErrorCode(ENETUNREACH);
     m->movePosition(sizeof(ICMPParamProb));
     m->setCommand(&InetReceiver::error);
 

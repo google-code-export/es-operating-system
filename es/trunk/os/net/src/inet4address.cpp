@@ -90,6 +90,34 @@ getHostName(char* hostName, unsigned int len)
 {
 }
 
+void Inet4Address::
+setScopeID(int id)
+{
+    if (id == scopeID)
+    {
+        return;
+    }
+
+    InFamily* family = inFamily;
+    if (!family)
+    {
+        scopeID = id;
+        return;
+    }
+
+    Handle<Inet4Address> address = inFamily->getAddress(addr, scopeID);
+    if (address)
+    {
+        family->removeAddress(this);
+        scopeID = id;
+        family->addAddress(this);
+    }
+    else
+    {
+        scopeID = id;
+    }
+}
+
 bool Inet4Address::
 isReachable(long long timeout)
 {
@@ -106,7 +134,7 @@ IInterface* Inet4Address::
 socket(int type, int protocol, int port)
 {
     Socket* socket = new Socket(type, protocol);
-    if (isUnspecified() || port == 0)
+    if (port == 0)
     {
         return socket;
     }
@@ -167,6 +195,16 @@ release()
 }
 
 // StateDestination
+
+void Inet4Address::
+StateDestination::start(Inet4Address* a)    // ARP for everything
+{
+    // Install ARP cache for this address.
+    ASSERT(1 < a->getScopeID());
+    a->inFamily->arpFamily.addAddress(a);
+    a->setState(stateIncomplete);
+    a->run();   // Invoke expired
+}
 
 bool Inet4Address::
 StateDestination::input(InetMessenger* m, Inet4Address* a)

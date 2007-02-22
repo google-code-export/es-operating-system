@@ -419,10 +419,14 @@ public:
 class ConduitFactory : public Conduit
 {
     Conduit*    prototype;
+    void*       defaultKey;
+    bool        hasDefault;
 
 public:
     ConduitFactory(Conduit* prototype = 0) :
-        prototype(prototype)
+        prototype(prototype),
+        defaultKey(0),
+        hasDefault(false)
     {
     }
 
@@ -466,7 +470,35 @@ public:
         {
             f->setReceiver(receiver->clone(f, key));
         }
+        if (hasDefaultKey())
+        {
+            f->addDefaultKey(getDefaultKey());
+        }
         return f;
+    }
+
+    bool hasDefaultKey() const
+    {
+        return hasDefault;
+    }
+
+    void* getDefaultKey() const
+    {
+        ASSERT(hasDefault);
+        return defaultKey;
+    }
+
+    void addDefaultKey(void* key)
+    {
+        hasDefault = true;
+        defaultKey = key;
+    }
+
+    void removeDefaultKey(void* key)
+    {
+        ASSERT(key == defaultKey);
+        hasDefault = false;
+        defaultKey = 0;
     }
 
     const char* getName() const
@@ -795,6 +827,8 @@ public:
     }
 };
 
+// Transporter extends Visitor to visit conduits using the default factory keys
+// if no matches are found.
 class Transporter : public Visitor
 {
 public:
@@ -806,6 +840,7 @@ public:
     bool toB(Mux* m)
     {
         void* key = m->getKey(getMessenger());
+        ConduitFactory* factory = m->getFactory();
 
 esReport("transport: %p (%ld)\n", key, (long) key);
 
@@ -821,20 +856,22 @@ esReport("transport: %p (%ld)\n", key, (long) key);
             }
             catch (SystemException<ENOENT>)
             {
-                // Try any key
-                try
+                if (factory->hasDefaultKey())
                 {
-                    Conduit* b = m->getB(0);
-                    if (b->accept(this, m))
+                    try // with default key
                     {
-                        return true;
+                        Conduit* b = m->getB(factory->getDefaultKey());
+                        if (b->accept(this, m))
+                        {
+                            return true;
+                        }
+                    }
+                    catch (SystemException<ENOENT>)
+                    {
                     }
                 }
-                catch (SystemException<ENOENT>)
-                {
-                }
             }
-        } while (!m->getFactory()->accept(this, m));    // Have factory added a new conduit to sideB?
+        } while (!factory->accept(this, m));    // Have factory added a new conduit to sideB?
         return false;
     }
 };

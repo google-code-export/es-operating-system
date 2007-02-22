@@ -61,12 +61,21 @@ read(SocketMessenger* m, Conduit* c)
 
     esReport("DatagramReceiver::read()\n");
 
+    Socket* socket = getSocket();
+    ASSERT(socket);
+
     // Copy-out data
     RingHdr ringhdr;
     long len;
     while ((len = recvRing.peek(&ringhdr, sizeof ringhdr)) == 0 && errorCode == 0)
     {
-        monitor->wait();
+        if (!monitor->wait(socket->getTimeout()))
+        {
+            if (errorCode == 0)
+            {
+                errorCode = ETIMEDOUT;
+            }
+        }
     }
 
     if (len < 0)
@@ -105,7 +114,7 @@ write(SocketMessenger* m, Conduit* c)
     d->setType(IPPROTO_UDP);
     Visitor v(d);
     conduit->accept(&v, conduit->getB());
-    return true;
+    return false;
 }
 
 bool DatagramReceiver::
@@ -113,5 +122,15 @@ close(SocketMessenger* m, Conduit* c)
 {
     SocketUninstaller uninstaller(getSocket());
     conduit->getB()->accept(&uninstaller);
+    return false;
+}
+
+bool DatagramReceiver::
+notify(SocketMessenger* m, Conduit* c)
+{
+    Synchronized<IMonitor*> method(monitor);
+
+    errorCode = ETIMEDOUT;
+    monitor->notifyAll();
     return false;
 }

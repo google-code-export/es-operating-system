@@ -178,6 +178,7 @@ class Inet4Address :
     class StateDestination : public State
     {
     public:
+        void start(Inet4Address* a);
         bool input(InetMessenger* m, Inet4Address* a);
         bool output(InetMessenger* m, Inet4Address* a);
         bool error(InetMessenger* m, Inet4Address* a);
@@ -335,6 +336,8 @@ public:
     {
         return scopeID;
     }
+    void setScopeID(int id);
+
     bool isUnspecified()
     {
         return IN_IS_ADDR_UNSPECIFIED(addr);

@@ -51,7 +51,7 @@ int main()
     InAddr addr = { htonl(192 << 24 | 168 << 16 | 2 << 8 | 40) };
     Handle<IInternetAddress> host = resolver->getHostByAddress(&addr.addr, sizeof addr, dixID);
     config->addAddress(host, 16);
-    esSleep(80000000);  // Wait for the host address to be settled.
+    esSleep(90000000);  // Wait for the host address to be settled.
 
     // Register a default router (192.168.2.1)
     InAddr addrRouter = { htonl(192 << 24 | 168 << 16 | 2 << 8 | 1) };

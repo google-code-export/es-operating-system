@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -271,13 +271,19 @@ wait(s64 timeout)
     Thread* current = getCurrentThread();
     ASSERT(current);
     ASSERT(current->state == IThread::RUNNING);
-    current->alarm.setInterval(timeout);
-    current->alarm.setCallback(static_cast<ICallback*>(this));
-    current->alarm.setEnabled(true);
 
-    wait();
-
-    current->alarm.setEnabled(false);
+    if (0 < timeout)
+    {
+        current->alarm.setInterval(timeout);
+        current->alarm.setCallback(static_cast<ICallback*>(this));
+        current->alarm.setEnabled(true);
+        wait();
+        current->alarm.setEnabled(false);
+    }
+    else
+    {
+        wait();
+    }
 
     Core::splX(x);
     return !current->condSleep(0);

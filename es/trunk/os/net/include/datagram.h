@@ -98,6 +98,7 @@ public:
     bool read(SocketMessenger* m, Conduit* c);
     bool write(SocketMessenger* m, Conduit* c);
     bool close(SocketMessenger* m, Conduit* c);
+    bool notify(SocketMessenger* m, Conduit* c);
 
     DatagramReceiver* clone(Conduit* conduit, void* key)
     {
