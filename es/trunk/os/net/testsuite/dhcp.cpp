@@ -637,7 +637,7 @@ public:
         Handle<IInternetAddress> nameServer;
         if (!IN_IS_ADDR_UNSPECIFIED(info.dns[0]))
         {
-            nameServer = resolver->getHostByAddress(&info.dns[0].addr, sizeof(InAddr), scopeID);    // XXX
+            nameServer = resolver->getHostByAddress(&info.dns[0].addr, sizeof(InAddr), 0);
             config->addNameServer(nameServer);
         }
 

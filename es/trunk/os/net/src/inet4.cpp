@@ -138,32 +138,27 @@ Inet4Address* InFamily::getAddress(InAddr addr, int scopeID)
 {
     ASSERT(0 <= scopeID && scopeID < Socket::INTERFACE_MAX);
 
+    if (scopeID == 0)
+    {
+        if (IN_IS_ADDR_LOOPBACK(addr))
+        {
+            scopeID = 1;
+        }
+        else
+        {
+            scopeID = 2;    // XXX
+        }
+    }
+
     Inet4Address* address;
     try
     {
         address = addressTable[scopeID].get(addr);
+        address->addRef();
     }
     catch (SystemException<ENOENT>)
     {
-        if (scopeID == 0)
-        {
-            address = 0;
-        }
-        else
-        {
-            try
-            {
-                address = addressTable[0].get(addr);
-            }
-            catch (SystemException<ENOENT>)
-            {
-                address = 0;
-            }
-        }
-    }
-    if (address)
-    {
-        address->addRef();
+        address = 0;
     }
     return address;
 }
@@ -208,8 +203,8 @@ Inet4Address* InFamily::onLink(InAddr addr, int scopeID)
 
 Inet4Address* InFamily::getNextHop(Inet4Address* dst)
 {
-    int scopeID = dst->getScopeID();
-    if (scopeID == 0)
+    Inet4Address* local = onLink(dst->getAddress(), dst->getScopeID());
+    if (!local)
     {
         Inet4Address* router = routerList.getAddress();
         if (router)
@@ -217,7 +212,10 @@ Inet4Address* InFamily::getNextHop(Inet4Address* dst)
             return router;
         }
     }
-
+    else
+    {
+        local->release();
+    }
     dst->addRef();
     return dst;
 }
@@ -387,7 +385,7 @@ void InFamily::addInterface(Interface* interface)
     if (1 < scopeID)
     {
         // Register InAddrAny
-        Inet4Address* any = new Inet4Address(InAddrAny, Inet4Address::statePreferred, scopeID, 0);
+        Inet4Address* any = new Inet4Address(InAddrAny, Inet4Address::statePreferred, scopeID);
         addAddress(any);
         any->start();
 
@@ -473,7 +471,7 @@ input(InetMessenger* m, Conduit* c)
         }
         else
         {
-            addr = new Inet4Address(iphdr->src, Inet4Address::stateDestination, 0);
+            addr = new Inet4Address(iphdr->src, Inet4Address::stateDestination, scopeID);
         }
         inFamily->addAddress(addr);
     }

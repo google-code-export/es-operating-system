@@ -416,6 +416,19 @@ getHostByAddress(const void* address, unsigned int len, unsigned int scopeID)
         InAddr addr;
         memmove(&addr.addr, address, sizeof(InAddr));
 
+        if (scopeID == 0)
+        {
+            // Select a default zone.
+            if (IN_IS_ADDR_LOOPBACK(addr))
+            {
+                scopeID = 1;
+            }
+            else
+            {
+                scopeID = 2;    // XXX
+            }
+        }
+
         InFamily* inFamily = dynamic_cast<InFamily*>(Socket::getAddressFamily(AF_INET));
         Inet4Address* host = inFamily->getAddress(addr, scopeID);
         if (!host)
