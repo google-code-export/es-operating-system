@@ -211,7 +211,7 @@ Inet4Address* InFamily::getNextHop(Inet4Address* dst)
     int scopeID = dst->getScopeID();
     if (scopeID == 0)
     {
-        Inet4Address* router = routerList.getRouter();
+        Inet4Address* router = routerList.getAddress();
         if (router)
         {
             return router;
@@ -246,7 +246,7 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
     int scopeID = dst->getScopeID();
     if (scopeID == 0)
     {
-        Inet4Address* router = routerList.getRouter();
+        Inet4Address* router = routerList.getAddress();
         if (router)
         {
             src = onLink(router->getAddress(), router->getScopeID());

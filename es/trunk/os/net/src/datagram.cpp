@@ -93,7 +93,7 @@ read(SocketMessenger* m, Conduit* c)
 
     recvRing.read(&ringhdr, sizeof ringhdr);
     ASSERT(ringhdr.len <= m->getSize());    // XXX
-    m->setPosition(m->getSize() - ringhdr.len);
+    m->setSize(ringhdr.len);
     recvRing.read(m->fix(ringhdr.len), ringhdr.len);
     return false;
 }

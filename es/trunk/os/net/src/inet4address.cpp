@@ -88,6 +88,7 @@ getHostAddress(char* hostAddress, unsigned int len)
 int Inet4Address::
 getHostName(char* hostName, unsigned int len)
 {
+    return Socket::resolver->getHostName(this, hostName, len);
 }
 
 void Inet4Address::

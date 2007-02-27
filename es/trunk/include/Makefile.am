@@ -42,6 +42,7 @@ nobase_include_HEADERS = \
 	es/uuid.h \
 	es/net/arp.h \
 	es/net/dhcp.h \
+	es/net/dns.h \
 	es/net/dix.h \
 	es/net/icmp.h \
 	es/net/igmp.h \

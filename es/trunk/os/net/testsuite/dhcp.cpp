@@ -26,6 +26,7 @@
 #include <es/net/IResolver.h>
 #include <es/net/arp.h>
 #include <es/net/dhcp.h>
+#include <es/net/dns.h>
 #include <es/net/udp.h>
 
 const InAddr DHCPHdr::magicCookie = { htonl(99 << 24 | 130 << 16 | 83 << 8 | 99) };
@@ -50,8 +51,7 @@ struct DHCPInfo
     // BOOTP options
     InAddr  netmask;                // DHCPOption::SubnetMask
     InAddr  router;                 // DHCPOption::Router (1st)
-    InAddr  dns1;                   // DHCPOption::DomainNameServer (1st)
-    InAddr  dns2;                   // DHCPOption::DomainNameServer (2nd)
+    InAddr  dns[2];                 // DHCPOption::DomainNameServer
     char    host[MaxDomainName];    // DHCPOption::HostName
     char    domain[MaxDomainName];  // DHCPOption::DomainName
     u8      ttl;                    // DHCPOption::DefaultTTL
@@ -97,7 +97,7 @@ class DHCPControl
     DateTime    epoch;
 
     DHCPInfo    info;
-    DHCPInfo    temp;
+    DHCPInfo    tentative;
 
     char        hostName[MaxDomainName];
 
@@ -169,7 +169,7 @@ class DHCPControl
         dhcp->flags = 0;
         if (state == DHCPState::Renewing || state == DHCPState::Rebinding)
         {
-            dhcp->ciaddr = temp.ipaddr;
+            dhcp->ciaddr = info.ipaddr;
         }
         else
         {
@@ -195,7 +195,7 @@ class DHCPControl
         {
             *vend++ = DHCPOption::ServerID;
             *vend++ = sizeof(InAddr);
-            memmove(vend, &temp.server, sizeof(InAddr));
+            memmove(vend, &info.server, sizeof(InAddr));
             vend += sizeof(InAddr);
         }
 
@@ -204,7 +204,7 @@ class DHCPControl
         {
             *vend++ = DHCPOption::RequestedAddress;
             *vend++ = sizeof(InAddr);
-            memmove(vend, &temp.ipaddr, sizeof(InAddr));
+            memmove(vend, &info.ipaddr, sizeof(InAddr));
             vend += sizeof(InAddr);
         }
 
@@ -229,7 +229,7 @@ class DHCPControl
         dhcp->xid = htonl(xid);
         dhcp->secs = 0;
         dhcp->flags = 0;
-        dhcp->ciaddr = temp.ipaddr;
+        dhcp->ciaddr = info.ipaddr;
         dhcp->yiaddr = dhcp->siaddr = dhcp->giaddr = InAddrAny;
         memmove(dhcp->chaddr, chaddr, sizeof chaddr);
         memset(dhcp->sname, 0, 64);
@@ -246,7 +246,7 @@ class DHCPControl
         // Server Identifier
         *vend++ = DHCPOption::ServerID;
         *vend++ = sizeof(InAddr);
-        memmove(vend, &temp.server, sizeof(InAddr));
+        memmove(vend, &info.server, sizeof(InAddr));
         vend += sizeof(InAddr);
 
         *vend++ = DHCPOption::End;
@@ -281,8 +281,7 @@ class DHCPControl
         }
 
         u8 messageType = 0;
-        DHCPInfo* info = &temp;
-        memset(info, 0, sizeof(DHCPInfo));
+        memset(&tentative, 0, sizeof(DHCPInfo));
 
         bool overloaded = false;
         u8* sname = 0;
@@ -327,7 +326,7 @@ class DHCPControl
                 {
                     return 0;
                 }
-                info->netmask = *reinterpret_cast<InAddr*>(vend);
+                tentative.netmask = *reinterpret_cast<InAddr*>(vend);
                 break;
             case DHCPOption::Router:
                 if (len <= 0 || len % sizeof(InAddr))
@@ -335,7 +334,7 @@ class DHCPControl
                     return 0;
                 }
                 // Choose the 1st one
-                info->router = *reinterpret_cast<InAddr*>(vend);
+                tentative.router = *reinterpret_cast<InAddr*>(vend);
                 break;
             case DHCPOption::DomainNameServer:
                 if (len <= 0 || len % sizeof(InAddr))
@@ -343,32 +342,32 @@ class DHCPControl
                     return 0;
                 }
                 // Choose the 1st two
-                info->dns1 = *reinterpret_cast<InAddr*>(vend);
+                tentative.dns[0] = *reinterpret_cast<InAddr*>(vend);
                 if (8 <= len)
                 {
-                    info->dns2 = *reinterpret_cast<InAddr*>(vend + sizeof(InAddr));
+                    tentative.dns[1] = *reinterpret_cast<InAddr*>(vend + sizeof(InAddr));
                 }
                 break;
             case DHCPOption::HostName:
-                memmove(info->host, vend, len);
-                info->host[len] = '\0';
+                memmove(tentative.host, vend, len);
+                tentative.host[len] = '\0';
                 break;
             case DHCPOption::DomainName:
-                memmove(info->domain, vend, len);
-                info->domain[len] = '\0';
+                memmove(tentative.domain, vend, len);
+                tentative.domain[len] = '\0';
                 break;
             case DHCPOption::DefaultTTL:
                 ttl = *(u8*) vend;
                 if (0 < ttl)
                 {
-                    info->ttl = ttl;
+                    tentative.ttl = ttl;
                 }
                 break;
             case DHCPOption::InterfaceMTU:
                 mtu = ntohs(*(u16*) vend);
                 if (68 <= mtu)
                 {
-                    info->mtu = mtu;
+                    tentative.mtu = mtu;
                 }
                 break;
 
@@ -377,7 +376,7 @@ class DHCPControl
                 {
                     return 0;
                 }
-                info->broadcast = *reinterpret_cast<InAddr*>(vend);
+                tentative.broadcast = *reinterpret_cast<InAddr*>(vend);
                 break;
 
             case DHCPOption::StaticRoute:
@@ -385,7 +384,7 @@ class DHCPControl
                 {
                     return 0;
                 }
-                memmove(info->staticRoute, vend, std::min((int) (MaxStaticRoute * sizeof(DHCPStaticRoute)), len));
+                memmove(tentative.staticRoute, vend, std::min((int) (MaxStaticRoute * sizeof(DHCPStaticRoute)), len));
                 break;
 
             //
@@ -396,7 +395,7 @@ class DHCPControl
                 {
                     return 0;
                 }
-                info->lease = ntohl(*(u32*) vend);
+                tentative.lease = ntohl(*(u32*) vend);
                 break;
             case DHCPOption::Overload:
                 if (len != 1 || overloaded)
@@ -430,21 +429,21 @@ class DHCPControl
                 {
                     return 0;
                 }
-                info->server = *reinterpret_cast<InAddr*>(vend);
+                tentative.server = *reinterpret_cast<InAddr*>(vend);
                 break;
             case DHCPOption::RenewalTime:
                 if (len != 4)
                 {
                     return 0;
                 }
-                info->renewal = ntohl(*(u32*) vend);
+                tentative.renewal = ntohl(*(u32*) vend);
                 break;
             case DHCPOption::RebindingTime:
                 if (len != 4)
                 {
                     return 0;
                 }
-                info->rebinding = ntohl(*(u32*) vend);
+                tentative.rebinding = ntohl(*(u32*) vend);
                 break;
             default:
                 break;
@@ -486,22 +485,22 @@ class DHCPControl
             break;
         }
 
-        info->ipaddr = dhcp->yiaddr;
+        tentative.ipaddr = dhcp->yiaddr;
 
-        if (info->renewal == 0 || info->lease <= info->renewal)
+        if (tentative.renewal == 0 || tentative.lease <= tentative.renewal)
         {
             // T1 defaults to (0.5 * duration_of_lease)
-            info->renewal = info->lease / 2;
+            tentative.renewal = tentative.lease / 2;
         }
 
-        if (info->rebinding == 0 || info->lease <= info->rebinding)
+        if (tentative.rebinding == 0 || tentative.lease <= tentative.rebinding)
         {
             // T2 defaults to (0.875 * duration_of_lease)
-            info->rebinding = (u32) ((7 * (u64) info->lease) / 8);
+            tentative.rebinding = (u32) ((7 * (u64) tentative.lease) / 8);
         }
-        if (info->rebinding <= info->renewal)
+        if (tentative.rebinding <= tentative.renewal)
         {
-            info->renewal = (u32) ((4 * (u64) info->rebinding) / 7);
+            tentative.renewal = (u32) ((4 * (u64) tentative.rebinding) / 7);
         }
 
         return messageType;
@@ -577,6 +576,7 @@ public:
         }
 
         // Send DHCPREQUEST
+        info = tentative;
         state = DHCPState::Requesting;
         DateTime now = DateTime::getNow();
         for (rxmitCount = 0; enabled && rxmitCount < rxmitMax; ++rxmitCount)
@@ -595,7 +595,7 @@ public:
             }
         }
 
-        if (type != DHCPType::Ack || temp.lease == 0)
+        if (type != DHCPType::Ack || tentative.lease == 0)
         {
             esReport("DHCP: failed.\n");
             state = DHCPState::Init;
@@ -603,17 +603,18 @@ public:
             return;
         }
 
+        info = tentative;
         state = DHCPState::Bound;
 
-        unsigned int prefix = 32 - (ffs(ntohl(temp.netmask.addr)) - 1);
+        unsigned int prefix = 32 - (ffs(ntohl(info.netmask.addr)) - 1);
 
-        esReport("lease %u\n", temp.lease);
-        esReport("renewal %u\n", temp.renewal);
-        esReport("rebinding: %u\n", temp.rebinding);
+        esReport("lease %u\n", info.lease);
+        esReport("renewal %u\n", info.renewal);
+        esReport("rebinding: %u\n", info.rebinding);
         esReport("prefix: %u\n", prefix);
 
-        // Register host address (temp.ipaddr)
-        host = resolver->getHostByAddress(&temp.ipaddr.addr, sizeof(InAddr), scopeID);
+        // Register host address (info.ipaddr)
+        host = resolver->getHostByAddress(&info.ipaddr.addr, sizeof(InAddr), scopeID);
         config->addAddress(host, prefix);
 
         if (!sleep(DateTime::getNow() + 90000000))  // Wait for the host address to be settled.
@@ -624,17 +625,25 @@ public:
         }
         // XXX Send decline if configuration was failed.
 
-        // Register a default router (temp.router)
+        // Register a default router (info.router)
         Handle<IInternetAddress> router;
-        if (!IN_IS_ADDR_UNSPECIFIED(temp.router))
+        if (!IN_IS_ADDR_UNSPECIFIED(info.router))
         {
-            router = resolver->getHostByAddress(&temp.router.addr, sizeof(InAddr), scopeID);
+            router = resolver->getHostByAddress(&info.router.addr, sizeof(InAddr), scopeID);
             config->addRouter(router);
+        }
+
+        // Register a domain name server (info.dns[0])
+        Handle<IInternetAddress> nameServer;
+        if (!IN_IS_ADDR_UNSPECIFIED(info.dns[0]))
+        {
+            nameServer = resolver->getHostByAddress(&info.dns[0].addr, sizeof(InAddr), scopeID);    // XXX
+            config->addNameServer(nameServer);
         }
 
         socket->close();
         socket = host->socket(AF_INET, ISocket::Datagram, DHCPHdr::ClientPort);
-        server = resolver->getHostByAddress(&temp.server, sizeof(InAddr), scopeID);
+        server = resolver->getHostByAddress(&info.server, sizeof(InAddr), scopeID);
 
         while (enabled)
         {
@@ -642,18 +651,18 @@ public:
             epoch = now;
 
             // Wait for T1 to move to RENEWING state.
-            if (!sleep(epoch + TimeSpan(0, 0, temp.renewal)))
+            if (!sleep(epoch + TimeSpan(0, 0, info.renewal)))
             {
                 continue;
             }
 
             state = DHCPState::Renewing;
             type = 0;
-            while (enabled && (now = DateTime::getNow()) < epoch + TimeSpan(0, 0, temp.rebinding))
+            while (enabled && (now = DateTime::getNow()) < epoch + TimeSpan(0, 0, info.rebinding))
             {
                 int len = request();
                 socket->sendTo(heap, len, 0, server, DHCPHdr::ServerPort);
-                TimeSpan wait = (epoch + TimeSpan(0, 0, temp.rebinding) - now) / 2;
+                TimeSpan wait = (epoch + TimeSpan(0, 0, info.rebinding) - now) / 2;
                 if (wait < TimeSpan(0, 0, 60))
                 {
                     break;
@@ -680,18 +689,18 @@ public:
             }
 
             // Wait for T2 to move to REBINDING state.
-            if (!sleep(epoch + TimeSpan(0, 0, temp.rebinding)))
+            if (!sleep(epoch + TimeSpan(0, 0, info.rebinding)))
             {
                 continue;
             }
 
             state = DHCPState::Rebinding;
             type = 0;
-            while (enabled && (now = DateTime::getNow()) < epoch + TimeSpan(0, 0, temp.rebinding))
+            while (enabled && (now = DateTime::getNow()) < epoch + TimeSpan(0, 0, info.rebinding))
             {
                 int len = request();
                 socket->sendTo(heap, len, 0, limited, DHCPHdr::ServerPort);
-                TimeSpan wait = (epoch + TimeSpan(0, 0, temp.lease) - now) / 2;
+                TimeSpan wait = (epoch + TimeSpan(0, 0, info.lease) - now) / 2;
                 if (wait < TimeSpan(0, 0, 60))
                 {
                     break;
@@ -790,15 +799,29 @@ int main()
     thread->start();
     esSleep(120000000);
 
-    // Test remote ping (192.195.204.26 / www.nintendo.com)
-    InAddr addrRemote = { htonl(192 << 24 | 195 << 16 | 204 << 8 | 26) };
-    Handle<IInternetAddress> remote = resolver->getHostByAddress(&addrRemote.addr, sizeof addrRemote, 0);
-    esReport("ping #1\n");
-    remote->isReachable(10000000);
-    esReport("ping #2\n");
-    remote->isReachable(10000000);
-    esReport("ping #3\n");
-    remote->isReachable(10000000);
+    Handle<IInternetAddress> address = resolver->getHostByName("www.nintendo.com", AF_INET);
+    if (address)
+    {
+        InAddr addr;
+
+        address->getAddress(&addr, sizeof(InAddr));
+        u32 h = ntohl(addr.addr);
+        esReport("%d.%d.%d.%d\n", (u8) (h >> 24), (u8) (h >> 16), (u8) (h >> 8), (u8) h);
+
+        char hostName[DNSHdr::NameMax];
+        if (address->getHostName(hostName, sizeof hostName))
+        {
+            esReport("'%s'\n", hostName);
+        }
+
+        // Test remote ping
+        esReport("ping #1\n");
+        address->isReachable(10000000);
+        esReport("ping #2\n");
+        address->isReachable(10000000);
+        esReport("ping #3\n");
+        address->isReachable(10000000);
+    }
 
     dhcp->stop();
     delete dhcp;

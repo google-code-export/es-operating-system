@@ -63,6 +63,7 @@ static void* serve(void* param)
     len = socket->read(input, 4);
     esReport("read: %s (%d)\n", input, len);
     ASSERT(len == 4);
+    ASSERT(memcmp(input, "abc", 4) == 0);
 
     socket->close();
     socket->release();

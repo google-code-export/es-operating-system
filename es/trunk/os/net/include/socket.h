@@ -20,6 +20,8 @@
 #include <es/ref.h>
 #include <es/timer.h>
 #include <es/base/IStream.h>
+#include <es/net/IInternetConfig.h>
+#include <es/net/IResolver.h>
 #include <es/net/ISocket.h>
 #include <es/net/udp.h>
 #include "inet.h"
@@ -57,6 +59,9 @@ class Socket :
 {
 public:
     static const int INTERFACE_MAX = 8;
+
+    static IResolver* resolver;
+    static IInternetConfig* config;
 
 private:
     static AddressFamily::List  addressFamilyList;

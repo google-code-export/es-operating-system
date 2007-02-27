@@ -24,7 +24,8 @@
 
 class InternetConfig : public IInternetConfig
 {
-    Ref     ref;
+    Ref                             ref;
+    AddressSet<IInternetAddress>    nameServers;
 
 public:
     //
@@ -41,6 +42,10 @@ public:
     int addInterface(IStream* stream, int hrd);
     IInterface* getInterface(int scopeID);
     void removeInterface(IStream* stream);
+
+    void addNameServer(IInternetAddress* address);
+    IInternetAddress* getNameServer();
+    void removeNameServer(IInternetAddress* address);
 
     //
     // IInterface

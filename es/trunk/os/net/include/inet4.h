@@ -172,7 +172,7 @@ class InFamily : public AddressFamily
     ARPFamily                   arpFamily;
 
     // Default Router List
-    RouterList<Inet4Address>    routerList;
+    AddressSet<Inet4Address>    routerList;
 
 public:
     InFamily();
@@ -260,12 +260,12 @@ public:
         local = onLink(addr->getAddress(), addr->getScopeID());
         if (local)
         {
-            routerList.addRouter(addr);
+            routerList.addAddress(addr);
         }
     }
     void removeRouter(Inet4Address* addr)
     {
-        routerList.removeRouter(addr);
+        routerList.removeAddress(addr);
     }
 
     void joinGroup(Inet4Address* addr);

@@ -93,20 +93,41 @@ removeRouter(IInternetAddress* router)
     }
 }
 
-int InternetConfig::addInterface(IStream* stream, int hrd)
+int InternetConfig::
+addInterface(IStream* stream, int hrd)
 {
     return Socket::addInterface(stream, hrd);
 }
 
-IInterface* InternetConfig::getInterface(int scopeID)
+IInterface* InternetConfig::
+getInterface(int scopeID)
 {
     Interface* interface = Socket::getInterface(scopeID);
     return interface->getStream();
 }
 
-void InternetConfig::removeInterface(IStream* stream)
+void InternetConfig::
+removeInterface(IStream* stream)
 {
     Socket::removeInterface(stream);
+}
+
+void InternetConfig::
+addNameServer(IInternetAddress* address)
+{
+    nameServers.addAddress(address);
+}
+
+IInternetAddress* InternetConfig::
+getNameServer()
+{
+    return nameServers.getAddress();
+}
+
+void InternetConfig::
+removeNameServer(IInternetAddress* address)
+{
+    nameServers.removeAddress(address);
 }
 
 bool InternetConfig::

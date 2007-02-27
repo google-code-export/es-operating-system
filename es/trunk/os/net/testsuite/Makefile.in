@@ -54,7 +54,7 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	config$(EXEEXT) anon$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	unreach$(EXEEXT) mcast$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	frag$(EXEEXT) timeout$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	dhcp$(EXEEXT)
+@ES_FALSE@@POSIX_TRUE@	dhcp$(EXEEXT) dns$(EXEEXT)
 @ES_TRUE@am__EXEEXT_1 = config$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_anon_OBJECTS = anon.$(OBJEXT)
@@ -72,6 +72,11 @@ am_dhcp_OBJECTS = dhcp.$(OBJEXT)
 dhcp_OBJECTS = $(am_dhcp_OBJECTS)
 dhcp_LDADD = $(LDADD)
 dhcp_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_dns_OBJECTS = dns.$(OBJEXT)
+dns_OBJECTS = $(am_dns_OBJECTS)
+dns_LDADD = $(LDADD)
+dns_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 am_frag_OBJECTS = frag.$(OBJEXT)
 frag_OBJECTS = $(am_frag_OBJECTS)
@@ -113,11 +118,13 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(anon_SOURCES) $(config_SOURCES) $(dhcp_SOURCES) \
-	$(frag_SOURCES) $(inet4_SOURCES) $(mcast_SOURCES) \
-	$(tcp_SOURCES) $(timeout_SOURCES) $(unreach_SOURCES)
+	$(dns_SOURCES) $(frag_SOURCES) $(inet4_SOURCES) \
+	$(mcast_SOURCES) $(tcp_SOURCES) $(timeout_SOURCES) \
+	$(unreach_SOURCES)
 DIST_SOURCES = $(anon_SOURCES) $(config_SOURCES) $(dhcp_SOURCES) \
-	$(frag_SOURCES) $(inet4_SOURCES) $(mcast_SOURCES) \
-	$(tcp_SOURCES) $(timeout_SOURCES) $(unreach_SOURCES)
+	$(dns_SOURCES) $(frag_SOURCES) $(inet4_SOURCES) \
+	$(mcast_SOURCES) $(tcp_SOURCES) $(timeout_SOURCES) \
+	$(unreach_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -233,7 +240,7 @@ AM_CPPFLAGS = \
 	-I $(srcdir)/../../../include
 
 @ES_TRUE@TESTS = config
-@POSIX_TRUE@TESTS = inet4 tcp config anon unreach mcast frag timeout dhcp
+@POSIX_TRUE@TESTS = inet4 tcp config anon unreach mcast frag timeout dhcp dns
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@noinst_DATA = config.img
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
@@ -246,6 +253,7 @@ tcp_SOURCES = tcp.cpp
 timeout_SOURCES = timeout.cpp
 config_SOURCES = config.cpp
 dhcp_SOURCES = dhcp.cpp
+dns_SOURCES = dns.cpp
 unreach_SOURCES = unreach.cpp
 EXTRA_DIST = makeScript
 all: all-am
@@ -293,6 +301,9 @@ config$(EXEEXT): $(config_OBJECTS) $(config_DEPENDENCIES)
 dhcp$(EXEEXT): $(dhcp_OBJECTS) $(dhcp_DEPENDENCIES) 
 	@rm -f dhcp$(EXEEXT)
 	$(CXXLINK) $(dhcp_LDFLAGS) $(dhcp_OBJECTS) $(dhcp_LDADD) $(LIBS)
+dns$(EXEEXT): $(dns_OBJECTS) $(dns_DEPENDENCIES) 
+	@rm -f dns$(EXEEXT)
+	$(CXXLINK) $(dns_LDFLAGS) $(dns_OBJECTS) $(dns_LDADD) $(LIBS)
 frag$(EXEEXT): $(frag_OBJECTS) $(frag_DEPENDENCIES) 
 	@rm -f frag$(EXEEXT)
 	$(CXXLINK) $(frag_LDFLAGS) $(frag_OBJECTS) $(frag_LDADD) $(LIBS)
@@ -321,6 +332,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dhcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frag.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mcast.Po@am__quote@

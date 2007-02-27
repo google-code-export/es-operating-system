@@ -189,7 +189,7 @@ read(SocketMessenger* m, Conduit* c)
     {
         len = m->getSize();
     }
-    m->movePosition(-len);
+    m->setSize(len);
     recvRing.read(m->fix(len), len);
 
     int size = 14 + 60 + 60 + mss;  // XXX Assume MAC, IPv4, TCP

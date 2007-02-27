@@ -21,6 +21,9 @@
 #include "socket.h"
 #include "visualizer.h"
 
+IResolver*          Socket::resolver = 0;
+IInternetConfig*    Socket::config = 0;
+
 AddressFamily::List Socket::addressFamilyList;
 Interface*          Socket::interfaces[Socket::INTERFACE_MAX];
 Timer*              Socket::timer;

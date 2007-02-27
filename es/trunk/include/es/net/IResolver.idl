@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -16,7 +16,7 @@ import "es/net/IInternetAddress.idl";
 /**
  * This interface provides methods for getting internet addresses.
  */
-[object, uuid(b0528c30-8f0b-11db-9c02-0009bf000001)]
+[object, uuid(ab43362c-c601-11db-8100-0009bf000001)]
 interface IResolver : IInterface
 {
     /** Gets an internet address about the host for the specified DNS host name.
@@ -35,4 +35,6 @@ interface IResolver : IInterface
      * @return the new internet address.
      */
     IInternetAddress* getHostByAddress([in, size_is(len)] void* address, unsigned int len, unsigned int scopeID);
+
+    boolean getHostName(IInternetAddress* address, [out, size_is(len)] char* hostName, unsigned int len);
 }

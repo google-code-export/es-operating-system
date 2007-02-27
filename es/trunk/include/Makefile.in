@@ -151,7 +151,7 @@ nobase_include_HEADERS = es.h es/broker.h es/classFactory.h es/clsid.h \
 	es/interlocked.h es/irf.h es/list.h es/md5.h es/ref.h \
 	es/reflect.h es/ring.h es/synchronized.h es/timer.h \
 	es/timeSpan.h es/tree.h es/types.h es/usage.h es/utf.h \
-	es/uuid.h es/net/arp.h es/net/dhcp.h es/net/dix.h \
+	es/uuid.h es/net/arp.h es/net/dhcp.h es/net/dns.h es/net/dix.h \
 	es/net/icmp.h es/net/igmp.h es/net/inet4.h es/net/inet6.h \
 	es/net/tcp.h es/net/udp.h es/base/IAlarm.idl \
 	es/base/ICache.idl es/base/ICallback.idl \

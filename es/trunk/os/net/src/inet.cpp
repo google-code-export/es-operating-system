@@ -36,10 +36,10 @@ void esRegisterInternetProtocol(IContext* context)
     localhost->start();
 
     // Register resolver interface
-    Resolver* resolver = new Resolver;
-    context->bind("network/resolver", static_cast<IResolver*>(resolver));
+    Socket::resolver = new Resolver;
+    context->bind("network/resolver", Socket::resolver);
 
     // Register config interface
-    InternetConfig* config = new InternetConfig;
-    context->bind("network/config", static_cast<InternetConfig*>(config));
+    Socket::config = new InternetConfig;
+    context->bind("network/config", Socket::config);
 }

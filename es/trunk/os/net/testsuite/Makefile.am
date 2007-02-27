@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = inet4 tcp config anon unreach mcast frag timeout dhcp
+TESTS = inet4 tcp config anon unreach mcast frag timeout dhcp dns
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -58,6 +58,8 @@ timeout_SOURCES = timeout.cpp
 config_SOURCES = config.cpp
 
 dhcp_SOURCES = dhcp.cpp
+
+dns_SOURCES = dns.cpp
 
 unreach_SOURCES = unreach.cpp
 

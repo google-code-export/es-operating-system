@@ -17,7 +17,7 @@ import "es/net/IInternetAddress.idl";
 /**
  * This interface provides methods for managing network configurations.
  */
-[object, uuid(ca09e86c-8e6b-11db-9c02-0009bf000001)]
+[object, uuid(81f55ac0-c534-11db-9c02-0009bf000001)]
 interface IInternetConfig : IInterface
 {
     /** Registers the specified internet address with the specified prefix to the TCP/IP network subsystem.
@@ -73,4 +73,8 @@ interface IInternetConfig : IInterface
      * @param stream stream of the network interface to be unregistered.
      */
     void removeInterface(IStream* stream);
+
+    void addNameServer(IInternetAddress* address);
+    IInternetAddress* getNameServer();
+    void removeNameServer(IInternetAddress* address);
 }
