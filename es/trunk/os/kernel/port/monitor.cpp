@@ -272,12 +272,14 @@ wait(s64 timeout)
     ASSERT(current);
     ASSERT(current->state == IThread::RUNNING);
 
+    bool expired(false);
     if (0 < timeout)
     {
         current->alarm.setInterval(timeout);
         current->alarm.setCallback(static_cast<ICallback*>(this));
         current->alarm.setEnabled(true);
         wait();
+        expired = current->condSleep(0);
         current->alarm.setEnabled(false);
     }
     else
@@ -286,7 +288,7 @@ wait(s64 timeout)
     }
 
     Core::splX(x);
-    return !current->condSleep(0);
+    return !expired;
 }
 
 void Thread::Monitor::
