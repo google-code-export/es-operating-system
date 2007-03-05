@@ -1,3 +1,9 @@
+2007-03-05  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.7 released.
+	* Add DHCP client service.
+	* Add DNS stub resolver.
+
 2007-02-09  Okasaka  <okasaka@users.sourceforge.jp>
 
 	* es 0.0.6 released.
