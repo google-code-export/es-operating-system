@@ -1,0 +1,17 @@
+#!/bin/sh
+DIR=$1
+SCRIPT=$DIR/$2
+\rm $SCRIPT 2> /dev/null
+
+echo '#!/bin/sh' > $SCRIPT
+echo 'vformat '$DIR'/fat32.img > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../os/bootsect/es.ldr > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/es.img > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/squeak.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/SqueakV3.sources > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/Squeak3.7-5989-full.changes > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/Squeak3.7-5989-full.image > /dev/null 2>&1' >> $SCRIPT
+echo '' >> $SCRIPT
+echo 'echo usage: qemu -hda '$DIR'/fat32.img -serial stdio -soundhw sb16' >> $SCRIPT
+
+chmod u+x $SCRIPT
