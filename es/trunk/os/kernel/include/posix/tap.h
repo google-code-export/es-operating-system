@@ -15,12 +15,12 @@
 #define NINTENDO_ES_KERNEL_POSIX_TAP_H_INCLUDED
 
 #include <es.h>
-#include <es/device/IEthernet.h>
+#include <es/device/INetworkInterface.h>
 #include <es/base/IStream.h>
 #include <es/ref.h>
 #include "posix/core.h"
 
-class Tap : public IEthernet, public IStream
+class Tap : public INetworkInterface, public IStream
 {
     IMonitor* monitor;
     Ref ref;
@@ -38,14 +38,14 @@ public:
     Tap(const char* ifName, const char* bridge, const char* script);
     ~Tap();
 
-    // IEthernet
+    // INetworkInterface
+    int getType()
+    {
+        return INetworkInterface::Ethernet;
+    }
+
     int start();
     int stop();
-
-    int probe()
-    {
-        return 0;
-    }
 
     bool getPromiscuousMode()
     {
@@ -73,13 +73,13 @@ public:
         return true;
     }
 
-    int getMode(void)
+    void getStatistics(Statistics* statistics)
     {
-        return MODE_AUTO;
     }
 
-    void getStatistics(InterfaceStatistics* statistics)
+    int getMTU()
     {
+        return 1500;
     }
 
     // IStream

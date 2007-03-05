@@ -17,7 +17,7 @@
 #include <es/handle.h>
 #include <es/list.h>
 #include <es/base/IStream.h>
-#include <es/device/IEthernet.h>
+#include <es/device/INetworkInterface.h>
 #include <es/naming/IContext.h>
 #include <es/net/ISocket.h>
 #include <es/net/IInternetConfig.h>
@@ -42,10 +42,10 @@ int main()
     Handle<IInternetConfig> config = context->lookup("network/config");
 
     // Setup DIX interface
-    Handle<IStream> ethernetStream = context->lookup("device/ethernet");
-    Handle<IEthernet> nic(ethernetStream);
-    nic->start();
-    int dixID = config->addInterface(ethernetStream, ARPHdr::HRD_ETHERNET);
+    Handle<INetworkInterface> ethernetInterface = context->lookup("device/ethernet");
+    ethernetInterface->start();
+    int dixID = config->addInterface(ethernetInterface);
+    esReport("dixID: %d\n", dixID);
 
     // Register host address (192.168.2.40)
     InAddr addr = { htonl(192 << 24 | 168 << 16 | 2 << 8 | 40) };
@@ -73,7 +73,7 @@ int main()
     socket = 0;
 
     esSleep(20000000);
-    nic->stop();
+    ethernetInterface->stop();
 
     esReport("done.\n");
 }

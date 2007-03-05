@@ -60,7 +60,7 @@ libesnet_a_AR = $(AR) $(ARFLAGS)
 libesnet_a_LIBADD =
 am__objects_1 =
 am__objects_2 = arp.$(OBJEXT) conduit.$(OBJEXT) datagram.$(OBJEXT) \
-	dix.$(OBJEXT) icmp4.$(OBJEXT) igmp.$(OBJEXT) \
+	dhcp.$(OBJEXT) dix.$(OBJEXT) icmp4.$(OBJEXT) igmp.$(OBJEXT) \
 	inet4address.$(OBJEXT) inet4reass.$(OBJEXT) inet4.$(OBJEXT) \
 	inet6address.$(OBJEXT) inet6.$(OBJEXT) inetConfig.$(OBJEXT) \
 	inet.$(OBJEXT) resolver.$(OBJEXT) socket.$(OBJEXT) \
@@ -207,6 +207,7 @@ cpp_source_files = \
 	src/arp.cpp \
 	src/conduit.cpp \
 	src/datagram.cpp \
+	src/dhcp.cpp \
 	src/dix.cpp \
 	src/icmp4.cpp \
 	src/igmp.cpp \
@@ -328,6 +329,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conduit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/datagram.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dhcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icmp4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/igmp.Po@am__quote@
@@ -403,6 +405,20 @@ datagram.obj: src/datagram.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/datagram.cpp' object='datagram.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o datagram.obj `if test -f 'src/datagram.cpp'; then $(CYGPATH_W) 'src/datagram.cpp'; else $(CYGPATH_W) '$(srcdir)/src/datagram.cpp'; fi`
+
+dhcp.o: src/dhcp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dhcp.o -MD -MP -MF "$(DEPDIR)/dhcp.Tpo" -c -o dhcp.o `test -f 'src/dhcp.cpp' || echo '$(srcdir)/'`src/dhcp.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dhcp.Tpo" "$(DEPDIR)/dhcp.Po"; else rm -f "$(DEPDIR)/dhcp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/dhcp.cpp' object='dhcp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dhcp.o `test -f 'src/dhcp.cpp' || echo '$(srcdir)/'`src/dhcp.cpp
+
+dhcp.obj: src/dhcp.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dhcp.obj -MD -MP -MF "$(DEPDIR)/dhcp.Tpo" -c -o dhcp.obj `if test -f 'src/dhcp.cpp'; then $(CYGPATH_W) 'src/dhcp.cpp'; else $(CYGPATH_W) '$(srcdir)/src/dhcp.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dhcp.Tpo" "$(DEPDIR)/dhcp.Po"; else rm -f "$(DEPDIR)/dhcp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/dhcp.cpp' object='dhcp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dhcp.obj `if test -f 'src/dhcp.cpp'; then $(CYGPATH_W) 'src/dhcp.cpp'; else $(CYGPATH_W) '$(srcdir)/src/dhcp.cpp'; fi`
 
 dix.o: src/dix.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dix.o -MD -MP -MF "$(DEPDIR)/dix.Tpo" -c -o dix.o `test -f 'src/dix.cpp' || echo '$(srcdir)/'`src/dix.cpp; \

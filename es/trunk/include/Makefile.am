@@ -18,6 +18,7 @@ nobase_include_HEADERS = \
 	es/classFactory.h \
 	es/clsid.h \
 	es/collection.h \
+	es/context.h \
 	es/dateTime.h \
 	es/elf.h \
 	es/endian.h \
@@ -66,6 +67,7 @@ nobase_nodist_include_HEADERS = \
 	es/base/IPageSet.h \
 	es/base/IProcess.h \
 	es/base/IRuntime.h \
+	es/base/IService.h \
 	es/base/IStream.h \
 	es/base/IThread.h \
 	es/device/IAudioFormat.h \
@@ -74,12 +76,12 @@ nobase_nodist_include_HEADERS = \
 	es/device/IDevice.h \
 	es/device/IDiskManagement.h \
 	es/device/IDmac.h \
-	es/device/IEthernet.h \
 	es/device/IFileSystem.h \
-	es/device/IPartition.h \
+	es/device/INetworkInterface.h \
 	es/device/IPic.h \
 	es/device/IRemovableMedia.h \
 	es/device/IRtc.h \
+	es/device/IPartition.h \
 	es/naming/IBinding.h \
 	es/naming/IContext.h \
 	es/net/IInternetAddress.h \
@@ -103,6 +105,7 @@ nobase_nodist_include_HEADERS += \
 	es/base/IPageSet.ird \
 	es/base/IProcess.ird \
 	es/base/IRuntime.ird \
+	es/base/IService.ird \
 	es/base/IStream.ird \
 	es/base/IThread.ird \
 	es/device/IAudioFormat.ird \
@@ -111,12 +114,12 @@ nobase_nodist_include_HEADERS += \
 	es/device/IDevice.ird \
 	es/device/IDiskManagement.ird \
 	es/device/IDmac.ird \
-	es/device/IEthernet.ird \
 	es/device/IFileSystem.ird \
-	es/device/IPartition.ird \
+	es/device/INetworkInterface.ird \
 	es/device/IPic.ird \
 	es/device/IRemovableMedia.ird \
 	es/device/IRtc.ird \
+	es/device/IPartition.ird \
 	es/naming/IBinding.ird \
 	es/naming/IContext.ird \
 	es/net/IInternetAddress.ird \
@@ -140,6 +143,7 @@ nobase_include_HEADERS += \
 	es/base/IPageSet.idl \
 	es/base/IProcess.idl \
 	es/base/IRuntime.idl \
+	es/base/IService.idl \
 	es/base/IStream.idl \
 	es/base/IThread.idl \
 	es/device/IAudioFormat.idl \
@@ -148,12 +152,12 @@ nobase_include_HEADERS += \
 	es/device/IDevice.idl \
 	es/device/IDiskManagement.idl \
 	es/device/IDmac.idl \
-	es/device/IEthernet.idl \
 	es/device/IFileSystem.idl \
-	es/device/IPartition.idl \
+	es/device/INetworkInterface.idl \
 	es/device/IPic.idl \
 	es/device/IRemovableMedia.idl \
 	es/device/IRtc.idl \
+	es/device/IPartition.idl \
 	es/naming/IBinding.idl \
 	es/naming/IContext.idl \
 	es/net/IInternetAddress.idl \
@@ -162,6 +166,7 @@ nobase_include_HEADERS += \
 	es/net/ISocket.idl \
 	es/util/IIterator.idl \
 	es/util/ISet.idl
+
 
 clean-local:
 	-rm -rf es

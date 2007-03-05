@@ -13,6 +13,7 @@ cpp_source_files = \
 	src/arp.cpp \
 	src/conduit.cpp \
 	src/datagram.cpp \
+	src/dhcp.cpp \
 	src/dix.cpp \
 	src/icmp4.cpp \
 	src/igmp.cpp \

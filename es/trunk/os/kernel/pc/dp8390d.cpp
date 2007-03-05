@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -613,7 +613,7 @@ restorePage(u8 cr)
 }
 
 //
-// IEthernet
+// INetworkInterface
 //
 
 Dp8390d::
@@ -907,14 +907,8 @@ getLinkState()
     return true;
 }
 
-int Dp8390d::
-getMode()
-{
-    return IEthernet::MODE_10FULL;
-}
-
 void Dp8390d::
-getStatistics(InterfaceStatistics* statistics)
+getStatistics(Statistics* statistics)
 {
     Lock::Synchronized method(spinLock);
 
@@ -1036,13 +1030,13 @@ queryInterface(const Guid& riid, void** objectPtr)
     {
         *objectPtr = static_cast<IStream*>(this);
     }
-    else if (riid == IID_IEthernet)
+    else if (riid == IID_INetworkInterface)
     {
-        *objectPtr = static_cast<IEthernet*>(this);
+        *objectPtr = static_cast<INetworkInterface*>(this);
     }
     else if (riid == IID_IInterface)
     {
-        *objectPtr = static_cast<IEthernet*>(this);
+        *objectPtr = static_cast<INetworkInterface*>(this);
     }
     else
     {

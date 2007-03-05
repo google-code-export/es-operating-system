@@ -14,7 +14,7 @@
 #ifndef NINTENDO_ES_KERNEL_I386_DP8390D_H_INCLUDED
 #define NINTENDO_ES_KERNEL_I386_DP8390D_H_INCLUDED
 
-#include <es/device/IEthernet.h>
+#include <es/device/INetworkInterface.h>
 #include <es/base/IStream.h>
 #include <es/base/ICallback.h>
 #include <es/ref.h>
@@ -22,7 +22,7 @@
 #include <es/interlocked.h>
 #include "i386/core.h"
 
-class Dp8390d : public IEthernet, public IStream, public ICallback
+class Dp8390d : public INetworkInterface, public IStream, public ICallback
 {
     Lock            spinLock;
     IMonitor*       monitor;
@@ -41,7 +41,7 @@ class Dp8390d : public IEthernet, public IStream, public ICallback
     DateTime        lastOverflow;
     bool            resend;
 
-    InterfaceStatistics statistics;
+    Statistics statistics;
 
     static const int PAGE_SIZE = 256;
     static const int NUM_TX_PAGE = 6;
@@ -107,7 +107,11 @@ public:
     Dp8390d(unsigned base, int irq);
     ~Dp8390d();
 
-    // IEthernet
+    // INetworkInterface
+    int getType()
+    {
+        return INetworkInterface::Ethernet;
+    }
     int start();
     int stop();
     int probe();
@@ -119,9 +123,13 @@ public:
 
     void getMacAddress(u8 mac[6]);
     bool getLinkState();
-    int getMode();
 
-    void getStatistics(InterfaceStatistics* statistics);
+    void getStatistics(Statistics* statistics);
+
+    int getMTU()
+    {
+        return 1500;
+    }
 
     // IStream
     long long getPosition()

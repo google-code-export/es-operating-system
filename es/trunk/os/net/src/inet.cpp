@@ -26,20 +26,23 @@ void esRegisterInternetProtocol(IContext* context)
     // Setup internet protocol family
     InFamily* inFamily = new InFamily;
 
+    // Create "network/interface" context
+    Socket::interface = context->createSubcontext("network/interface");
+
+    // Register resolver interface
+    Socket::resolver = new Resolver;
+    Handle<IBinding>(context->bind("network/resolver", Socket::resolver));
+
+    // Register config interface
+    Socket::config = new InternetConfig;
+    Handle<IBinding>(context->bind("network/config", Socket::config));
+
     // Setup loopback interface
-    Handle<IStream> loopbackStream = context->lookup("device/loopback");
-    int scopeID = Socket::addInterface(loopbackStream, ARPHdr::HRD_LOOPBACK);
+    Handle<INetworkInterface> loopbackInterface = context->lookup("device/loopback");
+    int scopeID = Socket::config->addInterface(loopbackInterface);
 
     // Register localhost address
     Handle<Inet4Address> localhost = new Inet4Address(InAddrLoopback, Inet4Address::statePreferred, scopeID, 8);
     inFamily->addAddress(localhost);
     localhost->start();
-
-    // Register resolver interface
-    Socket::resolver = new Resolver;
-    context->bind("network/resolver", Socket::resolver);
-
-    // Register config interface
-    Socket::config = new InternetConfig;
-    context->bind("network/config", Socket::config);
 }

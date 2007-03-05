@@ -14,23 +14,20 @@
 #include <stdlib.h>
 #include "dix.h"
 
-DIXInterface::DIXInterface(IStream* stream) :
-    stream(stream),
+const u8 DIXInterface::macAllHost[6] = { 0x01, 0x00, 0x5e, 0x00, 0x00, 0x01 };
+
+DIXInterface::DIXInterface(INetworkInterface* networkInterface) :
+    networkInterface(networkInterface, true),
+    stream(this->networkInterface),
     dixReceiver(this),
     inReceiver(this),
     arpReceiver(this),
-    Interface(stream, &dixAccessor, &dixReceiver)
+    Interface(networkInterface, &dixAccessor, &dixReceiver)
 {
-    if (stream)
-    {
-        Handle<IEthernet> ethernet = stream;
-        u8 mac[6];
-        ethernet->getMacAddress(mac);
-        setMacAddress(mac);
-        stream->addRef();
-
-        seed48((u16*) mac);
-    }
+    u8 mac[6];
+    networkInterface->getMacAddress(mac);
+    setMacAddress(mac);
+    seed48((u16*) mac);
 
     inProtocol.setReceiver(&inReceiver);
     arpProtocol.setReceiver(&arpReceiver);

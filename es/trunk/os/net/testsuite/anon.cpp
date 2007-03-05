@@ -17,7 +17,7 @@
 #include <es/handle.h>
 #include <es/list.h>
 #include <es/base/IStream.h>
-#include <es/device/IEthernet.h>
+#include <es/device/INetworkInterface.h>
 #include <es/naming/IContext.h>
 #include <es/net/ISocket.h>
 #include <es/net/IInternetConfig.h>

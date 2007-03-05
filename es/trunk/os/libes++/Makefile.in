@@ -60,12 +60,12 @@ ARFLAGS = cru
 libes___a_AR = $(AR) $(ARFLAGS)
 libes___a_LIBADD =
 am__libes___a_SOURCES_DIST = src/md5.c src/rand48.c src/string.c \
-	src/utf.c src/dateTime.cpp src/throw.cpp src/formatter.cpp \
-	src/ring.cpp src/system.cpp
+	src/utf.c src/context.cpp src/dateTime.cpp src/throw.cpp \
+	src/formatter.cpp src/ring.cpp include/core.h src/system.cpp
 am__objects_1 = md5.$(OBJEXT) rand48.$(OBJEXT) string.$(OBJEXT) \
 	utf.$(OBJEXT)
-am__objects_2 = dateTime.$(OBJEXT) throw.$(OBJEXT) formatter.$(OBJEXT) \
-	ring.$(OBJEXT)
+am__objects_2 = context.$(OBJEXT) dateTime.$(OBJEXT) throw.$(OBJEXT) \
+	formatter.$(OBJEXT) ring.$(OBJEXT)
 am__objects_3 =
 am__objects_4 = $(am__objects_1) $(am__objects_2) $(am__objects_3)
 @ES_TRUE@am_libes___a_OBJECTS = $(am__objects_4) system.$(OBJEXT)
@@ -214,12 +214,15 @@ c_source_files = \
 	src/utf.c
 
 cpp_source_files = \
+	src/context.cpp \
 	src/dateTime.cpp \
 	src/throw.cpp \
 	src/formatter.cpp \
 	src/ring.cpp
 
-header_files = 
+header_files = \
+	include/core.h
+
 libessup___a_SOURCES = $(c_source_files) $(cpp_source_files) $(header_files)
 @ES_TRUE@libes___a_SOURCES = $(libessup___a_SOURCES) src/system.cpp
 all: all-recursive
@@ -299,6 +302,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/context.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dateTime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/formatter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@
@@ -392,6 +396,20 @@ utf.obj: src/utf.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+context.o: src/context.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT context.o -MD -MP -MF "$(DEPDIR)/context.Tpo" -c -o context.o `test -f 'src/context.cpp' || echo '$(srcdir)/'`src/context.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/context.Tpo" "$(DEPDIR)/context.Po"; else rm -f "$(DEPDIR)/context.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/context.cpp' object='context.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o context.o `test -f 'src/context.cpp' || echo '$(srcdir)/'`src/context.cpp
+
+context.obj: src/context.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT context.obj -MD -MP -MF "$(DEPDIR)/context.Tpo" -c -o context.obj `if test -f 'src/context.cpp'; then $(CYGPATH_W) 'src/context.cpp'; else $(CYGPATH_W) '$(srcdir)/src/context.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/context.Tpo" "$(DEPDIR)/context.Po"; else rm -f "$(DEPDIR)/context.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/context.cpp' object='context.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o context.obj `if test -f 'src/context.cpp'; then $(CYGPATH_W) 'src/context.cpp'; else $(CYGPATH_W) '$(srcdir)/src/context.cpp'; fi`
 
 dateTime.o: src/dateTime.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dateTime.o -MD -MP -MF "$(DEPDIR)/dateTime.Tpo" -c -o dateTime.o `test -f 'src/dateTime.cpp' || echo '$(srcdir)/'`src/dateTime.cpp; \

@@ -55,7 +55,7 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	unreach$(EXEEXT) mcast$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	frag$(EXEEXT) timeout$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	dhcp$(EXEEXT) dns$(EXEEXT)
-@ES_TRUE@am__EXEEXT_1 = config$(EXEEXT)
+@ES_TRUE@am__EXEEXT_1 = config$(EXEEXT) dhcp$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_anon_OBJECTS = anon.$(OBJEXT)
 anon_OBJECTS = $(am_anon_OBJECTS)
@@ -239,10 +239,10 @@ AM_CPPFLAGS = \
 	-I ../../../include \
 	-I $(srcdir)/../../../include
 
-@ES_TRUE@TESTS = config
+@ES_TRUE@TESTS = config dhcp
 @POSIX_TRUE@TESTS = inet4 tcp config anon unreach mcast frag timeout dhcp dns
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
-@ES_TRUE@noinst_DATA = config.img
+@ES_TRUE@noinst_DATA = config.img dhcp.img
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 @ES_TRUE@AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
 anon_SOURCES = anon.cpp

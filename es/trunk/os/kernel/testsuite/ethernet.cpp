@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -14,7 +14,7 @@
 #include <es.h>
 #include <es/endian.h>
 #include <es/handle.h>
-#include <es/device/IEthernet.h>
+#include <es/device/INetworkInterface.h>
 #include <es/base/IStream.h>
 #include <es/net/arp.h>
 #include <es/net/dix.h>
@@ -43,7 +43,7 @@ int main()
 
     Handle<IStream> stream(context->lookup("device/ethernet"));
     TEST(stream);
-    Handle<IEthernet> nic = stream;
+    Handle<INetworkInterface> nic = stream;
     TEST(nic);
 
     u8 mac[6];

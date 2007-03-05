@@ -50,11 +50,11 @@ nodist_libeskernel_a_SOURCES = \
 	device/IDiskManagement.c \
 	device/IDmac.c \
 	device/IFileSystem.c \
+	device/INetworkInterface.c \
 	device/IPic.c \
 	device/IRemovableMedia.c \
 	device/IRtc.c \
 	device/IPartition.c \
-	device/IEthernet.c \
 	naming/IBinding.c \
 	naming/IContext.c \
 	util/IIterator.c \
@@ -68,7 +68,6 @@ c_source_files =
 
 cpp_source_files = \
 	port/classStore.cpp \
-	port/context.cpp \
 	port/elf.cpp \
 	port/init.cpp \
 	port/interface.cpp
@@ -93,7 +92,6 @@ header_files = \
 	include/arena.h \
 	include/cache.h \
 	include/classStore.h \
-	include/context.h \
 	include/elfFile.h \
 	include/heap.h \
 	include/interfaceStore.h \

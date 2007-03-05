@@ -17,7 +17,7 @@
 #include <es/handle.h>
 #include <es/base/IStream.h>
 #include <es/base/IThread.h>
-#include <es/device/IEthernet.h>
+#include <es/device/INetworkInterface.h>
 #include "inet.h"
 #include "interface.h"
 #include "address.h"
@@ -33,11 +33,12 @@ class Interface
 {
     static const int MRU = 1518;
 
+    Handle<INetworkInterface>   networkInterface;
+
     IThread*        thread;
 
-    u8              mac[6];     // MAC address
+    u8              mac[6];             // MAC address
 
-    IStream*        stream;     // Raw stream
     Accessor*       accessor;
     Receiver*       receiver;
 
@@ -48,7 +49,8 @@ class Interface
     void* vent()
     {
         Handle<InetMessenger> m = new InetMessenger(&InetReceiver::input, MRU);
-        while (stream)
+        Handle<IStream> stream = networkInterface;
+        for (;;)
         {
             int len = stream->read(m->fix(MRU), MRU);
             if (0 < len)
@@ -77,8 +79,8 @@ protected:
     Mux             mux;
 
 public:
-    Interface(IStream* stream, Accessor* accessor, Receiver* receiver) :
-        stream(stream),
+    Interface(INetworkInterface* networkInterface, Accessor* accessor, Receiver* receiver) :
+        networkInterface(networkInterface, true),
         accessor(accessor),
         receiver(receiver),
         mux(accessor, &factory),
@@ -89,28 +91,11 @@ public:
 
         adapter.setReceiver(receiver);
         Conduit::connectAA(&adapter, &mux);
-
-        if (stream)
-        {
-            stream->addRef();
-        }
-    }
-    ~Interface()
-    {
-        if (stream)
-        {
-            stream->release();
-            stream = 0;
-        }
     }
 
-    IStream* getStream()
+    INetworkInterface* getNetworkInterface()
     {
-        if (stream)
-        {
-            stream->addRef();
-        }
-        return stream;
+        return networkInterface;    // XXX Check reference count
     }
 
     Adapter* getAdapter()
@@ -139,18 +124,12 @@ public:
 
     void addMulticastAddress(u8 mac[6])
     {
-        if (Handle<IEthernet> nic = stream)
-        {
-            nic->addMulticastAddress(mac);
-        }
+        networkInterface->addMulticastAddress(mac);
     }
 
     void removeMulticastAddress(u8 mac[6])
     {
-        if (Handle<IEthernet> nic = stream)
-        {
-            nic->removeMulticastAddress(mac);
-        }
+        networkInterface->removeMulticastAddress(mac);
     }
 
     /** Run a thread that reads from the stream and creates an input
@@ -159,6 +138,7 @@ public:
     void start()
     {
         thread = esCreateThread(run, this);
+        thread->setPriority(IThread::Highest);
         thread->start();
     }
 

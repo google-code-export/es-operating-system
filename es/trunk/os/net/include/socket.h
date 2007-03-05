@@ -20,6 +20,7 @@
 #include <es/ref.h>
 #include <es/timer.h>
 #include <es/base/IStream.h>
+#include <es/naming/IContext.h>
 #include <es/net/IInternetConfig.h>
 #include <es/net/IResolver.h>
 #include <es/net/ISocket.h>
@@ -60,8 +61,9 @@ class Socket :
 public:
     static const int INTERFACE_MAX = 8;
 
-    static IResolver* resolver;
+    static IResolver*       resolver;
     static IInternetConfig* config;
+    static IContext*        interface;
 
 private:
     static AddressFamily::List  addressFamilyList;
@@ -111,15 +113,26 @@ public:
         return af->getProtocol(this);
     }
 
-    static int addInterface(IStream* stream, int hrd);
-    static void removeInterface(IStream* stream);
+    static int addInterface(INetworkInterface* networkInterface);
+    static void removeInterface(INetworkInterface* networkInterface);
     static Interface* getInterface(int scopeID)
     {
-        if (scopeID < 0 || INTERFACE_MAX <= scopeID)
+        if (scopeID < 1 || INTERFACE_MAX <= scopeID)
         {
             return 0;
         }
         return interfaces[scopeID];
+    }
+    static int getScopeID(INetworkInterface* networkInterface)
+    {
+        for (int id = 1; id < INTERFACE_MAX; ++id)
+        {
+            if (networkInterface == interfaces[id]->networkInterface)
+            {
+                return id;
+            }
+        }
+        return 0;
     }
 
     static void alarm(TimerTask* timerTask, TimeSpan delay)

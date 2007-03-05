@@ -16,6 +16,7 @@
 #include <es.h>
 #include <es/classFactory.h>
 #include <es/clsid.h>
+#include <es/context.h>
 #include <es/exception.h>
 #include <es/endian.h>
 #include <es/formatter.h>
@@ -30,7 +31,6 @@
 #include "cache.h"
 #include "cga.h"
 #include "classStore.h"
-#include "context.h"
 #include "core.h"
 #include "dp8390d.h"
 #include "fdc.h"
@@ -214,6 +214,13 @@ int esInit(IInterface** nameSpace)
 
     pit = new Pit(1000);
 
+    // Create class store
+    classStore = static_cast<IClassStore*>(new ClassStore);
+
+    // Register CLSID_MonitorFactory
+    IClassFactory* monitorFactory = new(ClassFactory<Monitor>);
+    classStore->add(CLSID_Monitor, monitorFactory);
+
     root = new Context;
     if (nameSpace)
     {
@@ -234,8 +241,7 @@ int esInit(IInterface** nameSpace)
     IContext* network = root->createSubcontext("network");
     network->release();
 
-    // Create class store
-    classStore = static_cast<IClassStore*>(new ClassStore);
+    // Create class name space
     binding = root->bind("class", classStore);
     binding->release();
 
@@ -251,10 +257,6 @@ int esInit(IInterface** nameSpace)
     // Register CLSID_CacheFactory
     IClassFactory* cacheFactoryFactory = new(ClassFactory<CacheFactory>);
     classStore->add(CLSID_CacheFactory, cacheFactoryFactory);
-
-    // Register CLSID_MonitorFactory
-    IClassFactory* monitorFactory = new(ClassFactory<Monitor>);
-    classStore->add(CLSID_Monitor, monitorFactory);
 
     // Register CLSID_PageSet
     classStore->add(CLSID_PageSet, static_cast<IClassFactory*>(PageTable::pageSet));

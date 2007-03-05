@@ -53,8 +53,8 @@ interface IInternetAddress : IInterface
      */
     int getPathMTU();
 
-    /** Gets this scope identifier which refers to an interface on the local system.
-     * @return this scope identifier, or zero if not set.
+    /** Gets the scope identifier of this internet address.
+     * @return the scope identifier.
      */
     int getScopeID();
 

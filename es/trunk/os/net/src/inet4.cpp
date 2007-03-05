@@ -439,7 +439,7 @@ input(InetMessenger* m, Conduit* c)
         }
         else if (IN_IS_ADDR_MULTICAST(iphdr->dst))
         {
-            return false;
+            addr = new Inet4Address(iphdr->dst, Inet4Address::stateNonMember, scopeID);
         }
         else if (onLink = inFamily->onLink(iphdr->dst))
         {
@@ -463,7 +463,7 @@ input(InetMessenger* m, Conduit* c)
         }
         else if (IN_IS_ADDR_MULTICAST(iphdr->src))
         {
-            addr = new Inet4Address(iphdr->src, Inet4Address::stateNonMember, scopeID);
+            return false;
         }
         else if (onLink = inFamily->onLink(iphdr->src))
         {

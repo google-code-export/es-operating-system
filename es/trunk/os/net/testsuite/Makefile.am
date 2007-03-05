@@ -26,13 +26,13 @@ endif POSIX
 
 if ES
 
-TESTS = config
+TESTS = config dhcp
 
 noinst_SCRIPTS = $(TESTS)
 
 noinst_PROGRAMS = $(TESTS)
 
-noinst_DATA = config.img
+noinst_DATA = config.img dhcp.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 

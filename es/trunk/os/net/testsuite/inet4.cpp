@@ -77,8 +77,8 @@ int main()
     visualize();
 
     // Setup loopback interface
-    Handle<IStream> loopbackStream = context->lookup("device/loopback");
-    int scopeID = Socket::addInterface(loopbackStream, ARPHdr::HRD_LOOPBACK);
+    Handle<INetworkInterface> loopbackInterface = context->lookup("device/loopback");
+    int scopeID = Socket::addInterface(loopbackInterface);
 
     // Register localhost address
     Handle<Inet4Address> localhost = new Inet4Address(InAddrLoopback, Inet4Address::statePreferred, scopeID, 8);
@@ -114,10 +114,9 @@ int main()
     localhost->isReachable(10000000);
 
     // Setup DIX interface
-    Handle<IStream> ethernetStream = context->lookup("device/ethernet");
-    Handle<IEthernet> nic(ethernetStream);
-    nic->start();
-    int dixID = Socket::addInterface(ethernetStream, ARPHdr::HRD_ETHERNET);
+    Handle<INetworkInterface> ethernetInterface = context->lookup("device/ethernet");
+    ethernetInterface->start();
+    int dixID = Socket::addInterface(ethernetInterface);
     esReport("dixID: %d\n", dixID);
 
     // Register host address (192.168.2.40)
@@ -167,7 +166,7 @@ int main()
     remote->isReachable(10000000);
 
     esSleep(100000000);
-    nic->stop();
+    ethernetInterface->stop();
 
     esReport("done.\n");
 }

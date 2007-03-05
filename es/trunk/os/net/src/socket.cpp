@@ -23,6 +23,7 @@
 
 IResolver*          Socket::resolver = 0;
 IInternetConfig*    Socket::config = 0;
+IContext*           Socket::interface = 0;
 
 AddressFamily::List Socket::addressFamilyList;
 Interface*          Socket::interfaces[Socket::INTERFACE_MAX];
@@ -38,7 +39,8 @@ initialize()
     timer = new Timer;
 }
 
-int Socket::addInterface(IStream* stream, int hrd)
+int Socket::
+addInterface(INetworkInterface* networkInterface)
 {
     int n;
     for (n = 1; n < Socket::INTERFACE_MAX; ++n)
@@ -53,11 +55,11 @@ int Socket::addInterface(IStream* stream, int hrd)
         return -1;
     }
 
-    switch (hrd)
+    switch (networkInterface->getType())
     {
-      case ARPHdr::HRD_ETHERNET:
+      case INetworkInterface::Ethernet:
       {
-        DIXInterface* dixInterface = new DIXInterface(stream);
+        DIXInterface* dixInterface = new DIXInterface(networkInterface);
         dixInterface->setScopeID(n);
         interfaces[n] = dixInterface;
 
@@ -79,9 +81,9 @@ int Socket::addInterface(IStream* stream, int hrd)
         dixInterface->start();
         break;
       }
-      case ARPHdr::HRD_LOOPBACK:
+      case INetworkInterface::Loopback:
       {
-        LoopbackInterface* loopbackInterface = new LoopbackInterface(stream);
+        LoopbackInterface* loopbackInterface = new LoopbackInterface(networkInterface);
         loopbackInterface->setScopeID(n);
         interfaces[n] = loopbackInterface;
 
@@ -109,13 +111,14 @@ int Socket::addInterface(IStream* stream, int hrd)
     return n;
 }
 
-void Socket::removeInterface(IStream* stream)
+void Socket::
+removeInterface(INetworkInterface* networkInterface)
 {
     int n;
     for (n = 1; n < Socket::INTERFACE_MAX; ++n)
     {
         Interface* i = interfaces[n];
-        if (i && i->stream == stream)
+        if (i && i->networkInterface == networkInterface)
         {
             interfaces[0] = 0;
             delete i;

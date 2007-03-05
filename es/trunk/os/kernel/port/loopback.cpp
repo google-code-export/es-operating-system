@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -135,6 +135,10 @@ queryInterface(const Guid& riid, void** objectPtr)
     if (riid == IID_IStream)
     {
         *objectPtr = static_cast<IStream*>(this);
+    }
+    else if (riid == IID_INetworkInterface)
+    {
+        *objectPtr = static_cast<INetworkInterface*>(this);
     }
     else if (riid == IID_IInterface)
     {

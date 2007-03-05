@@ -39,9 +39,10 @@ public:
     IInternetAddress* getRouter();
     void removeRouter(IInternetAddress* router);
 
-    int addInterface(IStream* stream, int hrd);
+    int addInterface(INetworkInterface* networkInterface);
     IInterface* getInterface(int scopeID);
-    void removeInterface(IStream* stream);
+    int getScopeID(INetworkInterface* networkInterface);
+    void removeInterface(INetworkInterface* networkInterface);
 
     void addNameServer(IInternetAddress* address);
     IInternetAddress* getNameServer();

@@ -23,6 +23,7 @@
 #include <es.h>
 #include <es/classFactory.h>
 #include <es/clsid.h>
+#include <es/context.h>
 #include <es/exception.h>
 #include <es/endian.h>
 #include <es/formatter.h>
@@ -32,7 +33,6 @@
 #include "alarm.h"
 #include "cache.h"
 #include "classStore.h"
-#include "context.h"
 #include "loopback.h"
 #include "partition.h"
 #include "posix/tap.h"
@@ -80,24 +80,22 @@ int esInit(IInterface** nameSpace)
     thread->setPriority(IThread::Normal);
     pthread_setspecific(Thread::cleanupKey, thread);
 
+    // Create class store
+    classStore = static_cast<IClassStore*>(new ClassStore);
+
+    // Register CLSID_MonitorFactory which is used by Context
+    IClassFactory* monitorFactory = new(ClassFactory<Monitor>);
+    classStore->add(CLSID_Monitor, monitorFactory);
+
     root = new Context;
     if (nameSpace)
     {
         *nameSpace = root;
     }
 
-    // Create class store
-    classStore = static_cast<IClassStore*>(new ClassStore);
+    // Create class name space
     IBinding* binding = root->bind("class", classStore);
     binding->release();
-
-    // Register CLSID_CacheFactory
-    IClassFactory* cacheFactoryFactory = new(ClassFactory<CacheFactory>);
-    classStore->add(CLSID_CacheFactory, cacheFactoryFactory);
-
-    // Register CLSID_MonitorFactory
-    IClassFactory* monitorFactory = new(ClassFactory<Monitor>);
-    classStore->add(CLSID_Monitor, monitorFactory);
 
     // Initialize the page table
     int fd = open("/dev/zero", O_RDWR);
@@ -107,6 +105,10 @@ int esInit(IInterface** nameSpace)
     esReport("arena: %p, size: %zu\n", arena, size);
 #endif
     PageTable::init(arena, size);
+
+    // Register CLSID_CacheFactory
+    IClassFactory* cacheFactoryFactory = new(ClassFactory<CacheFactory>);
+    classStore->add(CLSID_CacheFactory, cacheFactoryFactory);
 
     // Register CLSID_PageSet
     classStore->add(CLSID_PageSet, static_cast<IClassFactory*>(PageTable::pageSet));

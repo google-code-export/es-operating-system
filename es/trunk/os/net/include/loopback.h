@@ -39,24 +39,13 @@ public:
 class LoopbackReceiver :
     public InetReceiver
 {
-    IStream* stream;
+    Handle<IStream> stream;
 
 public:
-    LoopbackReceiver(IStream* stream) :
-        stream(stream)
+    LoopbackReceiver(INetworkInterface* loopbackInterface) :
+        stream(loopbackInterface, true)
     {
         ASSERT(stream);
-        if (stream)
-        {
-            stream->addRef();
-        }
-    }
-    ~LoopbackReceiver()
-    {
-        if (stream)
-        {
-            stream->release();
-        }
     }
 
     bool output(InetMessenger* m, Conduit* c)
@@ -81,9 +70,9 @@ class LoopbackInterface : public Interface
     LoopbackReceiver        loopbackReceiver;
 
 public:
-    LoopbackInterface(IStream* stream) :
-        loopbackReceiver(stream),
-        Interface(stream, &loopbackAccessor, &loopbackReceiver)
+    LoopbackInterface(INetworkInterface* loopbackInterface) :
+        loopbackReceiver(loopbackInterface),
+        Interface(loopbackInterface, &loopbackAccessor, &loopbackReceiver)
     {
     }
     ~LoopbackInterface()

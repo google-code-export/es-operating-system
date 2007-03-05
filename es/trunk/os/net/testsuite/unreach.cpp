@@ -58,8 +58,8 @@ int main()
     visualize();
 
     // Setup loopback interface
-    Handle<IStream> loopbackStream = context->lookup("device/loopback");
-    int scopeID = Socket::addInterface(loopbackStream, ARPHdr::HRD_LOOPBACK);
+    Handle<INetworkInterface> loopbackInterface = context->lookup("device/loopback");
+    int scopeID = Socket::addInterface(loopbackInterface);
 
     // Register localhost address
     Handle<Inet4Address> localhost = new Inet4Address(InAddrLoopback, Inet4Address::statePreferred, scopeID, 8);

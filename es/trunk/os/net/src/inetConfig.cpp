@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <es/naming/IBinding.h>
 #include "inetConfig.h"
 
 void InternetConfig::
@@ -94,22 +95,37 @@ removeRouter(IInternetAddress* router)
 }
 
 int InternetConfig::
-addInterface(IStream* stream, int hrd)
+addInterface(INetworkInterface* networkInterface)
 {
-    return Socket::addInterface(stream, hrd);
+    int scopeID = Socket::addInterface(networkInterface);
+    if (0 < scopeID && Socket::interface)
+    {
+        char name[3];
+        sprintf(name, "%d", scopeID);
+        esReport("addInterface: %s\n", name);
+        Handle<IContext> folder(Socket::interface->createSubcontext(name));
+        Handle<IBinding>(folder->bind("interface", networkInterface));
+    }
+    return scopeID;
 }
 
 IInterface* InternetConfig::
 getInterface(int scopeID)
 {
     Interface* interface = Socket::getInterface(scopeID);
-    return interface->getStream();
+    return interface->getNetworkInterface();
+}
+
+int InternetConfig::
+getScopeID(INetworkInterface* networkInterface)
+{
+    return Socket::getScopeID(networkInterface);
 }
 
 void InternetConfig::
-removeInterface(IStream* stream)
+removeInterface(INetworkInterface* networkInterface)
 {
-    Socket::removeInterface(stream);
+    Socket::removeInterface(networkInterface);
 }
 
 void InternetConfig::
