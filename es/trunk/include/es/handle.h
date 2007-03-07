@@ -73,6 +73,13 @@ public:
     static const bool Value = IsAbstract && IsObject;
 };
 
+template<>
+class IsInterfaceImp<IInterface>
+{
+public:
+    static const bool Value = true;
+};
+
 /** If <code>T</code> is an abstruct interface that inherits
  * <code>IInterface</code> then <code>IsInterface</code> inherits from
  * <code>TrueType</code>, otherwise inherits from <code>FalseType</code>.
