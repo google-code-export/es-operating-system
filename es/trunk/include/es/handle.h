@@ -246,7 +246,7 @@ public:
         object = cast(unknown, IsInterface<J>());
         if (object && !addRef)
         {
-            object->release();
+            unknown->release();
         }
     }
 
