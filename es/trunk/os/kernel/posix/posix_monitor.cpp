@@ -79,6 +79,7 @@ lock()
         {
             esThrow(err);
         }
+        addRef();
     }
     current->state = IThread::RUNNABLE;
 }
@@ -90,6 +91,7 @@ tryLock()
     switch (err)
     {
       case 0:
+        addRef();
         return true;
       case EBUSY:
       case EAGAIN:
@@ -106,6 +108,7 @@ unlock()
     {
         esThrow(err);
     }
+    release();
 }
 
 bool Monitor::
