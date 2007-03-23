@@ -77,7 +77,6 @@ isn(InetMessenger* m)
 int StreamReceiver::
 getDefaultMSS()
 {
-    Socket* socket = getSocket();
     if (socket)
     {
         switch (socket->getAddressFamily())
@@ -94,7 +93,6 @@ getDefaultMSS()
 int StreamReceiver::
 getDefaultMSS(int mtu)
 {
-    Socket* socket = getSocket();
     if (socket)
     {
         switch (socket->getAddressFamily())
@@ -111,6 +109,8 @@ getDefaultMSS(int mtu)
 bool StreamReceiver::
 input(InetMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     esReport("StreamReceiver::input %s\n", state->getName());
     if (state->input(m, this))
     {
@@ -131,6 +131,8 @@ input(InetMessenger* m, Conduit* c)
 bool StreamReceiver::
 output(InetMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     hole = 0;
     onxt = sendNext;
     return state->output(m, this);
@@ -139,6 +141,8 @@ output(InetMessenger* m, Conduit* c)
 bool StreamReceiver::
 error(InetMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     int code = m->getErrorCode();
     if (code != ENETUNREACH)
     {
@@ -157,16 +161,7 @@ abort()
 
     // XXX process listen and completed, etc.
 
-    monitor->notifyAll();
-
-    Socket* socket = getSocket();
-    SocketUninstaller uninstaller(socket);
-    Adapter* adapter = socket->getAdapter();
-    if (adapter)
-    {
-        socket->setAdapter(0);
-        adapter->accept(&uninstaller);
-    }
+    notify();
 }
 
 // Copy data out of recvRing
@@ -175,13 +170,20 @@ read(SocketMessenger* m, Conduit* c)
 {
     Synchronized<IMonitor*> method(monitor);
 
-    long len;
-    while ((len = recvRing.getUsed()) == 0 && !isShutdownInput() && err == 0)
+    while (!isReadable())
     {
+        if (!socket->isBlocking())
+        {
+            m->setErrorCode(EAGAIN);
+            return false;
+        }
         monitor->wait();
     }
+
+    long len = recvRing.getUsed();
     if (len < 0)
     {
+        // XXX m->setErrorCode(XXX);
         return false;
     }
 
@@ -211,13 +213,20 @@ bool StreamReceiver::
 write(SocketMessenger* m, Conduit* c)
 {
     Synchronized<IMonitor*> method(monitor);
-    long len;
-    while ((len = sizeof sendBuf - sendRing.getUsed()) == 0 && !isShutdownOutput() && err == 0)
+    while (!isWritable())
     {
+        if (!socket->isBlocking())
+        {
+            m->setErrorCode(EAGAIN);
+            return false;
+        }
         monitor->wait();
     }
+
+    long len = socket->getSendBufferSize() - sendRing.getUsed();
     if (len < 0)
     {
+        // XXX m->setErrorCode(XXX);
         return false;
     }
 
@@ -245,24 +254,38 @@ write(SocketMessenger* m, Conduit* c)
 bool StreamReceiver::
 accept(SocketMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     return state->accept(m, this);
 }
 
 bool StreamReceiver::
 listen(SocketMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     return false;
 }
 
 bool StreamReceiver::
 connect(SocketMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     return state->connect(m, this);
 }
 
 bool StreamReceiver::
 close(SocketMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
+    if (socket->getTimeout() == 0 && !socket->isBlocking())
+    {
+        state->abort(this);
+        return false;
+    }
+
     shutrd = shutwr = true;
     if (state->close(m, this))
     {
@@ -277,13 +300,25 @@ close(SocketMessenger* m, Conduit* c)
         Visitor v(seg);
         conduit->accept(&v, conduit->getB());
     }
-    monitor->notifyAll();
-    return true;
+
+    while (!isClosable())
+    {
+        ASSERT(socket);
+        if (!socket->isBlocking())
+        {
+            m->setErrorCode(EAGAIN);
+            return false;
+        }
+        monitor->wait();
+    }
+    return false;
 }
 
 bool StreamReceiver::
 shutdownOutput(SocketMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     shutwr = true;
     if (state->close(m, this))
     {
@@ -304,16 +339,16 @@ shutdownOutput(SocketMessenger* m, Conduit* c)
 bool StreamReceiver::
 shutdownInput(SocketMessenger* m, Conduit* c)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     shutrd = true;
-    monitor->notifyAll();
+    notify();
     return false;
 }
 
 bool StreamReceiver::
 StateClosed::connect(SocketMessenger* m, StreamReceiver* s)
 {
-    Synchronized<IMonitor*> method(s->monitor);
-
     // Initialize tcp
     s->initRto();
 
@@ -348,8 +383,13 @@ StateClosed::connect(SocketMessenger* m, StreamReceiver* s)
     Visitor v(seg);
     s->conduit->accept(&v, s->conduit->getB());
 
-    while (s->state == &stateSynSent && s->err == 0)
+    while (!s->isConnectable())
     {
+        if (!s->socket->isBlocking())
+        {
+            m->setErrorCode(EINPROGRESS);
+            return false;
+        }
         s->monitor->wait();
     }
 
@@ -359,17 +399,21 @@ StateClosed::connect(SocketMessenger* m, StreamReceiver* s)
 bool StreamReceiver::
 StateListen::accept(SocketMessenger* m, StreamReceiver* s)
 {
-    Synchronized<IMonitor*> method(s->monitor);
-
-    while (s->state == &stateListen && s->accepted.isEmpty() && s->err == 0)
+    while (!s->isAcceptable())
     {
+        if (!s->socket->isBlocking())
+        {
+            m->setErrorCode(EAGAIN);
+            return false;
+        }
         s->monitor->wait();
     }
     if (s->state == &stateListen && !s->accepted.isEmpty())
     {
         StreamReceiver* accepted = s->accepted.removeFirst();
         ASSERT(accepted);
-        m->setSocket(accepted->getSocket());
+        ASSERT(accepted->socket);
+        m->setSocket(accepted->socket);
     }
     return false;
 }

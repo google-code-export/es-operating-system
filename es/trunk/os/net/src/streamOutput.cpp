@@ -54,7 +54,7 @@ fillOptions(u8* opt, u16 flag)
         ptr += sizeof(TCPOptMss);
 #ifdef TCP_SACK
         new(ptr) TCPOptSackPermitted();
-        ptr += sizeof(TCPOptMss);
+        ptr += sizeof(TCPOptSackPermitted);
 #endif
     }
 #ifdef TCP_SACK

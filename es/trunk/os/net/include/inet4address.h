@@ -214,7 +214,7 @@ public:
         timeoutCount(0),
         pathMTU(1500)
     {
-        ASSERT(0 <= prefix && prefix < 32);
+        ASSERT(0 <= prefix && prefix <= 32);
         u8 mac[6];
 
         if (IN_IS_ADDR_MULTICAST(addr))

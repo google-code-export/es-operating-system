@@ -271,6 +271,8 @@ public:
     void joinGroup(Inet4Address* addr);
     void leaveGroup(Inet4Address* addr);
 
+    Inet4Address* getHostAddress(int scopeID = 0);
+
     Inet4Address* onLink(InAddr addr, int scopeID = 0);
 
     Inet4Address* getNextHop(Inet4Address* dst);

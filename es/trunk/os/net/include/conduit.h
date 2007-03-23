@@ -127,6 +127,11 @@ public:
         ASSERT(position <= len);
         return len - position;
     }
+    void setLength(long len)
+    {
+        ASSERT(0 <= len && position + len <= this->len);
+        this->len = position + len;
+    }
 
     int getType() const
     {

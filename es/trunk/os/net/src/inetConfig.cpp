@@ -35,6 +35,11 @@ addAddress(IInternetAddress* address, unsigned int prefix)
 IInternetAddress* InternetConfig::
 getAddress(unsigned int scopeID)
 {
+    InFamily* family = static_cast<InFamily*>(Socket::getAddressFamily(AF_INET));
+    if (family)
+    {
+        return family->getHostAddress(scopeID);
+    }
     return 0;   // XXX
 }
 

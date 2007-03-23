@@ -14,12 +14,6 @@
 #include "inet4.h"
 #include "inet4address.h"
 
-const InAddr InAddrAny = { htonl(INADDR_ANY) };
-const InAddr InAddrLoopback = { htonl(INADDR_LOOPBACK) };
-const InAddr InAddrBroadcast = { htonl(INADDR_BROADCAST) };
-const InAddr InAddrAllHost = { htonl(INADDR_ALLHOSTS_GROUP) };
-const InAddr InAddrAllRouters = { htonl(INADDR_ALLROUTERS_GROUP) };
-
 Inet4Address::StateInit             Inet4Address::stateInit;
 Inet4Address::StateIncomplete       Inet4Address::stateIncomplete;
 Inet4Address::StateReachable        Inet4Address::stateReachable;
@@ -137,7 +131,7 @@ socket(int type, int protocol, int port)
     Socket* socket = new Socket(type, protocol);
     if (port == 0)
     {
-        return socket;
+        return static_cast<ISocket*>(socket);
     }
 
     if (isLocalAddress())
@@ -153,7 +147,7 @@ socket(int type, int protocol, int port)
     {
         socket->connect(this, port);
     }
-    return socket;
+    return static_cast<ISocket*>(socket);
 }
 
 // IInterface

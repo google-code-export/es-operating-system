@@ -763,7 +763,7 @@ public:
         {
             IThread* thread = esCreateThread(run, this);
             thread->start();
-            thread->setPriority(IThread::Highest + 2);
+            thread->setPriority(IThread::Highest - 2);
             thread->release();
         }
         return enabled;

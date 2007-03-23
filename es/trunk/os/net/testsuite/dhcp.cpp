@@ -62,6 +62,16 @@ int main()
     service->start();
     esSleep(120000000);
 
+    Handle<IInternetAddress> host = config->getAddress(dixID);
+    if (host)
+    {
+        InAddr addr;
+
+        host->getAddress(&addr, sizeof(InAddr));
+        u32 h = ntohl(addr.addr);
+        esReport("host: %d.%d.%d.%d\n", (u8) (h >> 24), (u8) (h >> 16), (u8) (h >> 8), (u8) h);
+    }
+
     Handle<IInternetAddress> address = resolver->getHostByName("www.nintendo.com", AF_INET);
     if (address)
     {

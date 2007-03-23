@@ -38,7 +38,6 @@ InFamily::InFamily() :
     udpLocalAddressMux(&udpLocalAddressAccessor, &udpLocalAddressFactory),
     udpLocalPortFactory(&udpLocalAddressMux),
     udpLocalPortMux(&udpLocalPortAccessor, &udpLocalPortFactory),
-    udpLast(49152),
     udpUnreachReceiver(&unreachProtocol),
 
     streamReceiver(&tcpProtocol),
@@ -50,7 +49,6 @@ InFamily::InFamily() :
     tcpLocalAddressMux(&tcpLocalAddressAccessor, &tcpLocalAddressFactory),
     tcpLocalPortFactory(&tcpLocalAddressMux),
     tcpLocalPortMux(&tcpLocalPortAccessor, &tcpLocalPortFactory),
-    tcpLast(49152),
 
     reassReceiver(&inProtocol, &timeExceededProtocol, &reassAdapter),
     reassIdFactory(&reassAdapter),
@@ -65,6 +63,10 @@ InFamily::InFamily() :
 
     arpFamily(this)
 {
+    int anon = 49152 + DateTime::getNow().getTicks() % (65536 - 49152);
+    udpLast = anon;
+    tcpLast = anon;
+
     inProtocol.setReceiver(&inReceiver);
     icmpProtocol.setReceiver(&icmpReceiver);
     echoRequestAdapter.setReceiver(&echoRequestReceiver);
@@ -179,6 +181,26 @@ void InFamily::removeAddress(Inet4Address* address)
     address->release();
 }
 
+Inet4Address* InFamily::getHostAddress(int scopeID)
+{
+    Tree<void*, Conduit*>::Node* node;
+    Tree<void*, Conduit*>::Iterator iter = echoRequestMux.list();
+    while ((node = iter.next()))
+    {
+        Conduit* conduit = node->getValue();
+        ICMPEchoRequestReceiver* receiver = dynamic_cast<ICMPEchoRequestReceiver*>(conduit->getReceiver());
+        ASSERT(receiver);
+        Inet4Address* local = receiver->getAddress();
+        ASSERT(local);
+        if (local->getPrefix() && (scopeID == 0 || scopeID == local->getScopeID()))
+        {
+            return local;
+        }
+        local->release();
+    }
+    return 0;
+}
+
 Inet4Address* InFamily::onLink(InAddr addr, int scopeID)
 {
     Tree<void*, Conduit*>::Node* node;
@@ -232,8 +254,11 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
         return getAddress(InAddrLoopback, 1);
     }
 
+    int scopeID = dst->getScopeID();
+    ASSERT(scopeID != 0);
+
     Inet4Address* src = 0;
-    src = onLink(dst->getAddress(), dst->getScopeID());
+    src = onLink(dst->getAddress(), scopeID);
     if (src)
     {
         return src;
@@ -241,52 +266,26 @@ Inet4Address* InFamily::selectSourceAddress(Inet4Address* dst)
 
     // XXX Check destination cache
 
-    int scopeID = dst->getScopeID();
-    if (scopeID == 0)
+    Inet4Address* router = routerList.getAddress();
+    if (router)
     {
-        Inet4Address* router = routerList.getAddress();
-        if (router)
+        src = onLink(router->getAddress(), router->getScopeID());
+        router->release();
+        if (src)
         {
-            src = onLink(router->getAddress(), router->getScopeID());
-            router->release();
-            if (src)
-            {
-                return src;
-            }
+            return src;
         }
-        scopeID = 2;    // default
     }
 
     // Look up preferred address of the same scope ID.
-    Inet4Address* any = 0;
-    Tree<InAddr, Inet4Address*>::Node* node;
-    Tree<InAddr, Inet4Address*>::Iterator iter = addressTable[scopeID].begin();
-    while ((node = iter.next()))
+    src = static_cast<Inet4Address*>(getHostAddress(scopeID));
+    if (src)
     {
-        Inet4Address* address = node->getValue();
-        if (address->isPreferred())
-        {
-            if (address->isUnspecified())
-            {
-                any = address;
-            }
-            else
-            {
-                src = address;
-                src->addRef();
-                break;
-            }
-        }
+        return src;
     }
 
-    if (!src)
-    {
-        // Use 0.0.0.0 as default
-        src = any;
-        src->addRef();
-    }
-
-    return src;
+    // XXX Use 0.0.0.0 as default
+    return 0;
 }
 
 bool InFamily::isReachable(Inet4Address* dst, long long timeout)
@@ -421,10 +420,11 @@ input(InetMessenger* m, Conduit* c)
         return false;
     }
     int hlen = iphdr->getHdrSize();
-    if (m->getLength() < hlen || checksum(m, hlen) != 0)
+    if (m->getLength() < iphdr->getSize() || checksum(m, hlen) != 0)
     {
         return false;
     }
+    m->setLength(iphdr->getSize()); // Cut trailer
 
     int scopeID = m->getScopeID();
 

@@ -16,6 +16,7 @@ c_source_files = \
 cpp_source_files = \
 	src/context.cpp \
 	src/dateTime.cpp \
+	src/inet.cpp \
 	src/throw.cpp \
 	src/formatter.cpp \
 	src/ring.cpp

@@ -32,25 +32,37 @@ class DatagramReceiver :
     Ring        sendRing;
     Conduit*    conduit;
     int         errorCode;
+    Socket*     socket;
 
     struct RingHdr
     {
-        long    len;
+        long        len;
+        Address*    addr;
+        int         port;
 
-        RingHdr(long len = 0) :
-            len(len)
+        RingHdr(long len = 0, Address* addr = 0, int port = 0) :
+            len(len),
+            addr(addr),
+            port(port)
         {
         }
     };
 
-    Socket* getSocket()
+    bool isAcceptable()
     {
-        Conduit* adapter = conduit->getB();
-        if (!adapter)
-        {
-            return 0;
-        }
-        return dynamic_cast<Socket*>(adapter->getReceiver());
+        return false;
+    }
+    bool isConnectable()
+    {
+        return true;
+    }
+    bool isReadable()
+    {
+        return 0 < 0 < recvRing.getUsed() || errorCode;
+    }
+    bool isWritable()
+    {
+        return true;
     }
 
 public:
@@ -59,7 +71,8 @@ public:
         recvBuf(0),
         sendBuf(0),
         conduit(conduit),
-        errorCode(0)
+        errorCode(0),
+        socket(0)
     {
         esCreateInstance(CLSID_Monitor,
                          IID_IMonitor,
@@ -84,11 +97,21 @@ public:
 
     bool initialize(Socket* socket)
     {
+        this->socket = socket;
         recvBuf = new u8[socket->getReceiveBufferSize()];
         recvRing.initialize(recvBuf, socket->getReceiveBufferSize());
         sendBuf = new u8[socket->getSendBufferSize()];
         sendRing.initialize(sendBuf, socket->getSendBufferSize());
         return true;
+    }
+
+    void notify()
+    {
+        monitor->notifyAll();
+        if (socket->selector)
+        {
+            socket->selector->notifyAll();
+        }
     }
 
     bool input(InetMessenger* m, Conduit* c);
@@ -99,6 +122,30 @@ public:
     bool write(SocketMessenger* m, Conduit* c);
     bool close(SocketMessenger* m, Conduit* c);
     bool notify(SocketMessenger* m, Conduit* c);
+
+    bool isAcceptable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isAcceptable());
+        return false;
+    }
+
+    bool isConnectable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isConnectable());
+        return false;
+    }
+
+    bool isReadable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isReadable());
+        return false;
+    }
+
+    bool isWritable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isWritable());
+        return false;
+    }
 
     DatagramReceiver* clone(Conduit* conduit, void* key)
     {

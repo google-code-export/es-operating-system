@@ -16,7 +16,7 @@ import "es/net/IInternetAddress.idl";
 /**
  * This interface represents a socket.
  */
-[object, uuid(bc43020a-c21d-11db-9c02-0009bf000001)]
+[object, uuid(2f2ea026-d137-11db-9c02-0009bf000001)]
 interface ISocket : IInterface
 {
     // socket type
@@ -63,6 +63,8 @@ interface ISocket : IInterface
      */
     IInternetAddress* getLocalAddress();
 
+    int getLastError();
+
     /** Gets the local port to which this socket is bound.
      * @return the local port number.
      */
@@ -94,13 +96,23 @@ interface ISocket : IInterface
 
     long getTimeout();
 
+    boolean isAcceptable();
+
+    boolean isBlocking();
+
     boolean isBound();
 
     boolean isClosed();
 
+    boolean isConnectable();
+
     boolean isConnected();
 
+    boolean isReadable();
+
     boolean isReuseAddress();
+
+    boolean isWritable();
 
     /** Enables the connection-mode socket to accept connections.
      * @param backlog The maximum number of pending connections in the socket's listen backlog queue.
@@ -136,6 +148,8 @@ interface ISocket : IInterface
      * @return      the number of bytes sent.
      */
     int sendTo([in, size_is(count)] void* src, int count, int flags, IInternetAddress* addr, int port);
+
+    void setBlocking(boolean on);
 
     void setHops(int limit);
 

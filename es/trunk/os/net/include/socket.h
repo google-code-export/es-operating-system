@@ -19,6 +19,7 @@
 #include <es/endian.h>
 #include <es/ref.h>
 #include <es/timer.h>
+#include <es/base/ISelectable.h>
 #include <es/base/IStream.h>
 #include <es/naming/IContext.h>
 #include <es/net/IInternetConfig.h>
@@ -55,6 +56,7 @@ public:
 
 class Socket :
     public IMulticastSocket,
+    public ISelectable,
     public InetReceiver,
     public InetMessenger
 {
@@ -78,8 +80,13 @@ private:
     AddressFamily*  af;
     int             recvBufferSize;
     int             sendBufferSize;
+    int             errorCode;
     TimeSpan        timeout;
     Collection<Address*>    addresses;
+
+    // Asynchronous I/O
+    IMonitor*       selector;
+    bool            blocking;
 
 public:
     static void initialize();
@@ -208,6 +215,10 @@ public:
     {
         return type;
     }
+    int getLastError()
+    {
+        return errorCode;
+    }
 
     bool isBound();
     bool isClosed();
@@ -242,6 +253,24 @@ public:
 
     void notify();
 
+    bool isBlocking()
+    {
+        return blocking;
+    }
+    void setBlocking(bool on)
+    {
+        blocking = on;
+    }
+
+    bool isAcceptable();
+    bool isConnectable();
+    bool isReadable();
+    bool isWritable();
+
+    // ISelectable
+    int add(IMonitor* selector);
+    int remove(IMonitor* selector);
+
     // IMulticastSocket
     int getLoopbackMode();
     void setLoopbackMode(bool disable);
@@ -254,6 +283,9 @@ public:
     bool queryInterface(const Guid& riid, void** objectPtr);
     unsigned int addRef();
     unsigned int release();
+
+    friend class StreamReceiver;
+    friend class DatagramReceiver;
 };
 
 class SocketMessenger;
@@ -296,6 +328,26 @@ public:
     }
 
     virtual bool shutdownInput(SocketMessenger* m, Conduit* c)
+    {
+        return false;
+    }
+
+    virtual bool isAcceptable(SocketMessenger* m, Conduit* c)
+    {
+        return false;
+    }
+
+    virtual bool isConnectable(SocketMessenger* m, Conduit* c)
+    {
+        return false;
+    }
+
+    virtual bool isReadable(SocketMessenger* m, Conduit* c)
+    {
+        return false;
+    }
+
+    virtual bool isWritable(SocketMessenger* m, Conduit* c)
     {
         return false;
     }

@@ -92,6 +92,10 @@ class StreamReceiver :
         virtual void start(StreamReceiver* s)
         {
         }
+        virtual void abort(StreamReceiver* s)
+        {
+            s->abort();
+        }
         virtual bool input(InetMessenger* m, StreamReceiver* s)
         {
             return true;
@@ -126,6 +130,9 @@ class StreamReceiver :
     class StateClosed : public State
     {
     public:
+        void abort(StreamReceiver* s)
+        {
+        }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool connect(SocketMessenger* m, StreamReceiver* s);
         bool hasBeenEstablished()
@@ -181,6 +188,11 @@ class StreamReceiver :
     class StateSynReceived : public State
     {
     public:
+        void abort(StreamReceiver* s)
+        {
+            s->sendReset();
+            s->abort();
+        }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
         bool close(SocketMessenger* m, StreamReceiver* s)
@@ -206,6 +218,11 @@ class StreamReceiver :
         {
             s->r2 = R2;
         }
+        void abort(StreamReceiver* s)
+        {
+            s->sendReset();
+            s->abort();
+        }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
         bool close(SocketMessenger* m, StreamReceiver* s)
@@ -222,6 +239,11 @@ class StreamReceiver :
     class StateFinWait1 : public State
     {
     public:
+        void abort(StreamReceiver* s)
+        {
+            s->sendReset();
+            s->abort();
+        }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
         const char* getName() const
@@ -233,6 +255,11 @@ class StreamReceiver :
     class StateFinWait2 : public State
     {
     public:
+        void abort(StreamReceiver* s)
+        {
+            s->sendReset();
+            s->abort();
+        }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
         const char* getName() const
@@ -247,7 +274,12 @@ class StreamReceiver :
         void start(StreamReceiver* s)
         {
             s->shutrd = true;
-            s->monitor->notifyAll();
+            s->notify();
+        }
+        void abort(StreamReceiver* s)
+        {
+            s->sendReset();
+            s->abort();
         }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
@@ -279,7 +311,7 @@ class StreamReceiver :
         void start(StreamReceiver* s)
         {
             s->shutrd = true;
-            s->monitor->notifyAll();
+            s->notify();
         }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
@@ -301,7 +333,7 @@ class StreamReceiver :
             s->rto = 2 * MSL;
             s->startRxmitTimer();
 
-            s->monitor->notifyAll();
+            s->notify();
         }
         bool input(InetMessenger* m, StreamReceiver* s);
         bool output(InetMessenger* m, StreamReceiver* s);
@@ -323,6 +355,7 @@ class StreamReceiver :
     Ring        sendRing;
     Conduit*    conduit;
     int         err;
+    Socket*     socket;
 
     //
     // Standard members from RFC 793, RFC2018, etc.:
@@ -400,16 +433,6 @@ class StreamReceiver :
     StreamReceiver*                             listening;  // listening socket
     Link<StreamReceiver>                        link;
     List<StreamReceiver, &StreamReceiver::link> accepted;
-
-    Socket* getSocket()
-    {
-        Conduit* adapter = conduit->getB();
-        if (!adapter)
-        {
-            return 0;
-        }
-        return dynamic_cast<Socket*>(adapter->getReceiver());
-    }
 
     TCPSeq isn(InetMessenger* m);
     int getDefaultMSS();
@@ -497,6 +520,7 @@ class StreamReceiver :
     bool canSend(s32 len, s32 mss, u16 flag);
     bool send(InetMessenger* m, s32 sendable, u16 flag);
     void sendReset(InetMessenger* m);
+    void sendReset();
 
     //
     // Timer
@@ -521,6 +545,28 @@ class StreamReceiver :
     void deleteSackHoles(TCPSeq ack);
     void updateScoreboard(TCPSeq ack, TCPOptSack* optSack);
 
+    bool isAcceptable()
+    {
+        return state != &stateListen || !accepted.isEmpty() || err;
+    }
+    bool isConnectable()
+    {
+        return state != &stateSynSent || err;
+    }
+    bool isReadable()
+    {
+        return 0 < recvRing.getUsed() || isShutdownInput() || err;
+    }
+    bool isWritable()
+    {
+        return 0 < socket->getSendBufferSize() - sendRing.getUsed() ||
+               isShutdownOutput() || err;
+    }
+    bool isClosable()
+    {
+        return state == &stateClosed || state == &stateTimeWait;
+    }
+
 public:
     StreamReceiver(Conduit* conduit = 0) :
         state(&stateClosed),
@@ -529,6 +575,7 @@ public:
         sendBuf(0),
         conduit(conduit),
         err(0),
+        socket(0),
 
         mss(576 - sizeof(IPHdr) - sizeof(TCPHdr)),  // XXX v4 specific
         persist(false),
@@ -597,11 +644,21 @@ public:
 
     bool initialize(Socket* socket)
     {
+        this->socket = socket;
         recvBuf = new u8[socket->getReceiveBufferSize()];
         recvRing.initialize(recvBuf, socket->getReceiveBufferSize());
         sendBuf = new u8[socket->getSendBufferSize()];
         sendRing.initialize(sendBuf, socket->getSendBufferSize());
         return true;
+    }
+
+    void notify()
+    {
+        monitor->notifyAll();
+        if (socket->selector)
+        {
+            socket->selector->notifyAll();
+        }
     }
 
     bool input(InetMessenger* m, Conduit* c);
@@ -617,6 +674,30 @@ public:
     bool close(SocketMessenger* m, Conduit* c);
     bool shutdownOutput(SocketMessenger* m, Conduit* c);
     bool shutdownInput(SocketMessenger* m, Conduit* c);
+
+    bool isAcceptable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isAcceptable());
+        return false;
+    }
+
+    bool isConnectable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isConnectable());
+        return false;
+    }
+
+    bool isReadable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isReadable());
+        return false;
+    }
+
+    bool isWritable(SocketMessenger* m, Conduit* c)
+    {
+        m->setErrorCode(isWritable());
+        return false;
+    }
 
     void expired();
     void abort();

@@ -48,14 +48,19 @@ protected:
     InetReceiver::Command   op;
 
 private:
-    int                     scopeID;
-    Address*                remoteAddress;
-    Address*                localAddress;
-    u16                     remotePort;
-    u16                     localPort;
-    int                     code;
+    int         scopeID;
+    Address*    remoteAddress;
+    Address*    localAddress;
+    u16         remotePort;
+    u16         localPort;
+    int         code;
+    int         flag;
 
 public:
+    static const int Unicast = 1;
+    static const int Multicast = 2;
+    static const int Broadcast = 3;
+
     InetMessenger(InetReceiver::Command op = 0,
                   long len = 0, long pos = 0, void* chunk = 0) :
         Messenger(len, pos, chunk),
@@ -64,7 +69,8 @@ public:
         localAddress(0),
         remotePort(0),
         localPort(0),
-        code(0)
+        code(0),
+        flag(0)
     {
     }
     ~InetMessenger()
@@ -162,10 +168,22 @@ public:
         this->code = code;
     }
 
+    int getFlag() const
+    {
+        return flag;
+    }
+    void setFlag(int flag)
+    {
+        this->flag = flag;
+    }
+
     void setCommand(InetReceiver::Command command)
     {
         op = command;
     }
+
+    friend class InetLocalAddressAccessor;
+    friend class InetRemoteAddressAccessor;
 };
 
 class InetLocalPortAccessor : public Accessor
@@ -197,7 +215,7 @@ public:
     {
         InetMessenger* im = dynamic_cast<InetMessenger*>(m);
         ASSERT(im);
-        return im->getLocal();
+        return im->localAddress;    // Just need the address as the key
     }
 };
 
@@ -208,7 +226,7 @@ public:
     {
         InetMessenger* im = dynamic_cast<InetMessenger*>(m);
         ASSERT(im);
-        return im->getRemote();
+        return im->remoteAddress;   // Just need the address as the key
     }
 };
 

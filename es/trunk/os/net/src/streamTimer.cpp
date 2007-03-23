@@ -90,7 +90,6 @@ expired()
 {
     esReport("expired\n");
 
-    Socket* socket = getSocket();
     if (!socket)
     {
         return;
@@ -229,7 +228,6 @@ stopAckTimer()
 void StreamReceiver::
 delayedAck()
 {
-    Socket* socket = getSocket();
     if (!socket)
     {
         return;

@@ -24,6 +24,10 @@
 #include <es/net/IResolver.h>
 #include <es/net/arp.h>
 
+#define TEST(exp)                           \
+    (void) ((exp) ||                        \
+            (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
+
 extern int esInit(IInterface** nameSpace);
 extern void esRegisterInternetProtocol(IContext* context);
 
@@ -41,6 +45,36 @@ int main()
     // Create internet config object
     Handle<IInternetConfig> config = context->lookup("network/config");
 
+    // Test local ping
+    Handle<IInternetAddress> loopback = resolver->getHostByAddress(&InAddrLoopback.addr, sizeof InAddrLoopback, 1);
+    loopback->isReachable(10000000);
+
+    // Test bind and connect operations
+    Handle<ISocket> socket = loopback->socket(AF_INET, ISocket::Datagram, 53);
+    socket->connect(loopback, 53);
+
+    // Test read and write operations
+    char output[4] = "xyz";
+    socket->write(output, 4);
+
+    char input[4];
+    IInternetAddress* remoteAddress;
+    int remotePort;
+    socket->recvFrom(input, 4, 0, &remoteAddress, &remotePort);
+    esReport("'%s', %d\n", input, remotePort);
+    ASSERT(remoteAddress->isLoopback());
+    if (remoteAddress)
+    {
+        remoteAddress->release();
+        remoteAddress = 0;
+    }
+
+    // Test close operation
+    TEST(!socket->isClosed());
+    socket->close();
+    TEST(socket->isClosed());
+
+#if 1
     // Setup DIX interface
     Handle<INetworkInterface> ethernetInterface = context->lookup("device/ethernet");
     ethernetInterface->start();
@@ -60,24 +94,6 @@ int main()
     Handle<IInternetAddress> router = resolver->getHostByAddress(&addrRouter.addr, sizeof addr, dixID);
     config->addRouter(router);
 
-    // Test local ping
-    Handle<IInternetAddress> loopback = resolver->getHostByAddress(&InAddrLoopback.addr, sizeof addr, 1);
-    loopback->isReachable(10000000);
-
-    // Test bind and connect operations
-    Handle<ISocket> socket = loopback->socket(AF_INET, ISocket::Datagram, 53);
-    socket->connect(loopback, 53);
-
-    // Test read and write operations
-    char output[4] = "xyz";
-    socket->write(output, 4);
-    char input[4];
-    socket->read(input, 4);
-    esReport("'%s'\n", input);
-
-    // Test close operation
-    socket->close();
-
     // Test remote ping (192.195.204.26 / www.nintendo.com)
     InAddr addrRemote = { htonl(192 << 24 | 195 << 16 | 204 << 8 | 26) };
     Handle<IInternetAddress> remote = resolver->getHostByAddress(&addrRemote.addr, sizeof addr, 0);
@@ -90,6 +106,7 @@ int main()
 
     esSleep(100000000);
     ethernetInterface->stop();
+#endif
 
     esReport("done.\n");
 }
