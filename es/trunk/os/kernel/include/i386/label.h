@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -53,9 +53,9 @@ public:
         ASSERT(stackSize % sizeof(unsigned) == 0);
 
         unsigned* frame = static_cast<unsigned*>(stack);
-        eip = (unsigned) startUp;
-        esp = (unsigned) &frame[stackSize / sizeof(unsigned) - 2];
-        frame[stackSize / sizeof(unsigned) - 2] = (unsigned) 0;
+        eip = (unsigned) start;
+        esp = (unsigned) &frame[stackSize / sizeof(unsigned) - 1];
+        ebx = (unsigned) startUp;
         frame[stackSize / sizeof(unsigned) - 1] = (unsigned) param;
     }
 
@@ -68,6 +68,8 @@ public:
     {
         return (ebp == 0 || *reinterpret_cast<void**>(ebp) == reinterpret_cast<void*>(link)) ? true : false;
     }
+
+    static void start();
 };
 
 #endif  // NINTENDO_ES_KERNEL_I386_LABEL_H_INCLUDED
