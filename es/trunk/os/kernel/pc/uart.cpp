@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -46,7 +46,7 @@ Uart(int baseaddr) :
     outpb(baseaddr + FCR, 0xC7);    // FIFO Control Register
     outpb(baseaddr + MCR, 0x0B);    // Turn on DTR, RTS, and OUT2
 
-    // outpb(baseaddr + IER, 1);    // Turn on receive interrupt
+    // outpb(baseaddr + IER, 1);       // Turn on receive interrupt
 }
 
 void Uart::
@@ -103,25 +103,19 @@ read(void* dst, int count, long long offset)
 int Uart::
 write(const void* src, int count)
 {
-    Lock::Synchronized method(lock);
-
     int n;
     const u8* ptr = static_cast<const u8*>(src);
     for (n = 0; n < count; ++n, ++ptr)
     {
-        // insert CR before LF.
-        if (*ptr == '\n')
-        {
-            while (!(inpb(baseaddr + LSR) & (1<<5)))
-            {
-            }
-            outpb(baseaddr, '\r');
-        }
-
         while (!(inpb(baseaddr + LSR) & (1<<5)))
         {
         }
-        outpb(baseaddr, *ptr);
+
+        Lock::Synchronized method(lock);
+        if (inpb(baseaddr + LSR) & (1<<5))
+        {
+            outpb(baseaddr, *ptr);
+        }
     }
     return n;
 }
