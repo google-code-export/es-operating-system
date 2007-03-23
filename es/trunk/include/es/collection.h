@@ -198,11 +198,6 @@ public:
         }
         return false;
     }
-
-    Iterator list(E item)
-    {
-        return Iterator(nodeList.begin());
-    }
 };
 
 #endif // NINTENDO_ES_COLLECTION_H_INCLUDED
