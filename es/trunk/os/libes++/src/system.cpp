@@ -18,11 +18,13 @@
 #include <unwind.h>
 #include <es.h>
 #include <es/broker.h>
+#include <es/clsid.h>
 #include <es/dateTime.h>
 #include <es/exception.h>
 #include <es/formatter.h>
 #include <es/handle.h>
 #include <es/ref.h>
+#include <es/base/IClassStore.h>
 #include <es/base/IProcess.h>
 #include <es/base/IRuntime.h>
 
@@ -312,6 +314,7 @@ focus(void* param)
 int esReport(const char* spec, ...) __attribute__((weak));
 int esReportv(const char* spec, va_list list) __attribute__((weak));
 void esPanic(const char* file, int line, const char* msg, ...) __attribute__((weak));
+bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr) __attribute__((weak));
 
 int esReport(const char* spec, ...)
 {
@@ -343,6 +346,18 @@ void esPanic(const char* file, int line, const char* msg, ...)
     esReport(" in \"%s\" on line %d.\n", file, line);
 
     System()->exit(1);
+}
+
+bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
+{
+    static Handle<IClassStore> classStore;
+
+    if (!classStore)
+    {
+        Handle<IContext> root = System()->getRoot();
+        classStore = root->lookup("class");
+    }
+    return classStore->createInstance(rclsid, riid, objectPtr);
 }
 
 DateTime DateTime::getNow()
