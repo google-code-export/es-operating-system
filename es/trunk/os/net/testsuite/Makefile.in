@@ -51,6 +51,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = inet4$(EXEEXT) tcp$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	tcp1$(EXEEXT) tcp2$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	config$(EXEEXT) anon$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	unreach$(EXEEXT) mcast$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	frag$(EXEEXT) timeout$(EXEEXT) \
@@ -98,6 +99,16 @@ tcp_OBJECTS = $(am_tcp_OBJECTS)
 tcp_LDADD = $(LDADD)
 tcp_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_tcp1_OBJECTS = tcp1.$(OBJEXT)
+tcp1_OBJECTS = $(am_tcp1_OBJECTS)
+tcp1_LDADD = $(LDADD)
+tcp1_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_tcp2_OBJECTS = tcp2.$(OBJEXT)
+tcp2_OBJECTS = $(am_tcp2_OBJECTS)
+tcp2_LDADD = $(LDADD)
+tcp2_DEPENDENCIES = ../libesnet.a ../../kernel/libeskernel.a \
+	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 am_timeout_OBJECTS = timeout.$(OBJEXT)
 timeout_OBJECTS = $(am_timeout_OBJECTS)
 timeout_LDADD = $(LDADD)
@@ -119,12 +130,12 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(anon_SOURCES) $(config_SOURCES) $(dhcp_SOURCES) \
 	$(dns_SOURCES) $(frag_SOURCES) $(inet4_SOURCES) \
-	$(mcast_SOURCES) $(tcp_SOURCES) $(timeout_SOURCES) \
-	$(unreach_SOURCES)
+	$(mcast_SOURCES) $(tcp_SOURCES) $(tcp1_SOURCES) \
+	$(tcp2_SOURCES) $(timeout_SOURCES) $(unreach_SOURCES)
 DIST_SOURCES = $(anon_SOURCES) $(config_SOURCES) $(dhcp_SOURCES) \
 	$(dns_SOURCES) $(frag_SOURCES) $(inet4_SOURCES) \
-	$(mcast_SOURCES) $(tcp_SOURCES) $(timeout_SOURCES) \
-	$(unreach_SOURCES)
+	$(mcast_SOURCES) $(tcp_SOURCES) $(tcp1_SOURCES) \
+	$(tcp2_SOURCES) $(timeout_SOURCES) $(unreach_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -240,7 +251,7 @@ AM_CPPFLAGS = \
 	-I $(srcdir)/../../../include
 
 @ES_TRUE@TESTS = config dhcp
-@POSIX_TRUE@TESTS = inet4 tcp config anon unreach mcast frag timeout dhcp dns
+@POSIX_TRUE@TESTS = inet4 tcp tcp1 tcp2 config anon unreach mcast frag timeout dhcp dns
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@noinst_DATA = config.img dhcp.img
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
@@ -250,6 +261,8 @@ frag_SOURCES = frag.cpp
 inet4_SOURCES = inet4.cpp
 mcast_SOURCES = mcast.cpp
 tcp_SOURCES = tcp.cpp
+tcp1_SOURCES = tcp1.cpp
+tcp2_SOURCES = tcp2.cpp
 timeout_SOURCES = timeout.cpp
 config_SOURCES = config.cpp
 dhcp_SOURCES = dhcp.cpp
@@ -316,6 +329,12 @@ mcast$(EXEEXT): $(mcast_OBJECTS) $(mcast_DEPENDENCIES)
 tcp$(EXEEXT): $(tcp_OBJECTS) $(tcp_DEPENDENCIES) 
 	@rm -f tcp$(EXEEXT)
 	$(CXXLINK) $(tcp_LDFLAGS) $(tcp_OBJECTS) $(tcp_LDADD) $(LIBS)
+tcp1$(EXEEXT): $(tcp1_OBJECTS) $(tcp1_DEPENDENCIES) 
+	@rm -f tcp1$(EXEEXT)
+	$(CXXLINK) $(tcp1_LDFLAGS) $(tcp1_OBJECTS) $(tcp1_LDADD) $(LIBS)
+tcp2$(EXEEXT): $(tcp2_OBJECTS) $(tcp2_DEPENDENCIES) 
+	@rm -f tcp2$(EXEEXT)
+	$(CXXLINK) $(tcp2_LDFLAGS) $(tcp2_OBJECTS) $(tcp2_LDADD) $(LIBS)
 timeout$(EXEEXT): $(timeout_OBJECTS) $(timeout_DEPENDENCIES) 
 	@rm -f timeout$(EXEEXT)
 	$(CXXLINK) $(timeout_LDFLAGS) $(timeout_OBJECTS) $(timeout_LDADD) $(LIBS)
@@ -337,6 +356,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inet4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mcast.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcp1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcp2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timeout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unreach.Po@am__quote@
 
