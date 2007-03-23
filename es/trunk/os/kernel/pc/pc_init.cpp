@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -11,7 +11,6 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#include <new>
 #include <stdlib.h>
 #include <es.h>
 #include <es/classFactory.h>
@@ -45,6 +44,10 @@
 #include "uart.h"
 #include "vesa.h"
 
+#define USE_SVGA
+
+void putDebugChar(int ch);
+
 Reflect::Interface* getInterface(const Guid* iid);
 
 namespace
@@ -63,6 +66,7 @@ namespace
     Mps*            mps;
     Apic*           apic;
     u8              loopbackBuffer[64 * 1024];
+    Uart*           uart;
 };
 
 const int Page::SIZE = 4096;
@@ -136,8 +140,13 @@ static void initAP(...)
 
 extern int main(int, char* []);
 
+extern void set_debug_traps(void);
+extern void breakpoint(void);
+
 int esInit(IInterface** nameSpace)
 {
+    set_debug_traps();
+
     if (root)
     {
         if (nameSpace)
@@ -149,9 +158,9 @@ int esInit(IInterface** nameSpace)
 
     Cga* cga = new Cga;
     reportStream = cga;
-#if 1
-    int port = ((u16*) 0x400)[0];
-    if (port)
+
+    // COM1 for stdio
+    if (int port = ((u16*) 0x400)[0])
     {
         Uart* uart = new Uart(port);
         if (uart)
@@ -159,7 +168,12 @@ int esInit(IInterface** nameSpace)
             reportStream = uart;
         }
     }
-#endif
+
+    // COM2 for gdb
+    if (int port = ((u16*) 0x400)[1])
+    {
+        uart = new Uart(port);
+    }
 
     // Initialize 8259 anyways.
     pic = new Pic();
@@ -276,7 +290,7 @@ int esInit(IInterface** nameSpace)
 
     root->bind("device/beep", static_cast<IBeep*>(pit));
 
-#if 1
+#ifdef USE_SVGA
     Vesa* vesa = new Vesa((u8*) 0x8000, (u8*) 0x8200,
                           (u8*) ((*(u16*) (0x30000 + 128)) | ((*(u16*) (0x30000 + 130)) << 4)),
                           device);
@@ -288,11 +302,9 @@ int esInit(IInterface** nameSpace)
     AtaController* ctlr0 = new AtaController(0x1f0, 0x3f4, 14, 0, ata);
     AtaController* ctlr1 = new AtaController(0x170, 0x374, 15, 0, ata);
 
-#if 1
     FloppyController* fdc = new FloppyController(&slave->chan[2]);
     FloppyDrive* fdd = new FloppyDrive(fdc, 0);
     root->bind("device/floppy", static_cast<IStream*>(fdd));
-#endif
 
     SoundBlaster16* sb16 = new SoundBlaster16(master, slave);
     ASSERT(static_cast<IStream*>(&sb16->inputLine));
@@ -309,6 +321,13 @@ int esInit(IInterface** nameSpace)
     device->bind("ethernet", static_cast<IStream*>(ne2000));
 
     Process::initialize();
+
+    if (uart)
+    {
+        // Set break point here if using a debbugger.
+        breakpoint();
+        //  Core::pic->startup(4);
+    }
 
     return 0;
 }
@@ -401,4 +420,21 @@ Reflect::Interface& getInterface(const Guid& iid)
 IThread* esCreateThread(void* (*start)(void* param), void* param)
 {
     return new Thread(start, param, IThread::Normal);
+}
+
+/* write a single character      */
+void putDebugChar(int ch)
+{
+    u8 data = (u8) ch;
+    uart->write(&data, 1);
+}
+
+/* read and return a single char */
+int getDebugChar()
+{
+    u8 data;
+    while (uart->read(&data, 1) <= 0)
+    {
+    }
+    return data;
 }

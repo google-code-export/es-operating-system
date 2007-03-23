@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -22,6 +22,8 @@
 // #define VERBOSE
 
 extern "C" void _exit(int i);
+
+extern void debug(Ureg* ureg);
 
 namespace
 {
@@ -692,6 +694,10 @@ dispatchException(Ureg* ureg)
 
     switch (ureg->trap)
     {
+      case NO_DB:   // Debug
+      case NO_BP:   // Breakpoint
+        debug(ureg);
+        break;
       case NO_NM:   // Device Not Available (No Math Coprocessor)
         if (current)
         {
@@ -755,6 +761,10 @@ dispatchException(Ureg* ureg)
         }
         esReport("Kernel panic [%d]\n", core->id);
         ureg->dump();
+        if (process)
+        {
+            process->dump();
+        }
         esPanic(__FILE__, __LINE__, "Failed Core::dispatchException: %u @ %x cr2:%x\n", ureg->trap, ureg->eip, cr2);
         break;
       case 65:  // system call interface
