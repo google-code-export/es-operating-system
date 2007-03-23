@@ -41,6 +41,8 @@ nodist_libeskernel_a_SOURCES = \
 	base/IPageSet.c \
 	base/IProcess.c \
 	base/IRuntime.c \
+	base/ISelectable.c \
+	base/IService.c \
 	base/IStream.c \
 	base/IThread.c \
 	device/IAudioFormat.c \
@@ -57,6 +59,10 @@ nodist_libeskernel_a_SOURCES = \
 	device/IPartition.c \
 	naming/IBinding.c \
 	naming/IContext.c \
+	net/IInternetAddress.c \
+	net/IInternetConfig.c \
+	net/IResolver.c \
+	net/ISocket.c \
 	util/IIterator.c \
 	util/ISet.c
 
@@ -147,7 +153,7 @@ cpp_source_files += \
 	port/upcall.cpp
 
 # c_source_files += \
-#	pc/i386-stub.c
+#
 
 cpp_source_files += \
 	pc/8042.cpp \
@@ -161,6 +167,7 @@ cpp_source_files += \
 	pc/cga.cpp \
 	pc/fdc.cpp \
 	pc/fdd.cpp \
+	pc/gdbstub.cpp \
 	pc/mps.cpp \
 	pc/pc_core.cpp \
 	pc/pc_dateTime.cpp \

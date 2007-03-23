@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -68,6 +68,8 @@ extern unsigned char IPageableInfo[];
 extern unsigned char IPageSetInfo[];
 extern unsigned char IProcessInfo[];
 extern unsigned char IRuntimeInfo[];
+extern unsigned char ISelectableInfo[];
+extern unsigned char IServiceInfo[];
 extern unsigned char IStreamInfo[];
 extern unsigned char IThreadInfo[];
 
@@ -85,6 +87,11 @@ extern unsigned char IPartitionInfo[];
 
 extern unsigned char IBindingInfo[];
 extern unsigned char IContextInfo[];
+
+extern unsigned char IInternetAddressInfo[];
+extern unsigned char IInternetConfigInfo[];
+extern unsigned char IResolverInfo[];
+extern unsigned char ISocketInfo[];
 
 extern unsigned char IIteratorInfo[];
 extern unsigned char ISetInfo[];

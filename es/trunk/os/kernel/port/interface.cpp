@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -32,6 +32,8 @@ unsigned char* InterfaceStore::defaultInterfaceInfo[] =
     IPageSetInfo,
     IProcessInfo,
     IRuntimeInfo,
+    ISelectableInfo,
+    IServiceInfo,
     IStreamInfo,
     IThreadInfo,
 
@@ -49,6 +51,11 @@ unsigned char* InterfaceStore::defaultInterfaceInfo[] =
 
     IBindingInfo,
     IContextInfo,
+
+    IInternetAddressInfo,
+    IInternetConfigInfo,
+    IResolverInfo,
+    ISocketInfo,
 
     IIteratorInfo,
     ISetInfo,

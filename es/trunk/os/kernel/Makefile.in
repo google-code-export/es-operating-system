@@ -44,7 +44,7 @@ target_triplet = @target@
 @ES_TRUE@@I386_TRUE@am__append_1 = -iquote $(srcdir)/include/i386 -fnon-call-exceptions
 
 # c_source_files += \
-#	pc/i386-stub.c
+#
 @ES_TRUE@am__append_2 = port/lock.cpp port/malloc.cpp port/map.cpp \
 @ES_TRUE@	port/mmu.cpp port/monitor.cpp port/process.cpp \
 @ES_TRUE@	port/rendezvous.cpp port/sched.cpp port/spinlock.cpp \
@@ -52,10 +52,10 @@ target_triplet = @target@
 @ES_TRUE@	port/upcall.cpp pc/8042.cpp pc/8237a.cpp pc/8254.cpp \
 @ES_TRUE@	pc/8259.cpp pc/apic.cpp pc/ataController.cpp \
 @ES_TRUE@	pc/ataDevice.cpp pc/ataPacket.cpp pc/cga.cpp \
-@ES_TRUE@	pc/fdc.cpp pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp \
-@ES_TRUE@	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp \
-@ES_TRUE@	pc/rtc.cpp pc/sb16.cpp pc/uart.cpp pc/vesa.cpp \
-@ES_TRUE@	pc/xreg.cpp pc/dp8390d.cpp
+@ES_TRUE@	pc/fdc.cpp pc/fdd.cpp pc/gdbstub.cpp pc/mps.cpp \
+@ES_TRUE@	pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
+@ES_TRUE@	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
+@ES_TRUE@	pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp
 @ES_TRUE@am__append_3 = \
 @ES_TRUE@	include/i386/8042.h \
 @ES_TRUE@	include/i386/8237a.h \
@@ -138,10 +138,11 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	port/syscall.cpp port/thread.cpp port/upcall.cpp pc/8042.cpp \
 	pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/apic.cpp \
 	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
-	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/mps.cpp pc/pc_core.cpp \
-	pc/pc_dateTime.cpp pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
-	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp \
-	windows/ref.cpp posix/posix_thread.cpp posix/posix_monitor.cpp \
+	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/gdbstub.cpp pc/mps.cpp \
+	pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
+	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
+	pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp windows/ref.cpp \
+	posix/posix_thread.cpp posix/posix_monitor.cpp \
 	posix/posix_core.cpp posix/posix_dateTime.cpp \
 	posix/posix_init.cpp posix/posix_ethernet.cpp include/alarm.h \
 	include/arena.h include/cache.h include/classStore.h \
@@ -167,8 +168,8 @@ am__objects_2 =
 @ES_TRUE@	8237a.$(OBJEXT) 8254.$(OBJEXT) 8259.$(OBJEXT) \
 @ES_TRUE@	apic.$(OBJEXT) ataController.$(OBJEXT) \
 @ES_TRUE@	ataDevice.$(OBJEXT) ataPacket.$(OBJEXT) cga.$(OBJEXT) \
-@ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) mps.$(OBJEXT) \
-@ES_TRUE@	pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
+@ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) gdbstub.$(OBJEXT) \
+@ES_TRUE@	mps.$(OBJEXT) pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
 @ES_TRUE@	pc_init.$(OBJEXT) pc_thread.$(OBJEXT) rtc.$(OBJEXT) \
 @ES_TRUE@	sb16.$(OBJEXT) uart.$(OBJEXT) vesa.$(OBJEXT) \
 @ES_TRUE@	xreg.$(OBJEXT) dp8390d.$(OBJEXT)
@@ -193,13 +194,16 @@ nodist_libeskernel_a_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	IClassStore.$(OBJEXT) IFile.$(OBJEXT) IInterface.$(OBJEXT) \
 	IInterfaceStore.$(OBJEXT) IMonitor.$(OBJEXT) \
 	IPageable.$(OBJEXT) IPageSet.$(OBJEXT) IProcess.$(OBJEXT) \
-	IRuntime.$(OBJEXT) IStream.$(OBJEXT) IThread.$(OBJEXT) \
-	IAudioFormat.$(OBJEXT) IBeep.$(OBJEXT) ICursor.$(OBJEXT) \
-	IDevice.$(OBJEXT) IDiskManagement.$(OBJEXT) IDmac.$(OBJEXT) \
+	IRuntime.$(OBJEXT) ISelectable.$(OBJEXT) IService.$(OBJEXT) \
+	IStream.$(OBJEXT) IThread.$(OBJEXT) IAudioFormat.$(OBJEXT) \
+	IBeep.$(OBJEXT) ICursor.$(OBJEXT) IDevice.$(OBJEXT) \
+	IDiskManagement.$(OBJEXT) IDmac.$(OBJEXT) \
 	IFileSystem.$(OBJEXT) INetworkInterface.$(OBJEXT) \
 	IPic.$(OBJEXT) IRemovableMedia.$(OBJEXT) IRtc.$(OBJEXT) \
 	IPartition.$(OBJEXT) IBinding.$(OBJEXT) IContext.$(OBJEXT) \
-	IIterator.$(OBJEXT) ISet.$(OBJEXT) mbr.$(OBJEXT)
+	IInternetAddress.$(OBJEXT) IInternetConfig.$(OBJEXT) \
+	IResolver.$(OBJEXT) ISocket.$(OBJEXT) IIterator.$(OBJEXT) \
+	ISet.$(OBJEXT) mbr.$(OBJEXT)
 libeskernel_a_OBJECTS = $(am_libeskernel_a_OBJECTS) \
 	$(nodist_libeskernel_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -343,13 +347,15 @@ nodist_libeskernel_a_SOURCES = base/IAlarm.c base/ICache.c \
 	base/ICallback.c base/IClassFactory.c base/IClassStore.c \
 	base/IFile.c base/IInterface.c base/IInterfaceStore.c \
 	base/IMonitor.c base/IPageable.c base/IPageSet.c \
-	base/IProcess.c base/IRuntime.c base/IStream.c base/IThread.c \
+	base/IProcess.c base/IRuntime.c base/ISelectable.c \
+	base/IService.c base/IStream.c base/IThread.c \
 	device/IAudioFormat.c device/IBeep.c device/ICursor.c \
 	device/IDevice.c device/IDiskManagement.c device/IDmac.c \
 	device/IFileSystem.c device/INetworkInterface.c device/IPic.c \
 	device/IRemovableMedia.c device/IRtc.c device/IPartition.c \
-	naming/IBinding.c naming/IContext.c util/IIterator.c \
-	util/ISet.c mbr.c
+	naming/IBinding.c naming/IContext.c net/IInternetAddress.c \
+	net/IInternetConfig.c net/IResolver.c net/ISocket.c \
+	util/IIterator.c util/ISet.c mbr.c
 
 #
 # port
@@ -483,6 +489,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IFileSystem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInterface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInterfaceStore.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInternetAddress.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IInternetConfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IIterator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IMonitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/INetworkInterface.Po@am__quote@
@@ -492,9 +500,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IPic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IProcess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IRemovableMedia.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IResolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IRtc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IRuntime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ISelectable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IService.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ISet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ISocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IStream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alarm.Po@am__quote@
@@ -511,6 +523,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbstub.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interface.Po@am__quote@
@@ -764,6 +777,34 @@ IRuntime.obj: base/IRuntime.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IRuntime.obj `if test -f 'base/IRuntime.c'; then $(CYGPATH_W) 'base/IRuntime.c'; else $(CYGPATH_W) '$(srcdir)/base/IRuntime.c'; fi`
 
+ISelectable.o: base/ISelectable.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ISelectable.o -MD -MP -MF "$(DEPDIR)/ISelectable.Tpo" -c -o ISelectable.o `test -f 'base/ISelectable.c' || echo '$(srcdir)/'`base/ISelectable.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ISelectable.Tpo" "$(DEPDIR)/ISelectable.Po"; else rm -f "$(DEPDIR)/ISelectable.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/ISelectable.c' object='ISelectable.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ISelectable.o `test -f 'base/ISelectable.c' || echo '$(srcdir)/'`base/ISelectable.c
+
+ISelectable.obj: base/ISelectable.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ISelectable.obj -MD -MP -MF "$(DEPDIR)/ISelectable.Tpo" -c -o ISelectable.obj `if test -f 'base/ISelectable.c'; then $(CYGPATH_W) 'base/ISelectable.c'; else $(CYGPATH_W) '$(srcdir)/base/ISelectable.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ISelectable.Tpo" "$(DEPDIR)/ISelectable.Po"; else rm -f "$(DEPDIR)/ISelectable.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/ISelectable.c' object='ISelectable.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ISelectable.obj `if test -f 'base/ISelectable.c'; then $(CYGPATH_W) 'base/ISelectable.c'; else $(CYGPATH_W) '$(srcdir)/base/ISelectable.c'; fi`
+
+IService.o: base/IService.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IService.o -MD -MP -MF "$(DEPDIR)/IService.Tpo" -c -o IService.o `test -f 'base/IService.c' || echo '$(srcdir)/'`base/IService.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IService.Tpo" "$(DEPDIR)/IService.Po"; else rm -f "$(DEPDIR)/IService.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IService.c' object='IService.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IService.o `test -f 'base/IService.c' || echo '$(srcdir)/'`base/IService.c
+
+IService.obj: base/IService.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IService.obj -MD -MP -MF "$(DEPDIR)/IService.Tpo" -c -o IService.obj `if test -f 'base/IService.c'; then $(CYGPATH_W) 'base/IService.c'; else $(CYGPATH_W) '$(srcdir)/base/IService.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IService.Tpo" "$(DEPDIR)/IService.Po"; else rm -f "$(DEPDIR)/IService.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='base/IService.c' object='IService.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IService.obj `if test -f 'base/IService.c'; then $(CYGPATH_W) 'base/IService.c'; else $(CYGPATH_W) '$(srcdir)/base/IService.c'; fi`
+
 IStream.o: base/IStream.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IStream.o -MD -MP -MF "$(DEPDIR)/IStream.Tpo" -c -o IStream.o `test -f 'base/IStream.c' || echo '$(srcdir)/'`base/IStream.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IStream.Tpo" "$(DEPDIR)/IStream.Po"; else rm -f "$(DEPDIR)/IStream.Tpo"; exit 1; fi
@@ -987,6 +1028,62 @@ IContext.obj: naming/IContext.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='naming/IContext.c' object='IContext.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IContext.obj `if test -f 'naming/IContext.c'; then $(CYGPATH_W) 'naming/IContext.c'; else $(CYGPATH_W) '$(srcdir)/naming/IContext.c'; fi`
+
+IInternetAddress.o: net/IInternetAddress.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IInternetAddress.o -MD -MP -MF "$(DEPDIR)/IInternetAddress.Tpo" -c -o IInternetAddress.o `test -f 'net/IInternetAddress.c' || echo '$(srcdir)/'`net/IInternetAddress.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IInternetAddress.Tpo" "$(DEPDIR)/IInternetAddress.Po"; else rm -f "$(DEPDIR)/IInternetAddress.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/IInternetAddress.c' object='IInternetAddress.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInternetAddress.o `test -f 'net/IInternetAddress.c' || echo '$(srcdir)/'`net/IInternetAddress.c
+
+IInternetAddress.obj: net/IInternetAddress.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IInternetAddress.obj -MD -MP -MF "$(DEPDIR)/IInternetAddress.Tpo" -c -o IInternetAddress.obj `if test -f 'net/IInternetAddress.c'; then $(CYGPATH_W) 'net/IInternetAddress.c'; else $(CYGPATH_W) '$(srcdir)/net/IInternetAddress.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IInternetAddress.Tpo" "$(DEPDIR)/IInternetAddress.Po"; else rm -f "$(DEPDIR)/IInternetAddress.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/IInternetAddress.c' object='IInternetAddress.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInternetAddress.obj `if test -f 'net/IInternetAddress.c'; then $(CYGPATH_W) 'net/IInternetAddress.c'; else $(CYGPATH_W) '$(srcdir)/net/IInternetAddress.c'; fi`
+
+IInternetConfig.o: net/IInternetConfig.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IInternetConfig.o -MD -MP -MF "$(DEPDIR)/IInternetConfig.Tpo" -c -o IInternetConfig.o `test -f 'net/IInternetConfig.c' || echo '$(srcdir)/'`net/IInternetConfig.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IInternetConfig.Tpo" "$(DEPDIR)/IInternetConfig.Po"; else rm -f "$(DEPDIR)/IInternetConfig.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/IInternetConfig.c' object='IInternetConfig.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInternetConfig.o `test -f 'net/IInternetConfig.c' || echo '$(srcdir)/'`net/IInternetConfig.c
+
+IInternetConfig.obj: net/IInternetConfig.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IInternetConfig.obj -MD -MP -MF "$(DEPDIR)/IInternetConfig.Tpo" -c -o IInternetConfig.obj `if test -f 'net/IInternetConfig.c'; then $(CYGPATH_W) 'net/IInternetConfig.c'; else $(CYGPATH_W) '$(srcdir)/net/IInternetConfig.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IInternetConfig.Tpo" "$(DEPDIR)/IInternetConfig.Po"; else rm -f "$(DEPDIR)/IInternetConfig.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/IInternetConfig.c' object='IInternetConfig.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IInternetConfig.obj `if test -f 'net/IInternetConfig.c'; then $(CYGPATH_W) 'net/IInternetConfig.c'; else $(CYGPATH_W) '$(srcdir)/net/IInternetConfig.c'; fi`
+
+IResolver.o: net/IResolver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IResolver.o -MD -MP -MF "$(DEPDIR)/IResolver.Tpo" -c -o IResolver.o `test -f 'net/IResolver.c' || echo '$(srcdir)/'`net/IResolver.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IResolver.Tpo" "$(DEPDIR)/IResolver.Po"; else rm -f "$(DEPDIR)/IResolver.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/IResolver.c' object='IResolver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IResolver.o `test -f 'net/IResolver.c' || echo '$(srcdir)/'`net/IResolver.c
+
+IResolver.obj: net/IResolver.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IResolver.obj -MD -MP -MF "$(DEPDIR)/IResolver.Tpo" -c -o IResolver.obj `if test -f 'net/IResolver.c'; then $(CYGPATH_W) 'net/IResolver.c'; else $(CYGPATH_W) '$(srcdir)/net/IResolver.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/IResolver.Tpo" "$(DEPDIR)/IResolver.Po"; else rm -f "$(DEPDIR)/IResolver.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/IResolver.c' object='IResolver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o IResolver.obj `if test -f 'net/IResolver.c'; then $(CYGPATH_W) 'net/IResolver.c'; else $(CYGPATH_W) '$(srcdir)/net/IResolver.c'; fi`
+
+ISocket.o: net/ISocket.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ISocket.o -MD -MP -MF "$(DEPDIR)/ISocket.Tpo" -c -o ISocket.o `test -f 'net/ISocket.c' || echo '$(srcdir)/'`net/ISocket.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ISocket.Tpo" "$(DEPDIR)/ISocket.Po"; else rm -f "$(DEPDIR)/ISocket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/ISocket.c' object='ISocket.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ISocket.o `test -f 'net/ISocket.c' || echo '$(srcdir)/'`net/ISocket.c
+
+ISocket.obj: net/ISocket.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ISocket.obj -MD -MP -MF "$(DEPDIR)/ISocket.Tpo" -c -o ISocket.obj `if test -f 'net/ISocket.c'; then $(CYGPATH_W) 'net/ISocket.c'; else $(CYGPATH_W) '$(srcdir)/net/ISocket.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ISocket.Tpo" "$(DEPDIR)/ISocket.Po"; else rm -f "$(DEPDIR)/ISocket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/ISocket.c' object='ISocket.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ISocket.obj `if test -f 'net/ISocket.c'; then $(CYGPATH_W) 'net/ISocket.c'; else $(CYGPATH_W) '$(srcdir)/net/ISocket.c'; fi`
 
 IIterator.o: util/IIterator.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT IIterator.o -MD -MP -MF "$(DEPDIR)/IIterator.Tpo" -c -o IIterator.o `test -f 'util/IIterator.c' || echo '$(srcdir)/'`util/IIterator.c; \
@@ -1631,6 +1728,20 @@ fdd.obj: pc/fdd.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/fdd.cpp' object='fdd.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fdd.obj `if test -f 'pc/fdd.cpp'; then $(CYGPATH_W) 'pc/fdd.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/fdd.cpp'; fi`
+
+gdbstub.o: pc/gdbstub.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gdbstub.o -MD -MP -MF "$(DEPDIR)/gdbstub.Tpo" -c -o gdbstub.o `test -f 'pc/gdbstub.cpp' || echo '$(srcdir)/'`pc/gdbstub.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/gdbstub.Tpo" "$(DEPDIR)/gdbstub.Po"; else rm -f "$(DEPDIR)/gdbstub.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/gdbstub.cpp' object='gdbstub.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gdbstub.o `test -f 'pc/gdbstub.cpp' || echo '$(srcdir)/'`pc/gdbstub.cpp
+
+gdbstub.obj: pc/gdbstub.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gdbstub.obj -MD -MP -MF "$(DEPDIR)/gdbstub.Tpo" -c -o gdbstub.obj `if test -f 'pc/gdbstub.cpp'; then $(CYGPATH_W) 'pc/gdbstub.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/gdbstub.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/gdbstub.Tpo" "$(DEPDIR)/gdbstub.Po"; else rm -f "$(DEPDIR)/gdbstub.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/gdbstub.cpp' object='gdbstub.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o gdbstub.obj `if test -f 'pc/gdbstub.cpp'; then $(CYGPATH_W) 'pc/gdbstub.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/gdbstub.cpp'; fi`
 
 mps.o: pc/mps.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mps.o -MD -MP -MF "$(DEPDIR)/mps.Tpo" -c -o mps.o `test -f 'pc/mps.cpp' || echo '$(srcdir)/'`pc/mps.cpp; \
