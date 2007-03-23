@@ -67,6 +67,7 @@ nobase_nodist_include_HEADERS = \
 	es/base/IPageSet.h \
 	es/base/IProcess.h \
 	es/base/IRuntime.h \
+	es/base/ISelectable.h \
 	es/base/IService.h \
 	es/base/IStream.h \
 	es/base/IThread.h \
@@ -105,6 +106,7 @@ nobase_nodist_include_HEADERS += \
 	es/base/IPageSet.ird \
 	es/base/IProcess.ird \
 	es/base/IRuntime.ird \
+	es/base/ISelectable.ird \
 	es/base/IService.ird \
 	es/base/IStream.ird \
 	es/base/IThread.ird \
@@ -143,6 +145,7 @@ nobase_include_HEADERS += \
 	es/base/IPageSet.idl \
 	es/base/IProcess.idl \
 	es/base/IRuntime.idl \
+	es/base/ISelectable.idl \
 	es/base/IService.idl \
 	es/base/IStream.idl \
 	es/base/IThread.idl \

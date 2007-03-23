@@ -159,7 +159,8 @@ nobase_include_HEADERS = es.h es/broker.h es/classFactory.h es/clsid.h \
 	es/base/IFile.idl es/base/IInterface.idl \
 	es/base/IInterfaceStore.idl es/base/IMonitor.idl \
 	es/base/IPageable.idl es/base/IPageSet.idl \
-	es/base/IProcess.idl es/base/IRuntime.idl es/base/IService.idl \
+	es/base/IProcess.idl es/base/IRuntime.idl \
+	es/base/ISelectable.idl es/base/IService.idl \
 	es/base/IStream.idl es/base/IThread.idl \
 	es/device/IAudioFormat.idl es/device/IBeep.idl \
 	es/device/ICursor.idl es/device/IDevice.idl \
@@ -178,9 +179,9 @@ nobase_nodist_include_HEADERS = es/base/IAlarm.h es/base/ICache.h \
 	es/base/IClassStore.h es/base/IFile.h es/base/IInterface.h \
 	es/base/IInterfaceStore.h es/base/IMonitor.h \
 	es/base/IPageable.h es/base/IPageSet.h es/base/IProcess.h \
-	es/base/IRuntime.h es/base/IService.h es/base/IStream.h \
-	es/base/IThread.h es/device/IAudioFormat.h es/device/IBeep.h \
-	es/device/ICursor.h es/device/IDevice.h \
+	es/base/IRuntime.h es/base/ISelectable.h es/base/IService.h \
+	es/base/IStream.h es/base/IThread.h es/device/IAudioFormat.h \
+	es/device/IBeep.h es/device/ICursor.h es/device/IDevice.h \
 	es/device/IDiskManagement.h es/device/IDmac.h \
 	es/device/IFileSystem.h es/device/INetworkInterface.h \
 	es/device/IPic.h es/device/IRemovableMedia.h es/device/IRtc.h \
@@ -193,7 +194,8 @@ nobase_nodist_include_HEADERS = es/base/IAlarm.h es/base/ICache.h \
 	es/base/IFile.ird es/base/IInterface.ird \
 	es/base/IInterfaceStore.ird es/base/IMonitor.ird \
 	es/base/IPageable.ird es/base/IPageSet.ird \
-	es/base/IProcess.ird es/base/IRuntime.ird es/base/IService.ird \
+	es/base/IProcess.ird es/base/IRuntime.ird \
+	es/base/ISelectable.ird es/base/IService.ird \
 	es/base/IStream.ird es/base/IThread.ird \
 	es/device/IAudioFormat.ird es/device/IBeep.ird \
 	es/device/ICursor.ird es/device/IDevice.ird \
