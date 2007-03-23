@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -92,38 +92,45 @@ class Timer
 
     void* start()
     {
-        Synchronized<IMonitor*> method(monitor);
-
         while (!canceled)
         {
-            Tree<DateTime, Value>::Node* node(queue.getFirst());
-            if (node)
+            TimerTask* task;
+            while (!canceled)
             {
-                TimeSpan diff = node->getKey() - DateTime::getNow();
-                TimerTask* task = node->getValue().timerTask;
-                if (0 < diff)
+                Synchronized<IMonitor*> method(monitor);
+                Tree<DateTime, Value>::Node* node(queue.getFirst());
+                if (node)
                 {
-                    monitor->wait(diff);
+                    TimeSpan diff = node->getKey() - DateTime::getNow();
+                    task = node->getValue().timerTask;
+                    if (0 < diff)
+                    {
+                        monitor->wait(diff);
+                    }
+                    else
+                    {
+                        queue.remove(node->getKey());
+                        break;
+                    }
                 }
                 else
                 {
-                    queue.remove(node->getKey());
-                    if (task->period == 0)
-                    {
-                        task->executionTime = 0;
-                    }
-                    task->run();
-                    if (0 < task->period)
-                    {
-                        schedule(task,
-                                 task->scheduledExecutionTime() + task->period,
-                                 task->period);
-                    }
+                    monitor->wait(10000000);
                 }
             }
-            else
+            if (!canceled)
             {
-                monitor->wait(10000000);
+                if (task->period == 0)
+                {
+                    task->executionTime = 0;
+                }
+                task->run();
+                if (0 < task->period)
+                {
+                    schedule(task,
+                             task->scheduledExecutionTime() + task->period,
+                             task->period);
+                }
             }
         }
         thread = 0;
