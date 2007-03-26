@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -41,6 +41,8 @@ void dtor(void* ptr)
     esReport("dtor(%p);\n", ptr);
 }
 
+IMonitor* m;
+
 void* start(void* param)
 {
     Check check;
@@ -54,13 +56,12 @@ void* start(void* param)
     esCreateThreadKey(&key, dtor);
     esSetThreadSpecific(key, (void*) 0x1234);
 
-#if 0
-    IMonitor* m = System()->createMonitor();
+    esReport("m->lock();\n");
     m->lock();
     esReport("m->wait();\n");
     m->wait();
+    esReport("m->unlock();\n");
     m->unlock();
-#endif
 
 #if 1
     esReport("Let's unwind.\n");
@@ -82,12 +83,20 @@ int main(int argc, char* argv[])
 
     esReport("%d %d %p\n", testA, testB, &testA);
 
+    System()->trace(false);
+
+    m = System()->createMonitor();
+
     IThread* thread = System()->createThread(start, 0);
     thread->start();
 
     ICurrentThread* current(System()->currentThread());
     current->sleep(30000000);
     // System()->exit(0);
+
+    esReport("m->notify();\n");
+    m->notify();
+    current->sleep(30000000);
 
     void* rval;
     thread->join(&rval);
