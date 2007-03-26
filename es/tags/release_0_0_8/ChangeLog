@@ -1,0 +1,52 @@
+2007-03-26  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.8 released.
+	* init/es.cpp (initNetwork) : Initiate DHCP client service.
+	* Refine TCP/IP stack including non-blocking I/O support.
+	* include/es/timer.h (Timer::start) : Fix to unlock monitor while calling TimerTask.
+	* os/kernel/pc/gdbstub.cpp : New to support remote debugging with gdb.
+	* os/kernel/port/interface.cpp : Update the default interface database.
+	* include/es/broker.h (Broker::vtbl) : Expand the size of vtbl for ISocket.
+	* os/libes++/src/ring.cpp (Ring::read) : Fix bug.
+	* include/es/handle.h: Fix bugs.
+
+2007-03-05  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.7 released.
+	* Add DHCP client service.
+	* Add DNS stub resolver.
+
+2007-02-09  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.6 released.
+	* Refine the TCP/IP network protocol stack (concept demonstration).
+
+2006-12-26  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.5 released.
+	* Add a TCP/IP network protocol stack (concept demonstration).
+
+2006-10-17  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.4 released.
+	* Support symmetric multiprocessing (SMP) systems.
+
+2006-09-28  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.3 released.
+	* Implement the kernel page fault handler that raises the EFAULT
+	  system exception.
+	* Implement the interface store.
+	* Refine the system call and upcall paths.
+	* (gcc-4.1.1.patch) : New. 
+	* (newlib-1.14.0.patch) : Move extern "C" declarations.
+
+2006-09-14  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.2 released.
+	* Support procedural IPC.
+	* Fix clean build problem.
+
+2006-08-30  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.1 released.
