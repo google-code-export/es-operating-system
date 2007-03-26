@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -18,6 +18,11 @@
 #include <es/exception.h>
 #include <es/handle.h>
 #include <es/reflect.h>
+#include <es/base/ISelectable.h>
+#include <es/net/IInternetAddress.h>
+#include <es/net/IInternetConfig.h>
+#include <es/net/ISocket.h>
+#include <es/net/IResolver.h>
 #include "core.h"
 #include "interfaceStore.h"
 #include "process.h"
@@ -114,6 +119,17 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
     {
         log = false;
     }
+
+#if 1
+    if (interface.getIid() == IID_ISocket ||
+        interface.getIid() == IID_IInternetAddress ||
+        interface.getIid() == IID_IInternetConfig ||
+        interface.getIid() == IID_ISelectable ||
+        interface.getIid() == IID_IResolver)
+    {
+        log = true;
+    }
+#endif
 
     // If this interface inherits another interface,
     // methodNumber is checked accordingly.
