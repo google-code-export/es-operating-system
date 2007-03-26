@@ -52,9 +52,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-@ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = interlocked$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	exception$(EXEEXT) utf$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	ring$(EXEEXT) heap$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@am__EXEEXT_1 = handle$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	interlocked$(EXEEXT) exception$(EXEEXT) \
+@ES_FALSE@@POSIX_TRUE@	utf$(EXEEXT) ring$(EXEEXT) heap$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	page$(EXEEXT) cache$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	replace$(EXEEXT) position$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	size$(EXEEXT) write_read$(EXEEXT) \
@@ -75,9 +75,10 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	partition_print$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	timer$(EXEEXT)
-@ES_TRUE@am__EXEEXT_1 = interlocked$(EXEEXT) exception$(EXEEXT) \
-@ES_TRUE@	utf$(EXEEXT) ring$(EXEEXT) fpu$(EXEEXT) tsd$(EXEEXT) \
-@ES_TRUE@	context$(EXEEXT) datetime$(EXEEXT) thread$(EXEEXT) \
+@ES_TRUE@am__EXEEXT_1 = handle$(EXEEXT) interlocked$(EXEEXT) \
+@ES_TRUE@	exception$(EXEEXT) utf$(EXEEXT) ring$(EXEEXT) \
+@ES_TRUE@	fpu$(EXEEXT) tsd$(EXEEXT) context$(EXEEXT) \
+@ES_TRUE@	datetime$(EXEEXT) thread$(EXEEXT) \
 @ES_TRUE@	thread_cancel$(EXEEXT) thread_smp$(EXEEXT) \
 @ES_TRUE@	monitor0$(EXEEXT) monitor1$(EXEEXT) monitor2$(EXEEXT) \
 @ES_TRUE@	monitor3$(EXEEXT) bpi$(EXEEXT) bpi2$(EXEEXT) \
@@ -177,6 +178,11 @@ getPageCount_OBJECTS = $(am_getPageCount_OBJECTS)
 getPageCount_LDADD = $(LDADD)
 getPageCount_DEPENDENCIES = ../libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
+am_handle_OBJECTS = handle.$(OBJEXT)
+handle_OBJECTS = $(am_handle_OBJECTS)
+handle_LDADD = $(LDADD)
+handle_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
+	$(am__DEPENDENCIES_1)
 am_heap_OBJECTS = heap.$(OBJEXT)
 heap_OBJECTS = $(am_heap_OBJECTS)
 heap_LDADD = $(LDADD)
@@ -367,10 +373,11 @@ SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(create_release_SOURCES) $(datetime_SOURCES) \
 	$(ethernet_SOURCES) $(exception_SOURCES) $(fdc_SOURCES) \
 	$(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
-	$(getPageCount_SOURCES) $(heap_SOURCES) $(interlocked_SOURCES) \
-	$(invalidate_SOURCES) $(loopback_SOURCES) $(monitor0_SOURCES) \
-	$(monitor1_SOURCES) $(monitor2_SOURCES) $(monitor3_SOURCES) \
-	$(page_SOURCES) $(pageSet_SOURCES) $(partition_SOURCES) \
+	$(getPageCount_SOURCES) $(handle_SOURCES) $(heap_SOURCES) \
+	$(interlocked_SOURCES) $(invalidate_SOURCES) \
+	$(loopback_SOURCES) $(monitor0_SOURCES) $(monitor1_SOURCES) \
+	$(monitor2_SOURCES) $(monitor3_SOURCES) $(page_SOURCES) \
+	$(pageSet_SOURCES) $(partition_SOURCES) \
 	$(partition_bind_SOURCES) $(partition_error_SOURCES) \
 	$(partition_extended_SOURCES) $(partition_iterator_SOURCES) \
 	$(partition_over8GB_SOURCES) $(partition_print_SOURCES) \
@@ -386,10 +393,11 @@ DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(create_release_SOURCES) $(datetime_SOURCES) \
 	$(ethernet_SOURCES) $(exception_SOURCES) $(fdc_SOURCES) \
 	$(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
-	$(getPageCount_SOURCES) $(heap_SOURCES) $(interlocked_SOURCES) \
-	$(invalidate_SOURCES) $(loopback_SOURCES) $(monitor0_SOURCES) \
-	$(monitor1_SOURCES) $(monitor2_SOURCES) $(monitor3_SOURCES) \
-	$(page_SOURCES) $(pageSet_SOURCES) $(partition_SOURCES) \
+	$(getPageCount_SOURCES) $(handle_SOURCES) $(heap_SOURCES) \
+	$(interlocked_SOURCES) $(invalidate_SOURCES) \
+	$(loopback_SOURCES) $(monitor0_SOURCES) $(monitor1_SOURCES) \
+	$(monitor2_SOURCES) $(monitor3_SOURCES) $(page_SOURCES) \
+	$(pageSet_SOURCES) $(partition_SOURCES) \
 	$(partition_bind_SOURCES) $(partition_error_SOURCES) \
 	$(partition_extended_SOURCES) $(partition_iterator_SOURCES) \
 	$(partition_over8GB_SOURCES) $(partition_print_SOURCES) \
@@ -508,7 +516,7 @@ LDADD = ../libeskernel.a ../../libes++/libessup++.a $(am__append_2)
 SUFFIXES = .img .gz .iso
 AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 	$(srcdir)/../../../include $(am__append_1) $(am__append_3)
-@ES_TRUE@TESTS = interlocked exception utf ring fpu tsd \
+@ES_TRUE@TESTS = handle interlocked exception utf ring fpu tsd \
 @ES_TRUE@	context datetime thread thread_cancel thread_smp \
 @ES_TRUE@	monitor0 monitor1 monitor2 monitor3 \
 @ES_TRUE@	bpi bpi2 bpi3 \
@@ -520,7 +528,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@	pageSet process \
 @ES_TRUE@	loopback ethernet
 
-@POSIX_TRUE@TESTS = interlocked exception utf ring \
+@POSIX_TRUE@TESTS = handle interlocked exception utf ring \
 @POSIX_TRUE@	heap page cache replace \
 @POSIX_TRUE@	position size write_read write_read2 write read \
 @POSIX_TRUE@	create_release getPageCount invalidate \
@@ -531,7 +539,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @POSIX_TRUE@	loopback ethernet timer
 
 @ES_TRUE@noinst_DATA = fat16.img isotest.iso \
-@ES_TRUE@	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+@ES_TRUE@	handle.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
 @ES_TRUE@	context.img datetime.img thread.img thread_cancel.img thread_smp.img \
 @ES_TRUE@	monitor0.img monitor1.img monitor2.img monitor3.img \
 @ES_TRUE@	bpi.img bpi2.img bpi3.img \
@@ -548,6 +556,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 @ES_TRUE@AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
+handle_SOURCES = handle.cpp
 interlocked_SOURCES = interlocked.cpp
 exception_SOURCES = exception.cpp
 utf_SOURCES = utf.cpp
@@ -687,6 +696,9 @@ fpu$(EXEEXT): $(fpu_OBJECTS) $(fpu_DEPENDENCIES)
 getPageCount$(EXEEXT): $(getPageCount_OBJECTS) $(getPageCount_DEPENDENCIES) 
 	@rm -f getPageCount$(EXEEXT)
 	$(CXXLINK) $(getPageCount_LDFLAGS) $(getPageCount_OBJECTS) $(getPageCount_LDADD) $(LIBS)
+handle$(EXEEXT): $(handle_OBJECTS) $(handle_DEPENDENCIES) 
+	@rm -f handle$(EXEEXT)
+	$(CXXLINK) $(handle_LDFLAGS) $(handle_OBJECTS) $(handle_LDADD) $(LIBS)
 heap$(EXEEXT): $(heap_OBJECTS) $(heap_DEPENDENCIES) 
 	@rm -f heap$(EXEEXT)
 	$(CXXLINK) $(heap_LDFLAGS) $(heap_OBJECTS) $(heap_LDADD) $(LIBS)
@@ -813,6 +825,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc_diskChange.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fpu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getPageCount.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interlocked.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/invalidate.Po@am__quote@

@@ -18,7 +18,7 @@ if POSIX
 
 AM_CPPFLAGS += -iquote $(srcdir)/../include/posix
 
-TESTS = interlocked exception utf ring \
+TESTS = handle interlocked exception utf ring \
 	heap page cache replace \
 	position size write_read write_read2 write read \
 	create_release getPageCount invalidate \
@@ -42,7 +42,7 @@ if I386
 AM_CPPFLAGS += -iquote $(srcdir)/../include/i386
 endif I386
 
-TESTS = interlocked exception utf ring fpu tsd \
+TESTS = handle interlocked exception utf ring fpu tsd \
 	context datetime thread thread_cancel thread_smp \
 	monitor0 monitor1 monitor2 monitor3 \
 	bpi bpi2 bpi3 \
@@ -59,7 +59,7 @@ noinst_SCRIPTS = $(TESTS)
 noinst_PROGRAMS = $(TESTS)
 
 noinst_DATA = fat16.img isotest.iso \
-	interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+	handle.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
 	context.img datetime.img thread.img thread_cancel.img thread_smp.img \
 	monitor0.img monitor1.img monitor2.img monitor3.img \
 	bpi.img bpi2.img bpi3.img \
@@ -80,6 +80,8 @@ clean-local:
 AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
 
 endif ES
+
+handle_SOURCES = handle.cpp
 
 interlocked_SOURCES = interlocked.cpp
 
