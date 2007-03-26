@@ -12,6 +12,7 @@ extern sqExport MiscPrimitivePlugin_exports[];
 extern sqExport SoundPlugin_exports[];
 extern sqExport SoundGenerationPlugin_exports[];
 extern sqExport SecurityPlugin_exports[];
+extern sqExport SocketPlugin_exports[];
 
 sqExport *pluginExports[] = {
     vm_exports,
@@ -26,5 +27,6 @@ sqExport *pluginExports[] = {
     SoundPlugin_exports,
     SoundGenerationPlugin_exports,
     SecurityPlugin_exports,
+    SocketPlugin_exports,
     NULL
 };

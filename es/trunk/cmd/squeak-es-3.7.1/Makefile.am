@@ -12,6 +12,7 @@ c_source_files = \
 	Cross/vm/sqVirtualMachine.c \
 	Cross/vm/sqVirtualMachine.h \
 	es/vm/interp.c \
+	es/vm/selector.h \
 	es/vm/sqConfig.h \
 	es/vm/sqNamedPrims.h \
 	es/vm/sqPlatformSpecific.h \
@@ -26,6 +27,8 @@ c_source_files = \
 	es/vm/intplugins/SecurityPlugin/SecurityPlugin.c \
 	es/vm/intplugins/SecurityPlugin/SecurityPlugin.h \
 	es/vm/intplugins/SecurityPlugin/sqEs32Security.c \
+	es/vm/intplugins/SocketPlugin/SocketPlugin.c \
+	es/vm/intplugins/SocketPlugin/SocketPlugin.h \
 	es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.c \
 	es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.h \
 	es/vm/intplugins/SoundGenerationPlugin/sqOldSoundPrims.c \
@@ -37,6 +40,7 @@ cpp_source_files = \
 	es/vm/sqEsInput.cpp \
 	es/vm/intplugins/FilePlugin/sqEsFile.cpp \
 	es/vm/intplugins/FilePlugin/sqEsDirectory.cpp \
+	es/vm/intplugins/SocketPlugin/sqEsSocket.cpp \
 	es/vm/intplugins/SoundPlugin/sqEsSound.cpp
 
 squeak_SOURCES = $(c_source_files) $(cpp_source_files)
@@ -51,6 +55,7 @@ INCLUDES = \
 	-I$(srcdir)/es/vm/intplugins/LargeIntegers \
 	-I$(srcdir)/es/vm/intplugins/Matrix2x3Plugin \
 	-I$(srcdir)/es/vm/intplugins/MiscPrimitivePlugin \
+	-I$(srcdir)/es/vm/intplugins/SocketPlugin \
 	-I$(srcdir)/es/vm/intplugins/SoundPlugin \
 	-I$(srcdir)/es/vm/intplugins/SoundGenerationPlugin \
 	-I$(srcdir)/es/vm/intplugins/SecurityPlugin

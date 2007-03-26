@@ -56,10 +56,12 @@ am__objects_1 = sqNamedPrims.$(OBJEXT) sqVirtualMachine.$(OBJEXT) \
 	FilePlugin.$(OBJEXT) FloatArrayPlugin.$(OBJEXT) \
 	LargeIntegers.$(OBJEXT) Matrix2x3Plugin.$(OBJEXT) \
 	MiscPrimitivePlugin.$(OBJEXT) SecurityPlugin.$(OBJEXT) \
-	sqEs32Security.$(OBJEXT) SoundGenerationPlugin.$(OBJEXT) \
-	sqOldSoundPrims.$(OBJEXT) SoundPlugin.$(OBJEXT)
+	sqEs32Security.$(OBJEXT) SocketPlugin.$(OBJEXT) \
+	SoundGenerationPlugin.$(OBJEXT) sqOldSoundPrims.$(OBJEXT) \
+	SoundPlugin.$(OBJEXT)
 am__objects_2 = sqEs.$(OBJEXT) sqEsInput.$(OBJEXT) sqEsFile.$(OBJEXT) \
-	sqEsDirectory.$(OBJEXT) sqEsSound.$(OBJEXT)
+	sqEsDirectory.$(OBJEXT) sqEsSocket.$(OBJEXT) \
+	sqEsSound.$(OBJEXT)
 am_squeak_OBJECTS = $(am__objects_1) $(am__objects_2)
 squeak_OBJECTS = $(am_squeak_OBJECTS)
 squeak_LDADD = $(LDADD)
@@ -202,6 +204,7 @@ c_source_files = \
 	Cross/vm/sqVirtualMachine.c \
 	Cross/vm/sqVirtualMachine.h \
 	es/vm/interp.c \
+	es/vm/selector.h \
 	es/vm/sqConfig.h \
 	es/vm/sqNamedPrims.h \
 	es/vm/sqPlatformSpecific.h \
@@ -216,6 +219,8 @@ c_source_files = \
 	es/vm/intplugins/SecurityPlugin/SecurityPlugin.c \
 	es/vm/intplugins/SecurityPlugin/SecurityPlugin.h \
 	es/vm/intplugins/SecurityPlugin/sqEs32Security.c \
+	es/vm/intplugins/SocketPlugin/SocketPlugin.c \
+	es/vm/intplugins/SocketPlugin/SocketPlugin.h \
 	es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.c \
 	es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.h \
 	es/vm/intplugins/SoundGenerationPlugin/sqOldSoundPrims.c \
@@ -227,6 +232,7 @@ cpp_source_files = \
 	es/vm/sqEsInput.cpp \
 	es/vm/intplugins/FilePlugin/sqEsFile.cpp \
 	es/vm/intplugins/FilePlugin/sqEsDirectory.cpp \
+	es/vm/intplugins/SocketPlugin/sqEsSocket.cpp \
 	es/vm/intplugins/SoundPlugin/sqEsSound.cpp
 
 squeak_SOURCES = $(c_source_files) $(cpp_source_files)
@@ -240,6 +246,7 @@ INCLUDES = \
 	-I$(srcdir)/es/vm/intplugins/LargeIntegers \
 	-I$(srcdir)/es/vm/intplugins/Matrix2x3Plugin \
 	-I$(srcdir)/es/vm/intplugins/MiscPrimitivePlugin \
+	-I$(srcdir)/es/vm/intplugins/SocketPlugin \
 	-I$(srcdir)/es/vm/intplugins/SoundPlugin \
 	-I$(srcdir)/es/vm/intplugins/SoundGenerationPlugin \
 	-I$(srcdir)/es/vm/intplugins/SecurityPlugin
@@ -307,6 +314,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Matrix2x3Plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MiscPrimitivePlugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SecurityPlugin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SocketPlugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SoundGenerationPlugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SoundPlugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interp.Po@am__quote@
@@ -315,6 +323,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqEsDirectory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqEsFile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqEsInput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqEsSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqEsSound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqNamedPrims.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sqOldSoundPrims.Po@am__quote@
@@ -502,6 +511,20 @@ sqEs32Security.obj: es/vm/intplugins/SecurityPlugin/sqEs32Security.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sqEs32Security.obj `if test -f 'es/vm/intplugins/SecurityPlugin/sqEs32Security.c'; then $(CYGPATH_W) 'es/vm/intplugins/SecurityPlugin/sqEs32Security.c'; else $(CYGPATH_W) '$(srcdir)/es/vm/intplugins/SecurityPlugin/sqEs32Security.c'; fi`
 
+SocketPlugin.o: es/vm/intplugins/SocketPlugin/SocketPlugin.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT SocketPlugin.o -MD -MP -MF "$(DEPDIR)/SocketPlugin.Tpo" -c -o SocketPlugin.o `test -f 'es/vm/intplugins/SocketPlugin/SocketPlugin.c' || echo '$(srcdir)/'`es/vm/intplugins/SocketPlugin/SocketPlugin.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/SocketPlugin.Tpo" "$(DEPDIR)/SocketPlugin.Po"; else rm -f "$(DEPDIR)/SocketPlugin.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='es/vm/intplugins/SocketPlugin/SocketPlugin.c' object='SocketPlugin.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o SocketPlugin.o `test -f 'es/vm/intplugins/SocketPlugin/SocketPlugin.c' || echo '$(srcdir)/'`es/vm/intplugins/SocketPlugin/SocketPlugin.c
+
+SocketPlugin.obj: es/vm/intplugins/SocketPlugin/SocketPlugin.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT SocketPlugin.obj -MD -MP -MF "$(DEPDIR)/SocketPlugin.Tpo" -c -o SocketPlugin.obj `if test -f 'es/vm/intplugins/SocketPlugin/SocketPlugin.c'; then $(CYGPATH_W) 'es/vm/intplugins/SocketPlugin/SocketPlugin.c'; else $(CYGPATH_W) '$(srcdir)/es/vm/intplugins/SocketPlugin/SocketPlugin.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/SocketPlugin.Tpo" "$(DEPDIR)/SocketPlugin.Po"; else rm -f "$(DEPDIR)/SocketPlugin.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='es/vm/intplugins/SocketPlugin/SocketPlugin.c' object='SocketPlugin.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o SocketPlugin.obj `if test -f 'es/vm/intplugins/SocketPlugin/SocketPlugin.c'; then $(CYGPATH_W) 'es/vm/intplugins/SocketPlugin/SocketPlugin.c'; else $(CYGPATH_W) '$(srcdir)/es/vm/intplugins/SocketPlugin/SocketPlugin.c'; fi`
+
 SoundGenerationPlugin.o: es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT SoundGenerationPlugin.o -MD -MP -MF "$(DEPDIR)/SoundGenerationPlugin.Tpo" -c -o SoundGenerationPlugin.o `test -f 'es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.c' || echo '$(srcdir)/'`es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/SoundGenerationPlugin.Tpo" "$(DEPDIR)/SoundGenerationPlugin.Po"; else rm -f "$(DEPDIR)/SoundGenerationPlugin.Tpo"; exit 1; fi
@@ -613,6 +636,20 @@ sqEsDirectory.obj: es/vm/intplugins/FilePlugin/sqEsDirectory.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='es/vm/intplugins/FilePlugin/sqEsDirectory.cpp' object='sqEsDirectory.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sqEsDirectory.obj `if test -f 'es/vm/intplugins/FilePlugin/sqEsDirectory.cpp'; then $(CYGPATH_W) 'es/vm/intplugins/FilePlugin/sqEsDirectory.cpp'; else $(CYGPATH_W) '$(srcdir)/es/vm/intplugins/FilePlugin/sqEsDirectory.cpp'; fi`
+
+sqEsSocket.o: es/vm/intplugins/SocketPlugin/sqEsSocket.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sqEsSocket.o -MD -MP -MF "$(DEPDIR)/sqEsSocket.Tpo" -c -o sqEsSocket.o `test -f 'es/vm/intplugins/SocketPlugin/sqEsSocket.cpp' || echo '$(srcdir)/'`es/vm/intplugins/SocketPlugin/sqEsSocket.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/sqEsSocket.Tpo" "$(DEPDIR)/sqEsSocket.Po"; else rm -f "$(DEPDIR)/sqEsSocket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='es/vm/intplugins/SocketPlugin/sqEsSocket.cpp' object='sqEsSocket.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sqEsSocket.o `test -f 'es/vm/intplugins/SocketPlugin/sqEsSocket.cpp' || echo '$(srcdir)/'`es/vm/intplugins/SocketPlugin/sqEsSocket.cpp
+
+sqEsSocket.obj: es/vm/intplugins/SocketPlugin/sqEsSocket.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sqEsSocket.obj -MD -MP -MF "$(DEPDIR)/sqEsSocket.Tpo" -c -o sqEsSocket.obj `if test -f 'es/vm/intplugins/SocketPlugin/sqEsSocket.cpp'; then $(CYGPATH_W) 'es/vm/intplugins/SocketPlugin/sqEsSocket.cpp'; else $(CYGPATH_W) '$(srcdir)/es/vm/intplugins/SocketPlugin/sqEsSocket.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/sqEsSocket.Tpo" "$(DEPDIR)/sqEsSocket.Po"; else rm -f "$(DEPDIR)/sqEsSocket.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='es/vm/intplugins/SocketPlugin/sqEsSocket.cpp' object='sqEsSocket.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sqEsSocket.obj `if test -f 'es/vm/intplugins/SocketPlugin/sqEsSocket.cpp'; then $(CYGPATH_W) 'es/vm/intplugins/SocketPlugin/sqEsSocket.cpp'; else $(CYGPATH_W) '$(srcdir)/es/vm/intplugins/SocketPlugin/sqEsSocket.cpp'; fi`
 
 sqEsSound.o: es/vm/intplugins/SoundPlugin/sqEsSound.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT sqEsSound.o -MD -MP -MF "$(DEPDIR)/sqEsSound.Tpo" -c -o sqEsSound.o `test -f 'es/vm/intplugins/SoundPlugin/sqEsSound.cpp' || echo '$(srcdir)/'`es/vm/intplugins/SoundPlugin/sqEsSound.cpp; \

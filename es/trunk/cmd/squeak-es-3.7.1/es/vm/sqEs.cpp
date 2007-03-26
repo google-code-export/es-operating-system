@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -66,6 +66,7 @@ extern "C"
 extern void* inputProcess(void* param);
 extern void* audioProcess(void* param);
 extern void* recordProcess(void* param);
+extern void* networkProcess(void* param);
 
 /*** Constants ***/
 static const DateTime Epoch(1901, 1, 1);
@@ -171,8 +172,7 @@ int reserveExtraCHeapBytes(int origHeapSize, int bytesToReserve);
 
 int reserveExtraCHeapBytes(int origHeapSize, int bytesToReserve)
 {
-    int size = origHeapSize + bytesToReserve;
-    return MIN(64*1024*1024, size);
+    return origHeapSize + bytesToReserve;
 }
 
 int vmPathSize(void)
@@ -510,6 +510,10 @@ int main()
     IThread* recordThread = System()->createThread(recordProcess, 0);
     recordThread->setPriority(IThread::Normal + 1);
     recordThread->start();
+
+    IThread* networkThread = System()->createThread(networkProcess, 0);
+    networkThread->setPriority(IThread::Normal + 2);
+    networkThread->start();
 
     // Run Squeak
     interpret();
