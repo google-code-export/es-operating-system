@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -24,24 +24,6 @@
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
 
-long long systemCall(void* self, void* base, int m, va_list ap)
-{
-    esReport("%s(%d, %d, %p)\n", __func__, (void**) self - (void**) base, m, ap);
-
-    long long result;
-
-    __asm__ __volatile__ (
-        "int    $65"
-        : "=A"(result) : "a"(self), "d"(m), "c"(ap), "S"(base));
-    return result;
-}
-
-//
-// XXX The following table must be mapped into user process address space
-//     The kernel needs to know the address of Ptbl.
-//
-Broker<systemCall, 100> System;
-
 int main()
 {
     IInterface* system(0);
@@ -53,23 +35,10 @@ int main()
     long long size;
     size = framebuffer->getSize();
 
-    Reflect::Interface interface = getInterface(IInterface::interfaceID());
-    esReport("%s\n", interface.getName());
-
     Process* process = new Process;
     process->load();
 
-    IInterface* object = (IInterface*) &(System.getInterfaceTable()[0]);
-    esReport("object: %p\n", object);
-    int rc;
-    rc = object->addRef();
-    esReport("addRef: %x\n", rc);
-    IContext* root;
-    rc = object->queryInterface(IInterface::interfaceID(), (void**) &root);
-    esReport("queryInterface: %x\n", rc);
-
-    rc = root->release();
-    esReport("release: %x\n", rc);
+    process->trace(true);
 
     u8* ptr = (u8*) process->map(0, size,
                                  ICurrentProcess::PROT_READ | ICurrentProcess::PROT_WRITE,
