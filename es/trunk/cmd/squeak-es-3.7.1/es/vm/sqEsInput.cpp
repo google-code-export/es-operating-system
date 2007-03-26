@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -237,9 +237,6 @@ class EventQueue
         case KEYPAD_DOT:
             key = KEYBOARD_DELETE;
             break;
-        case KEYPAD_0:
-            key = KEYBOARD_INSERT;
-            break;
         case KEYPAD_1:
             key = KEYBOARD_END;
             break;
@@ -263,6 +260,9 @@ class EventQueue
             break;
         case KEYPAD_9:
             key = KEYBOARD_PAGEUP;
+            break;
+        case KEYPAD_0:
+            key = KEYBOARD_INSERT;
             break;
         default:
             return 0;
@@ -289,6 +289,27 @@ class EventQueue
 
         switch (key)
         {
+        case KEYBOARD_1:
+            return '1';
+        case KEYBOARD_2:
+            return '2';
+        case KEYBOARD_3:
+            return '3';
+        case KEYBOARD_4:
+            return '4';
+        case KEYBOARD_5:
+            return '5';
+        case KEYBOARD_6:
+            return '6';
+        case KEYBOARD_7:
+            return '7';
+        case KEYBOARD_8:
+            return '8';
+        case KEYBOARD_9:
+            return '9';
+        case KEYBOARD_0:
+            return '0';
+
         case KEYBOARD_SPACEBAR:
             return ' ';
         case KEYBOARD_MINUS:
@@ -314,8 +335,6 @@ class EventQueue
         case KEYBOARD_SLASH:
             return '/';
 
-        case KEYPAD_0:
-            return '0';
         case KEYPAD_1:
             return '1';
         case KEYPAD_2:
@@ -334,6 +353,8 @@ class EventQueue
             return '8';
         case KEYPAD_9:
             return '9';
+        case KEYPAD_0:
+            return '0';
 
         case KEYPAD_MULTIPLY:
             return '*';
@@ -714,6 +735,7 @@ int ioProcessEvents(void)
     /* process Macintosh events, checking for the interrupt key. Return
        true if the interrupt key was pressed. This might simply do nothing
        on some other platform.*/
+    // aioPoll(0);
 
     /* return true by RecordKeystroke if interrupt key is pressed */
     return 0;
@@ -788,6 +810,9 @@ int ioRelinquishProcessorForMicroseconds(int microSeconds)
 {
     Handle<ICurrentThread> current(System()->currentThread());
     current->sleep(microSeconds * 10);
+
+    // aioPoll(microSeconds);
+    return 0;
 }
 
 int ioForceDisplayUpdate(void)
