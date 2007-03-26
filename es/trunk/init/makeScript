@@ -12,6 +12,5 @@ echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/SqueakV3.sources > /dev/
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/Squeak3.7-5989-full.changes > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/squeak-3.7.1/Squeak3.7-5989-full.image > /dev/null 2>&1' >> $SCRIPT
 echo '' >> $SCRIPT
-echo 'echo usage: qemu -hda '$DIR'/fat32.img -serial stdio -soundhw sb16' >> $SCRIPT
-
+echo 'echo usage: qemu -hda '$DIR'/fat32.img -serial stdio -soundhw sb16 -net nic,vlan=0 -net tap,vlan=0,ifname=tap0,script=/etc/qemu-ifup' >> $SCRIPT
 chmod u+x $SCRIPT

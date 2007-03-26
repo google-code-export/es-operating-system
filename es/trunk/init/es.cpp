@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -11,7 +11,6 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#include <new>
 #include <stdlib.h>
 #include <es.h>
 #include <es/clsid.h>
@@ -19,7 +18,30 @@
 #include <es/base/IProcess.h>
 #include <es/device/IFileSystem.h>
 
+#include <string.h>
+#include <es.h>
+#include <es/dateTime.h>
+#include <es/endian.h>
+#include <es/handle.h>
+#include <es/list.h>
+#include <es/ref.h>
+#include <es/base/IService.h>
+#include <es/base/IStream.h>
+#include <es/base/IThread.h>
+#include <es/device/INetworkInterface.h>
+#include <es/naming/IContext.h>
+#include <es/net/ISocket.h>
+#include <es/net/IInternetConfig.h>
+#include <es/net/IResolver.h>
+#include <es/net/arp.h>
+#include <es/net/dhcp.h>
+#include <es/net/dns.h>
+#include <es/net/udp.h>
+
 int esInit(IInterface** nameSpace);
+extern void esRegisterInternetProtocol(IContext* context);
+extern void esRegisterDHCPClient(IContext* context);
+
 IStream* esReportStream();
 
 void init(Handle<IContext> root)
@@ -46,11 +68,52 @@ void init(Handle<IContext> root)
     esReport("Squeak exited.\n");
 }
 
+int initNetwork(Handle<IContext> context)
+{
+    esRegisterInternetProtocol(context);
+
+    // Lookup resolver object
+    Handle<IResolver> resolver = context->lookup("network/resolver");
+
+    // Lookup internet config object
+    Handle<IInternetConfig> config = context->lookup("network/config");
+
+    // Setup DIX interface
+    Handle<INetworkInterface> ethernetInterface = context->lookup("device/ethernet");
+    ethernetInterface->start();
+    int dixID = config->addInterface(ethernetInterface);
+    esReport("dixID: %d\n", dixID);
+
+    esRegisterDHCPClient(context);
+
+    Handle<IService> service = context->lookup("network/interface/2/dhcp");
+    service->start();
+
+#if 0
+    esSleep(120000000);
+
+    Handle<IInternetAddress> host = config->getAddress(dixID);
+    if (host)
+    {
+        InAddr addr;
+
+        host->getAddress(&addr, sizeof(InAddr));
+        u32 h = ntohl(addr.addr);
+        esReport("host: %d.%d.%d.%d\n", (u8) (h >> 24), (u8) (h >> 16), (u8) (h >> 8), (u8) h);
+    }
+#endif
+
+    // service->stop();
+    // ethernetInterface->stop();
+}
+
 int main(int argc, char* argv[])
 {
     IInterface* ns = 0;
     esInit(&ns);
     Handle<IContext> nameSpace(ns);
+
+    initNetwork(nameSpace);
 
     Handle<IClassStore> classStore(nameSpace->lookup("class"));
     esRegisterFatFileSystemClass(classStore);

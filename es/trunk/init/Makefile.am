@@ -12,7 +12,7 @@ noinst_PROGRAMS = $(noinst_SCRIPTS)
 
 noinst_DATA = es.img fat32.img
 
-LDADD = ../os/fs/fat/libesfat.a ../os/fs/iso9660/libesiso9660.a ../os/kernel/libeskernel.a ../os/libes++/libessup++.a
+LDADD = ../os/fs/fat/libesfat.a ../os/fs/iso9660/libesiso9660.a ../os/net/libesnet.a ../os/kernel/libeskernel.a ../os/libes++/libessup++.a
 
 AM_LDFLAGS = -v -static -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
 
