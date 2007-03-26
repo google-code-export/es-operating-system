@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -56,6 +56,8 @@
 // 0x00030000 - 0x0004ffff      MPS Core objects
 // 0x00100000 - 0x00ffffff      Heap
 // 0x01000000 -                 Kernel
+
+#define USE_SVGA
 
 #include "fat.h"
 
@@ -405,7 +407,7 @@ run:
         popw    %es
 3:
         // Switch to SVGA mode using VESA BIOS
-#if 1
+#ifdef USE_SVGA
         movw    $0x4f02, %ax
         movw    $0x4000, %bx            // 0x4000: enable linear frame-buffer
         orw     %cx, %bx
