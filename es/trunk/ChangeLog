@@ -1,3 +1,15 @@
+2007-03-26  Okasaka  <okasaka@users.sourceforge.jp>
+
+	* es 0.0.8 released.
+	* init/es.cpp (initNetwork) : Initiate DHCP client service.
+	* Refine TCP/IP stack including non-blocking I/O support.
+	* include/es/timer.h (Timer::start) : Fix to unlock monitor while calling TimerTask.
+	* os/kernel/pc/gdbstub.cpp : New to support remote debugging with gdb.
+	* os/kernel/port/interface.cpp : Update the default interface database.
+	* include/es/broker.h (Broker::vtbl) : Expand the size of vtbl for ISocket.
+	* os/libes++/src/ring.cpp (Ring::read) : Fix bug.
+	* include/es/handle.h: Fix bugs.
+
 2007-03-05  Okasaka  <okasaka@users.sourceforge.jp>
 
 	* es 0.0.7 released.
