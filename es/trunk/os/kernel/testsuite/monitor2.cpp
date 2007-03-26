@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -57,12 +57,14 @@ void* child2timeout(void* param)
     return 0;   // lint
 }
 
-void* test2(void*)
+void* test2(void* id)
 {
     void* val;
     long count;
     IMonitor* monitor[2];
     IThread* thread;
+
+    esReport("'%s'\n", id);
 
     // check timeout.
     monitor[0] = new Monitor();
@@ -113,6 +115,8 @@ void* test2(void*)
     return 0;
 }
 
+char* id = "hello.";
+
 int main()
 {
     IInterface* root = NULL;
@@ -120,7 +124,7 @@ int main()
 
     // check wait(s64 timeout).
     IThread* thread2 = new Thread(test2,            // thread function
-                                  0,                // argument to thread function
+                                  id,               // argument to thread function
                                   IThread::Normal); // priority
     thread2->start();
     void* val;
