@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -97,12 +97,24 @@ sync(u8 status)
 {
     using namespace Status;
 
+    int timeout = 0;
     while (inpb(ctlPort + ALTERNATE_STATUS) & BSY)
     {
 #if defined(__i386__) || defined(__x86_64__)
         __asm__ __volatile__ ("pause\n");
+        // Reading or writing a byte from/to port 0x80 take almost
+        // exactly 1 microsecond independent of the processor type
+        // and speed.
+        __asm__ __volatile__ ("outb %%al, $0x80" ::: "%eax");
 #endif
+        if (1000000L < ++timeout)
+        {
+            esReport("AtaController::sync() -- timeout\n");
+            break;
+        }
     }
+    inpb(ctlPort + ALTERNATE_STATUS);
+
     // It seems ALTERNATE_STATUS is not properly emulated under QEMU except the BSY bit.
     return inpb(cmdPort + STATUS);
 }
@@ -479,6 +491,8 @@ AtaController(int cmdPort, int ctlPort, int irq, AtaDma* dma, IContext* ata) :
     dma(dma),
     thread(run, this, IThread::Highest - (irq - 14))
 {
+    device[0] = device[1] = 0;
+
     esCreateInstance(CLSID_Monitor,
                      IID_IMonitor,
                      reinterpret_cast<void**>(&monitor));
@@ -519,6 +533,11 @@ AtaController(int cmdPort, int ctlPort, int irq, AtaDma* dma, IContext* ata) :
         {
             device[1] = new AtaPacketDevice(this, Device::SLAVE, signature);
         }
+    }
+
+    if (device[0] == 0 && device[1] == 0)
+    {
+        return;
     }
 
     Core::registerExceptionHandler(32 + irq, this);
