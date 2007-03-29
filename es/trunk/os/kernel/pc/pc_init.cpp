@@ -45,6 +45,10 @@
 #include "vesa.h"
 
 #define USE_SVGA
+#define GDB_STUB
+#define USE_COM1
+#define USE_SB16
+#define USE_NE2000
 
 void putDebugChar(int ch);
 
@@ -159,6 +163,7 @@ int esInit(IInterface** nameSpace)
     Cga* cga = new Cga;
     reportStream = cga;
 
+#ifdef USE_COM1
     // COM1 for stdio
     if (int port = ((u16*) 0x400)[0])
     {
@@ -168,12 +173,15 @@ int esInit(IInterface** nameSpace)
             reportStream = uart;
         }
     }
+#endif
 
+#ifdef GDB_STUB
     // COM2 for gdb
     if (int port = ((u16*) 0x400)[1])
     {
         uart = new Uart(port);
     }
+#endif
 
     // Initialize 8259 anyways.
     pic = new Pic();
@@ -288,6 +296,13 @@ int esInit(IInterface** nameSpace)
 
     Core::pic->splLo();
 
+    if (uart)
+    {
+        // Set break point here if using a debbugger.
+        breakpoint();
+        //  Core::pic->startup(4);
+    }
+
     root->bind("device/beep", static_cast<IBeep*>(pit));
 
 #ifdef USE_SVGA
@@ -299,35 +314,32 @@ int esInit(IInterface** nameSpace)
     Keyboard* keyboard = new Keyboard(device);
 
     IContext* ata = root->createSubcontext("device/ata");
-    AtaController* ctlr0 = new AtaController(0x1f0, 0x3f4, 14, 0, ata);
-    AtaController* ctlr1 = new AtaController(0x170, 0x374, 15, 0, ata);
+    AtaController* ctlr0 = new AtaController(0x1f0, 0x3f0, 14, 0, ata);
+    AtaController* ctlr1 = new AtaController(0x170, 0x370, 15, 0, ata);
 
     FloppyController* fdc = new FloppyController(&slave->chan[2]);
     FloppyDrive* fdd = new FloppyDrive(fdc, 0);
     root->bind("device/floppy", static_cast<IStream*>(fdd));
 
+#ifdef USE_SB16
     SoundBlaster16* sb16 = new SoundBlaster16(master, slave);
     ASSERT(static_cast<IStream*>(&sb16->inputLine));
     ASSERT(static_cast<IStream*>(&sb16->outputLine));
     root->bind("device/soundInput", static_cast<IStream*>(&sb16->inputLine));
     root->bind("device/soundOutput", static_cast<IStream*>(&sb16->outputLine));
+#endif
 
     // Register the loopback interface
     Loopback* loopback = new Loopback(loopbackBuffer, sizeof loopbackBuffer);
     device->bind("loopback", static_cast<IStream*>(loopback));
 
+#ifdef USE_NE2000
     // Register the Ethernet interface
     Dp8390d* ne2000 = new Dp8390d(0xc100, 10);
     device->bind("ethernet", static_cast<IStream*>(ne2000));
+#endif
 
     Process::initialize();
-
-    if (uart)
-    {
-        // Set break point here if using a debbugger.
-        breakpoint();
-        //  Core::pic->startup(4);
-    }
 
     return 0;
 }
@@ -347,6 +359,7 @@ void esSleep(s64 timeout)
         return;
     }
 
+    timeout += 9;
     timeout /= 10;
     while (0 < timeout--)
     {
