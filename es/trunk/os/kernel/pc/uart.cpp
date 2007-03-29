@@ -52,6 +52,8 @@ Uart(int baseaddr) :
 void Uart::
 setBaud(int rate)
 {
+    // baud = 115200 / rate
+
     outpb(baseaddr + LCR, 0x80);    // Set DLAB ON
     outpb(baseaddr + 0, rate);
     outpb(baseaddr + 1, 0x00);      // Set Baud rate - Divisor Latch High Byte
