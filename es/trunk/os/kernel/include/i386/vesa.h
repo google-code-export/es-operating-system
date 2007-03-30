@@ -20,6 +20,7 @@
 #include <es/base/IStream.h>
 #include <es/base/IPageable.h>
 #include <es/device/ICursor.h>
+#include "thread.h"
 
 class Vesa : public IStream, public ICursor, public IPageable
 {
@@ -92,6 +93,7 @@ class Vesa : public IStream, public ICursor, public IPageable
     long    size;
 
     // mouse cursor
+    Monitor     monitor;
     Interlocked count;
     static u32  data[32];
     static u32  mask[32];

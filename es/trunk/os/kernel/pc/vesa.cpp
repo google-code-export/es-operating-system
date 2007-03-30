@@ -119,6 +119,8 @@ Vesa(u8* vbeInfoBlock, u8* modeInfoBlock, u8* font, IContext* device) :
 int Vesa::
 show()
 {
+    Monitor::Synchronized method(monitor);
+
     int show = count.increment();
     if (show == 1)
     {
@@ -131,6 +133,8 @@ show()
 int Vesa::
 hide()
 {
+    Monitor::Synchronized method(monitor);
+
     int show = count.decrement();
     if (show == 0)
     {
@@ -148,6 +152,8 @@ move(int dx, int dy)
 void Vesa::
 getPosition(int& x, int& y)
 {
+    Monitor::Synchronized method(monitor);
+
     x = xPosition;
     y = yPosition;
 }
@@ -155,6 +161,8 @@ getPosition(int& x, int& y)
 void Vesa::
 setPosition(int x, int y)
 {
+    Monitor::Synchronized method(monitor);
+
     if (x == xPosition && y == yPosition)
     {
         return;
@@ -195,6 +203,8 @@ setPosition(int x, int y)
 void Vesa::
 setPattern(const u32 data[32], const u32 mask[32], u16 xHotSpot, u16 yHotSpot)
 {
+    Monitor::Synchronized method(monitor);
+
     if (0 < count)
     {
         restoreBackground();
