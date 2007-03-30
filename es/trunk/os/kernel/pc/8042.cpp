@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -444,19 +444,18 @@ invoke(int param)
             }
             packet[count] = data;
 
-
-            int dz = 0;
+            s8 dz = 0;
             ++count;
             switch (aux)
             {
-            case 0:
+            case 0: // PS/2 mouse
                 if (count == 3)
                 {
                     count = 0;
                     packet[3] = 0;
                 }
                 break;
-            case 3:
+            case 3: // Intellimouse
                 if (count == 4)
                 {
                     dz = data;
@@ -464,7 +463,7 @@ invoke(int param)
                     packet[3] = 0;
                 }
                 break;
-            case 4:
+            case 4: // Intellimouse (5 button)
                 if (count == 4)
                 {
                     dz = data & 0xff;
@@ -502,7 +501,7 @@ invoke(int param)
 
                 axis[2] = clamp(axis[2] + dz);
                 button = ((packet[3] >> 1) & 0x18) | (packet[0] & 0x07);
-                // esReport("aux: %02x %d %d %d\n", button, axis[0], axis[1], axis[2]);
+                // esReport("aux: %02x %02x %02x %02x: %02x\n", packet[0], packet[1], packet[2], packet[3], (u8) dz);
             }
         }
         else
@@ -651,26 +650,27 @@ detectAuxDevice(void)
     writeAuxDevice(SET_DEFAULTS);
     writeAuxDevice(SET_STREAM_MODE);
 
-    // Try to enter the scrolling wheel plus 5 button mode.
+    // Try to enter the scrolling wheel mode.
     writeAuxDevice(SET_SAMPLE_RATE);
     writeAuxDevice(200);
     writeAuxDevice(SET_SAMPLE_RATE);
-    writeAuxDevice(200);
+    writeAuxDevice(100);
     writeAuxDevice(SET_SAMPLE_RATE);
     writeAuxDevice(80);
-
     writeAuxDevice(GET_DEVICE_ID);
     aux = receiveData();
-    if (aux != 0x04)
+
+    if (aux == 0x03)
     {
-        // Try to enter the scrolling wheel mode.
+        // Try to enter the scrolling wheel plus 5 button mode.
         writeAuxDevice(SET_SAMPLE_RATE);
         writeAuxDevice(200);
         writeAuxDevice(SET_SAMPLE_RATE);
-        writeAuxDevice(100);
+        writeAuxDevice(200);
         writeAuxDevice(SET_SAMPLE_RATE);
         writeAuxDevice(80);
     }
+
     writeAuxDevice(GET_DEVICE_ID);
     aux = receiveData();
     // esReport("mouse type: %d\n", aux);
