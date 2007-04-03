@@ -57,9 +57,10 @@
 // 0x00100000 - 0x00ffffff      Heap
 // 0x01000000 -                 Kernel
 
-#define USE_SVGA
-
 #include "fat.h"
+
+#define USE_SVGA
+// #define USE_CHS         // Do not use LBA mode
 
 //
 // Configuration
@@ -651,6 +652,7 @@ read:
         movl    %edx, (PacketLBA32)
         movb    (DeviceNum), %dl
 
+#ifndef USE_CHS
         // Check LBA support
         movb    $0x41, %ah
         movw    $0x55aa, %bx
@@ -666,7 +668,9 @@ read:
         movw    %es, (PacketSeg)
         movb    $0x42, %ah              // extended read
         movw    $Packet, %si
-        jmp     2f
+        int     $0x13
+        jnc     2f
+#endif
 
         // Use CHS
 1:      movw    (PacketLBA0), %ax
@@ -684,10 +688,10 @@ read:
         movb    $1, %al                 // number of sectors to read
         movw    %di, %bx
         movb    (DeviceNum), %dl
-
-2:      int     $0x13
+        int     $0x13
         jc      hang
 
+2:
         addw    (BPB_BytsPerSec), %di
         jnc     3f
         movw    %es, %ax
@@ -698,7 +702,8 @@ read:
         addl    $1, %eax
         adcl    $0, %edx
         popw    %cx
-        loop    0b
+        decw    %cx
+        jnz     0b
 
         popl    %esi
         ret
