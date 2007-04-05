@@ -169,6 +169,7 @@ cpp_source_files += \
 	pc/fdd.cpp \
 	pc/gdbstub.cpp \
 	pc/mps.cpp \
+	pc/pci.cpp \
 	pc/pc_core.cpp \
 	pc/pc_dateTime.cpp \
 	pc/pc_init.cpp \
@@ -203,6 +204,7 @@ header_files += \
 	include/i386/io.h \
 	include/i386/label.h \
 	include/i386/mps.h \
+	include/i386/pci.h \
 	include/i386/rtc.h \
 	include/i386/sb16.h \
 	include/i386/vesa.h \

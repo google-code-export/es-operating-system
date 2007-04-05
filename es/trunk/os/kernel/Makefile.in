@@ -53,9 +53,10 @@ target_triplet = @target@
 @ES_TRUE@	pc/8259.cpp pc/apic.cpp pc/ataController.cpp \
 @ES_TRUE@	pc/ataDevice.cpp pc/ataPacket.cpp pc/cga.cpp \
 @ES_TRUE@	pc/fdc.cpp pc/fdd.cpp pc/gdbstub.cpp pc/mps.cpp \
-@ES_TRUE@	pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
-@ES_TRUE@	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
-@ES_TRUE@	pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp
+@ES_TRUE@	pc/pci.cpp pc/pc_core.cpp pc/pc_dateTime.cpp \
+@ES_TRUE@	pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
+@ES_TRUE@	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp \
+@ES_TRUE@	pc/dp8390d.cpp
 @ES_TRUE@am__append_3 = \
 @ES_TRUE@	include/i386/8042.h \
 @ES_TRUE@	include/i386/8237a.h \
@@ -70,6 +71,7 @@ target_triplet = @target@
 @ES_TRUE@	include/i386/io.h \
 @ES_TRUE@	include/i386/label.h \
 @ES_TRUE@	include/i386/mps.h \
+@ES_TRUE@	include/i386/pci.h \
 @ES_TRUE@	include/i386/rtc.h \
 @ES_TRUE@	include/i386/sb16.h \
 @ES_TRUE@	include/i386/vesa.h \
@@ -139,7 +141,7 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	pc/8237a.cpp pc/8254.cpp pc/8259.cpp pc/apic.cpp \
 	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
 	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/gdbstub.cpp pc/mps.cpp \
-	pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
+	pc/pci.cpp pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
 	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
 	pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp windows/ref.cpp \
 	posix/posix_thread.cpp posix/posix_monitor.cpp \
@@ -155,9 +157,9 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	include/i386/ataController.h include/i386/cga.h \
 	include/i386/core.h include/i386/cpu.h include/i386/fdc.h \
 	include/i386/io.h include/i386/label.h include/i386/mps.h \
-	include/i386/rtc.h include/i386/sb16.h include/i386/vesa.h \
-	include/i386/dp8390d.h include/posix/core.h \
-	include/posix/tap.h
+	include/i386/pci.h include/i386/rtc.h include/i386/sb16.h \
+	include/i386/vesa.h include/i386/dp8390d.h \
+	include/posix/core.h include/posix/tap.h
 @ES_TRUE@am__objects_1 = label.$(OBJEXT)
 am__objects_2 =
 @ES_TRUE@am__objects_3 = lock.$(OBJEXT) malloc.$(OBJEXT) map.$(OBJEXT) \
@@ -169,10 +171,11 @@ am__objects_2 =
 @ES_TRUE@	apic.$(OBJEXT) ataController.$(OBJEXT) \
 @ES_TRUE@	ataDevice.$(OBJEXT) ataPacket.$(OBJEXT) cga.$(OBJEXT) \
 @ES_TRUE@	fdc.$(OBJEXT) fdd.$(OBJEXT) gdbstub.$(OBJEXT) \
-@ES_TRUE@	mps.$(OBJEXT) pc_core.$(OBJEXT) pc_dateTime.$(OBJEXT) \
-@ES_TRUE@	pc_init.$(OBJEXT) pc_thread.$(OBJEXT) rtc.$(OBJEXT) \
-@ES_TRUE@	sb16.$(OBJEXT) uart.$(OBJEXT) vesa.$(OBJEXT) \
-@ES_TRUE@	xreg.$(OBJEXT) dp8390d.$(OBJEXT)
+@ES_TRUE@	mps.$(OBJEXT) pci.$(OBJEXT) pc_core.$(OBJEXT) \
+@ES_TRUE@	pc_dateTime.$(OBJEXT) pc_init.$(OBJEXT) \
+@ES_TRUE@	pc_thread.$(OBJEXT) rtc.$(OBJEXT) sb16.$(OBJEXT) \
+@ES_TRUE@	uart.$(OBJEXT) vesa.$(OBJEXT) xreg.$(OBJEXT) \
+@ES_TRUE@	dp8390d.$(OBJEXT)
 @WIN32_TRUE@am__objects_4 = ref.$(OBJEXT)
 @POSIX_TRUE@am__objects_5 = posix_thread.$(OBJEXT) \
 @POSIX_TRUE@	posix_monitor.$(OBJEXT) posix_core.$(OBJEXT) \
@@ -546,6 +549,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pc_dateTime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pc_init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pc_thread.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pci.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_core.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_dateTime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_ethernet.Po@am__quote@
@@ -1756,6 +1760,20 @@ mps.obj: pc/mps.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/mps.cpp' object='mps.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mps.obj `if test -f 'pc/mps.cpp'; then $(CYGPATH_W) 'pc/mps.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/mps.cpp'; fi`
+
+pci.o: pc/pci.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pci.o -MD -MP -MF "$(DEPDIR)/pci.Tpo" -c -o pci.o `test -f 'pc/pci.cpp' || echo '$(srcdir)/'`pc/pci.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/pci.Tpo" "$(DEPDIR)/pci.Po"; else rm -f "$(DEPDIR)/pci.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/pci.cpp' object='pci.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pci.o `test -f 'pc/pci.cpp' || echo '$(srcdir)/'`pc/pci.cpp
+
+pci.obj: pc/pci.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pci.obj -MD -MP -MF "$(DEPDIR)/pci.Tpo" -c -o pci.obj `if test -f 'pc/pci.cpp'; then $(CYGPATH_W) 'pc/pci.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/pci.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/pci.Tpo" "$(DEPDIR)/pci.Po"; else rm -f "$(DEPDIR)/pci.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/pci.cpp' object='pci.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pci.obj `if test -f 'pc/pci.cpp'; then $(CYGPATH_W) 'pc/pci.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/pci.cpp'; fi`
 
 pc_core.o: pc/pc_core.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pc_core.o -MD -MP -MF "$(DEPDIR)/pc_core.Tpo" -c -o pc_core.o `test -f 'pc/pc_core.cpp' || echo '$(srcdir)/'`pc/pc_core.cpp; \

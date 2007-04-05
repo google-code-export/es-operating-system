@@ -22,6 +22,7 @@
 #include <es/handle.h>
 #include <es/reflect.h>
 #include <es/base/IClassFactory.h>
+#include "io.h"
 #include "8042.h"
 #include "8237a.h"
 #include "8254.h"
@@ -38,6 +39,7 @@
 #include "loopback.h"
 #include "mps.h"
 #include "partition.h"
+#include "i386/pci.h"
 #include "rtc.h"
 #include "sb16.h"
 #include "thread.h"
@@ -48,7 +50,7 @@
 #define GDB_STUB
 #define USE_COM1
 #define USE_SB16
-#define USE_NE2000
+// #define USE_NE2000ISA
 
 void putDebugChar(int ch);
 
@@ -71,6 +73,7 @@ namespace
     Apic*           apic;
     u8              loopbackBuffer[64 * 1024];
     Uart*           uart;
+    Pci*            pci;
 };
 
 const int Page::SIZE = 4096;
@@ -333,11 +336,13 @@ int esInit(IInterface** nameSpace)
     Loopback* loopback = new Loopback(loopbackBuffer, sizeof loopbackBuffer);
     device->bind("loopback", static_cast<IStream*>(loopback));
 
-#ifdef USE_NE2000
+#ifdef USE_NE2000ISA
     // Register the Ethernet interface
     Dp8390d* ne2000 = new Dp8390d(0xc100, 10);
     device->bind("ethernet", static_cast<IStream*>(ne2000));
 #endif
+
+    pci = new Pci(device);
 
     Process::initialize();
 
