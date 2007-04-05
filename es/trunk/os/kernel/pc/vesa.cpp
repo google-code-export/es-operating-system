@@ -20,9 +20,6 @@
 
 // #define VERBOSE
 
-#define MIN(a, b)   (((a) <= (b)) ? (a) : (b))
-#define MAX(a, b)   (((b) <= (a)) ? (a) : (b))
-
 u32 Vesa::data[32] =
 {
     0xc0000000, // 1100000000000000
@@ -215,6 +212,7 @@ setPattern(const u32 data[32], const u32 mask[32], u16 xHotSpot, u16 yHotSpot)
     this->yHotSpot = yHotSpot;
     if (0 < count)
     {
+        saveBackground();
         drawCursor();
     }
 }
@@ -302,7 +300,7 @@ drawCursor()
     }
     if (x < 0)
     {
-        offset = x;
+        offset = -x;
         len -= -x;
         x = 0;
     }
