@@ -31,8 +31,6 @@
 int Dp8390d::
 readProm()
 {
-    Lock::Synchronized method(spinLock);
-
     u8 buf[32];
     readNicMemory(0, buf, sizeof(buf));
 
@@ -62,10 +60,8 @@ readProm()
         mac[i] = buf[2*i];
     }
 
-#ifdef VERBOSE
     esReport("MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-#endif // VERBOSE
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
     return 0;
 }
@@ -88,23 +84,23 @@ initializeRing()
         writeToNicMemory(page * PAGE_SIZE, buf, sizeof(buf));
     }
 
+    // page 0
+    outpb(base + PSTART, ring.pageStart);
+    outpb(base + PSTOP, ring.pageStop);
+    outpb(base + BNRY, ring.pageStart);
+
     {
         Lock::Synchronized method(spinLock);
-
-        outpb(base + PSTART, ring.pageStart);
-        outpb(base + PSTOP, ring.pageStop);
-        outpb(base + BNRY, ring.pageStart);
-
         // Program Command Register for page 1
         outpb(base + CR, CR_STP | CR_RD2 | CR_PAGE1);
 
         outpb(base + CURR, ring.nextPacket);
-
-        // Program Command Register for page 0
-        outpb(base + CR, CR_STP | CR_RD2 | CR_PAGE0);
-
-        ring.nextPacket = ring.pageStart + 1;
     }
+    // Program Command Register for page 0
+    outpb(base + CR, CR_STP | CR_RD2 | CR_PAGE0);
+
+    ring.nextPacket = ring.pageStart + 1;
+
     return 0;
 }
 
@@ -186,43 +182,35 @@ initializeMulticastAddress()
 int Dp8390d::
 reset()
 {
-    {
-        Lock::Synchronized method(spinLock);
+    // Program Command Register for page 0
+    outpb(base + CR, CR_STP | CR_RD2 | CR_PAGE0);
 
-        // Program Command Register for page 0
-        outpb(base + CR, CR_STP | CR_RD2 | CR_PAGE0);
+    // Initialize Data Configuration Register (DCR)
+    outpb(base + DCR, DCR_FT1 | DCR_LS); // for PCI device
 
-        // Initialize Data Configuration Register (DCR)
-        outpb(base + DCR, DCR_FT1 | DCR_LS); // for PCI device
+    // Clear Remote Byte Count Registers (RBCR0, RBCR1)
+    outpb(base + RBCR0, 0);
+    outpb(base + RBCR1, 0);
 
-        // Clear Remote Byte Count Registers (RBCR0, RBCR1)
-        outpb(base + RBCR0, 0);
-        outpb(base + RBCR1, 0);
+    // Initialize Receive Configuration Register (RCR)
+    // check addresses and CRC on incoming packets without buffering to memory.
+    // accept broadcast.
+    rcr = RCR_MON | RCR_AB;
+    outpb(base + RCR, rcr);
 
-        // Initialize Receive Configuration Register (RCR)
-        // check addresses and CRC on incoming packets without buffering to memory.
-        // accept broadcast.
-        rcr = RCR_MON | RCR_AB;
-        outpb(base + RCR, rcr);
-
-        // Place the NIC in loopback mode.
-        outpb(base + TCR, TCR_LB0);
-    }
+    // Place the NIC in loopback mode.
+    outpb(base + TCR, TCR_LB0);
 
     // Initialize Receive Buffer Ring: Boundary Pointer (BNDRY), Page Start (PSTART), and Page Stop (PSTOP)
     initializeRing();
 
-    {
-        Lock::Synchronized method(spinLock);
+    outpb(base + TPSR, txPageStart);
 
-        outpb(base + TPSR, txPageStart);
+    // Clear Interrupt Status Register (ISR) by writing 0FFh to it.
+    outpb(base + ISR, 0xff);
 
-        // Clear Interrupt Status Register (ISR) by writing 0FFh to it.
-        outpb(base + ISR, 0xff);
-
-        // Initialize Interrupt Mask Register
-        outpb(base + IMR, IMR_CNTE | IMR_OVWE | IMR_TXEE | IMR_RXEE | IMR_PTXE | IMR_PRXE);
-    }
+    // Initialize Interrupt Mask Register
+    outpb(base + IMR, IMR_CNTE | IMR_OVWE | IMR_TXEE | IMR_RXEE | IMR_PTXE | IMR_PRXE);
 
     return 0;
 }
@@ -230,27 +218,23 @@ reset()
 int Dp8390d::
 writeLocked(const void* src, int count)
 {
-    writeToNicMemory(txPageStart * PAGE_SIZE, (u8*) src, count);
+    count = writeToNicMemory(txPageStart * PAGE_SIZE, (u8*) src, count);
 
+    sendDone = false;
+    outpb(base + TBCR0, count & 0xff);
+    outpb(base + TBCR1, (count >> 8) & 0xff);
+    outpb(base + CR, CR_RD2 | CR_TXP | CR_STA | CR_PAGE0);
+
+    // update statistics.
+    statistics.outOctets += (unsigned long long) count;
+
+    if (*((u8*) src) & 0x01)
     {
-        Lock::Synchronized method(spinLock);
-
-        sendDone = false;
-        outpb(base + TBCR0, count & 0xff);
-        outpb(base + TBCR1, (count >> 8) & 0xff);
-        outpb(base + CR, CR_RD2 | CR_TXP | CR_STA | CR_PAGE0);
-
-        // update statistics.
-        statistics.outOctets += (unsigned long long) count;
-
-        if (*((u8*) src) & 0x01)
-        {
-            ++statistics.outNUcastPkts;
-        }
-        else
-        {
-            ++statistics.outUcastPkts;
-        }
+        ++statistics.outNUcastPkts;
+    }
+    else
+    {
+        ++statistics.outUcastPkts;
     }
 
     return count;
@@ -259,8 +243,6 @@ writeLocked(const void* src, int count)
 int Dp8390d::
 getPacketSize(RingHeader* header)
 {
-    Lock::Synchronized method(spinLock);
-
     /*
     In StarLAN applications using bus clock frequencies greater
     than 4 MHz, the NIC does not update the buffer header
@@ -299,15 +281,9 @@ checkRingStatus(RingHeader* header, int len)
         esReport("header->nextPage %d ring.pageStop %d len %d\n", len);
 #endif // VERBOSE
         // reinitialize the ring.
-        {
-            Lock::Synchronized method(spinLock);
-            outpb(base + CR, CR_RD2 | CR_STP | CR_PAGE0);
-        }
+        outpb(base + CR, CR_RD2 | CR_STP | CR_PAGE0);
         initializeRing();
-        {
-            Lock::Synchronized method(spinLock);
-            outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
-        }
+        outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
         return -1;
     }
 
@@ -317,8 +293,6 @@ checkRingStatus(RingHeader* header, int len)
 int Dp8390d::
 updateRing(RingHeader* header)
 {
-    Lock::Synchronized method(spinLock);
-
     /*
      * After a packet is DMAed from the Receive Buffer Ring,
      * the Next Page Pointer (second byte in NIC buffer header)
@@ -342,8 +316,6 @@ isRingEmpty()
 void Dp8390d::
 updateReceiveStatistics(RingHeader* header, int len)
 {
-    Lock::Synchronized method(spinLock);
-
     if (header->status & RSR_PRX)
     {
         statistics.inOctets += (unsigned long) len;
@@ -380,13 +352,9 @@ readLocked(void* dst, int count)
 
     if (!isRingEmpty())
     {
-        {
-            Lock::Synchronized method(spinLock);
-
-            nextPacketAddress = ring.nextPacket * PAGE_SIZE;
-            // read a packet status.
-            readNicMemory(nextPacketAddress, (u8*) &header, sizeof(header));
-        }
+        nextPacketAddress = ring.nextPacket * PAGE_SIZE;
+        // read a packet status.
+        readNicMemory(nextPacketAddress, (u8*) &header, sizeof(header));
         int len = getPacketSize(&header);
 
         // check ring status.
@@ -403,8 +371,6 @@ readLocked(void* dst, int count)
         // read data
         if ((header.status & (RSR_FO | RSR_FAE | RSR_CRC | RSR_PRX)) == RSR_PRX)
         {
-            Lock::Synchronized method(spinLock);
-
             // This packet was received with no errors.
             if (count < len)
             {
@@ -472,45 +438,38 @@ int Dp8390d::
 recoverFromOverflow()
 {
     u8 cr;
+
+    TimeSpan wait(0, 0, 0, 0, 2);
+    if (DateTime::getNow() < lastOverflow + wait)
     {
-        Lock::Synchronized method(spinLock);
-
-        TimeSpan wait(0, 0, 0, 0, 2);
-        if (DateTime::getNow() < lastOverflow + wait)
-        {
-            return -1;
-        }
-
-        cr = inpb(base + CR);
-
-        // Clear Remote Byte Count Registers.
-        outpb(base + RBCR0, 0);
-        outpb(base + RBCR1, 0);
-
-        if (resend && (inpb(base + ISR) & (ISR_PTX | ISR_TXE)))
-        {
-            resend = false;
-        }
-
-        outpb(base + TCR, TCR_LB0); // loopback mode.
-        outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0); // Issue start command.
-
-        // Remove one or more packets from the receive buffer ring.
-        ring.nextPacket = ring.pageStart + 1;
+        return -1;
     }
+
+    cr = inpb(base + CR);
+
+    // Clear Remote Byte Count Registers.
+    outpb(base + RBCR0, 0);
+    outpb(base + RBCR1, 0);
+
+    if (resend && (inpb(base + ISR) & (ISR_PTX | ISR_TXE)))
+    {
+        resend = false;
+    }
+
+    outpb(base + TCR, TCR_LB0); // loopback mode.
+    outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0); // Issue start command.
+
+    // Remove one or more packets from the receive buffer ring.
+    ring.nextPacket = ring.pageStart + 1;
 
     initializeRing();
 
+    outpb(base + ISR, ISR_OVW);
+    outpb(base + TCR, 0);
+
+    if(resend)
     {
-        Lock::Synchronized method(spinLock);
-
-        outpb(base + ISR, ISR_OVW);
-        outpb(base + TCR, 0);
-
-        if(resend)
-        {
-            outpb(base + CR, CR_RD2 | CR_TXP | CR_STA | CR_PAGE0);
-        }
+        outpb(base + CR, CR_RD2 | CR_TXP | CR_STA | CR_PAGE0);
     }
 
     overflow.exchange(false);
@@ -521,26 +480,37 @@ recoverFromOverflow()
 int Dp8390d::
 readNicMemory(unsigned short src, u8* buf, unsigned short len)
 {
-    u8 cr = inpb(base + CR) & ~CR_TXP; // save
+    unsigned short plen = len & ~1; // round-down
+    if (0 < plen)
+    {
+        u8 cr = inpb(base + CR) & ~CR_TXP; // save
 
-    // select page 0 registers
-    outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
+        // select page 0
+        outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
 
-    // set up DMA byte count
-    outpb(base + RBCR0, 0xff & len);
-    outpb(base + RBCR1, len >> 8);
+        // set Remote DMA Byte Count.
+        outpb(base + RBCR0, 0xff & plen);
+        outpb(base + RBCR1, plen >> 8);
 
-    // set up source address in NIC memory.
-    outpb(base + RSAR0, 0xff & src);
-    outpb(base + RSAR1, src >> 8);
+        // set Remote Start Address.
+        outpb(base + RSAR0, 0xff & src);
+        outpb(base + RSAR1, src >> 8);
 
-    outpb(base + CR, CR_RD0 | CR_STA | CR_PAGE0);
+        outpb(base + CR, CR_RD0 | CR_STA | CR_PAGE0);
 
-    inpsb(base + DATA, buf, len);
+        inpsb(base + DATA, buf, plen);
 
-    outpb(base + ISR, ISR_RDC);
+        outpb(base + ISR, ISR_RDC);
 
-    outpb(base + CR, cr); // restore
+        outpb(base + CR, cr); // restore
+    }
+
+    if (plen < len)
+    {
+        u8 last;
+        inpsb(base + DATA, buf+plen, 1);
+        inpsb(base + DATA, &last, 1);
+    }
 
     return len;
 }
@@ -548,37 +518,43 @@ readNicMemory(unsigned short src, u8* buf, unsigned short len)
 int Dp8390d::
 writeToNicMemory(unsigned short dst, u8* buf, unsigned short len)
 {
+    unsigned short plen = (len + 1) & ~1; // round-up
+
+    plen = (plen < 46 + 14) ? 60 : plen;
+#ifdef VERBOSE
+    esReport("writeToNicMemory: %d %d\n", len, plen);
+#endif // VERBOSE
+
+    // select page 0
+    outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
+
+    // clear interrupt status.
+    outpb(base + ISR, ISR_RDC);
+
+    // set Remote DMA Byte Count.
+    outpb(base + RBCR0, plen);
+    outpb(base + RBCR1, plen >> 8);
+
+    // set remote DMA start address.
+    outpb(base + RSAR0, 0xff & dst);
+    outpb(base + RSAR1, dst >> 8);
+
+    // start DMA.
+    outpb(base + CR, CR_RD1 | CR_STA | CR_PAGE0);
+
+    outpsb(base + DATA, buf, len); // Data port
+    while (len++ < plen)
     {
-        Lock::Synchronized method(spinLock);
-        // select page 0 registers
-        outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
-
-        // reset remote DMA complete flag
-        outpb(base + ISR, ISR_RDC);
-
-        // set up DMA byte count
-        outpb(base + RBCR0, len);
-        outpb(base + RBCR1, len >> 8);
-
-        // set up destination address in NIC memory.
-        outpb(base + RSAR0, 0xff & dst);
-        outpb(base + RSAR1, dst >> 8);
-
-        // set remote DMA write
-        outpb(base + CR, CR_RD1 | CR_STA | CR_PAGE0);
-
-        outpsb(base + DATA, buf, len); // Data port
+        outpb(base + DATA, 0);
     }
 
-    // Wait for remote DMA complete.
+    // Wait for the interrupt.
     while ((getIsr() & ISR_RDC) != ISR_RDC)
     {
-        monitor->lock();
         monitor->wait();
-        monitor->unlock();
     }
 
-    return 0;
+    return plen;
 }
 
 u8 Dp8390d::
@@ -593,13 +569,14 @@ setPage(int page)
 u8 Dp8390d::
 getIsr()
 {
-    Lock::Synchronized method(spinLock);
     return inpb(base + ISR);
 }
 
 u8 Dp8390d::
 getCurr()
 {
+    Lock::Synchronized method(spinLock);
+
     u8 cr = setPage(CR_PAGE1);
     u8 curr = inpb(base + CURR);
     restorePage(cr);
@@ -624,10 +601,6 @@ Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
                      IID_IMonitor,
                      reinterpret_cast<void**>(&monitor));
 
-    /*
-     * Reset the board. This is done by doing a read
-     * followed by a write to the Reset address.
-     */
     u8 tmp = inpb(base + RESET);
     esSleep(20000);    // wait for 2 milliseconds
     outpb(base + RESET, tmp);
@@ -665,8 +638,6 @@ Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
 
 Dp8390d::~Dp8390d()
 {
-    Lock::Synchronized method(spinLock);
-
     if (monitor)
     {
         monitor->release();
@@ -676,32 +647,36 @@ Dp8390d::~Dp8390d()
 int Dp8390d::
 start()
 {
+    Synchronized<IMonitor*> method(monitor);
+
     if (overflow && recoverFromOverflow() < 0)
     {
         return -1;
     }
 
-    {
-        Lock::Synchronized method(spinLock);
-        // Put NIC in START mode (Command Register 22H).
-        outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
+    // Program Command Register for page 0
+    outpb(base + CR, CR_STP | CR_RD2 | CR_PAGE0);
 
-        // Initialize TCR to be ready for transmission and reception.
-        outpb(base + TCR, 0);
-    }
+    // exit monitor mode.
+    rcr &= ~RCR_MON;
+    outpb(base + RCR, rcr);
+
+    // Put NIC in START mode (Command Register 22H).
+    outpb(base + CR, CR_RD2 | CR_STA | CR_PAGE0);
+
+    // Initialize TCR to be ready for transmission and reception.
+    outpb(base + TCR, 0);
 }
 
 int Dp8390d::
 stop()
 {
-    {
-        Lock::Synchronized method(spinLock);
+    Synchronized<IMonitor*> method(monitor);
 
-        // stop command.
-        outpb(base + CR, CR_RD2 | CR_STP | CR_PAGE0);
-        outpb(base + RBCR0, 0);
-        outpb(base + RBCR1, 0);
-    }
+    // stop command.
+    outpb(base + CR, CR_RD2 | CR_STP | CR_PAGE0);
+    outpb(base + RBCR0, 0);
+    outpb(base + RBCR1, 0);
 
     int timeout;
     for (timeout = 10; (getIsr() & ISR_RST) == 0 && timeout; --timeout)
@@ -709,11 +684,8 @@ stop()
         esSleep(2000);
     }
 
-    {
-        Lock::Synchronized method(spinLock);
-        // Place the NIC in loopback mode.
-        outpb(base + TCR, TCR_LB0);
-    }
+    // Place the NIC in loopback mode.
+    outpb(base + TCR, TCR_LB0);
 
     return 0;
 }
@@ -721,32 +693,29 @@ stop()
 int Dp8390d::
 probe()
 {
+    Synchronized<IMonitor*> method(monitor);
+
+    outpb(base + CR, CR_RD2 | CR_STP | CR_PAGE0);
+
+    if ((inpb(base + CR) & (CR_RD2 | CR_TXP | CR_STA | CR_STP)) != (CR_RD2 | CR_STP))
     {
-        Lock::Synchronized method(spinLock);
-
-        outpb(base + CR, CR_RD2 | CR_STP | CR_PAGE0);
-
-        if ((inpb(base + CR) & (CR_RD2 | CR_TXP | CR_STA | CR_STP)) != (CR_RD2 | CR_STP))
-        {
-            return -1;
-        }
-
-        if ((inpb(base + ISR) & ISR_RST) != ISR_RST)
-        {
-            return -1;
-        }
-
-        // This Ethernet adapter is DS8390.
-        // assume on-board memory size.
-        nicMemSize = 32 * 1024;
-        reservedPage = 16 * 1024;
-
-        // Temporarily initialize DCR for test.
-        outpb(base + DCR, DCR_FT1 | DCR_LS); // for PCI device
-        outpb(base + PSTART, reservedPage / PAGE_SIZE);
-        outpb(base + PSTOP, nicMemSize / PAGE_SIZE);
-        outpb(base + BNRY, reservedPage / PAGE_SIZE);
+        return -1;
     }
+
+    if ((inpb(base + ISR) & ISR_RST) != ISR_RST)
+    {
+        return -1;
+    }
+
+    // This Ethernet adapter is DP8390.
+    // assume on-board memory size.
+    nicMemSize = 32 * 1024;
+    reservedPage = 16 * 1024;
+
+    outpb(base + DCR, DCR_FT1 | DCR_LS); // assume PCI device
+    outpb(base + PSTART, reservedPage / PAGE_SIZE);
+    outpb(base + PSTOP, nicMemSize / PAGE_SIZE);
+    outpb(base + BNRY, reservedPage / PAGE_SIZE);
 
     // check if the parameters are valid.
     u8 testPattern[] = "Write this pattern, then read the memory and compare them.";
@@ -755,10 +724,7 @@ probe()
 
     writeToNicMemory(reservedPage, testPattern, sizeof(testPattern));
 
-    {
-        Lock::Synchronized method(spinLock);
-        readNicMemory(reservedPage, buf, sizeof(buf));
-    }
+    readNicMemory(reservedPage, buf, sizeof(buf));
     if (memcmp(testPattern, buf, sizeof(testPattern)) != 0)
     {
         return -1;
@@ -770,15 +736,14 @@ probe()
 bool Dp8390d::
 getPromiscuousMode()
 {
-    Lock::Synchronized method(spinLock);
-
+    Synchronized<IMonitor*> method(monitor);
     return rcr & RCR_PRO;
 }
 
 void Dp8390d::
 setPromiscuousMode(bool on)
 {
-    Lock::Synchronized method(spinLock);
+    Synchronized<IMonitor*> method(monitor);
 
     if (on == (rcr & RCR_PRO))
     {
@@ -788,6 +753,8 @@ setPromiscuousMode(bool on)
     u8 cr = setPage(CR_PAGE0);
     if (on)
     {
+        Lock::Synchronized method(spinLock);
+
         rcr = (rcr | RCR_PRO) & ~RCR_AM;
         outpb(base + RCR, rcr);
 
@@ -798,9 +765,12 @@ setPromiscuousMode(bool on)
         {
             outpb(base + MAR0 + i, 0xff);
         }
+        restorePage(cr);
     }
     else
     {
+        Lock::Synchronized method(spinLock);
+
         rcr = (rcr & ~RCR_PRO) | RCR_AM;
         outpb(base + RCR, rcr);
 
@@ -812,15 +782,15 @@ setPromiscuousMode(bool on)
         {
             outpb(base + MAR0 + i, hashTable[i]);
         }
+        restorePage(cr);
     }
-
-    restorePage(cr);
 }
 
 int Dp8390d::
 addMulticastAddress(const u8 macaddr[6])
 {
-    Lock::Synchronized method(spinLock);
+    Synchronized<IMonitor*> method(monitor);
+
     const u8* multicast = macaddr;
     if (!(*multicast & 0x01))
     {
@@ -836,6 +806,8 @@ addMulticastAddress(const u8 macaddr[6])
     // increment reference count.
     if (++hashRef[msb] == 1)
     {
+        Lock::Synchronized method(spinLock);
+
         // Program Command Register for page 1
         u8 cr = setPage(CR_PAGE1);
 
@@ -858,7 +830,7 @@ addMulticastAddress(const u8 macaddr[6])
 int Dp8390d::
 removeMulticastAddress(const u8 macaddr[6])
 {
-    Lock::Synchronized method(spinLock);
+    Synchronized<IMonitor*> method(monitor);
 
     const u8* multicast = macaddr;
     if (!(*multicast & 0x01))
@@ -874,6 +846,8 @@ removeMulticastAddress(const u8 macaddr[6])
 
     if (--hashRef[msb] <= 0)
     {
+        Lock::Synchronized method(spinLock);
+
         hashRef[msb] = 0;
 
         // Program Command Register for page 1
@@ -897,7 +871,7 @@ removeMulticastAddress(const u8 macaddr[6])
 void Dp8390d::
 getMacAddress(u8 mac[6])
 {
-    Lock::Synchronized method(spinLock);
+    Synchronized<IMonitor*> method(monitor);
     memmove(mac, this->mac, sizeof(this->mac));
 }
 
@@ -910,8 +884,7 @@ getLinkState()
 void Dp8390d::
 getStatistics(Statistics* statistics)
 {
-    Lock::Synchronized method(spinLock);
-
+    Synchronized<IMonitor*> method(monitor);
     *statistics = this->statistics;
 };
 
@@ -921,6 +894,8 @@ getStatistics(Statistics* statistics)
 int Dp8390d::
 read(void* dst, int count)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     if (overflow && recoverFromOverflow() < 0)
     {
         return -1;
@@ -928,18 +903,18 @@ read(void* dst, int count)
 
     int ret;
 
-    monitor->lock();
     while ((ret = readLocked(dst, count)) == 0)
     {
         monitor->wait();
     }
-    monitor->unlock();
     return ret;
 }
 
 int Dp8390d::
 write(const void* src, int count)
 {
+    Synchronized<IMonitor*> method(monitor);
+
     if (overflow && recoverFromOverflow() < 0)
     {
         return -1;
@@ -950,14 +925,12 @@ write(const void* src, int count)
         return -1;
     }
 
-    monitor->lock();
     int ret = writeLocked(src, count);
 
     while (!sendDone)
     {
         monitor->wait();
     }
-    monitor->unlock();
 
     return ret;
 }
@@ -975,6 +948,12 @@ invoke(int irq)
     u8 isr;
     while ((isr = inpb(base + ISR)) & (ISR_CNT | ISR_OVW | ISR_TXE | ISR_RXE | ISR_PTX | ISR_PRX))
     {
+#ifdef VERBOSE
+        u8 rsr = inpb(base + RSR);
+        u8 tsr = inpb(base + TSR);
+        esReport("Dp8390d::invoke: isr=0x%x rsr=0x%x tsr=0x%x\n", isr, rsr, tsr);
+#endif
+
         if (isr & (ISR_TXE | ISR_PTX))
         {
             // TRANSMIT ERROR or PACKET TRANSMITTED
@@ -1006,7 +985,18 @@ invoke(int irq)
             outpb(base + ISR, ISR_RXE | ISR_PRX); // clear.
             monitor->notifyAll();
         }
+
+        if (isr & ISR_CNT)
+        {
+            // MSB of one or more of the Network Tally Counters has been set.
+            outpb(base + ISR, ISR_CNT);
+        }
     }
+
+    // network tally counters
+    statistics.inDiscards += inpb(base + CNTR0); // frame alignment errors
+    statistics.inDiscards += inpb(base + CNTR1); // CRC errors
+    statistics.inDiscards += inpb(base + CNTR2); // lack of buffer resources
 
     if (isr & ISR_RDC)
     {
