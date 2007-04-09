@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -378,6 +378,11 @@ public:
     ConfigurationTableHeader* getConfigurationTableHeader() const
     {
         return cth;
+    }
+
+    int getProcessorCount() const
+    {
+        return processorCount;
     }
 
     /** Lookup interrupt assignment entry for irq and bus.

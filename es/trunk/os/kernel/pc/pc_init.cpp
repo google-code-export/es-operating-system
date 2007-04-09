@@ -207,6 +207,10 @@ int esInit(IInterface** nameSpace)
     {
         Core::pic = pic;
     }
+    else if (mps->getProcessorCount() < 2)
+    {
+        Core::pic = pic;
+    }
     else
     {
         // Startup APs
