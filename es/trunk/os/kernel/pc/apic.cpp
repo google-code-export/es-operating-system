@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -400,6 +400,11 @@ release(void)
 int Apic::
 readRtcCounter(int addr)
 {
+    do
+    {
+        outpb(Rtc::PORT_ADDR, Rtc::PORT_A);
+    }
+    while (inpb(Rtc::PORT_DATA) & 0x80);    // wait UIP
     outpb(Rtc::PORT_ADDR, addr);
     u8 bcd = inpb(Rtc::PORT_DATA);
     return (bcd & 0xf) + 10 * (bcd >> 4);
@@ -411,6 +416,7 @@ busFreq()
 {
     int t0;
     int t1;
+    int t2;
 
     localApic[DCR] &= ~0x0b;
     localApic[DCR] |= 0x0b;         // divide by 1
@@ -425,14 +431,14 @@ busFreq()
     } while (t0 == t1);
     localApic[ICR] = 0xffffffff;
     do {
-        t0 = readRtcCounter(Rtc::SECONDS);
-    } while (t0 == t1);
+        t2 = readRtcCounter(Rtc::SECONDS);
+    } while (t2 == t1);
     unsigned count = localApic[CCR];
     Core::splX(x);
 
-    busClock = 0xffffffff - count;
+    busClock = 0xffffffffU - count;
     busClock = (busClock + 500000) / 1000000 * 1000000;
-    esReport("Bus freq: %u\n", busClock);
+    esReport("Bus freq: %u %u %d %d %d\n", busClock, count, t0, t1, t2);
 
     localApic[ICR] = 1;
     while (0 < localApic[CCR])
