@@ -70,6 +70,13 @@ extern "C"
     };
 
     int inputSemaphoreIndex = 0;/* if non-zero the event semaphore index */
+
+    /*** Variables -- Imported from Virtual Machine ***/
+    extern int interruptPending;
+    extern int interruptCheckCounter;
+    extern int interruptKeycode;
+    extern int fullScreenFlag;
+    extern int deferDisplayUpdates; /* Is the Interpreter doing defered updates for us?! */
 }
 
 class EventQueue
@@ -544,9 +551,10 @@ public:
         y = this->y;
     }
 
-    void keyEvent(u8* data, long size)
+    bool keyEvent(u8* data, long size)
     {
         Synchronized<IMonitor*> method(monitor);
+        bool notify(false);
 
         using namespace UsageID;
 
@@ -569,6 +577,7 @@ public:
             ASSERT(0 <= key);
             bits &= ~(1u << key);
             keyDown(key + KEYBOARD_LEFTCONTROL);
+            notify = true;
         }
 
         bits = (*from ^ *to) & *to;
@@ -578,6 +587,7 @@ public:
             ASSERT(0 <= key);
             bits &= ~(1u << key);
             keyUp(key + KEYBOARD_LEFTCONTROL);
+            notify = true;
         }
 
         u8 mod(*to | (*to >> 4));
@@ -594,11 +604,13 @@ public:
             if (*from < *to)
             {
                 keyUp(*from);
+                notify = true;
                 ++from;
             }
             else if (*to < *from)
             {
                 keyDown(*to);
+                notify = true;
                 ++to;
             }
             else
@@ -610,11 +622,14 @@ public:
         } while (*to != *from || *to != 255);
 
         memmove(key, next, 9);
+
+        return notify;
     }
 
-    void mouseEvent(u8* data, long size)
+    bool mouseEvent(u8* data, long size)
     {
         Synchronized<IMonitor*> method(monitor);
+        bool notify(false);
 
         using namespace UsageID;
 
@@ -625,39 +640,59 @@ public:
             {
                 keyDown(KEYBOARD_PAGEUP);
                 keyUp(KEYBOARD_PAGEUP);
+                notify = true;
             }
             else if (0 < z)
             {
                 keyDown(KEYBOARD_PAGEDOWN);
                 keyUp(KEYBOARD_PAGEDOWN);
+                notify = true;
             }
         }
 
-        if (size < 3 || !(data[0] ^ button) && !data[1] && !data[2])
+        if (3 <= size && ((data[0] ^ button) || data[1] || data[2]))
         {
-            return;
-        }
-        button = data[0];
-        x += (s8) data[1];
-        y -= (s8) data[2];
-        if (x < 0)
-        {
-            x = 0;
-        }
-        if (width <= x)
-        {
-            x = width - 1;
-        }
-        if (y < 0)
-        {
-            y = 0;
-        }
-        if (height <= y)
-        {
-            y = height - 1;
+            button = data[0];
+            x += (s8) data[1];
+            y -= (s8) data[2];
+            if (x < 0)
+            {
+                x = 0;
+            }
+            if (width <= x)
+            {
+                x = width - 1;
+            }
+            if (y < 0)
+            {
+                y = 0;
+            }
+            if (height <= y)
+            {
+                y = height - 1;
+            }
+
+            mouse(button, x, y);
+            notify = true;
         }
 
-        mouse(button, x, y);
+        return notify;
+    }
+
+    bool wait(long long timeout)
+    {
+        Synchronized<IMonitor*> method(monitor);
+
+        if (eventRing.getUsed() == 0)
+        {
+            return monitor->wait(timeout);
+        }
+        return false;
+    }
+
+    void notify()
+    {
+        monitor->notifyAll();
     }
 };
 
@@ -808,11 +843,10 @@ int ioSetCursorWithMask(int cursorBitsIndex, int cursorMaskIndex, int offsetX, i
 
 int ioRelinquishProcessorForMicroseconds(int microSeconds)
 {
-    Handle<ICurrentThread> current(System()->currentThread());
-    current->sleep(microSeconds * 10);
-
-    // aioPoll(microSeconds);
-    return 0;
+    /* wake us up if something happens */
+    eventQueue.wait(microSeconds * 10LL);
+    interruptCheckCounter = 0;  // for smooth eToy animation, etc.
+    return microSeconds;
 }
 
 int ioForceDisplayUpdate(void)
@@ -959,16 +993,21 @@ void* inputProcess(void* param)
     {
         u8 buffer[8];
         long count;
+        bool notify(false);
 
         count = keyboard->read(buffer, 8);
-        eventQueue.keyEvent(buffer, count);
+        notify |= eventQueue.keyEvent(buffer, count);
 
         count = mouse->read(buffer, 4);
-        eventQueue.mouseEvent(buffer, count);
+        notify |= eventQueue.mouseEvent(buffer, count);
 
         eventQueue.getMousePoint(x, y);
         cursor->setPosition(x, y);
 
+        if (notify)
+        {
+            eventQueue.notify();
+        }
         currentThread->sleep(10000000 / 60);
     }
 
