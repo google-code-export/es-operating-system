@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -31,8 +31,6 @@ Rtc() :
 int Rtc::
 getCounter(int addr)
 {
-    Lock::Synchronized method(spinLock);
-
     outpb(PORT_ADDR, addr);
     u8 bcd = inpb(PORT_DATA);
     return (bcd & 0xf) + 10 * (bcd >> 4);
@@ -50,6 +48,14 @@ setCounter(int addr, int count)
 DateTime Rtc::
 getTime()
 {
+    Lock::Synchronized method(spinLock);
+
+    do
+    {
+        outpb(Rtc::PORT_ADDR, Rtc::PORT_A);
+    }
+    while (inpb(Rtc::PORT_DATA) & 0x80);    // wait UIP
+
     int second = getCounter(SECONDS);
     int minute = getCounter(MINUTES);
     int hour = getCounter(HOURS);
