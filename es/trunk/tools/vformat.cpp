@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -36,11 +36,22 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        esReport("usage: %s disk_image\n", argv[0]);
+        esReport("usage: %s disk_image [cylinders] [heads] [sectorsPerTrack]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    Handle<IStream> disk = new VDisk(static_cast<char*>(argv[1]));
+    Handle<IStream> disk;
+    if (argc < 5)
+    {
+        disk = new VDisk(static_cast<char*>(argv[1]));
+    }
+    else
+    {
+        unsigned int cylinders = atoi(argv[2]);
+        unsigned int heads = atoi(argv[3]);
+        unsigned int sectorsPerTrack = atoi(argv[4]);
+        disk = new VDisk(static_cast<char*>(argv[1]), cylinders, heads, sectorsPerTrack);
+    }
     Handle<IFileSystem> fatFileSystem;
     esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
                      reinterpret_cast<void**>(&fatFileSystem));
