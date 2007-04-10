@@ -132,7 +132,7 @@ struct VirtualMachine* interpreterProxy;
 #endif
 
 #ifdef NDEBUG
-#define FPRINTF(...)    (void)
+#define FPRINTF(...)    (__VA_ARGS__)
 #else
 #define FPRINTF(...)    esReport(__VA_ARGS__)
 #endif
