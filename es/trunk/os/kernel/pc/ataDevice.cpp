@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -19,7 +19,7 @@
 #include "io.h"
 #include "ataController.h"
 
-// #define VERBOSE
+#define VERBOSE
 
 using namespace ATAttachment;
 using namespace Register;
@@ -61,6 +61,10 @@ AtaDevice(AtaController* ctlr, u8 device, u8* signature) :
             dma |= 0x80;
         }
     }
+
+#ifdef VERBOSE
+    esReport("CHS=%d/%d/%d\n", id[1], id[3], id[6]);
+#endif
 
     if (AtaController::isAtapiDevice(signature))
     {
