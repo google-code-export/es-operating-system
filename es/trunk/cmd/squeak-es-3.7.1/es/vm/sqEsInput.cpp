@@ -83,6 +83,8 @@ class EventQueue
 {
     static const int KEYBUF_SIZE = 64;
     static const int MAX_EVENT_BUFFER = 1024;
+    static const int AUTO_REPEAT_RATE = 4;
+    static const int AUTO_REPEAT_DELAY = 20;
 
     IMonitor* monitor;
 
@@ -96,6 +98,7 @@ class EventQueue
     int modifiers;
     bool caps;
     bool numlock;
+    int repeat;
 
     int width;
     int height;
@@ -195,7 +198,7 @@ class EventQueue
         {
         case KEYBOARD_HOME:
             return 1;
-        case KEYBOARD_ENTER:
+        case KEYPAD_ENTER:
             return 3;
         case KEYBOARD_END:
             return 4;
@@ -209,7 +212,7 @@ class EventQueue
             return 11;
         case KEYBOARD_PAGEDOWN:
             return 12;
-        case KEYBOARD_RETURN:
+        case KEYBOARD_ENTER:
             return 13;
         case KEYBOARD_LEFTALT:
             return 17;
@@ -490,6 +493,7 @@ public:
         modifiers(0),
         caps(false),
         numlock(true),
+        repeat(0),
         width(1024),
         height(768),
         button(0),
@@ -598,6 +602,7 @@ public:
                     ((mod & (1<<(0x0f & KEYBOARD_RIGHTSHIFT))) ? ShiftKeyBit : 0) |
                     ((mod & (1<<(0x0f & KEYBOARD_RIGHTALT))) ? OptionKeyBit : 0);
 
+        bool repeated(false);
         *from++ = *to++;
         do
         {
@@ -615,11 +620,20 @@ public:
             }
             else
             {
-                // XXX auto
+                repeated = true;
+                if (++repeat == AUTO_REPEAT_DELAY)
+                {
+                    keyDown(*to);   // Auto repeat
+                    repeat = AUTO_REPEAT_DELAY - AUTO_REPEAT_RATE;
+                }
                 ++from;
                 ++to;
             }
         } while (*to != *from || *to != 255);
+        if (!repeated)
+        {
+            repeat = 0;
+        }
 
         memmove(key, next, 9);
 
