@@ -48,10 +48,14 @@ void init(Handle<IContext> root)
 {
     Handle<IIterator>   iter;
     Handle<IFile>       file;
-    Handle<IStream>     stream;
     long long           size = 0;
 
     file = root->lookup("file/squeak.elf");
+    if (!file)
+    {
+        esReport("Could not open \"squeak.elf\"\n");
+        return;
+    }
     size = file->getSize();
     esReport("main size: %lld\n", size);
 
