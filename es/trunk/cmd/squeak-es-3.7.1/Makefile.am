@@ -1,7 +1,7 @@
 noinst_PROGRAMS = squeak
 
 AM_LDFLAGS = -static -Wl,--no-omagic,-Map,$@.map,--cref -L$(prefix)/lib
-AM_CPPFLAGS = -I$(prefix)/include -DSQUEAK_BUILTIN_PLUGIN
+AM_CPPFLAGS = -I$(prefix)/include -DSQUEAK_BUILTIN_PLUGIN -DDISABLE_SECURITY
 AM_CFLAGS = -O2
 
 LDADD = -les++
@@ -26,7 +26,7 @@ c_source_files = \
 	es/vm/intplugins/MiscPrimitivePlugin/MiscPrimitivePlugin.c \
 	es/vm/intplugins/SecurityPlugin/SecurityPlugin.c \
 	es/vm/intplugins/SecurityPlugin/SecurityPlugin.h \
-	es/vm/intplugins/SecurityPlugin/sqEs32Security.c \
+	es/vm/intplugins/SecurityPlugin/sqEsSecurity.c \
 	es/vm/intplugins/SocketPlugin/SocketPlugin.c \
 	es/vm/intplugins/SocketPlugin/SocketPlugin.h \
 	es/vm/intplugins/SoundGenerationPlugin/SoundGenerationPlugin.c \

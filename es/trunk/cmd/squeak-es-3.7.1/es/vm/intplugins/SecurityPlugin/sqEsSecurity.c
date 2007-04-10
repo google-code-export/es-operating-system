@@ -71,17 +71,17 @@ int ioHasFileAccess(void)
 /* image security */
 
 static int allowImageWrite = 1;  /* allow writing the image */
-int ioCanRenameImage(void)
+int (ioCanRenameImage)(void)
 {
     return allowImageWrite; /* only when we're allowed to save the image */
 }
 
-int ioCanWriteImage(void)
+int (ioCanWriteImage)(void)
 {
     return allowImageWrite;
 }
 
-int ioDisableImageWrite(void)
+int (ioDisableImageWrite)(void)
 {
     allowImageWrite = 0;
 }
@@ -125,12 +125,12 @@ int ioHasSocketAccess()
 
 char *ioGetSecureUserDirectory(void)
 {
-    return NULL;
+    return (char *)success(false);
 }
 
 char *ioGetUntrustedUserDirectory(void)
 {
-    return NULL;
+    return (char *)success(false);
 }
 
 /* note: following is called from VM directly, not from plugin */
