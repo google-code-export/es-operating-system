@@ -32,7 +32,6 @@
  *   All rights reserved.
  */
 
-#include <new>
 #include <es.h>
 #include <es/dateTime.h>
 #include <es/handle.h>
@@ -47,7 +46,11 @@
 #include <es/device/IRtc.h>
 #include <es/naming/IContext.h>
 
-#define MIN(a, b) ((a < b) ? a : b)
+#ifndef _DEBUG
+#define FPRINTF(...)    (__VA_ARGS__)
+#else
+#define FPRINTF(...)    esReport(__VA_ARGS__)
+#endif
 
 ICurrentProcess* System();
 
@@ -146,7 +149,8 @@ int (ioMicroMSecs)(void)
        resolution timers for real time applications such as music. Thus, on the Mac, we've
        opted to use the microsecond clock for both ioMSecs() and ioMicroMSecs(). */
     long long ticks = System()->getNow();
-    return (int) (ticks / 10000);
+    /* Make sure the value fits into Squeak SmallIntegers */
+    return (int) (ticks / 10000) & 0x3FFFFFFF;
 }
 
 int (ioMSecs)(void)
@@ -155,7 +159,8 @@ int (ioMSecs)(void)
     /* Note: This was once a macro based on clock(); it now uses the microsecond clock for
        greater resolution. See the comment in ioMicroMSecs(). */
     long long ticks = System()->getNow();
-    return (int) (ticks / 10000);
+    /* Make sure the value fits into Squeak SmallIntegers */
+    return (int) (ticks / 10000) & 0x3FFFFFFF;
 }
 
 int ioSeconds(void)
@@ -381,7 +386,7 @@ int ioDisablePowerManager(int disableIfNonZero)
 
 /*** Image File Read/Write ***/
 
-#define USE_MMAP
+// #define USE_MMAP
 
 IFile* imageFile;
 
@@ -405,6 +410,7 @@ void* sqAllocateMemory(int minHeapSize, int desiredHeapSize)
 
 int sqImageFileClose(sqImageFile f)
 {
+    FPRINTF("%s(%p);\n", __func__, f);
     IStream* stream = (IStream*) f;
     stream->release();
     return 0;
@@ -412,8 +418,7 @@ int sqImageFileClose(sqImageFile f)
 
 sqImageFile sqImageFileOpen(char *fileName, char *mode)
 {
-    esReport("sqImageFileOpen(%s);\n", fileName);
-
+    FPRINTF("%s(\"%s\", \"%s\");\n", __func__, fileName, mode);
     IInterface* interface = gRoot->lookup(fileName);
     interface->queryInterface(IID_IFile, (void**) &imageFile);
     interface->release();
@@ -423,15 +428,17 @@ sqImageFile sqImageFileOpen(char *fileName, char *mode)
 
 squeakFileOffsetType sqImageFilePosition(sqImageFile f)
 {
+    FPRINTF("%s(%p) :", __func__, f);
     IStream* stream = (IStream*) f;
     long long pos;
     pos = stream->getPosition();
+    FPRINTF("%lld", pos);
     return pos;
 }
 
 size_t sqImageFileRead(void *ptr, size_t elementSize, size_t count, sqImageFile f)
 {
-    esReport("sqImageFileRead(%d, %d)\n", elementSize, count);
+    FPRINTF("%s(%d, %d) :", __func__, elementSize, count);
 #ifdef USE_MMAP
     if (4 < elementSize * count)
     {
@@ -440,22 +447,26 @@ size_t sqImageFileRead(void *ptr, size_t elementSize, size_t count, sqImageFile 
     }
 #endif
     IStream* stream = (IStream*) f;
-    return stream->read(ptr, elementSize * count);
+    size_t len = stream->read(ptr, elementSize * count);
+    FPRINTF(" %d\n", len);
+    return (0 < len) ? len / elementSize : len;
 }
 
 squeakFileOffsetType sqImageFileSeek(sqImageFile f, squeakFileOffsetType pos)
 {
+    FPRINTF("%s(%lld)\n", __func__, pos);
     IStream* stream = (IStream*) f;
-    esReport("sqImageFileSeek(%d)\n", pos);
     stream->setPosition(pos);
     return pos;
 }
 
 size_t sqImageFileWrite(void *ptr, size_t elementSize, size_t count, sqImageFile f)
 {
+    FPRINTF("%s(%d, %d) : ", __func__, elementSize, count);
     IStream* stream = (IStream*) f;
-    esReport("sqImageFileRead(%d, %d)\n", elementSize, count);
-    return stream->write(ptr, elementSize * count);
+    size_t len = stream->write(ptr, elementSize * count);
+    FPRINTF("%d\n", len);
+    return (0 < len) ? len / elementSize : len;
 }
 
 int main()
