@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -37,6 +37,12 @@
 #include <es/base/IFile.h>
 #include <es/base/IStream.h>
 #include <es/naming/IContext.h>
+
+#ifndef _DEBUG
+#define FPRINTF(...)    (__VA_ARGS__)
+#else
+#define FPRINTF(...)    esReport(__VA_ARGS__)
+#endif
 
 extern "C"
 {
@@ -99,8 +105,10 @@ extern struct VirtualMachine * interpreterProxy;
 // Return true if the file's read/write head is at the end of the file.
 int sqFileAtEnd(SQFile* f)
 {
+    FPRINTF("%s(%p)\n", __func__, f);
     if (!sqFileValid(f))
     {
+        FPRINTF("%s(%p) : failed.\n", __func__, f);
         return interpreterProxy->success(false);
     }
 
@@ -113,8 +121,10 @@ int sqFileAtEnd(SQFile* f)
 // Close the given file.
 int sqFileClose(SQFile* f)
 {
+    FPRINTF("%s(%p)\n", __func__, f);
     if (!sqFileValid(f))
     {
+        FPRINTF("%s(%p) : failed.\n", __func__, f);
         return interpreterProxy->success(false);
     }
 
@@ -132,18 +142,22 @@ int sqFileClose(SQFile* f)
 
 int sqFileDeleteNameSize(int sqFileNameIndex, int sqFileNameSize)
 {
+    FPRINTF("%s(%*.*s)\n", __func__, sqFileNameSize, sqFileNameSize, (char*) sqFileNameIndex);
+
     char cFileName[1000];
     int i;
 
     // copy the file name into a null-terminated C string
     if (sizeof cFileName <= sqFileNameSize)
     {
+        FPRINTF("%s : failed.\n", __func__);
         return interpreterProxy->success(false);
     }
     sqFilenameFromString(cFileName, sqFileNameIndex, sqFileNameSize);
 
     if (gRoot->unbind(cFileName) < 0)
     {
+        FPRINTF("%s : failed.\n", __func__);
         return interpreterProxy->success(false);
     }
 
@@ -153,14 +167,18 @@ int sqFileDeleteNameSize(int sqFileNameIndex, int sqFileNameSize)
 // Return the current position of the file's read/write head.
 squeakFileOffsetType sqFileGetPosition(SQFile* f)
 {
+    FPRINTF("%s(%p) : ", __func__, f);
+
     if (!sqFileValid(f))
     {
+        FPRINTF("failed.\n");
         return interpreterProxy->success(false);
     }
 
     IStream* stream = getStream(f);
     long long position;
     position = stream->getPosition();
+    FPRINTF("%d\n", position);
     return (squeakFileOffsetType) position;
 }
 
@@ -192,15 +210,21 @@ int sqFileOpen(SQFile* f, int sqFileNameIndex, int sqFileNameSize, int writeFlag
 {
     char cFileName[1001];
 
+    FPRINTF("%s(%p, \"%*.*s\", %d) : %d\n", __func__, f,
+            sqFileNameSize, sqFileNameSize, (char *) sqFileNameIndex, writeFlag,
+            sqFileValid(f));
+
     // don't open an already open file
     if (sqFileValid(f))
     {
+        FPRINTF("%s: failed.\n", __func__);
         return interpreterProxy->success(false);
     }
 
     // copy the file name into a null-terminated C string
     if (sizeof cFileName <= sqFileNameSize)
     {
+        FPRINTF("%s: failed.\n", __func__);
         return interpreterProxy->success(false);
     }
     sqFilenameFromString(cFileName, sqFileNameIndex, sqFileNameSize);
@@ -235,6 +259,7 @@ int sqFileOpen(SQFile* f, int sqFileNameIndex, int sqFileNameSize, int writeFlag
     {
         f->sessionID = 0;
         f->fileSize = 0;
+        FPRINTF("%s: failed.\n", __func__);
         return interpreterProxy->success(false);
     }
     else
@@ -257,11 +282,14 @@ int sqFileOpen(SQFile* f, int sqFileNameIndex, int sqFileNameSize, int writeFlag
  */
 size_t sqFileReadIntoAt(SQFile* f, size_t count, int byteArrayIndex, size_t startIndex)
 {
+    FPRINTF("%s(%p)\n", __func__, f);
+
     char* dst;
     int bytesRead;
 
     if (!sqFileValid(f))
     {
+        FPRINTF("%s(%p) : failed.\n", __func__, f);
         return interpreterProxy->success(false);
     }
 
@@ -274,10 +302,13 @@ size_t sqFileReadIntoAt(SQFile* f, size_t count, int byteArrayIndex, size_t star
 
 int sqFileRenameOldSizeNewSize(int oldNameIndex, int oldNameSize, int newNameIndex, int newNameSize)
 {
+    FPRINTF("%s()\n", __func__);
+
     char cOldName[1000], cNewName[1000];
 
     if (sizeof(cOldName) <= oldNameSize || sizeof(cNewName) <= newNameSize)
     {
+        FPRINTF("%s() : failed.\n", __func__);
         return interpreterProxy->success(false);
     }
 
@@ -287,6 +318,7 @@ int sqFileRenameOldSizeNewSize(int oldNameIndex, int oldNameSize, int newNameInd
 
     if (gRoot->rename(cOldName, cNewName) < 0)
     {
+        FPRINTF("%s() : failed.\n", __func__);
         return interpreterProxy->success(false);
     }
     return 1;
@@ -295,8 +327,11 @@ int sqFileRenameOldSizeNewSize(int oldNameIndex, int oldNameSize, int newNameInd
 // Set the file's read/write head to the given position.
 int sqFileSetPosition(SQFile* f, squeakFileOffsetType position)
 {
+    FPRINTF("%s(%p, %d)\n", __func__, f, position);
+
     if (!sqFileValid(f))
     {
+        FPRINTF("%s(%p) : failed.\n", __func__, f);
         return interpreterProxy->success(false);
     }
 
@@ -309,11 +344,15 @@ int sqFileSetPosition(SQFile* f, squeakFileOffsetType position)
 // Return the length of the given file.
 squeakFileOffsetType sqFileSize(SQFile* f)
 {
+    FPRINTF("%s(%p) :", __func__, f);
+
     if (!sqFileValid(f))
     {
+        FPRINTF(" failed.\n");
         return interpreterProxy->success(false);
     }
 
+    FPRINTF(" %d.\n", f->fileSize);
     return (squeakFileOffsetType) f->fileSize;
 }
 
@@ -328,11 +367,14 @@ int sqFileValid(SQFile* f)
  */
 size_t sqFileWriteFromAt(SQFile *f, size_t count, int byteArrayIndex, size_t startIndex)
 {
+    FPRINTF("%s(%p, %d) : %d %d\n", __func__, f, count, sqFileValid(f), f->writable);
+
     char* src;
     int bytesWritten;
 
     if (!(sqFileValid(f) && f->writable))
     {
+        FPRINTF("%s: failed.\n", __func__);
         return interpreterProxy->success(false);
     }
 
@@ -347,6 +389,7 @@ size_t sqFileWriteFromAt(SQFile *f, size_t count, int byteArrayIndex, size_t sta
 
     if (bytesWritten != count)
     {
+        FPRINTF("%s: failed.\n", __func__);
         interpreterProxy->success(false);
     }
     f->lastOp = WRITE_OP;
@@ -357,6 +400,7 @@ int sqFileFlush(SQFile* f)
 {
     if (!sqFileValid(f))
     {
+        FPRINTF("%s: failed.\n", __func__);
         return interpreterProxy->success(false);
     }
     IStream* stream = getStream(f);
@@ -366,8 +410,11 @@ int sqFileFlush(SQFile* f)
 
 int sqFileTruncate(SQFile* f, squeakFileOffsetType offset)
 {
+    FPRINTF("%s(%p)\n", __func__, f);
+
     if (!sqFileValid(f))
     {
+        FPRINTF("%s: failed.\n", __func__);
         return interpreterProxy->success(false);
     }
     IStream* stream = getStream(f);
