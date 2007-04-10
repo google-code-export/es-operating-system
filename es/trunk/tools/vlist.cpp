@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
     esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
                      reinterpret_cast<void**>(&fatFileSystem));
     fatFileSystem->mount(disk);
+    fatFileSystem->checkDisk(false);
     esReport("\n");
 
     {
