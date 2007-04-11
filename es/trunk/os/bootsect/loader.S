@@ -136,8 +136,15 @@ _start:                                 // at location 3000:0000
         call    prtstr
 
         // Enable A20 gate
+        call    testA20
+        jnz     a20enabled
         movw    $0x2401, %ax
         int     $0x15
+        call    testA20
+        jnz     a20enabled
+        jmp     hang
+a20enabled:
+        wbinvd
 
         // Initialize bss
         xorw    %ax, %ax
@@ -1090,3 +1097,16 @@ _startap:
         ljmpl   *(0x30000 + Entryap)    // Jump to the es.img
 
         .code16
+
+testA20:
+        xorw    %ax, %ax
+        movw    %ax, %fs                // 0x0000
+        decw    %ax
+        movw    %ax, %gs                // 0xffff
+        movw    $2, %cx
+0:      incw    %ax
+        movw    %ax, %fs:(0x200)
+        outb    %al,$0x80               // delay
+        cmpw    %gs:(0x210), %ax
+        loope   0b
+        ret
