@@ -77,6 +77,8 @@ extern "C"
     extern int interruptKeycode;
     extern int fullScreenFlag;
     extern int deferDisplayUpdates; /* Is the Interpreter doing defered updates for us?! */
+
+    int synchronizedSignalSemaphoreWithIndex(int semaIndex);
 }
 
 class EventQueue
@@ -720,6 +722,17 @@ Handle<IPageable> framebuffer;
 Handle<ICursor> cursor;
 int bpp;
 void* framebufferPtr;
+
+/*** Synchronization functions ***/
+
+int synchronizedSignalSemaphoreWithIndex(int semaIndex)
+{
+    /* do our job */
+    int result = signalSemaphoreWithIndex(semaIndex);
+    /* wake up interpret() if sleeping */
+    eventQueue.notify();
+    return result;
+}
 
 /* User input recording I:
    In general, either set of input function can be supported,

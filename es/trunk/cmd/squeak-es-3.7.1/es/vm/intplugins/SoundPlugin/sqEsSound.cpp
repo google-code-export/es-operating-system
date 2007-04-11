@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -41,16 +41,14 @@
 
 ICurrentProcess* System();
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "sq.h"
 #include "SoundPlugin.h"
 
-#ifdef __cplusplus
+int synchronizedSignalSemaphoreWithIndex(int semaIndex);
+
 }
-#endif
 
 Handle<IStream> gSoundOutput;
 Handle<IStream> gSoundInput;
@@ -334,7 +332,7 @@ int snd_Stop(void)
     }
     playState.head = playState.tail = NULL;
 
-    signalSemaphoreWithIndex(playState.playSemaIndex);
+    synchronizedSignalSemaphoreWithIndex(playState.playSemaIndex);
 
     return true;
 }
@@ -720,7 +718,7 @@ void* audioProcess(void* param)
             }
 
             MoveHead(n);
-            signalSemaphoreWithIndex(playState.playSemaIndex);
+            synchronizedSignalSemaphoreWithIndex(playState.playSemaIndex);
 
             if (len <= offset + n)
             {
@@ -793,7 +791,7 @@ void* recordProcess(void* param)
             }
 
             SetupRecordBuf(n);
-            signalSemaphoreWithIndex(recordState.recordSemaIndex);
+            synchronizedSignalSemaphoreWithIndex(recordState.recordSemaIndex);
         }
     }
 

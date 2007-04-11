@@ -111,11 +111,7 @@ extern "C"
 #include "sq.h"
 #include "SocketPlugin.h"
 
-#ifdef SQUEAK_BUILTIN_PLUGIN
-extern
-#endif
-struct VirtualMachine* interpreterProxy;
-
+int synchronizedSignalSemaphoreWithIndex(int semaIndex);
 }
 
 #ifndef  HOST_NOT_FOUND
@@ -201,7 +197,7 @@ struct privateSocketStruct
 
 #define PING(S,EVT)                                             \
 {                                                               \
-  interpreterProxy->signalSemaphoreWithIndex((S)->EVT##Sema);   \
+  synchronizedSignalSemaphoreWithIndex((S)->EVT##Sema);         \
   FPRINTF("notify %p %s\n", (S)->s.get(), #EVT);                \
 }
 
@@ -296,7 +292,7 @@ static int socketValid(SocketPtr s)
 {
   if (s && s->privateSocketPtr && thisNetSession && (s->sessionID == thisNetSession))
     return true;
-  interpreterProxy->success(false);
+  success(false);
   return false;
 }
 
@@ -639,7 +635,7 @@ void sqSocketCreateNetTypeSocketTypeRecvBytesSendBytesSemaIDReadSemaIDWriteSemaI
   if (!newSocket)
     {
       /* socket() failed, or incorrect socketType */
-      interpreterProxy->success(false);
+      success(false);
       return;
     }
   // newSocket->setSockOpt(SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one));
@@ -652,7 +648,7 @@ void sqSocketCreateNetTypeSocketTypeRecvBytesSendBytesSemaIDReadSemaIDWriteSemaI
   if (pss == NULL)
     {
       esReport("acceptFrom: out of memory\n");
-      interpreterProxy->success(false);
+      success(false);
       return;
     }
   pss->s= newSocket;
@@ -696,7 +692,7 @@ int sqSocketConnectionStatus(SocketPtr s)
       esReport("socketStatus: freeing invalidated pss=%p\n", PSP(s));
       /*delete PSP(s);*/ /* this almost never happens -- safer not to free()?? */
       _PSP(s)= 0;
-      interpreterProxy->success(false);
+      success(false);
       return Invalid;
     }
 #if 0
@@ -733,7 +729,7 @@ void sqSocketListenOnPortBacklogSizeInterface(SocketPtr s, int port, int backlog
   /* only TCP sockets have a backlog */
   if ((backlogSize > 1) && (s->socketType != TCPSocketType))
     {
-      interpreterProxy->success(false);
+      success(false);
       return;
     }
 
@@ -846,7 +842,7 @@ void sqSocketAcceptFromRecvBytesSendBytesSemaIDReadSemaIDWriteSemaID
   if (!socketValid(serverSocket) || !PSP(serverSocket)->multiListen)
     {
       FPRINTF("accept failed: (multi->%d)\n", PSP(serverSocket)->multiListen);
-      interpreterProxy->success(false);
+      success(false);
       return;
     }
 
@@ -854,7 +850,7 @@ void sqSocketAcceptFromRecvBytesSendBytesSemaIDReadSemaIDWriteSemaID
   if (!PSP(serverSocket)->acceptedSock)
     {
       esReport("acceptFrom: no socket available\n");
-      interpreterProxy->success(false);
+      success(false);
       return;
     }
 
@@ -864,7 +860,7 @@ void sqSocketAcceptFromRecvBytesSendBytesSemaIDReadSemaIDWriteSemaID
   if (pss == NULL)
     {
       esReport("acceptFrom: out of memory\n");
-      interpreterProxy->success(false);
+      success(false);
       return;
     }
 
@@ -1226,7 +1222,7 @@ int sqSocketReceiveUDPDataBufCountaddressportmoreFlag
       SOCKETERROR(s)= err;
       FPRINTF("receiveData(%p)= %da\n", SOCKET(s).get(), 0);
     }
-  interpreterProxy->success(false);
+  success(false);
   return 0;
 }
 
@@ -1254,7 +1250,7 @@ int sqSockettoHostportSendDataBufCount(SocketPtr s, int address, int port,
       FPRINTF("UDP send failed\n");
       SOCKETERROR(s)= err;
     }
-  interpreterProxy->success(false);
+  success(false);
   return 0;
 }
 
@@ -1417,7 +1413,7 @@ int sqSocketSetOptionsoptionNameStartoptionNameSizeoptionValueStartoptionValueSi
         }
     }
  barf:
-  interpreterProxy->success(false);
+  success(false);
   return false;
 }
 
@@ -1447,7 +1443,7 @@ int sqSocketGetOptionsoptionNameStartoptionNameSizereturnedValue
         }
     }
  barf:
-  interpreterProxy->success(false);
+  success(false);
   return errno;
 }
 
@@ -1506,7 +1502,7 @@ void sqResolverStartNameLookup(char *hostName, int nameSize)
   FPRINTF("name lookup %s\n", lastName);
   lastAddr= nameToAddr(lastName);
   /* we're done before we even started */
-  interpreterProxy->signalSemaphoreWithIndex(resolverSema);
+  synchronizedSignalSemaphoreWithIndex(resolverSema);
 }
 
 void* networkProcess(void* param)
