@@ -66,6 +66,10 @@
 // Configuration
 //
 
+#define XResolution             18      // Horizontal resolution
+#define YResolution             20      // Vertical resolution
+#define BitsPerPixel            25      // Bits per pixel
+
 // 0x141 1024x768  32bit Dcolr A000 RW ---- -- 64 64 C000:6F01 FD000000 VMWare
 // 0x144 1024x768  32bit Dcolr A000 RW ---- -- 64 64 C000:6C4B E0000000 Bochs
 // 0x118 1024x768  32bit Dcolr A000 RW ---- -- 64 64 C800:1DEE F8000000 Visual PC 2004
@@ -101,6 +105,8 @@
 #define Font                    128     // VGA font address
 #define Entryap                 132     // AP protected-mode entry address [m16:32]
 #define Halt                    138
+#define Width                   140     // Screen width
+#define Height                  142     // Screen height
 
 .code16
 .text
@@ -117,6 +123,10 @@ _start:                                 // at location 3000:0000
         .word   0, 0, 8
         .org    Halt
         .word   0
+        .org    Width
+        .word   1024
+        .org    Height
+        .word   768
 
 0:
         // Set %sp
@@ -137,13 +147,13 @@ _start:                                 // at location 3000:0000
 
         // Enable A20 gate
         call    testA20
-        jnz     a20enabled
+        jnz     a20_enabled
         movw    $0x2401, %ax
         int     $0x15
         call    testA20
-        jnz     a20enabled
+        jnz     a20_enabled
         jmp     hang
-a20enabled:
+a20_enabled:
         wbinvd
 
         // Initialize bss
@@ -373,9 +383,9 @@ run:
         movw    $0x4f00, %ax
         int     $0x10
         cmpb    $0x4f, %al
-        jne     kernel_mode
+        jne     text_mode
         andb    %ah, %ah
-        jnz     kernel_mode
+        jnz     text_mode
 
         movw    %es:(14), %di
         movw    %es:(16), %ax
@@ -383,12 +393,13 @@ run:
 0:
         movw    %es:(%di), %cx
         cmpw    $0xffff, %cx
-        je      kernel_mode
+        je      text_mode
         addw    $2, %di
 
         // Get VESA SVGA mode information at 0820:0000
         pushw   %es
         pushw   %di
+
         movw    $0x0820, %ax
         movw    %ax, %es
         xorw    %di, %di
@@ -400,10 +411,13 @@ run:
         jnz     1f
         andb    $1, %es:(0)
         jz      1f
-        movw    %es:(18), %ax           // 1024 <= width ?
-        cmpw    $1024, %ax
-        jb      1f
-        movb    %es:(25), %al           // 24 <= depth ?
+        movw    %es:(XResolution), %ax
+        cmpw    (Width), %ax
+        jne     1f
+        movw    %es:(YResolution), %ax
+        cmpw    (Height), %ax
+        jne     1f
+        movb    %es:(BitsPerPixel), %al           // 24 <= depth ?
         cmpb    $24, %al
         jae     2f
 1:
@@ -433,6 +447,7 @@ run:
         movw    %es, %ax
         movw    %ax, (Font+2)
 #endif
+text_mode:
 
         // Save APM _shutdown address
         leaw    _shutdown, %ax
@@ -446,7 +461,6 @@ run:
         leaw    _halt, %ax
         movw    %ax, (Halt)
 
-kernel_mode:
         cli
 
         // Set up GDT and IDT
