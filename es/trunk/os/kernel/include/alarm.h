@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -28,16 +28,6 @@ class Alarm : public IAlarm
     };
 
     Link<Alarm>     link;
-    Ref             ref;
-
-    ICallback*      callback;
-
-    unsigned        flags;
-    long long       interval;
-    long long       start;
-
-    long long       nextTick;
-
     class Queue
     {
         List<Alarm, &Alarm::link> queue;
@@ -49,6 +39,12 @@ class Alarm : public IAlarm
         bool check();
     };
 
+    Ref             ref;
+    ICallback*      callback;
+    unsigned        flags;
+    long long       interval;
+    long long       start;
+    long long       nextTick;
     Queue*          current;
 
     static Lock     spinLock;

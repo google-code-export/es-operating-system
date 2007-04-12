@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -29,7 +29,8 @@ Alarm() :
     flags(Enabled),
     interval(0),
     start(0),
-    nextTick(0)
+    nextTick(0),
+    current(0)
 {
 }
 
