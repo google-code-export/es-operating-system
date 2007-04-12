@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -68,6 +68,7 @@ class AtaController : public ICallback
     bool softwareReset();
     bool detectDevice(int dev, u8* signature);
 
+    static bool isAtaDevice(const u8* signature);
     static bool isAtapiDevice(const u8* signature);
     static void* run(void* param);
 

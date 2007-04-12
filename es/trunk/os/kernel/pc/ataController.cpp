@@ -26,6 +26,12 @@ using namespace ATAttachment;
 using namespace Register;
 
 bool AtaController::
+isAtaDevice(const u8* signature)
+{
+    return (signature[2] == 0x00 && signature[3] == 0x00) ? true : false;
+}
+
+bool AtaController::
 isAtapiDevice(const u8* signature)
 {
     return (signature[2] == 0x14 && signature[3] == 0xeb) ? true : false;
@@ -114,8 +120,6 @@ sync(u8 status)
         }
     }
     inpb(ctlPort + ALTERNATE_STATUS);
-
-    // It seems ALTERNATE_STATUS is not properly emulated under QEMU except the BSY bit.
     return inpb(cmdPort + STATUS);
 }
 
@@ -509,11 +513,11 @@ AtaController(int cmdPort, int ctlPort, int irq, AtaDma* dma, IContext* ata) :
         esReport("device0: signature %02x %02x %02x %02x %02x\n",
                  signature[0], signature[1], signature[2], signature[3], signature[4]);
 #endif
-        if (!isAtapiDevice(signature))
+        if (isAtaDevice(signature))
         {
             device[0] = new AtaDevice(this, Device::MASTER, signature);
         }
-        else
+        else if (isAtapiDevice(signature))
         {
             device[0] = new AtaPacketDevice(this, Device::MASTER, signature);
         }
@@ -525,11 +529,11 @@ AtaController(int cmdPort, int ctlPort, int irq, AtaDma* dma, IContext* ata) :
         esReport("device1: signature %02x %02x %02x %02x %02x\n",
                  signature[0], signature[1], signature[2], signature[3], signature[4]);
 #endif
-        if (!isAtapiDevice(signature))
+        if (isAtaDevice(signature))
         {
             device[1] = new AtaDevice(this, Device::SLAVE, signature);
         }
-        else
+        else if (isAtapiDevice(signature))
         {
             device[1] = new AtaPacketDevice(this, Device::SLAVE, signature);
         }

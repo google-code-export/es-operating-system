@@ -64,6 +64,7 @@ AtaDevice(AtaController* ctlr, u8 device, u8* signature) :
 
 #ifdef VERBOSE
     esReport("CHS=%d/%d/%d\n", id[1], id[3], id[6]);
+    esDump(id, 512);
 #endif
 
     if (AtaController::isAtapiDevice(signature))
