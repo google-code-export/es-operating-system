@@ -25,12 +25,12 @@ TESTS = handle interlocked exception utf ring \
 	context datetime thread thread_cancel \
 	monitor0 monitor1 monitor2 monitor3 pageSet \
 	partition partition_error partition_extended partition_iterator \
-	partition_bind partition_over8GB partition_print \
+	partition_bind partition_print \
 	loopback ethernet timer
 
 noinst_PROGRAMS = $(TESTS)
 
-noinst_DATA = fat16_32MB.img over8GB.img fat16.img
+noinst_DATA = fat16_32MB.img fat16.img
 
 LDADD += -lpthread -lrt -lstdc++
 
@@ -175,8 +175,6 @@ partition_iterator_SOURCES = partition_iterator.cpp vdisk.h
 
 partition_bind_SOURCES = partition_bind.cpp vdisk.h
 
-partition_over8GB_SOURCES = partition_over8GB.cpp vdisk.h
-
 partition_print_SOURCES = partition_print.cpp vdisk.h
 
 ethernet_SOURCES = ethernet.cpp
@@ -192,13 +190,10 @@ endif POSIX
 fat16_32MB.img: fat16_32MB.img.gz
 	gunzip -c $< > $@
 
-over8GB.img: over8GB.img.gz
-	gunzip -c $< > $@
-
 fat16.img: fat16.img.gz
 	gunzip -c $< > $@
 
 isotest.iso: isotest.iso.gz
 	gunzip -c $< > $@
 
-EXTRA_DIST = fat16_32MB.img.gz over8GB.img.gz fat16.img.gz isotest.iso.gz makeScript
+EXTRA_DIST = fat16_32MB.img.gz fat16.img.gz isotest.iso.gz makeScript

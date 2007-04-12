@@ -71,7 +71,6 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	partition_extended$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_iterator$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_bind$(EXEEXT) \
-@ES_FALSE@@POSIX_TRUE@	partition_over8GB$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	partition_print$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT) \
 @ES_FALSE@@POSIX_TRUE@	timer$(EXEEXT)
@@ -258,11 +257,6 @@ partition_iterator_OBJECTS = $(am_partition_iterator_OBJECTS)
 partition_iterator_LDADD = $(LDADD)
 partition_iterator_DEPENDENCIES = ../libeskernel.a \
 	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
-am_partition_over8GB_OBJECTS = partition_over8GB.$(OBJEXT)
-partition_over8GB_OBJECTS = $(am_partition_over8GB_OBJECTS)
-partition_over8GB_LDADD = $(LDADD)
-partition_over8GB_DEPENDENCIES = ../libeskernel.a \
-	../../libes++/libessup++.a $(am__DEPENDENCIES_1)
 am_partition_print_OBJECTS = partition_print.$(OBJEXT)
 partition_print_OBJECTS = $(am_partition_print_OBJECTS)
 partition_print_LDADD = $(LDADD)
@@ -380,10 +374,10 @@ SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(pageSet_SOURCES) $(partition_SOURCES) \
 	$(partition_bind_SOURCES) $(partition_error_SOURCES) \
 	$(partition_extended_SOURCES) $(partition_iterator_SOURCES) \
-	$(partition_over8GB_SOURCES) $(partition_print_SOURCES) \
-	$(position_SOURCES) $(process_SOURCES) $(read_SOURCES) \
-	$(replace_SOURCES) $(ring_SOURCES) $(sb16_SOURCES) \
-	$(size_SOURCES) $(thread_SOURCES) $(thread_cancel_SOURCES) \
+	$(partition_print_SOURCES) $(position_SOURCES) \
+	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
+	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
+	$(thread_SOURCES) $(thread_cancel_SOURCES) \
 	$(thread_smp_SOURCES) $(timer_SOURCES) $(tsd_SOURCES) \
 	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
 	$(write_read_SOURCES) $(write_read2_SOURCES)
@@ -400,10 +394,10 @@ DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(pageSet_SOURCES) $(partition_SOURCES) \
 	$(partition_bind_SOURCES) $(partition_error_SOURCES) \
 	$(partition_extended_SOURCES) $(partition_iterator_SOURCES) \
-	$(partition_over8GB_SOURCES) $(partition_print_SOURCES) \
-	$(position_SOURCES) $(process_SOURCES) $(read_SOURCES) \
-	$(replace_SOURCES) $(ring_SOURCES) $(sb16_SOURCES) \
-	$(size_SOURCES) $(thread_SOURCES) $(thread_cancel_SOURCES) \
+	$(partition_print_SOURCES) $(position_SOURCES) \
+	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
+	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
+	$(thread_SOURCES) $(thread_cancel_SOURCES) \
 	$(thread_smp_SOURCES) $(am__timer_SOURCES_DIST) $(tsd_SOURCES) \
 	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
 	$(write_read_SOURCES) $(write_read2_SOURCES)
@@ -535,7 +529,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @POSIX_TRUE@	context datetime thread thread_cancel \
 @POSIX_TRUE@	monitor0 monitor1 monitor2 monitor3 pageSet \
 @POSIX_TRUE@	partition partition_error partition_extended partition_iterator \
-@POSIX_TRUE@	partition_bind partition_over8GB partition_print \
+@POSIX_TRUE@	partition_bind partition_print \
 @POSIX_TRUE@	loopback ethernet timer
 
 @ES_TRUE@noinst_DATA = fat16.img isotest.iso \
@@ -552,7 +546,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@	pageSet.img process.img \
 @ES_TRUE@	ethernet.img loopback.img
 
-@POSIX_TRUE@noinst_DATA = fat16_32MB.img over8GB.img fat16.img
+@POSIX_TRUE@noinst_DATA = fat16_32MB.img fat16.img
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 @ES_TRUE@AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
@@ -603,12 +597,11 @@ partition_error_SOURCES = partition_error.cpp vdisk.h
 partition_extended_SOURCES = partition_extended.cpp vdisk.h
 partition_iterator_SOURCES = partition_iterator.cpp vdisk.h
 partition_bind_SOURCES = partition_bind.cpp vdisk.h
-partition_over8GB_SOURCES = partition_over8GB.cpp vdisk.h
 partition_print_SOURCES = partition_print.cpp vdisk.h
 ethernet_SOURCES = ethernet.cpp
 loopback_SOURCES = loopback.cpp
 @POSIX_TRUE@timer_SOURCES = timer.cpp
-EXTRA_DIST = fat16_32MB.img.gz over8GB.img.gz fat16.img.gz isotest.iso.gz makeScript
+EXTRA_DIST = fat16_32MB.img.gz fat16.img.gz isotest.iso.gz makeScript
 all: all-am
 
 .SUFFIXES:
@@ -744,9 +737,6 @@ partition_extended$(EXEEXT): $(partition_extended_OBJECTS) $(partition_extended_
 partition_iterator$(EXEEXT): $(partition_iterator_OBJECTS) $(partition_iterator_DEPENDENCIES) 
 	@rm -f partition_iterator$(EXEEXT)
 	$(CXXLINK) $(partition_iterator_LDFLAGS) $(partition_iterator_OBJECTS) $(partition_iterator_LDADD) $(LIBS)
-partition_over8GB$(EXEEXT): $(partition_over8GB_OBJECTS) $(partition_over8GB_DEPENDENCIES) 
-	@rm -f partition_over8GB$(EXEEXT)
-	$(CXXLINK) $(partition_over8GB_LDFLAGS) $(partition_over8GB_OBJECTS) $(partition_over8GB_LDADD) $(LIBS)
 partition_print$(EXEEXT): $(partition_print_OBJECTS) $(partition_print_DEPENDENCIES) 
 	@rm -f partition_print$(EXEEXT)
 	$(CXXLINK) $(partition_print_LDFLAGS) $(partition_print_OBJECTS) $(partition_print_LDADD) $(LIBS)
@@ -841,7 +831,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partition_error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partition_extended.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partition_iterator.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partition_over8GB.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partition_print.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/position.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Po@am__quote@
@@ -1128,9 +1117,6 @@ uninstall-am: uninstall-info-am
 @ES_TRUE@	-rm -f *.map *.log 2hd.img es.img
 
 fat16_32MB.img: fat16_32MB.img.gz
-	gunzip -c $< > $@
-
-over8GB.img: over8GB.img.gz
 	gunzip -c $< > $@
 
 fat16.img: fat16.img.gz
