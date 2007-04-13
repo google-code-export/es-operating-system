@@ -212,7 +212,7 @@ public:
 
         void print() const
         {
-            esReport("I/O Interrupt Assignment:\n");
+            esReport("Local Interrupt Assignment:\n");
             esReport("\tInterrupt Type: %d\n", type);
             esReport("\tPO: %d\n", getPolarity());
             esReport("\tEL: %d\n", getTriggerMode());
@@ -303,19 +303,16 @@ public:
     class LookupAssignment : public Visitor
     {
         unsigned int irq;
-        unsigned int bus;
         const InterruptAssignment* assignment;
     public:
-        LookupAssignment(unsigned int irq, unsigned int bus = 0) :
+        LookupAssignment(unsigned int irq) :
             irq(irq),
-            bus(bus),
             assignment(0)
         {
         }
         bool at(const InterruptAssignment* interrupt)
         {
-            if (interrupt->type == 0 /* INT */ &&
-                interrupt->busIRQ == irq && interrupt->busID == bus)
+            if (interrupt->type == 0 /* INT */ && interrupt->busIRQ == irq)
             {
                 assignment = interrupt;
                 return false;
@@ -385,11 +382,10 @@ public:
         return processorCount;
     }
 
-    /** Lookup interrupt assignment entry for irq and bus.
+    /** Lookup interrupt assignment entry for the irq.
      * @return memory mapped I/O APIC address or zero if not found
      */
-    volatile u32* getInterruptAssignment(unsigned int irq, unsigned int bus,
-                                         InterruptAssignment& assignment);
+    volatile u32* getInterruptAssignment(unsigned int irq, InterruptAssignment& assignment);
 
     bool accept(Visitor& visitor)
     {

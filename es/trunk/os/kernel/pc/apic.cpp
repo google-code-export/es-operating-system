@@ -27,8 +27,10 @@ void Apic::
 setIoApicID(volatile u32* addr, u8 id)
 {
     addr[IOREGSEL] = IOAPICID;
-    addr[IOWIN] &= 0x00ffffff;
-    addr[IOWIN] |= id << 24;
+    u32 ioapicid = addr[IOWIN];
+    ioapicid &= 0xf0ffffff;
+    ioapicid |= (id & 0x0f) << 24;
+    addr[IOWIN] = ioapicid;
 }
 
 void Apic::
@@ -120,11 +122,11 @@ shutdown(unsigned irq)
 void Apic::
 enable(unsigned int irq)
 {
-    enable(irq, 0, 32 + irq);
+    enable(irq, 32 + irq);
 }
 
 void Apic::
-enable(unsigned int irq, unsigned int bus, u8 vec)
+enable(unsigned int irq, u8 vec)
 {
     if (vec < 0x10 || 0xfe < vec)
     {
@@ -132,7 +134,7 @@ enable(unsigned int irq, unsigned int bus, u8 vec)
     }
 
     Mps::InterruptAssignment assignment;
-    volatile u32* addr = mps->getInterruptAssignment(irq, bus, assignment);
+    volatile u32* addr = mps->getInterruptAssignment(irq, assignment);
     if (!addr || 23 < assignment.apicINTINn)
     {
         return;
@@ -145,11 +147,11 @@ enable(unsigned int irq, unsigned int bus, u8 vec)
 void Apic::
 disable(unsigned int irq)
 {
-    disable(irq, 0, 32 + irq);
+    disable(irq, 32 + irq);
 }
 
 void Apic::
-disable(unsigned int irq, unsigned int bus, u8 vec)
+disable(unsigned int irq, u8 vec)
 {
     if (vec < 0x10 || 0xfe < vec)
     {
@@ -157,13 +159,13 @@ disable(unsigned int irq, unsigned int bus, u8 vec)
     }
 
     Mps::InterruptAssignment assignment;
-    volatile u32* addr = mps->getInterruptAssignment(irq, bus, assignment);
+    volatile u32* addr = mps->getInterruptAssignment(irq, assignment);
     if (!addr || 23 < assignment.apicINTINn)
     {
         return;
     }
-
     addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn;
+
     addr[IOWIN] = 1 << 16;  // mask
 }
 
@@ -176,7 +178,7 @@ ack(unsigned int irq)
         return false;
     }
 
-    disable(irq, 0, vec);
+    // XXX disable(irq, vec);
 
     // Note it appears qemu does not emulate ISR and we don't check ISR here.
     localApic[EOI] = 0;
@@ -187,14 +189,14 @@ ack(unsigned int irq)
 void Apic::
 end(unsigned int irq)
 {
-    enable(irq);
+    // XXX enable(irq);
 }
 
 void Apic::
 setAffinity(unsigned int irq, unsigned int mask)
 {
     Mps::InterruptAssignment assignment;
-    volatile u32* addr = mps->getInterruptAssignment(irq, 0, assignment);
+    volatile u32* addr = mps->getInterruptAssignment(irq, assignment);
     if (!addr || 23 < assignment.apicINTINn)
     {
         return;
@@ -438,7 +440,7 @@ busFreq()
 
     busClock = 0xffffffffU - count;
     busClock = (busClock + 500000) / 1000000 * 1000000;
-    esReport("Bus freq: %u %u %d %d %d\n", busClock, count, t0, t1, t2);
+    esReport("Bus freq: %u %u\n", busClock, 0xffffffffU - count);
 
     localApic[ICR] = 1;
     while (0 < localApic[CCR])

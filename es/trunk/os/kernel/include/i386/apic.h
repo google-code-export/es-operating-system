@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -72,8 +72,8 @@ class Apic : public IPic
     static u8 getLocalApicVersion();
     void setImcr(u8 value);
 
-    void enable(unsigned int irq, unsigned int bus, u8 vec);
-    void disable(unsigned int irq, unsigned int bus, u8 vec);
+    void enable(unsigned int irq, u8 vec);
+    void disable(unsigned int irq, u8 vec);
 
     void sendInit(u8 id, u32 addr);
     void sendStartup(u8 id, u32 addr);
