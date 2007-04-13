@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -105,6 +105,9 @@ public:
 
     static long registerExceptionHandler(u8 exceptionNumber, ICallback* callback);
     static long unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback);
+
+    static long registerInterruptHandler(u8 irq, ICallback* callback);
+    static long unregisterInterruptHandler(u8 irq, ICallback* callback);
 
     // processor execution level
     static unsigned int splIdle()

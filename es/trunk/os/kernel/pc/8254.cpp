@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -30,7 +30,7 @@ Pit(unsigned hz) : hz(hz), beeper(0)
     outpb(PORT_CONTROL, COUNTER_0 | COUNTER_HI | COUNTER_LO | MODE_SQUARE);
     outpb(PORT_COUNTER_0, count);
     outpb(PORT_COUNTER_0, count >> 8);
-    Core::registerExceptionHandler(32 + 0, this);   // XXX startup irq
+    Core::registerInterruptHandler(0, this);
 
     // Set up counter 2 (beep)
     setFrequency(750);

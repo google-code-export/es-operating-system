@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -203,7 +203,7 @@ SoundBlaster16(Dmac* master, Dmac* slave,
         return;
         break;
     }
-    Core::registerExceptionHandler(32 + irq, this);
+    Core::registerInterruptHandler(irq, this);
 
     writeData(SPEAKER_ON);
     esSleep(1120000);

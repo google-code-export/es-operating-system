@@ -134,6 +134,10 @@ issue(AtaDevice* device, u8 cmd, void* buffer, int count, long long lba)
     using namespace Command;
     using namespace Status;
 
+#ifdef VERBOSE
+    esReport("AtaController::%s(%02x, %p, %d, %lld)\n", __func__, cmd, buffer, count, lba);
+#endif
+
     Lock::Synchronized io(lock);
 
     if (device->id[FEATURES_COMMAND_SETS_SUPPORTED + 1] & 0x0400)
@@ -331,7 +335,7 @@ invoke(int param)
 #ifdef VERBOSE
     if (param)
     {
-        esReport("AtaController::%s(%d) : %02x : %02x\n", __func__, param, this->cmd, status);
+        esReport("AtaController::%s(%d) : %02xh : %02xh\n", __func__, param, cmd, status);
     }
 #endif
 
@@ -354,6 +358,9 @@ invoke(int param)
                 {
                     done = true;
                 }
+#ifdef VERBOSE
+                esReport("AtaController::%s : %p, %p, %d\n", __func__, data, limit, done);
+#endif
             }
             else
             {
@@ -375,6 +382,9 @@ invoke(int param)
                 {
                     done = true;
                 }
+#ifdef VERBOSE
+                esReport("AtaController::%s : %d, %p, %p, %d\n", __func__, len, data, limit, done);
+#endif
             }
             else
             {
@@ -544,7 +554,7 @@ AtaController(int cmdPort, int ctlPort, int irq, AtaDma* dma, IContext* ata) :
         return;
     }
 
-    Core::registerExceptionHandler(32 + irq, this);
+    Core::registerInterruptHandler(irq, this);
 
     for (int i = 0; i < 10; ++i)
     {

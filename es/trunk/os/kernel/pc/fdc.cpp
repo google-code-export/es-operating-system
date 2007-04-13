@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -37,7 +37,7 @@ FloppyController(IDmac* dmac, u16 base, u8 irq) :
 
     outpb(base + DSR, 0);
 
-    Core::registerExceptionHandler(32 + irq, this);
+    Core::registerInterruptHandler(irq, this);
 }
 
 FloppyController::

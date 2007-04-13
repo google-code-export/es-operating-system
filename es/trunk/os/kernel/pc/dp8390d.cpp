@@ -621,7 +621,7 @@ Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
     ring.nextPacket = ring.pageStart + 1;
     reset();
 
-    Core::registerExceptionHandler(32 + irq, this);
+    Core::registerInterruptHandler(irq, this);
 
     // read PROM emulation area of NIC memory.
     if (readProm() < 0)

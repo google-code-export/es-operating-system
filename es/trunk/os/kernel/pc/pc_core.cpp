@@ -872,20 +872,18 @@ dispatchException(Ureg* ureg)
 long Core::
 registerExceptionHandler(u8 exceptionNumber, ICallback* callback)
 {
+    Lock::Synchronized method(spinLock);
+
     if (!callback)
     {
         return -1;
     }
-    unsigned x = splHi();
-    spinLock.lock();
     ICallback* old = exceptionHandlers[exceptionNumber];
     exceptionHandlers[exceptionNumber] = callback;
     if (32 <= exceptionNumber && !old)
     {
         pic->startup(exceptionNumber - 32);
     }
-    spinLock.unlock();
-    splX(x);
     callback->addRef();
     if (old)
     {
@@ -897,9 +895,9 @@ registerExceptionHandler(u8 exceptionNumber, ICallback* callback)
 long Core::
 unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback)
 {
+    Lock::Synchronized method(spinLock);
+
     long rc;
-    unsigned x = splHi();
-    spinLock.lock();
     ICallback* old = exceptionHandlers[exceptionNumber];
     if (!callback || old == callback)
     {
@@ -914,8 +912,58 @@ unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback)
     {
         pic->shutdown(exceptionNumber - 32);
     }
-    spinLock.unlock();
-    splX(x);
+    if (old)
+    {
+        old->release();
+    }
+    return rc;
+}
+
+long Core::
+registerInterruptHandler(u8 irq, ICallback* callback)
+{
+    Lock::Synchronized method(spinLock);
+
+    if (!callback)
+    {
+        return -1;
+    }
+    u8 exceptionNumber = irq + 32;
+    ICallback* old = exceptionHandlers[exceptionNumber];
+    exceptionHandlers[exceptionNumber] = callback;
+    if (!old)
+    {
+        pic->startup(irq);
+    }
+    callback->addRef();
+    if (old)
+    {
+        old->release();
+    }
+    return 0;
+}
+
+long Core::
+unregisterInterruptHandler(u8 irq, ICallback* callback)
+{
+    Lock::Synchronized method(spinLock);
+
+    long rc;
+    u8 exceptionNumber = irq + 32;
+    ICallback* old = exceptionHandlers[exceptionNumber];
+    if (!callback || old == callback)
+    {
+        exceptionHandlers[exceptionNumber] = 0;
+        rc = 0;
+    }
+    else
+    {
+        rc = -1;
+    }
+    if (old)
+    {
+        pic->shutdown(irq);
+    }
     if (old)
     {
         old->release();

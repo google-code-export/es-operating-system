@@ -586,8 +586,8 @@ Keyboard(IContext* device) :
 
     detectAuxDevice();
 
-    Core::registerExceptionHandler(32 + IRQ_KEYBOARD, this);
-    Core::registerExceptionHandler(32 + IRQ_AUXILIARY_DEVICE, this);
+    Core::registerInterruptHandler(IRQ_KEYBOARD, this);
+    Core::registerInterruptHandler(IRQ_AUXILIARY_DEVICE, this);
 
     device->bind("keyboard", static_cast<IStream*>(&keyboardStream));
     device->bind("mouse", static_cast<IStream*>(&mouseStream));
