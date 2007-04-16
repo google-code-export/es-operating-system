@@ -80,28 +80,11 @@ attach(ConfigurationSpaceHeader* csp)
 void Pci::
 scan()
 {
-    int bus = 0;
-    for (int device = 0; device < maxDevice; ++device)
+    for (int bus = 0; bus <= 3; ++bus)
     {
-        ConfigurationSpaceHeader csh(tag(bus, device, 0));
-        if (csh.deviceID == 0xffff)
+        for (int device = 0; device < maxDevice; ++device)
         {
-            continue;
-        }
-        attach(&csh);
-
-#ifdef VERBOSE
-        esReport("PCI %d:%d\n", bus, device);
-        csh.report();
-#endif
-
-        if (!(csh.headerType & 0x80))   // not multi-function device?
-        {
-            continue;
-        }
-        for (u8 func = 1; func < 8; ++func)
-        {
-            ConfigurationSpaceHeader csh(tag(bus, device, func));
+            ConfigurationSpaceHeader csh(tag(bus, device, 0));
             if (csh.deviceID == 0xffff)
             {
                 continue;
@@ -109,9 +92,28 @@ scan()
             attach(&csh);
 
 #ifdef VERBOSE
-            esReport("PCI: %d:%d:%d\n", bus, device, func);
+            esReport("PCI %d:%d\n", bus, device);
             csh.report();
 #endif
+
+            if (!(csh.headerType & 0x80))   // not multi-function device?
+            {
+                continue;
+            }
+            for (u8 func = 1; func < 8; ++func)
+            {
+                ConfigurationSpaceHeader csh(tag(bus, device, func));
+                if (csh.deviceID == 0xffff)
+                {
+                    continue;
+                }
+                attach(&csh);
+
+#ifdef VERBOSE
+                esReport("PCI: %d:%d:%d\n", bus, device, func);
+                csh.report();
+#endif
+            }
         }
     }
 }
