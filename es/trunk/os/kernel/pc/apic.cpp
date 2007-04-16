@@ -18,7 +18,7 @@
 
 extern long hzBus;
 
-u8 Apic::idBSP = 0;     // boot-strap processor's local APIC id
+u8 Apic::idBSP = 0;             // boot-strap processor's local APIC id
 volatile u32* Apic::localApic;  // memory-mapped address of local APIC
 volatile bool Apic::online;
 unsigned Apic::busClock;
@@ -316,6 +316,7 @@ startupAp(u8 id, u32 hltAP, u32 startAP)
     // Wait till AP gets ready
     while (!online)
     {
+        __asm__ __volatile__ ("pause\n");
     }
 }
 
@@ -332,29 +333,46 @@ shutdownAp(u8 id, u32 hltAP)
 unsigned Apic::
 splIdle()
 {
-    unsigned x = exchange(localApic + TPR, 0 << 4);
-    __asm__ __volatile__ ("sti\n");
-    return x;
+    register unsigned eax;
+    __asm__ __volatile__ (
+        "pushfl\n"
+        "popl    %0\n"
+        "sti"
+        : "=a" (eax));
+    return eax;
 }
 
 unsigned Apic::
 splLo()
 {
-    unsigned x = exchange(localApic + TPR, 1 << 4);
-    __asm__ __volatile__ ("sti\n");
-    return x;
+    register unsigned eax;
+    __asm__ __volatile__ (
+        "pushfl\n"
+        "popl   %0\n"
+        "sti"
+        : "=a" (eax));
+    return eax;
 }
 
 unsigned Apic::
 splHi()
 {
-    return exchange(localApic + TPR, 15 << 4);
+    register unsigned eax;
+    __asm__ __volatile__ (
+        "pushfl\n"
+        "popl   %0\n"
+        "cli"
+        : "=a" (eax));
+    return eax;
 }
 
 void Apic::
 splX(unsigned x)
 {
-    localApic[TPR] = x;
+    __asm__ __volatile__ (
+        "pushl   %0\n"
+        "popfl"
+        :: "r" (x));
 }
 
 //
