@@ -74,6 +74,13 @@ void init(Handle<IContext> root)
 
 int initNetwork(Handle<IContext> context)
 {
+    // Get DIX interface
+    Handle<INetworkInterface> ethernetInterface = context->lookup("device/ethernet");
+    if (!ethernetInterface)
+    {
+        return -1;
+    }
+
     esRegisterInternetProtocol(context);
 
     // Lookup resolver object
@@ -83,7 +90,6 @@ int initNetwork(Handle<IContext> context)
     Handle<IInternetConfig> config = context->lookup("network/config");
 
     // Setup DIX interface
-    Handle<INetworkInterface> ethernetInterface = context->lookup("device/ethernet");
     ethernetInterface->start();
     int dixID = config->addInterface(ethernetInterface);
     esReport("dixID: %d\n", dixID);
@@ -109,6 +115,7 @@ int initNetwork(Handle<IContext> context)
 
     // service->stop();
     // ethernetInterface->stop();
+    return 0;
 }
 
 int main(int argc, char* argv[])
