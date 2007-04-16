@@ -138,7 +138,7 @@ static void initAP(...)
 {
     apic->enableLocalApic();
     apic->splHi();
-    apic->setTimer(67, 1000);
+    // apic->setTimer(67, 1000);
     Core* core = new Core(sched);
     apic->started();
     core->start();
@@ -225,8 +225,8 @@ int esInit(IInterface** nameSpace)
         apic->busFreq();
         Core::pic = apic;
 
-        Core::registerExceptionHandler(67, sched);
-        apic->setTimer(67, 1000);
+        // Core::registerExceptionHandler(67, sched);
+        // apic->setTimer(67, 1000);
 
         apic->startup(hltAP, startAP);
     }
