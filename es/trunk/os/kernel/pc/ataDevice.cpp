@@ -19,7 +19,7 @@
 #include "io.h"
 #include "ataController.h"
 
-#define VERBOSE
+// #define VERBOSE
 
 using namespace ATAttachment;
 using namespace Register;
@@ -221,8 +221,13 @@ read(void* dst, int count)
 int AtaDevice::
 read(void* dst, int count, long long offset)
 {
-    // esReport("AtaDevice::%s(%p, %d, %lld)\n", __func__, dst, count, offset);
+#ifdef VERBOSE
+    esReport("AtaDevice::%s(%p, %d, %lld)\n", __func__, dst, count, offset);
+#endif
     count = ctlr->issue(this, readCmd, dst, count / sectorSize, offset / sectorSize);
+#ifdef VERBOSE
+    esReport("AtaDevice::%s : %d\n", __func__, count);
+#endif
     return (count <= 0) ? count : (count * sectorSize);
 }
 
@@ -235,8 +240,13 @@ write(const void* src, int count)
 int AtaDevice::
 write(const void* src, int count, long long offset)
 {
-    // esReport("AtaDevice::%s(%p, %d, %lld)\n", __func__, src, count, offset);
+#ifdef VERBOSE
+    esReport("AtaDevice::%s(%p, %d, %lld)\n", __func__, src, count, offset);
+#endif
     count = ctlr->issue(this, writeCmd, const_cast<void*>(src), count / sectorSize, offset / sectorSize);
+#ifdef VERBOSE
+    esReport("AtaDevice::%s : %d\n", __func__, count);
+#endif
     return (count <= 0) ? count : (count * sectorSize);
 }
 
