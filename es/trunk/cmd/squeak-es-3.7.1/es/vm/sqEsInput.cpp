@@ -45,6 +45,9 @@
 
 ICurrentProcess* System();
 
+#define WIDTH   1024
+#define HEIGHT  768
+
 /****************************************************************************/
 /*              Keyboard and Mouse                                          */
 /****************************************************************************/
@@ -496,8 +499,8 @@ public:
         caps(false),
         numlock(true),
         repeat(0),
-        width(1024),
-        height(768),
+        width(WIDTH),
+        height(HEIGHT),
         button(0),
         x(width / 2),
         y(height / 2)
@@ -884,7 +887,7 @@ int ioForceDisplayUpdate(void)
 int ioScreenSize(void)
 {
     /* return the screen size as two positive 16-bit integers packed into a 32-bit integer */
-    int w = 1024, h = 768;
+    int w = WIDTH, h = HEIGHT;
 
     return (w << 16) | (h & 0xFFFF);  /* w is high 16 bits; h is low 16 bits */
 }
@@ -975,7 +978,7 @@ int ioHasDisplayDepth(int depth)
 
 int ioSetDisplayMode(int width, int height, int depth, int fullscreenFlag)
 {
-    if (width == 1024 && height == 768 && depth == 32)
+    if (width == WIDTH && height == HEIGHT && depth == 32)
     {
         return 1;   // accept
     }
@@ -1010,7 +1013,7 @@ void* inputProcess(void* param)
                                  ICurrentProcess::PROT_READ | ICurrentProcess::PROT_WRITE,
                                  ICurrentProcess::MAP_SHARED,
                                  framebuffer, 0);
-    bpp = 8 * (size / (1024 * 768));
+    bpp = 8 * (size / (WIDTH * HEIGHT));
 
     cursor = root->lookup("device/cursor");
     cursor->setPosition(x, y);
