@@ -124,9 +124,9 @@ _start:                                 // at location 3000:0000
         .org    Halt
         .word   0
         .org    Width
-        .word   1024
+        .word   1024                    // Screen width
         .org    Height
-        .word   768
+        .word   768                     // Screen height
 
 0:
         // Set %sp
@@ -148,10 +148,19 @@ _start:                                 // at location 3000:0000
         // Enable A20 gate
         call    testA20
         jnz     a20_enabled
-        movw    $0x2401, %ax
+
+        movw    $0x2401, %ax            // Via BIOS
         int     $0x15
         call    testA20
         jnz     a20_enabled
+
+        inb     $0x92, %al              // Via System Control Port A
+        orb     $0x02, %al              // Bit 1: 0: disable A20, 1: enable A20
+        andb    $0xfe, %al
+        outb    %al, $0x92
+        call    testA20
+        jnz     a20_enabled
+
         jmp     hang
 a20_enabled:
         wbinvd
