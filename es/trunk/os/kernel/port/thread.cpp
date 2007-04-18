@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -471,11 +471,11 @@ Thread(void* (*func)(void*), void* param, int priority,
     if (!stack)
     {
         stack = new u8[stackSize];
-        ASSERT(stack);
     }
     this->stack = stack;
     *(int*) stack = 0xa5a5a5a5;
     sp0 = (u32) stack + stackSize - 2048;   // 2048: default kernel TLS size
+    memset((void*) sp0, 0, 2048);           // Clear TLS
     ktcb = static_cast<u8*>(stack) + stackSize - sizeof(void*);
     *(void**) ktcb = ktcb;
     label.init(stack, stackSize - 2048 /* default kernel TLS size */, startUp, this);
