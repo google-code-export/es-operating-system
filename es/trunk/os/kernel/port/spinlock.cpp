@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -102,6 +102,7 @@ unlock()
     ASSERT(0 < count);
     if (--count == 0)
     {
+        owner = 0;
         spin.exchange(0);
     }
 }
