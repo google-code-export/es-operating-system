@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -120,7 +120,7 @@ class Keyboard : public ICallback
 
     u8 sendControllerCommand(u8 cmd);
     void sendData(u8 data);
-    u8 receiveData();
+    u8 receiveData(int retry = 10000);
     void reset(void);
 
     u8 writeAuxDevice(u8 byte);

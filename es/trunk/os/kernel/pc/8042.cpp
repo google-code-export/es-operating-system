@@ -11,12 +11,14 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <es.h>
-#include <es/usage.h>
 #include <es/clsid.h>
+#include <es/exception.h>
 #include <es/handle.h>
+#include <es/usage.h>
 #include "core.h"
 #include "io.h"
 #include "8042.h"
@@ -367,13 +369,18 @@ sendData(u8 data)
 }
 
 u8 Keyboard::
-receiveData()
+receiveData(int retry)
 {
     while (!(inpb(STATUS_BYTE) & OUTPUT_BUFFER_FULL))
     {
 #if defined(__i386__) || defined(__x86_64__)
         __asm__ __volatile__ ("pause\n");
 #endif
+        --retry;
+        if (retry < 0)
+        {
+            throw SystemException<ENODEV>();
+        }
     }
     return inpb(DATA_BUFFER);
 }
@@ -647,43 +654,50 @@ writeAuxDevice(u8 byte)
 void Keyboard::
 detectAuxDevice(void)
 {
-    writeAuxDevice(SET_DEFAULTS);
-    writeAuxDevice(SET_STREAM_MODE);
-
-    // Try to enter the scrolling wheel mode.
-    writeAuxDevice(SET_SAMPLE_RATE);
-    writeAuxDevice(200);
-    writeAuxDevice(SET_SAMPLE_RATE);
-    writeAuxDevice(100);
-    writeAuxDevice(SET_SAMPLE_RATE);
-    writeAuxDevice(80);
-    writeAuxDevice(GET_DEVICE_ID);
-    aux = receiveData();
-
-    if (aux == 0x03)
+    try
     {
-        // Try to enter the scrolling wheel plus 5 button mode.
+        writeAuxDevice(SET_DEFAULTS);
+        writeAuxDevice(SET_STREAM_MODE);
+
+        // Try to enter the scrolling wheel mode.
         writeAuxDevice(SET_SAMPLE_RATE);
         writeAuxDevice(200);
         writeAuxDevice(SET_SAMPLE_RATE);
-        writeAuxDevice(200);
+        writeAuxDevice(100);
         writeAuxDevice(SET_SAMPLE_RATE);
         writeAuxDevice(80);
-    }
+        writeAuxDevice(GET_DEVICE_ID);
+        aux = receiveData();
 
-    writeAuxDevice(GET_DEVICE_ID);
-    aux = receiveData();
-    // esReport("mouse type: %d\n", aux);
-    switch (aux)
+        if (aux == 0x03)
+        {
+            // Try to enter the scrolling wheel plus 5 button mode.
+            writeAuxDevice(SET_SAMPLE_RATE);
+            writeAuxDevice(200);
+            writeAuxDevice(SET_SAMPLE_RATE);
+            writeAuxDevice(200);
+            writeAuxDevice(SET_SAMPLE_RATE);
+            writeAuxDevice(80);
+        }
+
+        writeAuxDevice(GET_DEVICE_ID);
+        aux = receiveData();
+        esReport("PS2 mouse: type = %02x\n", aux);
+        switch (aux)
+        {
+        case 0x00:  // PS/2 mouse
+        case 0x03:  // Intellimouse
+        case 0x04:  // Intellimouse (5 button)
+            writeAuxDevice(ENABLE_DATA_REPORTING);
+            break;
+        default:
+            writeAuxDevice(DISABLE_DATA_REPORTING);
+            break;
+        }
+    }
+    catch (...)
     {
-    case 0x00:  // PS/2 mouse
-    case 0x03:  // Intellimouse
-    case 0x04:  // Intellimouse (5 button)
-        writeAuxDevice(ENABLE_DATA_REPORTING);
-        break;
-    default:
-        writeAuxDevice(DISABLE_DATA_REPORTING);
-        break;
+        esReport("PS2 mouse: not detected.\n");
     }
 }
 
