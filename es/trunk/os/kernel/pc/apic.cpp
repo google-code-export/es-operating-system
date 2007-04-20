@@ -16,7 +16,7 @@
 #include "io.h"
 #include "rtc.h"
 
-extern long hzBus;
+extern Interlocked esShutdownCount;
 
 u8 Apic::idBSP = 0;             // boot-strap processor's local APIC id
 volatile u32* Apic::localApic;  // memory-mapped address of local APIC
@@ -67,7 +67,8 @@ setImcr(u8 value)
 
 Apic::
 Apic(Mps* mps) :
-    mps(mps)
+    mps(mps),
+    hz(0)
 {
     if (!mps)
     {
@@ -476,10 +477,47 @@ setTimer(int vec, long hz)
     localApic[LVT_TR] &= ~0x20000;  // one-shot
     if (0 < hz)
     {
+        this->hz = hz;
         localApic[DCR] &= ~0x0b;
         localApic[DCR] |= 0x0b;                 // divide by 1
         localApic[ICR] = busClock / hz;
         localApic[LVT_TR] |= 0x20000 | vec;     // periodic
         localApic[LVT_TR] &= ~0x10000;          // unmask
     }
+}
+
+//
+// ICallback
+//
+
+#include "8254.h"
+
+int Apic::
+invoke(int)
+{
+    if (getLocalApicID() == 0)      // is bsp?
+    {
+        Pit::tick += 10000000 / hz;
+        Alarm::invoke();
+    }
+
+    if (0 < esShutdownCount)
+    {
+        setTimer(0, 0);             // Stop local timer
+        esShutdownCount.decrement();
+        if (getLocalApicID() == 0)  // is bsp?
+        {
+            while (0 < esShutdownCount)
+            {
+                __asm__ __volatile__ ("pause\n");
+            }
+            Core::shutdown();
+        }
+        for (;;)
+        {
+            __asm__ __volatile__ ("hlt\n");
+        }
+    }
+
+    return 0;
 }

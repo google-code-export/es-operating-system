@@ -191,13 +191,4 @@ esUnlockMonitor(esMonitor* monitor)
     static_cast<Monitor*>(monitor->monitor)->unlock();
 }
 
-void _exit(int i)
-{
-    Core::shutdown();
-    for (;;)
-    {
-        __asm__ __volatile__ ("hlt");
-    }
-}
-
 #endif // __es__

@@ -80,6 +80,8 @@ const int Page::SIZE = 4096;
 const int Page::SHIFT = 12;
 const int Page::SECTOR = 512;
 
+Interlocked esShutdownCount;
+
 struct AddressRangeDesc
 {
     u64 base;   // base address
@@ -138,7 +140,7 @@ static void initAP(...)
 {
     apic->enableLocalApic();
     apic->splHi();
-    // apic->setTimer(67, 1000);
+    apic->setTimer(32, 1000);
     Core* core = new Core(sched);
     apic->started();
     core->start();
@@ -207,28 +209,27 @@ int esInit(IInterface** nameSpace)
     {
         Core::pic = pic;
     }
-    else if (mps->getProcessorCount() < 2)
-    {
-        Core::pic = pic;
-    }
     else
     {
-        // Startup APs
-        u32 hltAP = 0x30000 + *(u16*) (0x30000 + 138);
-        u32 startAP = 0x30000 + *(u16*) (0x30000 + 126);
-        *(u32*) (0x30000 + 132) = (u32) initAP;
-
-        esReport("Startap: %x\n", startAP);
-        esReport("Halt: %x\n", hltAP);
-
         apic = new Apic(mps);
         apic->busFreq();
         Core::pic = apic;
 
-        // Core::registerExceptionHandler(67, sched);
-        // apic->setTimer(67, 1000);
+        if (2 <= mps->getProcessorCount())
+        {
+            // Startup APs
+            u32 hltAP = 0x30000 + *(u16*) (0x30000 + 138);
+            u32 startAP = 0x30000 + *(u16*) (0x30000 + 126);
+            *(u32*) (0x30000 + 132) = (u32) initAP;
 
-        apic->startup(hltAP, startAP);
+            esReport("Startap: %x\n", startAP);
+            esReport("Halt: %x\n", hltAP);
+
+            apic->startup(hltAP, startAP);
+        }
+
+        Core::registerExceptionHandler(32, apic);
+        apic->setTimer(32, 1000);
     }
 
     // Create the default thread (stack top: 0x80010000)
@@ -241,7 +242,7 @@ int esInit(IInterface** nameSpace)
     core->current = thread;
     core->ktcb.tcb = thread->ktcb;
 
-    pit = new Pit(1000);
+    pit = new Pit(!mps->getFloatingPointerStructure() ? 1000 : 0);
 
     // Create class store
     classStore = static_cast<IClassStore*>(new ClassStore);
@@ -329,11 +330,18 @@ int esInit(IInterface** nameSpace)
     root->bind("device/floppy", static_cast<IStream*>(fdd));
 
 #ifdef USE_SB16
-    SoundBlaster16* sb16 = new SoundBlaster16(master, slave);
-    ASSERT(static_cast<IStream*>(&sb16->inputLine));
-    ASSERT(static_cast<IStream*>(&sb16->outputLine));
-    root->bind("device/soundInput", static_cast<IStream*>(&sb16->inputLine));
-    root->bind("device/soundOutput", static_cast<IStream*>(&sb16->outputLine));
+    try
+    {
+        SoundBlaster16* sb16 = new SoundBlaster16(master, slave);
+        ASSERT(static_cast<IStream*>(&sb16->inputLine));
+        ASSERT(static_cast<IStream*>(&sb16->outputLine));
+        root->bind("device/soundInput", static_cast<IStream*>(&sb16->inputLine));
+        root->bind("device/soundOutput", static_cast<IStream*>(&sb16->outputLine));
+    }
+    catch (...)
+    {
+        esReport("sb16: not detected.\n");
+    }
 #endif
 
     // Register the loopback interface
@@ -362,7 +370,7 @@ void esSleep(s64 timeout)
 {
     Thread* thread(Thread::getCurrentThread());
 
-    if (thread && 20000 <= timeout)
+    if (thread && 20000 < timeout)
     {
         thread->sleep(timeout);
         return;
@@ -459,4 +467,21 @@ int getDebugChar()
     {
     }
     return data;
+}
+
+void _exit(int i)
+{
+    if (!mps->getFloatingPointerStructure())
+    {
+        Core::shutdown();
+    }
+    else
+    {
+        esShutdownCount.exchange(mps->getProcessorCount());
+        Core::splIdle();
+    }
+    for (;;)
+    {
+        __asm__ __volatile__ ("hlt");
+    }
 }

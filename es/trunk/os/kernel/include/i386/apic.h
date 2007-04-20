@@ -14,12 +14,13 @@
 #ifndef NINTENDO_ES_KERNEL_I386_APIC_H_INCLUDED
 #define NINTENDO_ES_KERNEL_I386_APIC_H_INCLUDED
 
+#include <es/base/ICallback.h>
 #include <es/device/IPic.h>
 #include <es/ref.h>
 #include <es.h>
 #include "mps.h"
 
-class Apic : public IPic
+class Apic : public IPic, public ICallback
 {
     // Memory mapped registers for accessing IOAPIC registers
     static const int IOREGSEL  = 0x00 / sizeof(u32);
@@ -62,8 +63,9 @@ class Apic : public IPic
     static volatile bool    online;
     static unsigned         busClock;
 
-    Ref     ref;
-    Mps*    mps;
+    Ref         ref;
+    Mps*        mps;
+    unsigned    hz;         // for counter 0
 
     static void setIoApicID(volatile u32* addr, u8 id);
     /** Get local APIC version.
@@ -152,7 +154,8 @@ public:
 
     static int readRtcCounter(int addr);
     static void busFreq();
-    static void setTimer(int vec, long hz);
+
+    void setTimer(int vec, long hz);
 
     void startup(u32 hltAP, u32 startAP)
     {
@@ -187,6 +190,9 @@ public:
     unsigned int splLo();
     unsigned int splHi();
     void splX(unsigned int x);
+
+    // ICallback
+    int invoke(int);
 
     static u8 getLocalApicID()
     {
