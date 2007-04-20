@@ -497,7 +497,6 @@ text_mode:
         xorl    %eax, %eax
         lldt    %ax                     // Invalidate LDTR
 
-#if 1
         // Turn on PSE
         movl    %cr4, %eax
         orl     $0x10, %eax
@@ -531,7 +530,6 @@ text_mode:
         movl    %cr0, %eax
         orl     $0x80010000, %eax
         movl    %eax, %cr0              // and set paging (PG) bit with WP
-#endif
 
         movl    $0x80010000, %esp
         pushl   %esp
@@ -607,7 +605,12 @@ _shutdown:
         movw    $0x0003, %cx
         int     $0x15
 
-3:      leaw    turnoff, %si
+3:
+        // Switch to text mode
+        movw    $0x0003, %ax
+        int     $0x10
+
+        leaw    turnoff, %si
         call    prtstr
         jmp     _halt
 
