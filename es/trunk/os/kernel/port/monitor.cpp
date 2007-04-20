@@ -17,8 +17,8 @@
 
 Thread::Monitor::
 Monitor() :
-    owner(0),
-    lockCount(0)
+    lockCount(0),
+    owner(0)
 {
     return;
 }
@@ -93,6 +93,7 @@ Retry:
         effective = current->priority;
     }
 
+    ASSERT(owner);
     if (owner->tryLock())
     {
         if (owner->priority < effective)
@@ -215,8 +216,11 @@ condWait(int)
     Thread* current = getCurrentThread();
     if (current == owner)
     {
+        rendezvous.lock();
         lockCount = 0;
         owner = 0;
+        rendezvous.unlock();
+
         current->lock();
         current->monitorList.remove(this);
         current->resetPriority();
