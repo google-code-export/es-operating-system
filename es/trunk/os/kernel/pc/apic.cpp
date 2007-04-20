@@ -166,7 +166,6 @@ disable(unsigned int irq, u8 vec)
         return;
     }
     addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn;
-
     addr[IOWIN] = 1 << 16;  // mask
 }
 
@@ -179,7 +178,9 @@ ack(unsigned int irq)
         return false;
     }
 
-    // XXX disable(irq, vec);
+    // Note IOAPIC ignores edge-sensitive interrupts (ISA) signaled on a
+    // masked interrupt pin (i.e. does not deliver or hold pending). So we
+    // do not mask irq here to keep the source code simple.
 
     // Note it appears qemu does not emulate ISR and we don't check ISR here.
     localApic[EOI] = 0;
@@ -190,7 +191,6 @@ ack(unsigned int irq)
 void Apic::
 end(unsigned int irq)
 {
-    // XXX enable(irq);
 }
 
 void Apic::
@@ -334,46 +334,45 @@ shutdownAp(u8 id, u32 hltAP)
 unsigned Apic::
 splIdle()
 {
-    register unsigned eax;
-    __asm__ __volatile__ (
-        "pushfl\n"
-        "popl    %0\n"
-        "sti"
-        : "=a" (eax));
-    return eax;
+    unsigned x = exchange(localApic + TPR, 0 << 4);
+    __asm__ __volatile__ ("sti\n");
+    return x;
 }
 
 unsigned Apic::
 splLo()
 {
-    register unsigned eax;
-    __asm__ __volatile__ (
-        "pushfl\n"
-        "popl   %0\n"
-        "sti"
-        : "=a" (eax));
-    return eax;
+    unsigned x = exchange(localApic + TPR, 1 << 4);
+    __asm__ __volatile__ ("sti\n");
+    return x;
 }
 
 unsigned Apic::
 splHi()
 {
-    register unsigned eax;
-    __asm__ __volatile__ (
-        "pushfl\n"
-        "popl   %0\n"
-        "cli"
-        : "=a" (eax));
-    return eax;
+    unsigned x = exchange(localApic + TPR, 15 << 4);
+    __asm__ __volatile__ ("cli\n");
+    return x;
 }
 
 void Apic::
 splX(unsigned x)
 {
-    __asm__ __volatile__ (
-        "pushl   %0\n"
-        "popfl"
-        :: "r" (x));
+    switch (x)
+    {
+    case 0 << 4:
+        splIdle();
+        break;
+    case 1 << 4:
+        splLo();
+        break;
+    case 15 << 4:
+        splHi();
+        break;
+    default:
+        esPanic(__FILE__, __LINE__, "inv. spl %d\n", x);
+        break;
+    }
 }
 
 //
