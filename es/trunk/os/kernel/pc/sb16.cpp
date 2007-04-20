@@ -11,10 +11,12 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <es.h>
 #include <es/clsid.h>
+#include <es/exception.h>
 #include <es/handle.h>
 #include "8237a.h"
 #include "core.h"
@@ -91,8 +93,7 @@ SoundBlaster16(Dmac* master, Dmac* slave,
     u8 data = readData();
     if (data != 0xaa)
     {
-        esReport("no response (%02x)\n", data);
-        return;
+        throw SystemException<ENODEV>();
     }
 
     writeData(GET_VERSION);
@@ -103,7 +104,7 @@ SoundBlaster16(Dmac* master, Dmac* slave,
     {
         esReport("No SoundBlaster16 compatible sound card found. (DSP version %d.%d)\n",
                  major, minor);
-        return;
+        throw SystemException<ENODEV>();
     }
 
     //
@@ -200,7 +201,7 @@ SoundBlaster16(Dmac* master, Dmac* slave,
         irq = 10;
         break;
     default:
-        return;
+        throw SystemException<ENODEV>();
         break;
     }
     Core::registerInterruptHandler(irq, this);
