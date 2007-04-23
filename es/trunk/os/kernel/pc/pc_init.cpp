@@ -235,6 +235,17 @@ int esInit(IInterface** nameSpace)
         apic->setTimer(32, 1000);
     }
 
+    // Invalidate 0-2GB region for debug purposes.
+    u32* table = static_cast<u32*>(Mmu::getPointer(0x10000));
+    for (int i = 0; i < 512; ++i)
+    {
+        table[i] = 0;
+    }
+    __asm__ __volatile__ (
+        "movl   $0x10000, %%eax\n"
+        "movl   %%eax, %%cr3\n"
+        ::: "%eax");
+
     // Create the default thread (stack top: 0x80010000)
     Thread* thread = new Thread(0, 0, IThread::Normal,
                                 (void*) 0x80009000, 0x80010000 - 0x80009000);
@@ -317,8 +328,8 @@ int esInit(IInterface** nameSpace)
     root->bind("device/beep", static_cast<IBeep*>(pit));
 
 #ifdef USE_SVGA
-    Vesa* vesa = new Vesa((u8*) 0x8000, (u8*) 0x8200,
-                          (u8*) ((*(u16*) (0x30000 + 128)) | ((*(u16*) (0x30000 + 130)) << 4)),
+    Vesa* vesa = new Vesa((u8*) 0x80008000, (u8*) 0x80008200,
+                          (u8*) ((*(u16*) (0x80030000 + 128)) | ((*(u16*) (0x80030000 + 130)) << 4)),
                           device);
 #endif
 
