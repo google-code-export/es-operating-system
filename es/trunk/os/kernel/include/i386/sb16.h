@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -123,7 +123,7 @@ public:
     InputLine       inputLine;
     OutputLine      outputLine;
 
-    SoundBlaster16(Dmac* master, Dmac* slave,
+    SoundBlaster16(u8 bus, Dmac* master, Dmac* slave,
                    u16 base = 0x220, u8 irq = 5, u8 chan8 = 1, u8 chan16 = 5, u16 mpu401 = 0x330);
     ~SoundBlaster16();
 

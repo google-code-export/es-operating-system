@@ -78,6 +78,7 @@ private:
     static Lock         spinLock;
     static ICallback*   exceptionHandlers[255];
     static IPic*        pic;
+    static u8           isaBus;     // ISA Bus #
 
 public:
     Core(Sched* sched);
@@ -106,8 +107,17 @@ public:
     static long registerExceptionHandler(u8 exceptionNumber, ICallback* callback);
     static long unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback);
 
-    static long registerInterruptHandler(u8 irq, ICallback* callback);
-    static long unregisterInterruptHandler(u8 irq, ICallback* callback);
+    static long registerInterruptHandler(u8 bus, u8 irq, ICallback* callback);
+    static long unregisterInterruptHandler(u8 bus, u8 irq, ICallback* callback);
+
+    static long registerInterruptHandler(u8 irq, ICallback* callback)
+    {
+        return registerInterruptHandler(isaBus, irq, callback);
+    }
+    static long unregisterInterruptHandler(u8 irq, ICallback* callback)
+    {
+        return unregisterInterruptHandler(isaBus, irq, callback);
+    }
 
     // processor execution level
     static unsigned int splIdle()

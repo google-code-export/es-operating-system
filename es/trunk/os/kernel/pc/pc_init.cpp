@@ -211,6 +211,9 @@ int esInit(IInterface** nameSpace)
     }
     else
     {
+        Core::isaBus = mps->getISABusID();
+        esReport("ISA Bus #: %d\n", Core::isaBus);
+
         apic = new Apic(mps);
         apic->busFreq();
         Core::pic = apic;
@@ -225,7 +228,7 @@ int esInit(IInterface** nameSpace)
             esReport("Startap: %x\n", startAP);
             esReport("Halt: %x\n", hltAP);
 
-            apic->startup(hltAP, startAP);
+            apic->startupAllAP(hltAP, startAP);
         }
 
         Core::registerExceptionHandler(32, apic);
@@ -332,7 +335,7 @@ int esInit(IInterface** nameSpace)
 #ifdef USE_SB16
     try
     {
-        SoundBlaster16* sb16 = new SoundBlaster16(master, slave);
+        SoundBlaster16* sb16 = new SoundBlaster16(Core::isaBus, master, slave);
         ASSERT(static_cast<IStream*>(&sb16->inputLine));
         ASSERT(static_cast<IStream*>(&sb16->outputLine));
         root->bind("device/soundInput", static_cast<IStream*>(&sb16->inputLine));
@@ -350,11 +353,11 @@ int esInit(IInterface** nameSpace)
 
 #ifdef USE_NE2000ISA
     // Register the Ethernet interface
-    Dp8390d* ne2000 = new Dp8390d(0xc100, 10);
+    Dp8390d* ne2000 = new Dp8390d(Core::isaBus, 0xc100, 10);
     device->bind("ethernet", static_cast<IStream*>(ne2000));
 #endif
 
-    pci = new Pci(device);
+    pci = new Pci(mps, device);
 
     Process::initialize();
 

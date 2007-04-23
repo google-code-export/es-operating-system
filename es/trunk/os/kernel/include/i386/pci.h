@@ -16,7 +16,8 @@
 
 #include <es/types.h>
 #include <es/naming/IContext.h>
-#include "i386/io.h"
+#include "io.h"
+#include "mps.h"
 
 class Pci
 {
@@ -26,6 +27,7 @@ class Pci
     static const u32 RESERVED = 0x7f000000;
     static const u32 CFGE = 0x80000000;         // Configuration Enable
 
+    Mps*        mps;
     int         maxDevice;
     IContext*   device;
 
@@ -75,16 +77,19 @@ public:
         {
             esReport("  device ID: %04x\n", deviceID);
             esReport("  vendor ID: %04x\n", vendorID);
+            esReport("  command: %04x\n", command);
+            esReport("  status: %04x\n", status);
             esReport("  class code: %08x\n", classCode);
             esReport("  base address register: %08x %08x\n", baseAddressRegisters[0],
                                                              baseAddressRegisters[1]);
             esReport("  subsystem ID: %04x\n", subsystemID);
             esReport("  subsystem vendor ID: %04x\n", subsystemVendorID);
             esReport("  interrupt line: %d\n", interruptLine);
+            esReport("  interrupt pin: %d\n", interruptPin);
         }
     };
 
-    Pci(IContext* device);
+    Pci(Mps* mps, IContext* device);
     ~Pci();
 
     static u32 tag(u8 bus, u8 device, u8 func)
@@ -111,7 +116,7 @@ public:
 
     void scan();
 
-    void attach(ConfigurationSpaceHeader* csp);
+    void attach(int bus, int device, ConfigurationSpaceHeader* csp);
 };
 
 #endif // NINTENDO_ES_KERNEL_I386_PCI_H_INCLUDED

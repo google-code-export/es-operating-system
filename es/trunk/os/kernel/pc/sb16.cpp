@@ -67,7 +67,7 @@ writeMixer(u8 addr, u8 val)
 }
 
 SoundBlaster16::
-SoundBlaster16(Dmac* master, Dmac* slave,
+SoundBlaster16(u8 bus, Dmac* master, Dmac* slave,
                u16 base, u8 irq, u8 chan8, u8 chan16, u16 mpu401) :
     base(base),
     mpu401(mpu401),
@@ -204,7 +204,7 @@ SoundBlaster16(Dmac* master, Dmac* slave,
         throw SystemException<ENODEV>();
         break;
     }
-    Core::registerInterruptHandler(irq, this);
+    Core::registerInterruptHandler(bus, irq, this);
 
     writeData(SPEAKER_ON);
     esSleep(1120000);

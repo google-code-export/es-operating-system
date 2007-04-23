@@ -74,9 +74,6 @@ class Apic : public IPic, public ICallback
     static u8 getLocalApicVersion();
     void setImcr(u8 value);
 
-    void enable(unsigned int irq, u8 vec);
-    void disable(unsigned int irq, u8 vec);
-
     void sendInit(u8 id, u32 addr);
     void sendStartup(u8 id, u32 addr);
 
@@ -157,7 +154,7 @@ public:
 
     void setTimer(int vec, long hz);
 
-    void startup(u32 hltAP, u32 startAP)
+    void startupAllAP(u32 hltAP, u32 startAP)
     {
         Mps::ConfigurationTableHeader* cth = mps->getConfigurationTableHeader();
         if (!cth)
@@ -179,13 +176,13 @@ public:
     unsigned int release(void);
 
     // IPic
-    void startup(unsigned int irq);
-    void shutdown(unsigned int irq);
-    void enable(unsigned int irq);
-    void disable(unsigned int irq);
-    bool ack(unsigned int irq);
-    void end(unsigned int irq);
-    void setAffinity(unsigned int irq, unsigned int mask);
+    int startup(unsigned int bus, unsigned int irq);
+    int shutdown(unsigned int bus, unsigned int irq);
+    int enable(unsigned int bus, unsigned int irq);
+    int disable(unsigned int bus, unsigned int irq);
+    bool ack(int vec);
+    bool end(int vec);
+    int setAffinity(unsigned int bus, unsigned int irq, unsigned int mask);
     unsigned int splIdle();
     unsigned int splLo();
     unsigned int splHi();

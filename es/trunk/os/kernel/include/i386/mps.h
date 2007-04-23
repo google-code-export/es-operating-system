@@ -15,6 +15,7 @@
 #define NINTENDO_ES_KERNEL_I386_MPS_H_INCLUDED
 
 #include <es.h>
+#include <string.h>
 
 class Mps
 {
@@ -251,9 +252,11 @@ public:
     class ProcessorCount : public Visitor
     {
         int processorCount;
+        u8  isaBus;
     public:
         ProcessorCount(int count = 0) :
-            processorCount(count)
+            processorCount(count),
+            isaBus(0)
         {
         }
         bool at(const Processor* processor)
@@ -264,9 +267,21 @@ public:
             }
             return true;
         }
+        bool at(const Bus* bus)
+        {
+            if (memcmp(bus->typeString, "ISA   ", 6) == 0)
+            {
+                isaBus = bus->id;
+            }
+            return true;
+        }
         operator int() const
         {
             return processorCount;
+        }
+        u8 getISABusID() const
+        {
+            return isaBus;
         }
     };
 
@@ -302,17 +317,21 @@ public:
 
     class LookupAssignment : public Visitor
     {
+        unsigned int bus;
         unsigned int irq;
         const InterruptAssignment* assignment;
     public:
-        LookupAssignment(unsigned int irq) :
+        LookupAssignment(unsigned int bus, unsigned int irq) :
+            bus(bus),
             irq(irq),
             assignment(0)
         {
         }
         bool at(const InterruptAssignment* interrupt)
         {
-            if (interrupt->type == 0 /* INT */ && interrupt->busIRQ == irq)
+            if (interrupt->type == 0 && // INT
+                interrupt->busID == bus &&
+                interrupt->busIRQ == irq)
             {
                 assignment = interrupt;
                 return false;
@@ -382,10 +401,17 @@ public:
         return processorCount;
     }
 
+    u8 getISABusID() const
+    {
+        return processorCount.getISABusID();
+    }
+
     /** Lookup interrupt assignment entry for the irq.
      * @return memory mapped I/O APIC address or zero if not found
      */
-    volatile u32* getInterruptAssignment(unsigned int irq, InterruptAssignment& assignment);
+    volatile u32* getInterruptAssignment(unsigned int bus,
+                                         unsigned int irq,
+                                         InterruptAssignment& assignment);
 
     bool accept(Visitor& visitor)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -13,6 +13,7 @@
 
 // 8259 interrupt controllers
 
+#include <es.h>
 #include "io.h"
 #include "8259.h"
 
@@ -38,20 +39,20 @@ Pic() :
     outpb(PORT_MASTER_IMR, imrMaster);
 }
 
-void Pic::
-startup(unsigned irq)
+int Pic::
+startup(unsigned bus, unsigned irq)
 {
-    enable(irq);
+    return 32 + irq;
 }
 
-void Pic::
-shutdown(unsigned irq)
+int Pic::
+shutdown(unsigned bus, unsigned irq)
 {
-    disable(irq);
+    return disable(bus, irq);
 }
 
-void Pic::
-enable(unsigned irq)
+int Pic::
+enable(unsigned bus, unsigned irq)
 {
     if (irq & 8)
     {
@@ -63,10 +64,11 @@ enable(unsigned irq)
         imrMaster &= ~(1u << (irq & 7));
         outpb(PORT_MASTER_IMR, imrMaster);
     }
+    return 32 + irq;
 }
 
-void Pic::
-disable(unsigned irq)
+int Pic::
+disable(unsigned bus, unsigned irq)
 {
     if (irq & 8)
     {
@@ -78,6 +80,7 @@ disable(unsigned irq)
         imrMaster |= (1u << (irq & 7));
         outpb(PORT_MASTER_IMR, imrMaster);
     }
+    return 32 + irq;
 }
 
 int Pic::
@@ -100,8 +103,10 @@ readISR(unsigned irq)
 }
 
 bool Pic::
-ack(unsigned irq)
+ack(int vec)
 {
+    ASSERT(32 <= vec && vec < 32 + 16);
+    unsigned irq = vec - 32;
     unsigned irqmask = 1u << (irq & 7);
     if (readISR(irq) & irqmask)
     {
@@ -123,16 +128,17 @@ ack(unsigned irq)
     return false;
 }
 
-void Pic::
-end(unsigned irq)
+bool Pic::
+end(int vec)
 {
-    enable(irq);
+    enable(0, vec - 32);
+    return true;
 }
 
-void Pic::
-setAffinity(unsigned irq, unsigned int cpuMask)
+int Pic::
+setAffinity(unsigned bus, unsigned irq, unsigned int cpuMask)
 {
-    return;
+    return 32 + irq;
 }
 
 unsigned Pic::

@@ -33,13 +33,34 @@ namespace
     {
         Ref ref;
     public:
-        void startup(unsigned int irq) {}
-        void shutdown(unsigned int irq) {}
-        void enable(unsigned int irq) {}
-        void disable(unsigned int irq) {}
-        bool ack(unsigned int irq) { return false; }
-        void end(unsigned int irq) {}
-        void setAffinity(unsigned int irq, unsigned int mask) {}
+        int startup(unsigned int bus, unsigned int irq)
+        {
+            return -1;
+        }
+        int shutdown(unsigned int bus, unsigned int irq)
+        {
+            return -1;
+        }
+        int enable(unsigned int bus, unsigned int irq)
+        {
+            return -1;
+        }
+        int disable(unsigned int bus, unsigned int irq)
+        {
+            return -1;
+        }
+        bool ack(int vec)
+        {
+            return false;
+        }
+        bool end(int vec)
+        {
+            return false;
+        }
+        int setAffinity(unsigned int bus, unsigned int irq, unsigned int mask)
+        {
+            return -1;
+        }
         unsigned int splIdle() { return 0; }
         unsigned int splLo() { return 0; }
         unsigned int splHi() { return 0; }
@@ -95,6 +116,7 @@ SegdescLoc Core::idtLoc(sizeof idt - 1, idt);
 Lock Core::spinLock;
 ICallback* Core::exceptionHandlers[255];
 IPic* Core::pic = &nullPic;
+u8 Core::isaBus;
 
 extern "C"
 {
@@ -837,17 +859,15 @@ dispatchException(Ureg* ureg)
         {
             core->freeze.increment();
             core->current = 0;
-            int irq = ureg->trap - 32;
-
-            if (pic->ack(irq))
+            if (pic->ack(ureg->trap))
             {
-                // x = splLo();    // Enable interrupts
+                // x = splLo();     // Enable interrupts
                 ICallback* callback = core->exceptionHandlers[ureg->trap];
                 if (callback)
                 {
-                    callback->invoke(irq);
+                    callback->invoke(ureg->trap);
                 }
-                pic->end(irq);
+                pic->end(ureg->trap);
                 // splX(x);
             }
 
@@ -880,10 +900,6 @@ registerExceptionHandler(u8 exceptionNumber, ICallback* callback)
     }
     ICallback* old = exceptionHandlers[exceptionNumber];
     exceptionHandlers[exceptionNumber] = callback;
-    if (32 <= exceptionNumber && !old)
-    {
-        pic->startup(exceptionNumber - 32);
-    }
     callback->addRef();
     if (old)
     {
@@ -908,10 +924,6 @@ unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback)
     {
         rc = -1;
     }
-    if (32 <= exceptionNumber && old)
-    {
-        pic->shutdown(exceptionNumber - 32);
-    }
     if (old)
     {
         old->release();
@@ -920,7 +932,7 @@ unregisterExceptionHandler(u8 exceptionNumber, ICallback* callback)
 }
 
 long Core::
-registerInterruptHandler(u8 irq, ICallback* callback)
+registerInterruptHandler(u8 bus, u8 irq, ICallback* callback)
 {
     Lock::Synchronized method(spinLock);
 
@@ -928,47 +940,42 @@ registerInterruptHandler(u8 irq, ICallback* callback)
     {
         return -1;
     }
-    u8 exceptionNumber = irq + 32;
-    ICallback* old = exceptionHandlers[exceptionNumber];
-    exceptionHandlers[exceptionNumber] = callback;
-    if (!old)
+
+    int vec = pic->startup(bus, irq);
+    if (vec < 0 || exceptionHandlers[vec])
     {
-        pic->startup(irq);
+        return -1;
     }
+
     callback->addRef();
-    if (old)
-    {
-        old->release();
-    }
-    return 0;
+    exceptionHandlers[vec] = callback;
+
+    return pic->enable(bus, irq);;
 }
 
 long Core::
-unregisterInterruptHandler(u8 irq, ICallback* callback)
+unregisterInterruptHandler(u8 bus, u8 irq, ICallback* callback)
 {
     Lock::Synchronized method(spinLock);
 
-    long rc;
-    u8 exceptionNumber = irq + 32;
-    ICallback* old = exceptionHandlers[exceptionNumber];
-    if (!callback || old == callback)
+    if (!callback)
     {
-        exceptionHandlers[exceptionNumber] = 0;
-        rc = 0;
+        return -1;
     }
-    else
+
+    int vec = pic->disable(bus, irq);
+    if (vec < 0 || !exceptionHandlers[vec])
     {
-        rc = -1;
+        return -1;
     }
-    if (old)
-    {
-        pic->shutdown(irq);
-    }
-    if (old)
-    {
-        old->release();
-    }
-    return rc;
+
+    ICallback* old = exceptionHandlers[vec];
+    ASSERT(old == callback);
+    pic->shutdown(bus, irq);
+    old->release();
+    exceptionHandlers[vec] = 0;
+
+    return pic->shutdown(bus, irq);;
 }
 
 void Core::

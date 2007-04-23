@@ -41,7 +41,7 @@ class Dp8390d : public INetworkInterface, public IStream, public ICallback
     DateTime        lastOverflow;
     bool            resend;
 
-    Statistics statistics;
+    Statistics      statistics;
 
     static const int PAGE_SIZE = 256;
     static const int NUM_TX_PAGE = 6;
@@ -104,7 +104,7 @@ class Dp8390d : public INetworkInterface, public IStream, public ICallback
     u8 getCurr();
 
 public:
-    Dp8390d(unsigned base, int irq);
+    Dp8390d(u8 bus, unsigned base, int irq);
     ~Dp8390d();
 
     // INetworkInterface

@@ -28,6 +28,8 @@
 #include "i386/io.h"
 #include "i386/core.h"
 
+// #define VERBOSE
+
 int Dp8390d::
 readProm()
 {
@@ -594,8 +596,12 @@ restorePage(u8 cr)
 //
 
 Dp8390d::
-Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
-    overflow(false), lastOverflow(0)
+Dp8390d(u8 bus, unsigned base, int irq) :
+    base(base),
+    irq(irq),
+    sendDone(false),
+    overflow(false),
+    lastOverflow(0)
 {
     esCreateInstance(CLSID_Monitor,
                      IID_IMonitor,
@@ -621,7 +627,7 @@ Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
     ring.nextPacket = ring.pageStart + 1;
     reset();
 
-    Core::registerInterruptHandler(irq, this);
+    Core::registerInterruptHandler(bus, irq, this);
 
     // read PROM emulation area of NIC memory.
     if (readProm() < 0)
@@ -636,7 +642,8 @@ Dp8390d(unsigned base, int irq) : ref(0), base(base), irq(irq), sendDone(false),
     memset(&statistics, 0, sizeof(statistics));
 }
 
-Dp8390d::~Dp8390d()
+Dp8390d::
+~Dp8390d()
 {
     if (monitor)
     {
@@ -951,7 +958,7 @@ invoke(int irq)
 #ifdef VERBOSE
         u8 rsr = inpb(base + RSR);
         u8 tsr = inpb(base + TSR);
-        esReport("Dp8390d::invoke: isr=0x%x rsr=0x%x tsr=0x%x\n", isr, rsr, tsr);
+        esReport("Dp8390d::invoke(%d): isr=0x%x rsr=0x%x tsr=0x%x\n", irq, isr, rsr, tsr);
 #endif
 
         if (isr & (ISR_TXE | ISR_PTX))

@@ -107,76 +107,68 @@ Apic::
 {
 }
 
-void Apic::
-startup(unsigned irq)
+int Apic::
+startup(unsigned int bus, unsigned irq)
 {
-    setAffinity(irq, 0xff);
-    enable(irq);
+    return setAffinity(bus, irq, 0xff);
 }
 
-void Apic::
-shutdown(unsigned irq)
+int Apic::
+shutdown(unsigned int bus, unsigned irq)
 {
-    disable(irq);
+    return disable(bus, irq);
 }
 
-void Apic::
-enable(unsigned int irq)
+int Apic::
+enable(unsigned int bus, unsigned int irq)
 {
-    enable(irq, 32 + irq);
-}
-
-void Apic::
-enable(unsigned int irq, u8 vec)
-{
-    if (vec < 0x10 || 0xfe < vec)
-    {
-        return;
-    }
-
     Mps::InterruptAssignment assignment;
-    volatile u32* addr = mps->getInterruptAssignment(irq, assignment);
+    volatile u32* addr = mps->getInterruptAssignment(bus, irq, assignment);
+    u8 intin;
     if (!addr || 23 < assignment.apicINTINn)
     {
-        return;
+        return -1;
     }
-
-    addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn;
-    addr[IOWIN] = (1 << 11) | (1 << 8) | vec;   // logical, lowest priority
-}
-
-void Apic::
-disable(unsigned int irq)
-{
-    disable(irq, 32 + irq);
-}
-
-void Apic::
-disable(unsigned int irq, u8 vec)
-{
-    if (vec < 0x10 || 0xfe < vec)
+    else
     {
-        return;
+        u32 mode = (1 << 11) | (1 << 8) | (32 + assignment.apicINTINn);     // logical, lowest priority
+        if (assignment.getTriggerMode() == 3)
+        {
+            mode |= (1 << 15);      // Level sensitive
+        }
+        if (assignment.getPolarity() == 3)
+        {
+            mode |= (1 << 13);      // Low active
+        }
+        addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn;
+        addr[IOWIN] = mode;
     }
+    return 32 + assignment.apicINTINn;
+}
 
+int Apic::
+disable(unsigned int bus, unsigned int irq)
+{
     Mps::InterruptAssignment assignment;
-    volatile u32* addr = mps->getInterruptAssignment(irq, assignment);
+    volatile u32* addr = mps->getInterruptAssignment(bus, irq, assignment);
+    u8 intin;
     if (!addr || 23 < assignment.apicINTINn)
     {
-        return;
+        return -1;
     }
-    addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn;
+    else
+    {
+        intin = assignment.apicINTINn;
+    }
+    addr[IOREGSEL] = IOREDTBL + 2 * intin;
     addr[IOWIN] = 1 << 16;  // mask
+    return 32 + assignment.apicINTINn;
 }
 
 bool Apic::
-ack(unsigned int irq)
+ack(int vec)
 {
-    u8 vec = 32 + irq;
-    if (vec < 0x10 || 0xfe < vec)
-    {
-        return false;
-    }
+    ASSERT(32 <= vec && vec < 32 + 24);
 
     // Note IOAPIC ignores edge-sensitive interrupts (ISA) signaled on a
     // masked interrupt pin (i.e. does not deliver or hold pending). So we
@@ -188,23 +180,28 @@ ack(unsigned int irq)
     return true;
 }
 
-void Apic::
-end(unsigned int irq)
+bool Apic::
+end(int vec)
 {
+    return true;
 }
 
-void Apic::
-setAffinity(unsigned int irq, unsigned int mask)
+int Apic::
+setAffinity(unsigned int bus, unsigned int irq, unsigned int mask)
 {
     Mps::InterruptAssignment assignment;
-    volatile u32* addr = mps->getInterruptAssignment(irq, assignment);
+    volatile u32* addr = mps->getInterruptAssignment(bus, irq, assignment);
+    u8 intin;
     if (!addr || 23 < assignment.apicINTINn)
     {
-        return;
+        return -1;
     }
-
-    addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn + 1;
-    addr[IOWIN] = (mask << 24);
+    else
+    {
+        addr[IOREGSEL] = IOREDTBL + 2 * assignment.apicINTINn + 1;
+        addr[IOWIN] = (mask << 24);
+    }
+    return 32 + assignment.apicINTINn;
 }
 
 // cf. HLT opcode is 0xf4
