@@ -36,5 +36,10 @@ interface IResolver : IInterface
      */
     IInternetAddress* getHostByAddress([in, size_is(len)] void* address, unsigned int len, unsigned int scopeID);
 
+    /** Gets the host name of the specified internet address.
+     * @param address  the internet address.
+     * @param hostName the host name.
+     * @param len      the length of the buffer to contain the host name.
+     */
     boolean getHostName(IInternetAddress* address, [out, size_is(len)] char* hostName, unsigned int len);
 }

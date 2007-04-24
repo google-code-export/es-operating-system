@@ -56,6 +56,9 @@ interface ISocket : IInterface
      */
     int getAddressFamily();
 
+    /** Gets maximum number of hops allowed for packets to be sent from this socket.
+     * @return maximum number of hops.
+     */
     int getHops();
 
     /** Gets the local address to which this socket is bound.
@@ -63,6 +66,9 @@ interface ISocket : IInterface
      */
     IInternetAddress* getLocalAddress();
 
+    /** Returns the last error code of this socket.
+     * @return the last error code.
+     */
     int getLastError();
 
     /** Gets the local port to which this socket is bound.
@@ -75,6 +81,9 @@ interface ISocket : IInterface
      */
     int getProtocolType();
 
+    /** Gets the receive buffer size of this socket.
+     * @return the receive buffer size.
+     */
     int getReceiveBufferSize();
 
     /** Gets the remote internet address to which this socket is connected.
@@ -87,6 +96,9 @@ interface ISocket : IInterface
      */
     int getRemotePort();
 
+    /** Gets the send buffer size of this socket.
+     * @return the send buffer size.
+     */
     int getSendBufferSize();
 
     /** Gets the type of this socket.
@@ -94,24 +106,57 @@ interface ISocket : IInterface
      */
     int getSocketType();
 
+    /** Gets the timeout setting of this socket.
+     * A timeout of zero implies an infinite timeout.
+     * @return the timeout value in 100-nanosecond units.
+     */
     long getTimeout();
 
+    /** Tests whether this socket is ready to accept a new connection.
+     * @return true if a new connection is acceptable.
+     */
     boolean isAcceptable();
 
+    /** Gets the blocking option of this socket.
+     * By default, this option is enabled.
+     * @return  whether the blocking option is enabled or not.
+     */
     boolean isBlocking();
 
+    /** Tests whether this socket bound to an internet address.
+     * @return true if this socket bound to an internet address.
+     */
     boolean isBound();
 
+    /** Tests whether this socket has been closed.
+     * @return true if this socket has been closed.
+     */
     boolean isClosed();
 
+    /** Tests whether this socket has completed the connect operation, either finished or failed.
+     * @return true if the connect operation has been completed.
+     */
     boolean isConnectable();
 
+    /** Tests whether this socket has been connected.
+     * @return true if this socket has been connected.
+     */
     boolean isConnected();
 
+    /** Tests whether this socket is ready for reading
+     * @return true if this socket is readable.
+     */
     boolean isReadable();
 
+    /** Gets the reuse address option of this socket.
+     * By default, this option is disabled.
+     * @return  whether the reuse address is enabled or not.
+     */
     boolean isReuseAddress();
 
+    /** Tests whether this socket is ready for writing
+     * @return true if this socket is writable.
+     */
     boolean isWritable();
 
     /** Enables the connection-mode socket to accept connections.
@@ -120,6 +165,8 @@ interface ISocket : IInterface
      */
     void listen(int backlog);
 
+    /** Wakes up threads that are waiting on this socket.
+     */
     void notify();
 
     /** Attempt to read the specified bytes of data from the other end of this socket.
@@ -143,22 +190,43 @@ interface ISocket : IInterface
      * @param src   the buffer containing the message to send.
      * @param count the length of the message to be sent in bytes.
      * @param flags the type of message transmission.
-     * @param addr  the internet address of the the destination.
+     * @param addr  the internet address of the destination.
      * @param port  the port number of the destination.
      * @return      the number of bytes sent.
      */
     int sendTo([in, size_is(count)] void* src, int count, int flags, IInternetAddress* addr, int port);
 
+    /** Sets the blocking option of this socket.
+     * By default, this option is enabled.
+     * @param on    whether to enable or disable the blocking option.
+     */
     void setBlocking(boolean on);
 
+    /** Sets maximum number of hops allowed for packets to be sent from this socket.
+     * @param limit maximum number of hops.
+     */
     void setHops(int limit);
 
+    /** Sets the receive buffer size of this socket.
+     * @param size  the receive buffer size.
+     */
     void setReceiveBufferSize(int size);
 
+    /** Sets the reuse address option of this socket.
+     * By default, this option is disabled.
+     * @param on    whether to enable or disable the reuse address option.
+     */
     void setReuseAddress(boolean on);
 
+    /** Sets the send buffer size of this socket.
+     * @param size  the send buffer size.
+     */
     void setSendBufferSize(int size);
 
+    /** Sets the timeout setting of this socket.
+     * A timeout of zero implies an infinite timeout.
+     * @param timeSpan the timeout value in 100-nanosecond units.
+     */
     void setTimeout(long timeSpan);
 
     /** Disables read-half of this socket connection.

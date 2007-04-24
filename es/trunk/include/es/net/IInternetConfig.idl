@@ -46,8 +46,8 @@ interface IInternetConfig : IInterface
      */
     void addRouter(IInternetAddress* router);
 
-    /** Gets the router to the TCP/IP network subsystem.
-     * @param router the internet address of the router.
+    /** Gets the router address from the TCP/IP network subsystem.
+     * @return the internet address of the router.
      */
     IInternetAddress* getRouter();
 
@@ -81,7 +81,18 @@ interface IInternetConfig : IInterface
      */
     void removeInterface(INetworkInterface* networkInterface);
 
+    /** Adds the specified internet address as a DNS server to the TCP/IP network subsystem.
+     * @param address the internet address of the DNS server.
+     */
     void addNameServer(IInternetAddress* address);
+
+    /** Gets the DNS server address from the TCP/IP network subsystem.
+     * @return the internet address of the DNS server.
+     */
     IInternetAddress* getNameServer();
+
+    /** Removes the specified DNS server from the TCP/IP network subsystem.
+     * @param address the internet address of the DNS server to be removed.
+     */
     void removeNameServer(IInternetAddress* address);
 }

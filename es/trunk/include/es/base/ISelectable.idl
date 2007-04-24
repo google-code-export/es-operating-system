@@ -13,9 +13,20 @@
 
 import "es/base/IMonitor.idl";
 
+/** A selectable object notifies the registered monitor objects
+ * when its state is changed.
+ */
 [object, uuid(4714271e-d101-11db-9c02-0009bf000001)]
 interface ISelectable : IInterface
 {
+    /**
+     * Registers a monitor object to this selectable object.
+     * @param selector a monitor object.
+     */
     int add(IMonitor* selector);
+    /**
+     * Unregisters a monitor object from this selectable object.
+     * @param selector a monitor object.
+     */
     int remove(IMonitor* selector);
 }

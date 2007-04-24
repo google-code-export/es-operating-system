@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -26,8 +26,14 @@ interface IContext : IInterface
      */
     IBinding* bind([in] char* name, IInterface* element);
 
+    /** Creates a new context.
+     * @param name      The name of the context to create.
+     */
     IContext* createSubcontext([in] char* name);
 
+    /** Removes the named context.
+     * @param name      The name of the context to be destroyed.
+     */
     int destroySubcontext([in] char* name);
 
     /** Retrieves the named object.

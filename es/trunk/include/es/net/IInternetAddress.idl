@@ -18,9 +18,9 @@ import "es/base/IInterface.idl";
 [object, uuid(5e951e76-b27e-11db-9c02-0009bf000001)]
 interface IInternetAddress : IInterface
 {
-    /** Gets the raw IP address of this internet address.
-     * @param address the IP address.
-     * @param len     the length of the buffer to contain the IP address.
+    /** Gets the raw internet address of this internet address.
+     * @param address the raw internet address.
+     * @param len     the length of the buffer to contain the internet address.
      */
     int getAddress([out, size_is(len)] void* address, unsigned int len);
 
@@ -30,20 +30,19 @@ interface IInternetAddress : IInterface
     int getAddressFamily();
 
     /** Gets the canonical host name which is a fully qualified domain name for this internet address.
-     * @param hostName this canonical host name.
+     * @param hostName the canonical host name.
      * @param len      the length of the buffer to contain the canonical host name.
      */
     int getCanonicalHostName([out, size_is(len)] char* hostName, unsigned int len);
 
-    /** Gets the host address of this internet address.
-     * A host address specifies the computer in a single network.
-     * @param hostAddress this host address.
+    /** Gets the raw internet address of this internet address in a string format.
+     * @param hostAddress the host address in a string format.
      * @param len         the length of the buffer to contain the host address.
      */
     int getHostAddress([out, size_is(len)] char* hostAddress, unsigned int len);
 
     /** Gets the host name for this internet address.
-     * @param hostName this host name.
+     * @param hostName the host name.
      * @param len      the length of the buffer to contain the host name.
      */
     int getHostName([out, size_is(len)] char* hostName, unsigned int len);
@@ -58,8 +57,8 @@ interface IInternetAddress : IInterface
      */
     int getScopeID();
 
-    /** Checks whether this address is unspecified.
-     * @return true if this address is unspecified.
+    /** Checks whether this address is the unspecified address.
+     * @return true if this address is the unspecified address.
      */
     boolean isUnspecified();
 

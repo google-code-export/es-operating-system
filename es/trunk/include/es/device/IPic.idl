@@ -19,36 +19,48 @@ import "es/base/IInterface.idl";
 interface IPic : IInterface
 {
     /** Starts the specified IRQ.
+     * @param bus   the bus.
      * @param irq   the IRQ.
+     * @return the interrupt vector for the interrupt request line.
      */
     int startup(unsigned int bus, unsigned int irq);
 
     /** Stops the specified IRQ.
+     * @param bus   the bus.
      * @param irq   the IRQ.
+     * @return the interrupt vector for the interrupt request line.
      */
     int shutdown(unsigned int bus, unsigned int irq);
 
     /** Enables the specified IRQ.
+     * @param bus   the bus.
      * @param irq   the IRQ.
+     * @return the interrupt vector for the interrupt request line.
      */
     int enable(unsigned int bus, unsigned int irq);
 
     /** Disables the specified IRQ.
+     * @param bus   the bus.
      * @param irq   the IRQ.
+     * @return the interrupt vector for the interrupt request line.
      */
     int disable(unsigned int bus, unsigned int irq);
 
     /** Acknowledges the received IRQ.
+     * @param vec   the interrupt vector.
      */
     boolean ack(int vec);
 
     /** Completes the acknowledged IRQ handling.
+     * @param vec   the interrupt vector.
      */
     boolean end(int vec);
 
     /** Sets the affinity of the specified IRQ to the specific CPUs.
+     * @param bus   the bus.
      * @param irq   the IRQ.
      * @param mask  the set of processors.
+     * @return the interrupt vector for the interrupt request line.
      */
     int setAffinity(unsigned int bus, unsigned int irq, unsigned int mask);
 
