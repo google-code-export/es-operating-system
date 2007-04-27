@@ -1,3 +1,87 @@
+2007-04-27 00:59  okasaka
+
+	* cmd/configure, cmd/configure.ac, configure, configure.ac,
+	  esidl/configure, esidl/configure.ac, init/configure,
+	  init/configure.ac, os/configure, os/configure.ac,
+	  tools/configure, tools/configure.ac: Set version to 0.0.10.
+
+2007-04-24 04:00  okasaka
+
+	* include/es/base/ISelectable.idl, include/es/base/IService.idl,
+	  include/es/device/IPic.idl, include/es/naming/IContext.idl,
+	  include/es/net/IInternetAddress.idl,
+	  include/es/net/IInternetConfig.idl, include/es/net/IResolver.idl,
+	  include/es/net/ISocket.idl: Refine comments.
+
+2007-04-23 08:08  okasaka
+
+	* os/kernel/pc/pc_init.cpp: (esInit) : Invalidate 0-2GB region
+	  after the processor initialization for debug purposes.
+
+2007-04-23 07:42  okasaka
+
+	* include/es/device/IPic.idl, os/kernel/include/i386/8259.h,
+	  os/kernel/include/i386/apic.h, os/kernel/include/i386/core.h,
+	  os/kernel/include/i386/dp8390d.h, os/kernel/include/i386/mps.h,
+	  os/kernel/include/i386/pci.h, os/kernel/include/i386/sb16.h,
+	  os/kernel/pc/8259.cpp, os/kernel/pc/apic.cpp,
+	  os/kernel/pc/dp8390d.cpp, os/kernel/pc/mps.cpp,
+	  os/kernel/pc/pc_core.cpp, os/kernel/pc/pc_init.cpp,
+	  os/kernel/pc/pci.cpp, os/kernel/pc/sb16.cpp: Support PCI
+	  interrupts via APIC.
+
+2007-04-20 07:30  okasaka
+
+	* os/kernel/pc/apic.cpp: (splIdle, splLo, splHi, splX) : Revert to
+	  using TPR.
+
+2007-04-20 04:29  okasaka
+
+	* os/kernel/pc/sb16.cpp: (SoundBlaster16) : Throw ENODEV exception
+	  if not found not to be registered to the name space.
+
+2007-04-20 04:28  okasaka
+
+	* os/kernel/include/i386/8254.h, os/kernel/include/i386/apic.h,
+	  os/kernel/pc/8254.cpp, os/kernel/pc/apic.cpp,
+	  os/kernel/pc/pc_init.cpp, os/kernel/port/init.cpp: Use APIC
+	  instead of 8259 if available.
+
+2007-04-20 04:26  okasaka
+
+	* os/kernel/port/monitor.cpp: (condWait) : Lock rendezvous while
+	  clearing owner to fix the race condition with condLock.
+
+2007-04-20 04:25  okasaka
+
+	* os/bootsect/loader.S: Switch to text mode before power off.
+
+2007-04-19 09:16  okasaka
+
+	* os/kernel/port/spinlock.cpp: (unlock) : Clear owner to fix the
+	  race condition in tryLock.
+
+2007-04-19 06:45  okasaka
+
+	* os/kernel/include/i386/8042.h, os/kernel/pc/8042.cpp:
+	  (detectAuxDevice) : Abandon if not detected.
+
+2007-04-18 04:59  okasaka
+
+	* os/kernel/port/thread.cpp: (Thread::Thread) : Fix to clear TLS.
+
+2007-04-17 02:30  okasaka
+
+	* ChangeLog, cmd/squeak-es-3.7.1/ChangeLog: es 0.0.9 released.
+
+2007-04-17 02:28  okasaka
+
+	* cmd/configure, cmd/configure.ac, cmd/squeak-es-3.7.1/configure,
+	  cmd/squeak-es-3.7.1/configure.ac, configure, configure.ac,
+	  esidl/configure, esidl/configure.ac, init/configure,
+	  init/configure.ac, os/configure, os/configure.ac,
+	  tools/configure, tools/configure.ac: Set version to 0.0.9.
+
 2007-04-16 08:16  okasaka
 
 	* os/bootsect/loader.S: Try to enable A20 via system control port A
