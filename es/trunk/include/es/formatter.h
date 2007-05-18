@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -181,7 +181,8 @@ class Formatter
     void scientific();
     void fixed();
 
-    int digitlen(int& k, int& dd);
+    template <typename U, int Bit>
+    int digitlen(int& k, int& dd, U f, U r);
 
     template <typename U, int Bit>
     int significantlen(U f, U r);

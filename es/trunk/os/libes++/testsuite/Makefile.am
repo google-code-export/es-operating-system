@@ -8,7 +8,7 @@ AM_CPPFLAGS = \
 
 if POSIX
 
-TESTS = collection list hashtable tree rand smartptr 
+TESTS = collection list hashtable tree rand smartptr formatter
 
 noinst_PROGRAMS = $(TESTS)
 
@@ -23,6 +23,8 @@ rand_SOURCES = rand.cpp
 smartptr_SOURCES= smartptr.cpp
 
 tree_SOURCES = tree.cpp
+
+formatter_SOURCES = formatter.cpp
 
 LDADD += -lpthread -lrt 
 

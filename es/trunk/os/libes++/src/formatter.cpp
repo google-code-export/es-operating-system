@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -79,9 +79,8 @@ fillBlank(int count, char c)
 int Formatter::
 print(char c)
 {
-    int count = printChar(c);
-    reset();
-    return count;
+    char s[2] = { c, '\0' };
+    return print(s);
 }
 
 int Formatter::
@@ -274,8 +273,9 @@ fixed()
 
 // Get number of significant digits plus '.' ane 'e-dd'.
 // Adjust precision to the number of digits to print.
+template <typename U, int Bit>
 int Formatter::
-digitlen(int& k, int& dd)
+digitlen(int& k, int& dd, U f, U r)
 {
     int n;
 
@@ -283,30 +283,60 @@ digitlen(int& k, int& dd)
     switch (conversion)
     {
     case 'g':
-        if (precision <= 0)
+        if (precision < 0)
+        {
+            precision = 6;
+        }
+        else if (precision == 0)
         {
             precision = 1;
         }
         if (-4 <= k && k < precision)
         {
             // fixed
-            n = 1;
-            if (0 < k)
+            if (!alt)
             {
-                n += k;
+                int sig = significantlen<U, Bit>(f, r);
+                if (sig < precision)
+                {
+                    precision = sig;
+                }
+            }
+
+            if (0 <= k)
+            {
+                n = 1 + k;
+                if (precision < n)
+                {
+                    precision = n;
+                }
+                if (k - precision < -1)
+                {
+                    if (n < precision)
+                    {
+                        n += (precision - n);    // 000
+                    }
+                    ++n;    // .
+                }
             }
             else
             {
                 precision += -k;
-            }
-            if (n < precision)
-            {
-                n += 1 + (precision - n);    // .ddd
+                n = precision + 1;
             }
         }
         else
         {
             // scientific
+            if (!alt)
+            {
+                int sig = significantlen<U, Bit>(f, r);
+                if (sig < precision)
+                {
+                    precision = sig;
+                }
+            }
+
             n = (k < 0) ? -k : k;
             if (n < 100)
             {
@@ -320,10 +350,12 @@ digitlen(int& k, int& dd)
             {
                 n = 4;  // dddd
             }
-            n += 3;     // d e+
-
-            ++precision;
-            n += precision;     // .ddd
+            n += 2;     // e+
+            n += precision;
+            if (1 < precision)
+            {
+                ++n;
+            }
             dd = k;
             k = 0;      // Adjust k
         }
@@ -345,7 +377,7 @@ digitlen(int& k, int& dd)
         }
 
         ++precision;
-        if (0 <= k)
+        if (0 < k)
         {
             precision += k;
         }
@@ -380,6 +412,10 @@ digitlen(int& k, int& dd)
         k = 0;          // Adjust k
         break;
     default:
+        if (precision <= 0)
+        {
+            precision = significantlen<U, Bit>(f, r);
+        }
         if (0 <= k)
         {
             n = 1 + k;
@@ -389,6 +425,10 @@ digitlen(int& k, int& dd)
             }
             if (k - precision < -1)
             {
+                if (n < precision)
+                {
+                    n += (precision - n);    // 000
+                }
                 ++n;    // .
             }
         }
@@ -541,26 +581,7 @@ printFloat(U x)
         f &= (~((U) 0) >> 4);
     }
 
-    switch (conversion)
-    {
-    case 'g':
-        if (!alt)
-        {
-            int sig = significantlen<U, Bit>(f, r);
-            if (sig < precision)
-            {
-                precision = sig;
-            }
-        }
-        break;
-    case 0:
-        if (precision <= 0)
-        {
-            precision = significantlen<U, Bit>(f, r);
-        }
-        break;
-    }
-    n = digitlen(k, dd);
+    n = digitlen<U, Bit>(k, dd, f, r);
     width -= n;
 
     if (filler != '0' && !leftJustified)
@@ -921,7 +942,10 @@ ConversionSpecifier:
             // FALL THROUGH
         case 'f':
             fixed();
-            count += printFloat<u64, sizeof(u64) * 8, 53, 1023>(va_arg(args, u64));
+            {
+                double x = va_arg(args, double);
+                count += printFloat<u64, sizeof(u64) * 8, 53, 1023>(*(u64*) &x);
+            }
             break;
 
         case 'E':
@@ -929,7 +953,10 @@ ConversionSpecifier:
             // FALL THROUGH
         case 'e':
             scientific();
-            count += printFloat<u64, sizeof(u64) * 8, 53, 1023>(va_arg(args, u64));
+            {
+                double x = va_arg(args, double);
+                count += printFloat<u64, sizeof(u64) * 8, 53, 1023>(*(u64*) &x);
+            }
             break;
 
         case 'G':
@@ -937,7 +964,10 @@ ConversionSpecifier:
             // FALL THROUGH
         case 'g':
             general();
-            count += printFloat<u64, sizeof(u64) * 8, 53, 1023>(va_arg(args, u64));
+            {
+                double x = va_arg(args, double);
+                count += printFloat<u64, sizeof(u64) * 8, 53, 1023>(*(u64*) &x);
+            }
             break;
 
         case '%':
