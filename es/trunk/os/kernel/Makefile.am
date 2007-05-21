@@ -176,6 +176,7 @@ cpp_source_files += \
 	pc/pc_thread.cpp \
 	pc/rtc.cpp \
 	pc/sb16.cpp \
+	pc/es1370.cpp \
 	pc/uart.cpp \
 	pc/vesa.cpp \
 	pc/xreg.cpp \
@@ -207,6 +208,7 @@ header_files += \
 	include/i386/pci.h \
 	include/i386/rtc.h \
 	include/i386/sb16.h \
+	include/i386/es1370.h \
 	include/i386/vesa.h \
 	include/i386/dp8390d.h
 

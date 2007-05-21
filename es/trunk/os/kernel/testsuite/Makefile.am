@@ -46,7 +46,7 @@ TESTS = handle interlocked exception utf ring fpu tsd \
 	context datetime thread thread_cancel thread_smp \
 	monitor0 monitor1 monitor2 monitor3 \
 	bpi bpi2 bpi3 \
-	ata beep 8042 vesa fdc fdc_diskChange sb16 cdrom \
+	ata beep 8042 vesa fdc fdc_diskChange sb16 es1370 cdrom \
 	page cache replace \
 	position size write_read write_read2 \
 	write read create_release getPageCount \
@@ -64,7 +64,7 @@ noinst_DATA = fat16.img isotest.iso \
 	monitor0.img monitor1.img monitor2.img monitor3.img \
 	bpi.img bpi2.img bpi3.img \
 	ata.img beep.img 8042.img vesa.img fdc.img \
-	fdc_diskChange.img sb16.img cdrom.img \
+	fdc_diskChange.img sb16.img es1370.img cdrom.img \
 	page.img cache.img replace.img \
 	position.img size.img write_read.img write_read2.img \
 	write.img read.img create_release.img getPageCount.img \
@@ -114,6 +114,8 @@ fdc_SOURCES = fdc.cpp
 fdc_diskChange_SOURCES = fdc_diskChange.cpp
 
 sb16_SOURCES = sb16.cpp wave.cpp
+
+es1370_SOURCES = es1370.cpp wave.cpp
 
 cdrom_SOURCES = cdrom.cpp
 

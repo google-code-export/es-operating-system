@@ -83,13 +83,14 @@ CONFIG_CLEAN_FILES =
 @ES_TRUE@	monitor3$(EXEEXT) bpi$(EXEEXT) bpi2$(EXEEXT) \
 @ES_TRUE@	bpi3$(EXEEXT) ata$(EXEEXT) beep$(EXEEXT) \
 @ES_TRUE@	8042$(EXEEXT) vesa$(EXEEXT) fdc$(EXEEXT) \
-@ES_TRUE@	fdc_diskChange$(EXEEXT) sb16$(EXEEXT) cdrom$(EXEEXT) \
-@ES_TRUE@	page$(EXEEXT) cache$(EXEEXT) replace$(EXEEXT) \
-@ES_TRUE@	position$(EXEEXT) size$(EXEEXT) write_read$(EXEEXT) \
-@ES_TRUE@	write_read2$(EXEEXT) write$(EXEEXT) read$(EXEEXT) \
-@ES_TRUE@	create_release$(EXEEXT) getPageCount$(EXEEXT) \
-@ES_TRUE@	invalidate$(EXEEXT) pageSet$(EXEEXT) process$(EXEEXT) \
-@ES_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT)
+@ES_TRUE@	fdc_diskChange$(EXEEXT) sb16$(EXEEXT) es1370$(EXEEXT) \
+@ES_TRUE@	cdrom$(EXEEXT) page$(EXEEXT) cache$(EXEEXT) \
+@ES_TRUE@	replace$(EXEEXT) position$(EXEEXT) size$(EXEEXT) \
+@ES_TRUE@	write_read$(EXEEXT) write_read2$(EXEEXT) \
+@ES_TRUE@	write$(EXEEXT) read$(EXEEXT) create_release$(EXEEXT) \
+@ES_TRUE@	getPageCount$(EXEEXT) invalidate$(EXEEXT) \
+@ES_TRUE@	pageSet$(EXEEXT) process$(EXEEXT) loopback$(EXEEXT) \
+@ES_TRUE@	ethernet$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_8042_OBJECTS = 8042.$(OBJEXT)
 8042_OBJECTS = $(am_8042_OBJECTS)
@@ -146,6 +147,11 @@ am_datetime_OBJECTS = datetime.$(OBJEXT)
 datetime_OBJECTS = $(am_datetime_OBJECTS)
 datetime_LDADD = $(LDADD)
 datetime_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
+	$(am__DEPENDENCIES_1)
+am_es1370_OBJECTS = es1370.$(OBJEXT) wave.$(OBJEXT)
+es1370_OBJECTS = $(am_es1370_OBJECTS)
+es1370_LDADD = $(LDADD)
+es1370_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
 	$(am__DEPENDENCIES_1)
 am_ethernet_OBJECTS = ethernet.$(OBJEXT)
 ethernet_OBJECTS = $(am_ethernet_OBJECTS)
@@ -365,8 +371,8 @@ SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(bpi_SOURCES) $(bpi2_SOURCES) $(bpi3_SOURCES) \
 	$(cache_SOURCES) $(cdrom_SOURCES) $(context_SOURCES) \
 	$(create_release_SOURCES) $(datetime_SOURCES) \
-	$(ethernet_SOURCES) $(exception_SOURCES) $(fdc_SOURCES) \
-	$(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
+	$(es1370_SOURCES) $(ethernet_SOURCES) $(exception_SOURCES) \
+	$(fdc_SOURCES) $(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
 	$(getPageCount_SOURCES) $(handle_SOURCES) $(heap_SOURCES) \
 	$(interlocked_SOURCES) $(invalidate_SOURCES) \
 	$(loopback_SOURCES) $(monitor0_SOURCES) $(monitor1_SOURCES) \
@@ -385,8 +391,8 @@ DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(bpi_SOURCES) $(bpi2_SOURCES) $(bpi3_SOURCES) \
 	$(cache_SOURCES) $(cdrom_SOURCES) $(context_SOURCES) \
 	$(create_release_SOURCES) $(datetime_SOURCES) \
-	$(ethernet_SOURCES) $(exception_SOURCES) $(fdc_SOURCES) \
-	$(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
+	$(es1370_SOURCES) $(ethernet_SOURCES) $(exception_SOURCES) \
+	$(fdc_SOURCES) $(fdc_diskChange_SOURCES) $(fpu_SOURCES) \
 	$(getPageCount_SOURCES) $(handle_SOURCES) $(heap_SOURCES) \
 	$(interlocked_SOURCES) $(invalidate_SOURCES) \
 	$(loopback_SOURCES) $(monitor0_SOURCES) $(monitor1_SOURCES) \
@@ -514,7 +520,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@	context datetime thread thread_cancel thread_smp \
 @ES_TRUE@	monitor0 monitor1 monitor2 monitor3 \
 @ES_TRUE@	bpi bpi2 bpi3 \
-@ES_TRUE@	ata beep 8042 vesa fdc fdc_diskChange sb16 cdrom \
+@ES_TRUE@	ata beep 8042 vesa fdc fdc_diskChange sb16 es1370 cdrom \
 @ES_TRUE@	page cache replace \
 @ES_TRUE@	position size write_read write_read2 \
 @ES_TRUE@	write read create_release getPageCount \
@@ -538,7 +544,7 @@ AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 @ES_TRUE@	monitor0.img monitor1.img monitor2.img monitor3.img \
 @ES_TRUE@	bpi.img bpi2.img bpi3.img \
 @ES_TRUE@	ata.img beep.img 8042.img vesa.img fdc.img \
-@ES_TRUE@	fdc_diskChange.img sb16.img cdrom.img \
+@ES_TRUE@	fdc_diskChange.img sb16.img es1370.img cdrom.img \
 @ES_TRUE@	page.img cache.img replace.img \
 @ES_TRUE@	position.img size.img write_read.img write_read2.img \
 @ES_TRUE@	write.img read.img create_release.img getPageCount.img \
@@ -567,6 +573,7 @@ vesa_SOURCES = vesa.cpp
 fdc_SOURCES = fdc.cpp
 fdc_diskChange_SOURCES = fdc_diskChange.cpp
 sb16_SOURCES = sb16.cpp wave.cpp
+es1370_SOURCES = es1370.cpp wave.cpp
 cdrom_SOURCES = cdrom.cpp
 pageSet_SOURCES = pageSet.cpp  memoryStream.h
 process_SOURCES = process.cpp
@@ -671,6 +678,9 @@ create_release$(EXEEXT): $(create_release_OBJECTS) $(create_release_DEPENDENCIES
 datetime$(EXEEXT): $(datetime_OBJECTS) $(datetime_DEPENDENCIES) 
 	@rm -f datetime$(EXEEXT)
 	$(CXXLINK) $(datetime_LDFLAGS) $(datetime_OBJECTS) $(datetime_LDADD) $(LIBS)
+es1370$(EXEEXT): $(es1370_OBJECTS) $(es1370_DEPENDENCIES) 
+	@rm -f es1370$(EXEEXT)
+	$(CXXLINK) $(es1370_LDFLAGS) $(es1370_OBJECTS) $(es1370_LDADD) $(LIBS)
 ethernet$(EXEEXT): $(ethernet_OBJECTS) $(ethernet_DEPENDENCIES) 
 	@rm -f ethernet$(EXEEXT)
 	$(CXXLINK) $(ethernet_LDFLAGS) $(ethernet_OBJECTS) $(ethernet_LDADD) $(LIBS)
@@ -809,6 +819,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/context.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/create_release.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/datetime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/es1370.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ethernet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc.Po@am__quote@

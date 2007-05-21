@@ -55,8 +55,8 @@ target_triplet = @target@
 @ES_TRUE@	pc/fdc.cpp pc/fdd.cpp pc/gdbstub.cpp pc/mps.cpp \
 @ES_TRUE@	pc/pci.cpp pc/pc_core.cpp pc/pc_dateTime.cpp \
 @ES_TRUE@	pc/pc_init.cpp pc/pc_thread.cpp pc/rtc.cpp \
-@ES_TRUE@	pc/sb16.cpp pc/uart.cpp pc/vesa.cpp pc/xreg.cpp \
-@ES_TRUE@	pc/dp8390d.cpp
+@ES_TRUE@	pc/sb16.cpp pc/es1370.cpp pc/uart.cpp pc/vesa.cpp \
+@ES_TRUE@	pc/xreg.cpp pc/dp8390d.cpp
 @ES_TRUE@am__append_3 = \
 @ES_TRUE@	include/i386/8042.h \
 @ES_TRUE@	include/i386/8237a.h \
@@ -74,6 +74,7 @@ target_triplet = @target@
 @ES_TRUE@	include/i386/pci.h \
 @ES_TRUE@	include/i386/rtc.h \
 @ES_TRUE@	include/i386/sb16.h \
+@ES_TRUE@	include/i386/es1370.h \
 @ES_TRUE@	include/i386/vesa.h \
 @ES_TRUE@	include/i386/dp8390d.h
 
@@ -142,9 +143,9 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	pc/ataController.cpp pc/ataDevice.cpp pc/ataPacket.cpp \
 	pc/cga.cpp pc/fdc.cpp pc/fdd.cpp pc/gdbstub.cpp pc/mps.cpp \
 	pc/pci.cpp pc/pc_core.cpp pc/pc_dateTime.cpp pc/pc_init.cpp \
-	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/uart.cpp \
-	pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp windows/ref.cpp \
-	posix/posix_thread.cpp posix/posix_monitor.cpp \
+	pc/pc_thread.cpp pc/rtc.cpp pc/sb16.cpp pc/es1370.cpp \
+	pc/uart.cpp pc/vesa.cpp pc/xreg.cpp pc/dp8390d.cpp \
+	windows/ref.cpp posix/posix_thread.cpp posix/posix_monitor.cpp \
 	posix/posix_core.cpp posix/posix_dateTime.cpp \
 	posix/posix_init.cpp posix/posix_ethernet.cpp include/alarm.h \
 	include/arena.h include/cache.h include/classStore.h \
@@ -158,8 +159,9 @@ am__libeskernel_a_SOURCES_DIST = pc/label.S port/classStore.cpp \
 	include/i386/core.h include/i386/cpu.h include/i386/fdc.h \
 	include/i386/io.h include/i386/label.h include/i386/mps.h \
 	include/i386/pci.h include/i386/rtc.h include/i386/sb16.h \
-	include/i386/vesa.h include/i386/dp8390d.h \
-	include/posix/core.h include/posix/tap.h
+	include/i386/es1370.h include/i386/vesa.h \
+	include/i386/dp8390d.h include/posix/core.h \
+	include/posix/tap.h
 @ES_TRUE@am__objects_1 = label.$(OBJEXT)
 am__objects_2 =
 @ES_TRUE@am__objects_3 = lock.$(OBJEXT) malloc.$(OBJEXT) map.$(OBJEXT) \
@@ -174,8 +176,8 @@ am__objects_2 =
 @ES_TRUE@	mps.$(OBJEXT) pci.$(OBJEXT) pc_core.$(OBJEXT) \
 @ES_TRUE@	pc_dateTime.$(OBJEXT) pc_init.$(OBJEXT) \
 @ES_TRUE@	pc_thread.$(OBJEXT) rtc.$(OBJEXT) sb16.$(OBJEXT) \
-@ES_TRUE@	uart.$(OBJEXT) vesa.$(OBJEXT) xreg.$(OBJEXT) \
-@ES_TRUE@	dp8390d.$(OBJEXT)
+@ES_TRUE@	es1370.$(OBJEXT) uart.$(OBJEXT) vesa.$(OBJEXT) \
+@ES_TRUE@	xreg.$(OBJEXT) dp8390d.$(OBJEXT)
 @WIN32_TRUE@am__objects_4 = ref.$(OBJEXT)
 @POSIX_TRUE@am__objects_5 = posix_thread.$(OBJEXT) \
 @POSIX_TRUE@	posix_monitor.$(OBJEXT) posix_core.$(OBJEXT) \
@@ -524,6 +526,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/classStore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dp8390d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/es1370.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdbstub.Po@am__quote@
@@ -1858,6 +1861,20 @@ sb16.obj: pc/sb16.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/sb16.cpp' object='sb16.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sb16.obj `if test -f 'pc/sb16.cpp'; then $(CYGPATH_W) 'pc/sb16.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/sb16.cpp'; fi`
+
+es1370.o: pc/es1370.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT es1370.o -MD -MP -MF "$(DEPDIR)/es1370.Tpo" -c -o es1370.o `test -f 'pc/es1370.cpp' || echo '$(srcdir)/'`pc/es1370.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/es1370.Tpo" "$(DEPDIR)/es1370.Po"; else rm -f "$(DEPDIR)/es1370.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/es1370.cpp' object='es1370.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o es1370.o `test -f 'pc/es1370.cpp' || echo '$(srcdir)/'`pc/es1370.cpp
+
+es1370.obj: pc/es1370.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT es1370.obj -MD -MP -MF "$(DEPDIR)/es1370.Tpo" -c -o es1370.obj `if test -f 'pc/es1370.cpp'; then $(CYGPATH_W) 'pc/es1370.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/es1370.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/es1370.Tpo" "$(DEPDIR)/es1370.Po"; else rm -f "$(DEPDIR)/es1370.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='pc/es1370.cpp' object='es1370.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o es1370.obj `if test -f 'pc/es1370.cpp'; then $(CYGPATH_W) 'pc/es1370.cpp'; else $(CYGPATH_W) '$(srcdir)/pc/es1370.cpp'; fi`
 
 uart.o: pc/uart.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT uart.o -MD -MP -MF "$(DEPDIR)/uart.Tpo" -c -o uart.o `test -f 'pc/uart.cpp' || echo '$(srcdir)/'`pc/uart.cpp; \
