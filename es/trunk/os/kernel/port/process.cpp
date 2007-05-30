@@ -599,9 +599,9 @@ set(SyscallProxy* table, void* interface, const Guid& iid)
 #ifdef VERBOSE
             esReport("Process::set(%p, {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}) : %d;\n",
                      interface,
-                     iid->Data1, iid->Data2, iid->Data3,
-                     iid->Data4[0], iid->Data4[1], iid->Data4[2], iid->Data4[3],
-                     iid->Data4[4], iid->Data4[5], iid->Data4[6], iid->Data4[7],
+                     iid.Data1, iid.Data2, iid.Data3,
+                     iid.Data4[0], iid.Data4[1], iid.Data4[2], iid.Data4[3],
+                     iid.Data4[4], iid.Data4[5], iid.Data4[6], iid.Data4[7],
                      proxy - table);
 #endif
             return proxy - table;
@@ -624,11 +624,14 @@ ast(void* param)
     if (process->threadCount == 1)  // The default thread?
     {
         // Push arguments now as the process finally becomes the current one.
+
+        // Set up TLS.
         void* tls = thread->tls(process->tlsSize, process->tlsAlign);
 #ifdef VERBOSE
-        esReport("ast: %p\n", tls);
+        esReport("ast: %p \n", tls);
 #endif  // VERBOSE
         memmove(tls, process->tlsImage, process->tlsImageSize);
+        memset((u8*) tls + process->tlsImageSize, 0, process->tlsSize - process->tlsImageSize);
 
         // Copy-out the argument.
         Ureg* ureg(static_cast<Ureg*>(thread->param));
@@ -724,6 +727,7 @@ createThread(void* (*start)(void* param), void* param)
 
     void* tls = thread->tls(tlsSize, tlsAlign);
     memmove(tls, tlsImage, tlsImageSize);
+    memset((u8*) tls + tlsImageSize, 0, tlsSize - tlsImageSize);
     if (!startup)
     {
         thread->push(reinterpret_cast<unsigned>(param));

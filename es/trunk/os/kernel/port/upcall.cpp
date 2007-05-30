@@ -181,6 +181,8 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         // Initialize TLS.
         memmove(reinterpret_cast<void*>(record->ureg.esp),
                 server->tlsImage, server->tlsImageSize);
+        memset(reinterpret_cast<u8*>(record->ureg.esp) + server->tlsImageSize,
+               0, server->tlsSize - server->tlsImageSize);
 
         record->push(0);                                            // param
         record->push(reinterpret_cast<unsigned>(server->focus));    // start
