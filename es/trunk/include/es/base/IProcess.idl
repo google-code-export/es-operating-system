@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -15,7 +15,7 @@ import "es/base/ICallback.idl", "es/base/IFile.idl", "es/base/IPageable.idl", "e
 
 /** This interface provides methods for handling child processes of the current process.
  */
-[object, uuid(0328e552-25db-11db-9c02-0009bf000001)]
+[object, uuid(8a122054-1f92-11dc-9c02-0009bf000001)]
 interface IProcess : IInterface
 {
     /**
@@ -23,20 +23,20 @@ interface IProcess : IInterface
      */
     void kill();
     /**
-     * Starts this process.
+     * Starts this process, which executes a program <code>file</code> with arguments.
+     * @param file an executable file.
+     * @param command arguments to be passed to the program.
      */
-    void start();
+    void start(IFile* file, [in] char* command);
     /**
      * Starts this process, which executes a program <code>file</code>.
      * @param file an executable file.
      */
     void start(IFile* file);
     /**
-     * Starts this process, which executes a program <code>file</code> with arguments.
-     * @param file an executable file.
-     * @param arguments arguments to be passed to the program.
+     * Starts this process.
      */
-    void start(IFile* file, [in] char* arguments);
+    void start();
     /**
      * Waits until this process is complete.
      */
