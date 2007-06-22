@@ -50,10 +50,10 @@ void init(Handle<IContext> root)
     Handle<IFile>       file;
     long long           size = 0;
 
-    file = root->lookup("file/squeak.elf");
+    file = root->lookup("file/esjs.elf");
     if (!file)
     {
-        esReport("Could not open \"squeak.elf\"\n");
+        esReport("Could not open \"esjs.elf\"\n");
         return;
     }
     size = file->getSize();
@@ -67,9 +67,9 @@ void init(Handle<IContext> root)
     process->setIn(esReportStream());
     process->setOut(esReportStream());
     process->setError(esReportStream());
-    process->start(file);
+    process->start(file, "esjs file/shell.js");
     process->wait();
-    esReport("Squeak exited.\n");
+    esReport("esjs exited.\n");
 }
 
 int initNetwork(Handle<IContext> context)
@@ -97,7 +97,10 @@ int initNetwork(Handle<IContext> context)
     esRegisterDHCPClient(context);
 
     Handle<IService> service = context->lookup("network/interface/2/dhcp");
-    service->start();
+    if (service)
+    {
+        service->start();
+    }
 
 #if 0
     esSleep(120000000);
@@ -113,7 +116,10 @@ int initNetwork(Handle<IContext> context)
     }
 #endif
 
-    // service->stop();
+    if (service)
+    {
+        // service->stop();
+    }
     // ethernetInterface->stop();
     return 0;
 }

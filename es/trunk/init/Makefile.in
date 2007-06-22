@@ -536,7 +536,7 @@ uninstall-am: uninstall-info-am
 	$(host_alias)-objcopy -O binary $< $@
 
 % :: %.elf
-	$(srcdir)/makeScript "`pwd`" $@
+	$(srcdir)/makeScript "`pwd`" $(srcdir) $@
 
 es.img: es.elf
 	$(host_alias)-objcopy -O binary $< $@
