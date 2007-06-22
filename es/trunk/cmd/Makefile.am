@@ -15,7 +15,7 @@ SUFFIXES = .h .idl .ird
 	echo -n "InfoSize = sizeof" $(*F) >> $@;
 	echo "Info;" >> $@;
 
-noinst_PROGRAMS = main server client binder binderClient location locationClient
+noinst_PROGRAMS = main hello server client binder binderClient location locationClient
 
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref
 AM_CPPFLAGS = -I- \
@@ -23,6 +23,8 @@ AM_CPPFLAGS = -I- \
 	-I$(srcdir)/../include
 
 LDADD = ../os/libes++/libes++.a
+
+hello_SOURCES = hello.cpp
 
 main_SOURCES = main.cpp
 
