@@ -607,6 +607,7 @@ set(SyscallProxy* table, void* interface, const Guid& iid)
             return proxy - table;
         }
     }
+    esReport("Ins. interface pointer table.\n");
     return -1;
 }
 
