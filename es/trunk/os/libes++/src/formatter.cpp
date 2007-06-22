@@ -41,6 +41,13 @@ Formatter(IStream* stream) throw() :
 }
 
 Formatter::
+Formatter(std::string& string) throw() :
+    putc(stringPutc), opt(&string)
+{
+    reset();
+}
+
+Formatter::
 Formatter(const Formatter& o) throw() :
     putc(o.putc), opt(o.opt)
 {

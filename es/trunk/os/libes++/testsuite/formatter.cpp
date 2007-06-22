@@ -11,11 +11,21 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#ifndef _ISOC99_SOURCE
+#define _ISOC99_SOURCE
+#endif
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
 #include <es/types.h>
 #include <es/formatter.h>
+
+#ifndef NAN
+#define NAN         __builtin_nan("")
+#endif
+#ifndef INFINITY
+#define INFINITY    __builtin_inf()
+#endif
 
 int print(const char* spec, ...)
 {

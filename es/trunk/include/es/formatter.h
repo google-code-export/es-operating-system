@@ -14,6 +14,7 @@
 #ifndef NINTENDO_ES_FORMATTER_H_INCLUDED
 #define NINTENDO_ES_FORMATTER_H_INCLUDED
 
+#include <string>
 #include <stdarg.h>
 #include <es/base/IStream.h>
 
@@ -198,6 +199,18 @@ class Formatter
         return 0;
     }
 
+    static int stringPutc(int c, void* opt)
+    {
+        std::string* string(reinterpret_cast<std::string*>(opt));
+        if (string)
+        {
+            char ch(static_cast<char>(c));
+            string->append(1, ch);
+            return 1;
+        }
+        return 0;
+    }
+
 public:
     /**
      * Constructs a new formatter with the specified output function.
@@ -215,6 +228,12 @@ public:
      * @param stream the output stream.
      */
     Formatter(IStream* stream) throw();
+    /**
+     * Constructs a new formatter with the specified string.
+     * The formated strings are written to the specified string.
+     * @param string the string.
+     */
+    Formatter(std::string& string) throw();
     /**
      * Destructs this object.
      */
