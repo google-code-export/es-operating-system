@@ -170,6 +170,5 @@ nobase_include_HEADERS += \
 	es/util/IIterator.idl \
 	es/util/ISet.idl
 
-
 clean-local:
 	-rm -rf es
