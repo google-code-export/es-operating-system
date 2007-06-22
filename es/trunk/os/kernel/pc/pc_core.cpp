@@ -997,7 +997,6 @@ shutdown()
     splX(x);
 }
 
-
 bool Core::
 checkStack()
 {

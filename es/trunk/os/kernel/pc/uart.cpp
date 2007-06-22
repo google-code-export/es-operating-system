@@ -12,19 +12,21 @@
  */
 
 #include <es.h>
+#include <es/clsid.h>
+#include <es/synchronized.h>
 #include "io.h"
+#include "core.h"
 #include "uart.h"
 
 Uart::
-Uart(int baseaddr) :
-    baseaddr(baseaddr)
+Uart(int baseaddr, int bus, int irq) :
+    baseaddr(baseaddr),
+    ring(buffer, sizeof buffer)
 {
-    u8 x, olddata;
-
     esReport("COM %x: ", baseaddr);
 
     outpb(baseaddr + FCR, 0xC7); // FIFO Control Register
-    x = inpb(baseaddr + IIR);
+    u8 x = inpb(baseaddr + IIR);
     switch (x & 0xc0)
     {
       case 0xc0:
@@ -46,7 +48,21 @@ Uart(int baseaddr) :
     outpb(baseaddr + FCR, 0xC7);    // FIFO Control Register
     outpb(baseaddr + MCR, 0x0B);    // Turn on DTR, RTS, and OUT2
 
-    // outpb(baseaddr + IER, 1);       // Turn on receive interrupt
+    if (0 <= irq)
+    {
+        interrupt = true;
+        Core::registerInterruptHandler(bus, irq, this);
+        outpb(baseaddr + IER, 1);   // Turn on receive interrupt
+    }
+    else
+    {
+        interrupt = false;
+    }
+}
+
+Uart::
+~Uart()
+{
 }
 
 void Uart::
@@ -84,14 +100,33 @@ void Uart::setSize(long long size)
 int Uart::
 read(void* dst, int count)
 {
-    Lock::Synchronized method(lock);
-
     int n = 0;
-    u8* ptr = static_cast<u8*>(dst);
-    while (inpb(baseaddr + LSR) & 1)    // Check to see if char has been received.
+    if (interrupt)
     {
-        *ptr++ = inpb(baseaddr);        // If so, then get Char
-        ++n;
+        for (;;)
+        {
+            Monitor::Synchronized method(monitor);
+            {
+                Lock::Synchronized method(lock);
+                n = ring.read(dst, count);
+                if (0 < n)
+                {
+                    break;
+                }
+            }
+            monitor.wait(10000);
+        }
+    }
+    else
+    {
+        Lock::Synchronized method(lock);
+
+        u8* ptr = static_cast<u8*>(dst);
+        while (inpb(baseaddr + LSR) & 1)    // Check to see if char has been received.
+        {
+            *ptr++ = inpb(baseaddr);        // If so, then get Char
+            ++n;
+        }
     }
     return n;
 }
@@ -133,6 +168,44 @@ flush()
 {
 }
 
+int Uart::
+invoke(int irq)
+{
+    if (!interrupt)
+    {
+        return 0;
+    }
+
+    {
+        Lock::Synchronized method(lock);
+
+        u8 x = inpb(baseaddr + IIR);
+        switch (x & IIR_ID_MASK)
+        {
+          case IIR_MODEM_STATUS:
+            break;
+          case IIR_THR_EMPTY:
+            break;
+          case IIR_RECV_DATA:
+          case IIR_CHAR_TIMEOUT:
+            while (inpb(baseaddr + LSR) & 1)    // Check to see if char has been received.
+            {
+                u8 data = inpb(baseaddr);       // If so, then get Char
+                if (0 < ring.getUnused())
+                {
+                    ring.write(&data, 1);
+                }
+            }
+            break;
+          case IIR_RECV_STATUS:
+            break;
+        }
+    }
+    monitor.notify();
+
+    return 0;
+}
+
 bool Uart::
 queryInterface(const Guid& riid, void** objectPtr)
 {
@@ -154,13 +227,13 @@ queryInterface(const Guid& riid, void** objectPtr)
 }
 
 unsigned int Uart::
-addRef(void)
+addRef()
 {
     return ref.addRef();
 }
 
 unsigned int Uart::
-release(void)
+release()
 {
     unsigned int count = ref.release();
     if (count == 0)

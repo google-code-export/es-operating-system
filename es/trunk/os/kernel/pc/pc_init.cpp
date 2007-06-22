@@ -49,6 +49,7 @@
 #define USE_SVGA
 #define GDB_STUB
 #define USE_COM1
+// #define USE_COM3
 #define USE_SB16
 // #define USE_NE2000ISA
 
@@ -74,6 +75,7 @@ namespace
     u8              loopbackBuffer[64 * 1024];
     Uart*           uart;
     Pci*            pci;
+    IStream*        stubStream;
 };
 
 const int Page::SIZE = 4096;
@@ -168,26 +170,6 @@ int esInit(IInterface** nameSpace)
     Cga* cga = new Cga;
     reportStream = cga;
 
-#ifdef USE_COM1
-    // COM1 for stdio
-    if (int port = ((u16*) 0x400)[0])
-    {
-        Uart* uart = new Uart(port);
-        if (uart)
-        {
-            reportStream = uart;
-        }
-    }
-#endif
-
-#ifdef GDB_STUB
-    // COM2 for gdb
-    if (int port = ((u16*) 0x400)[1])
-    {
-        uart = new Uart(port);
-    }
-#endif
-
     // Initialize 8259 anyways.
     pic = new Pic();
 
@@ -245,6 +227,39 @@ int esInit(IInterface** nameSpace)
         "movl   $0x10000, %%eax\n"
         "movl   %%eax, %%cr3\n"
         ::: "%eax");
+
+#ifdef USE_COM1
+    // COM1 for stdio
+    if (int port = ((u16*) 0x80000400)[0])
+    {
+        Uart* uart = new Uart(port, Core::isaBus, 4);
+        if (uart)
+        {
+            reportStream = uart;
+        }
+    }
+#endif
+
+#ifdef GDB_STUB
+    // COM2 for gdb
+    if (int port = ((u16*) 0x80000400)[1])
+    {
+        uart = new Uart(port);
+    }
+#endif
+
+#ifdef USE_COM3
+    // COM3 for network test stub
+    if (int port = ((u16*) 0x80000400)[2])
+    {
+        Uart* uart = new Uart(port, Core::isaBus, 4);
+        if (uart)
+        {
+            stubStream = uart;
+            ASSERT(stubStream);
+        }
+    }
+#endif
 
     // Create the default thread (stack top: 0x80010000)
     Thread* thread = new Thread(0, 0, IThread::Normal,
@@ -369,6 +384,11 @@ int esInit(IInterface** nameSpace)
 #endif
 
     pci = new Pci(mps, device);
+
+#ifdef USE_COM3
+    ASSERT(stubStream);
+    device->bind("com3", static_cast<IStream*>(stubStream));
+#endif
 
     Process::initialize();
 
