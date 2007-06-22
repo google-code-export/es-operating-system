@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script
-AC_INIT([es-os], [0.0.10])
+AC_INIT([es-os], [0.0.11])
 AC_CONFIG_AUX_DIR(.)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
