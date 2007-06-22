@@ -318,7 +318,12 @@ Binding* Context::walk(Context* context, const char*& name)
             break;
         }
         context->release();
-        context = dynamic_cast<Context*>(object);
+
+        if (!object->queryInterface(IID_Context, (void**) &context))
+        {
+            context = 0;
+        }
+        object->release();
     }
     if (context)
     {
@@ -468,13 +473,19 @@ IIterator* Context::list(const char* name)
         return 0;
     }
 
-    Context* context = dynamic_cast<Context*>(object);
+    Context* context;
+    if (!object->queryInterface(IID_Context, (void**) &context))
+    {
+        context = 0;
+    }
+
     if (context)
     {
         binding = context->getFirst();
         IIterator* iterator = new ::Iterator(binding);
         binding->release();
         object->release();
+        context->release();
         return iterator;
     }
 
@@ -573,6 +584,10 @@ bool Context::queryInterface(const Guid& riid, void** objectPtr)
     else if (riid == IID_IInterface)
     {
         *objectPtr = static_cast<IContext*>(this);
+    }
+    else if (riid == IID_Context)
+    {
+        *objectPtr = static_cast<Context*>(this);
     }
     else
     {

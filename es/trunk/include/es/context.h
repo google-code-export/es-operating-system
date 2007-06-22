@@ -26,6 +26,11 @@ class Binding;
 class Context;
 class Iterator;
 
+static const Guid IID_Context =
+{
+    0x8017f170, 0x1a13, 0x11dc, { 0x9c, 0x02, 0x00, 0x09, 0xbf, 0x00, 0x00, 0x01 }
+};
+
 class Binding : public IBinding
 {
     friend class Context;
@@ -92,6 +97,11 @@ public:
     int rename(const char* oldName, const char* newName);
     int unbind(const char* name);
     IIterator* list(const char* name);
+
+    static const Guid& interfaceID()
+    {
+        return IID_Context;
+    }
 };
 
 class Iterator : public IIterator
