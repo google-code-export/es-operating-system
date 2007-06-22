@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -691,6 +691,11 @@ copyOut(UpcallRecord* record)
                     {
                         esReport(" = %p", ip);
                     }
+                }
+                else if (ip == 0)
+                {
+                    // Requested interface is not returned.
+                    **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = 0;
                 }
                 else
                 {
