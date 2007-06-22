@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -125,6 +125,7 @@ getName(char* name, unsigned int len)
                         }
                     }
                     FatFileSystem::utf16toutf8(l, name);    // XXX error check
+                    return strlen(name);                    // XXX for esjs
                     break;
                 }
                 ord = -1;
