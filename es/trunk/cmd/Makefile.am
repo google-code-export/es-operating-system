@@ -3,7 +3,7 @@ SUBDIRS = . testsuite
 SUFFIXES = .h .idl .ird
 
 %.h %.ird : %.idl
-	esidl -I $(prefix)/include $<
+	esidl -I $(srcdir)/../include $<
 
 %.c : %.ird
 	mkdir -p $(*D);

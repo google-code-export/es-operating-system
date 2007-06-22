@@ -732,7 +732,7 @@ uninstall-info: uninstall-info-recursive
 
 
 %.h %.ird : %.idl
-	esidl -I $(prefix)/include $<
+	esidl -I $(srcdir)/../include $<
 
 %.c : %.ird
 	mkdir -p $(*D);
