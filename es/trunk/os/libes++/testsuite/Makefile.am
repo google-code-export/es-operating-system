@@ -26,6 +26,4 @@ tree_SOURCES = tree.cpp
 
 formatter_SOURCES = formatter.cpp
 
-LDADD += -lpthread -lrt 
-
 endif POSIX
