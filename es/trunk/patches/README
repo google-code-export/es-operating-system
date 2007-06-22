@@ -25,5 +25,9 @@ original software.
     usage: $ tar -zxvf newlib-1.14.0.tar.gz
            $ patch -p0 -d . < newlib-1.14.0.patch
 
+- PCRE - Perl Compatible Regular Expressions library 7.1 (pcre-7.1.patch)
+    http://www.pcre.org/
+    usage: $ tar -zxvf pcre-7.1.tar.gz
+           $ patch -p0 -d . < pcre-7.1.patch
 
 See http://sourceforge.jp/projects/nes/ for how to report bugs usefully.
