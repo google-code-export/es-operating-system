@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -309,58 +309,4 @@ focus(void* param)
         errorCode = EINVAL;
     }
     return reinterpret_cast<void*>(errorCode);
-}
-
-int esReport(const char* spec, ...) __attribute__((weak));
-int esReportv(const char* spec, va_list list) __attribute__((weak));
-void esPanic(const char* file, int line, const char* msg, ...) __attribute__((weak));
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr) __attribute__((weak));
-
-int esReport(const char* spec, ...)
-{
-    va_list list;
-    int count;
-
-    va_start(list, spec);
-    count = esReportv(spec, list);
-    va_end(list);
-    return count;
-}
-
-int esReportv(const char* spec, va_list list)
-{
-    IStream* output(System()->getOut());
-    Formatter textOutput(output);
-    int count = textOutput.format(spec, list);
-    output->release();
-    return count;
-}
-
-void esPanic(const char* file, int line, const char* msg, ...)
-{
-    va_list marker;
-
-    va_start(marker, msg);
-    esReportv(msg, marker);
-    va_end(marker);
-    esReport(" in \"%s\" on line %d.\n", file, line);
-
-    System()->exit(1);
-}
-
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
-{
-    static Handle<IClassStore> classStore;
-
-    if (!classStore)
-    {
-        Handle<IContext> root = System()->getRoot();
-        classStore = root->lookup("class");
-    }
-    return classStore->createInstance(rclsid, riid, objectPtr);
-}
-
-DateTime DateTime::getNow()
-{
-    return DateTime(System()->getNow());
 }
