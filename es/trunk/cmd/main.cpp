@@ -47,10 +47,10 @@ void* start(void* param)
 {
     Check check;
 
-    esReport("start(): %d %d %p\n", testA, testB, &testA);
+    esReport("start(): %x %x %x\n", testA, testB, &testA);
     testA = 4;
     testB = 5;
-    esReport("start(): %d %d %p\n", testA, testB, &testA);
+    esReport("start(): %x %x %x\n", testA, testB, &testA);
 
     unsigned int key;
     esCreateThreadKey(&key, dtor);
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         esReport("%s\n", *argv++);
     }
 
-    esReport("%d %d %p\n", testA, testB, &testA);
+    esReport("%x %x %x\n", testA, testB, &testA);
 
     System()->trace(false);
 
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     thread->join(&rval);
     thread->release();
 
-    esReport("main(): %d %d %p\n", testA, testB, &testA);
+    esReport("main(): %x %x %x\n", testA, testB, &testA);
 
     // Check kernel page fault
     try
