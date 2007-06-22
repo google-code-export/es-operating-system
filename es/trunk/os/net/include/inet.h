@@ -65,6 +65,7 @@ public:
                   long len = 0, long pos = 0, void* chunk = 0) :
         Messenger(len, pos, chunk),
         op(op),
+        scopeID(0),
         remoteAddress(0),
         localAddress(0),
         remotePort(0),

@@ -133,6 +133,7 @@ Socket(int family, int type, int protocol) :
     type(type),
     protocol(protocol),
     adapter(0),
+    af(0),
     recvBufferSize(8192),
     sendBufferSize(8192),
     errorCode(0),
@@ -383,6 +384,7 @@ accept()
     {
         errorCode = code;
     }
+    return m.getSocket();
 }
 
 void Socket::

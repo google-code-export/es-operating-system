@@ -55,9 +55,10 @@ class Interface
             int len = stream->read(m->fix(MRU), MRU);
             if (0 < len)
             {
+#ifdef VERBOSE
                 esReport("# input\n");
                 esDump(m->fix(len), len);
-
+#endif
                 m->setSize(len);
                 m->setScopeID(scopeID);
                 Transporter v(m);
@@ -81,11 +82,11 @@ protected:
 public:
     Interface(INetworkInterface* networkInterface, Accessor* accessor, Receiver* receiver) :
         networkInterface(networkInterface, true),
+        thread(0),
         accessor(accessor),
         receiver(receiver),
         mux(accessor, &factory),
-        scopeID(0),
-        thread(0)
+        scopeID(0)
     {
         memset(mac, 0, sizeof mac);
 
