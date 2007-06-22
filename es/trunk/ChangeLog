@@ -1,3 +1,173 @@
+2007-06-22 02:16  okasaka
+
+	* init/Makefile.am, init/Makefile.in, init/es.cpp, init/makeScript:
+	  (init) : Start esjs instead of squeak.
+
+2007-06-22 02:09  okasaka
+
+	* esjs, esjs/Makefile.am, esjs/Makefile.in, esjs/aclocal.m4,
+	  esjs/config.guess, esjs/config.sub, esjs/configure,
+	  esjs/configure.ac, esjs/depcomp, esjs/include,
+	  esjs/include/esjs.h, esjs/include/interface.h,
+	  esjs/include/smartptr.h, esjs/include/value.h, esjs/install-sh,
+	  esjs/missing, esjs/scripts, esjs/scripts/cat.js,
+	  esjs/scripts/echo.js, esjs/scripts/ls.js, esjs/scripts/shell.js,
+	  esjs/src, esjs/src/apply.S, esjs/src/array.cpp,
+	  esjs/src/esjs.cpp, esjs/src/interface.cpp, esjs/src/lexer.ll,
+	  esjs/src/math.cpp, esjs/src/parser.yy, esjs/src/regexp.cpp,
+	  esjs/src/string.cpp, esjs/src/value.cpp, esjs/src/valueptr.cpp,
+	  esjs/testsuite, esjs/testsuite/1.js, esjs/testsuite/10.js,
+	  esjs/testsuite/11.js, esjs/testsuite/12.js, esjs/testsuite/13.js,
+	  esjs/testsuite/14.js, esjs/testsuite/15.js, esjs/testsuite/16.js,
+	  esjs/testsuite/17.js, esjs/testsuite/18.js, esjs/testsuite/19.js,
+	  esjs/testsuite/2.js, esjs/testsuite/20.js, esjs/testsuite/21.js,
+	  esjs/testsuite/22.js, esjs/testsuite/23.js, esjs/testsuite/24.js,
+	  esjs/testsuite/25.js, esjs/testsuite/26.js, esjs/testsuite/27.js,
+	  esjs/testsuite/28.js, esjs/testsuite/29.js, esjs/testsuite/3.js,
+	  esjs/testsuite/30.js, esjs/testsuite/31.js, esjs/testsuite/32.js,
+	  esjs/testsuite/33.js, esjs/testsuite/34.js, esjs/testsuite/35.js,
+	  esjs/testsuite/36.js, esjs/testsuite/37.js, esjs/testsuite/38.js,
+	  esjs/testsuite/39.js, esjs/testsuite/4.js, esjs/testsuite/40.js,
+	  esjs/testsuite/41.js, esjs/testsuite/42.js, esjs/testsuite/43.js,
+	  esjs/testsuite/44.js, esjs/testsuite/45.js, esjs/testsuite/46.js,
+	  esjs/testsuite/47.js, esjs/testsuite/48.js, esjs/testsuite/49.js,
+	  esjs/testsuite/5.js, esjs/testsuite/50.js, esjs/testsuite/51.js,
+	  esjs/testsuite/52.js, esjs/testsuite/53.js, esjs/testsuite/54.js,
+	  esjs/testsuite/55.js, esjs/testsuite/56.js, esjs/testsuite/57.js,
+	  esjs/testsuite/58.js, esjs/testsuite/59.js, esjs/testsuite/6.js,
+	  esjs/testsuite/60.js, esjs/testsuite/61.js, esjs/testsuite/62.js,
+	  esjs/testsuite/63.js, esjs/testsuite/64.js, esjs/testsuite/65.js,
+	  esjs/testsuite/66.js, esjs/testsuite/67.js, esjs/testsuite/7.js,
+	  esjs/testsuite/8.js, esjs/testsuite/9.js,
+	  esjs/testsuite/Makefile.am, esjs/testsuite/Makefile.in: Initial
+	  check-in.
+
+2007-06-22 01:53  okasaka
+
+	* include/es/base/IProcess.idl: (IProcess) : Reorder the start
+	  methods for esjs.
+
+2007-06-22 01:51  okasaka
+
+	* cmd/main.cpp: (main) : Clean up.
+
+2007-06-22 01:50  okasaka
+
+	* os/fs/fat/fatBinding.cpp: (FatStream::getName) : Return the name
+	  length for esjs.
+
+2007-06-22 01:48  okasaka
+
+	* os/libes++/Makefile.am, os/libes++/Makefile.in,
+	  os/libes++/src/system.cpp: (posix_system, reflect, report) : New.
+
+2007-06-22 01:45  okasaka
+
+	* os/libes++/testsuite/Makefile.am,
+	  os/libes++/testsuite/Makefile.in: (Makefile) : Clean up.
+
+2007-06-22 01:42  okasaka
+
+	* include/Makefile.am: (Makefile) : Clean up.
+
+2007-06-22 01:39  okasaka
+
+	* os/kernel/include/uart.h, os/kernel/pc/pc_core.cpp,
+	  os/kernel/pc/pc_init.cpp, os/kernel/pc/uart.cpp: (Uart) : Support
+	  buffered input using interrupt.
+
+2007-06-22 01:31  okasaka
+
+	* include/es/reflect.h: (isInteger, isBoolean, isFloat, isUuid) :
+	  New.
+
+2007-06-22 01:27  okasaka
+
+	* include/es/list.h: (Iterator::operator=) : New.
+
+2007-06-22 01:25  okasaka
+
+	* include/es/context.h, os/libes++/src/context.cpp: (Context::walk,
+	  list) : Fix not to use dynamic_cast for upcalls.
+
+2007-06-22 01:22  okasaka
+
+	* os/kernel/port/process.cpp: (Process::set) : Report an error
+	  message for debugging.
+
+2007-06-22 01:20  okasaka
+
+	* os/kernel/port/malloc.cpp: (malloc) : Pollute the allocated block
+	  for debugging.
+
+2007-06-22 01:19  okasaka
+
+	* os/kernel/port/upcall.cpp: (Process::copyOut) : Fix a bug.
+
+2007-06-22 01:17  okasaka
+
+	* os/net/include/inet.h, os/net/include/interface.h,
+	  os/net/include/loopback.h, os/net/src/dix.cpp,
+	  os/net/src/socket.cpp: (Socket::accept) : Fix a bug.
+
+2007-06-22 01:14  okasaka
+
+	* include/es/formatter.h, os/libes++/src/formatter.cpp,
+	  os/libes++/testsuite/formatter.cpp:
+	  (Formatter::Formatter(std::string&)) : New.
+
+2007-06-22 01:10  okasaka
+
+	* esidl/Makefile.am, esidl/Makefile.in: Drop -iquote for older gcc.
+
+2007-06-22 01:06  okasaka
+
+	* patches/README: (pcre-7.1.patch) : New.
+
+2007-06-22 01:05  okasaka
+
+	* Makefile.am, Makefile.in: (pcre-7.1.patch) : New.
+
+2007-06-22 01:03  okasaka
+
+	* cmd/Makefile.am, cmd/Makefile.in: (hello) : New.
+
+2007-06-22 01:01  okasaka
+
+	* cmd/hello.cpp, os/libes++/src/posix_system.cpp,
+	  os/libes++/src/reflect.cpp, os/libes++/src/report.cpp,
+	  patches/pcre-7.1.patch: New.
+
+2007-05-30 09:29  okasaka
+
+	* os/kernel/pc/pc_thread.cpp, os/kernel/port/process.cpp,
+	  os/kernel/port/upcall.cpp: (Process::ast, Process::createThread,
+	  Process::upcall, Thread::tls) : Fix broken user thread TLS
+	  initialization.
+
+2007-05-22 04:28  ueno9
+
+	* os/kernel/pc/pci.cpp: (Pci::attach) : Support es1370.
+
+2007-05-21 09:04  ueno9
+
+	* os/kernel/Makefile.am, os/kernel/Makefile.in,
+	  os/kernel/include/i386/es1370.h, os/kernel/pc/es1370.cpp,
+	  os/kernel/testsuite/Makefile.am, os/kernel/testsuite/Makefile.in,
+	  os/kernel/testsuite/es1370.cpp: (es1370) : new.
+
+2007-05-18 02:13  okasaka
+
+	* include/es/formatter.h, os/libes++/src/formatter.cpp,
+	  os/libes++/testsuite/Makefile.am,
+	  os/libes++/testsuite/Makefile.in,
+	  os/libes++/testsuite/formatter.cpp: (Formatter) : Fix %g
+	  conversion following C99, etc.
+
+2007-04-27 01:01  okasaka
+
+	* ChangeLog: es 0.0.10 released.
+
 2007-04-27 00:59  okasaka
 
 	* cmd/configure, cmd/configure.ac, configure, configure.ac,
