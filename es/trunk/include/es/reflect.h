@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -305,6 +305,102 @@ public:
                 }
             }
             return false;
+        }
+
+        /**
+         * Checks if this type is an integer.
+         */
+        bool isInteger() const
+        {
+            if (isPointer() || isReference() || isArray() || isFunction())
+            {
+                return false;
+            }
+            if (isPrimitive())
+            {
+                switch (offset & ReflectionFile::OFFSET_MASK)
+                {
+                case ReflectionFile::TAG_S8:
+                case ReflectionFile::TAG_U8:
+                case ReflectionFile::TAG_S16:
+                case ReflectionFile::TAG_U16:
+                case ReflectionFile::TAG_S32:
+                case ReflectionFile::TAG_U32:
+                case ReflectionFile::TAG_S64:
+                case ReflectionFile::TAG_U64:
+                case ReflectionFile::TAG_CHAR:
+                case ReflectionFile::TAG_WIDECHAR:
+                    return true;
+                default:
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Checks if this type is a boolean.
+         */
+        bool isBoolean() const
+        {
+            if (isPointer() || isReference() || isArray() || isFunction())
+            {
+                return false;
+            }
+            if (isPrimitive())
+            {
+                switch (offset & ReflectionFile::OFFSET_MASK)
+                {
+                case ReflectionFile::TAG_BOOLEAN:
+                    return true;
+                default:
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Checks if this type is a float.
+         */
+        bool isFloat() const
+        {
+            if (isPointer() || isReference() || isArray() || isFunction())
+            {
+                return false;
+            }
+            if (isPrimitive())
+            {
+                switch (offset & ReflectionFile::OFFSET_MASK)
+                {
+                case ReflectionFile::TAG_F32:
+                case ReflectionFile::TAG_F64:
+                    return true;
+                default:
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Checks if this type is a reference to uuid.
+         */
+        bool isUuid() const
+        {
+            if (!isReference())
+            {
+                return false;
+            }
+            if (!isPrimitive())
+            {
+                return false;
+            }
+            if ((offset & ReflectionFile::OFFSET_MASK) != ReflectionFile::TAG_UUID)
+            {
+                return false;
+            }
+            return true;
         }
 
         /**
