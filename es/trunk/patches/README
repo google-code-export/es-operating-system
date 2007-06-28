@@ -30,4 +30,9 @@ original software.
     usage: $ tar -zxvf pcre-7.1.tar.gz
            $ patch -p0 -d . < pcre-7.1.patch
 
+- FreeType 2.3.4 (freetype-2.3.4.patch)
+    http://www.freetype.org/
+    usage: $ tar -zxvf freetype-2.3.4.tar.gz
+           $ patch -p0 -d . < freetype-2.3.4.patch
+
 See http://sourceforge.jp/projects/nes/ for how to report bugs usefully.
