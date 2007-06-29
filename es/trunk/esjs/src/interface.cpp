@@ -478,11 +478,14 @@ public:
                 else if (type.isInterfacePointer())
                 {
                     InterfacePointerValue* unknown = dynamic_cast<InterfacePointerValue*>(value);
-                    if (!unknown)
+                    if (unknown)
                     {
-                        throw getErrorInstance("TypeError");
+                        argp->ptr = unknown->getObject();
                     }
-                    argp->ptr = unknown->getObject();
+                    else
+                    {
+                        argp->ptr = 0;
+                    }
                     argp->cls = Param::PTR;
                 }
                 else if (type.isString() || type.isPointer())   // XXX
