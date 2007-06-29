@@ -28,4 +28,6 @@ es.img: es.elf
 fat32.img: fat32.img.gz
 	gunzip -c $< > $@
 
+es: makeScript
+
 EXTRA_DIST = fat32.img.gz makeScript

@@ -237,9 +237,6 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-es$(EXEEXT): $(es_OBJECTS) $(es_DEPENDENCIES) 
-	@rm -f es$(EXEEXT)
-	$(CXXLINK) $(es_LDFLAGS) $(es_OBJECTS) $(es_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -543,6 +540,8 @@ es.img: es.elf
 
 fat32.img: fat32.img.gz
 	gunzip -c $< > $@
+
+es: makeScript
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
