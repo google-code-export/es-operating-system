@@ -14,8 +14,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <fcntl.h>
+#include <termios.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -34,20 +36,20 @@ namespace
 
 class Stream : public IStream
 {
-    Ref     ref;
-    FILE*   file;
+    Ref ref;
+    int fd;
 
 public:
-    Stream(FILE* file) :
-        file(file)
+    Stream(int fd) :
+        fd(fd)
     {
     }
 
     ~Stream()
     {
-        if (file && !isatty(fileno(file)))
+        if (3 <= fd)
         {
-            fclose(file);
+            close(fd);
         }
     }
 
@@ -57,53 +59,52 @@ public:
 
     long long getPosition()
     {
-        return ftell(file);
+        return lseek(fd, 0, SEEK_CUR);
     }
 
     void setPosition(long long pos)
     {
-        fseek(file, pos, SEEK_SET);
+        lseek(fd, pos, SEEK_SET);
     }
 
     long long getSize()
     {
-        long tmp = ftell(file);
-        fseek(file, 0, SEEK_END);
-        long size = ftell(file);
-        fseek(file, tmp, SEEK_SET);
-        return size;
+        struct stat buf;
+
+        fstat(fd, &buf);
+        return buf.st_size;
     }
 
     void setSize(long long size)
     {
-        ftruncate(fileno(file), size);
+        ftruncate(fd, size);
     }
 
     int read(void* buffer, int size)
     {
-        return fread(buffer, 1, size, file);
+        return ::read(fd, buffer, size);
     }
 
     int read(void* buffer, int size, long long offset)
     {
         setPosition(offset);
-        return fread(buffer, 1, size, file);
+        return ::read(fd, buffer, size);
     }
 
     int write(const void* buffer, int size)
     {
-        return fwrite(buffer, 1, size, file);
+        return ::write(fd, buffer, size);
     }
 
     int write(const void* buffer, int size, long long offset)
     {
         setPosition(offset);
-        return fwrite(buffer, 1, size, file);
+        return ::write(fd, buffer, size);
     }
 
     void flush()
     {
-        fflush(file);
+        fsync(fd);
     }
 
     //
@@ -232,17 +233,7 @@ public:
 
     IStream* getStream()
     {
-        FILE* file = fdopen(fd, "rw");
-        if (!file)
-        {
-            file = fdopen(fd, "r");
-        }
-        if (!file)
-        {
-            return 0;
-        }
-        fd = dup(fd);
-        return new Stream(file);
+        return new Stream(dup(fd));
     }
 
     IPageable* getPageable()
@@ -449,11 +440,12 @@ public:
         {
             return 0;
         }
-        int fd = open(name, O_CREAT | O_RDWR, 0777);
+        int fd = open(name, O_CREAT | O_RDWR | O_TRUNC, 0777);
         if (fd == -1)
         {
             return 0;
         }
+
         return new File(fd, name);
     }
 
@@ -789,17 +781,22 @@ public:
 class System : public ICurrentProcess
 {
     Ref         ref;
-    Stream*     in;
-    Stream*     out;
-    Stream*     error;
+    Stream*     in;     // 0
+    Stream*     out;    // 1
+    Stream*     error;  // 2
     IContext*   root;
 
 public:
     System()
     {
-        in = new Stream(stdin);
-        out = new Stream(stdout);
-        error = new Stream(stderr);
+        struct termio tty;
+        ioctl(0, TCGETA, &tty);
+        tty.c_lflag &= ~(ICANON|ECHO);
+        ioctl(0, TCSETAF, &tty);
+
+        in = new Stream(0);
+        out = new Stream(1);
+        error = new Stream(2);
 
         IInterface* unknown = 0;
         esInit(&unknown);
@@ -819,6 +816,11 @@ public:
     ~System()
     {
         root->release();
+
+        struct termio tty;
+        ioctl(0, TCGETA, &tty);
+        tty.c_lflag |= ICANON|ECHO;
+        ioctl(0, TCSETAF, &tty);
     }
 
     void exit(int status)
