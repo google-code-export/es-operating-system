@@ -93,7 +93,8 @@ public:
             return REG_NOMATCH;
         }
 
-        int code = regexec(&regex, s.c_str() + offset, nmatch, pmatch, 0);
+        int code = regexec(&regex, s.c_str() + offset, nmatch, pmatch,
+                           (offset == 0) ? 0 : REG_NOTBOL);
         if (code == 0)
         {
             int index = 0;
