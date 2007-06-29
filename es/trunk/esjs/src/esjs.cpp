@@ -290,8 +290,10 @@ public:
             }
         }
 
+#ifdef VERBOSE
         report("param: '%s'\n", p.c_str());
         report("body: '%s'\n", body.c_str());
+#endif
 
         setSource(p);
         FormalParameterList* formalParameterList = parseFormalParameterList();
@@ -844,7 +846,7 @@ int main(int argc, char* argv[])
 
     constructGlobalObject();
     ExecutionContext* context = new ExecutionContext(getGlobal(), getGlobal());
-    Value::setThresh(1);
+    Value::setThresh(1000);     // Set this thresh to one for testing GC
 
     report("alloc count: %lld\n", Value::getAllocCount());
 
