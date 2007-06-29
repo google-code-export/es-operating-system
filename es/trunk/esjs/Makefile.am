@@ -94,4 +94,4 @@ clean-local:
 dist-hook:
 	-rm -f $(distdir)/lexer.cc $(distdir)/parser.cc $(distdir)/parser.h
 
-EXTRA_DIST = scripts/cat.js scripts/echo.js scripts/ls.js scripts/shell.js 
+EXTRA_DIST = scripts/cat.js scripts/echo.js scripts/ls.js scripts/shell.js scripts/edit.js
