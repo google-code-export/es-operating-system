@@ -218,3 +218,10 @@ CompletionType ObjectValue::iterate(Expression* expression, Statement* statement
     }
     return CompletionType(CompletionType::Normal, value, "");
 }
+
+void ObjectValue::setParameterList(FormalParameterList* list)
+{
+    parameterList = list;
+    Register<NumberValue> length = new NumberValue(parameterList->getLength());
+    put("length", length);  // { DontDelete, ReadOnly, DontEnum }
+}

@@ -3099,8 +3099,14 @@ public:
 class FormalParameterList
 {
     mutable Identifier::List    list;
+    int length;
 
 public:
+    FormalParameterList() :
+        length(0)
+    {
+    }
+
     virtual ~FormalParameterList()
     {
         while (!list.isEmpty())
@@ -3112,6 +3118,7 @@ public:
 
     void add(Identifier* parameter)
     {
+        ++length;
         list.addLast(parameter);
     }
 
@@ -3137,6 +3144,11 @@ public:
         {
             variableObject->put(parameter->toString(), (*arguments)[arg++]);
         }
+    }
+
+    int getLength() const
+    {
+        return length;
     }
 };
 
@@ -3237,30 +3249,24 @@ public:
 
     Value* evaluate()
     {
+        Register<ObjectValue> function = new ObjectValue();
+        function->setParameterList(formalParameterList);
         if (!identifier)
         {
-            Register<ObjectValue> function = new ObjectValue();
             function->setPrototype(getGlobal()->get("Function")->getPrototype());
-            function->setParameterList(formalParameterList);
-            function->setCode(functionBody);
             function->setScope(getScopeChain());
-            Register<ObjectValue> prototype = new ObjectValue;
-            function->put("prototype", prototype);
-            return function;
         }
         else
         {
             Register<ObjectValue> object = new ObjectValue();
             object->setNext(getScopeChain());
-            Register<ObjectValue> function = new ObjectValue();
-            function->setParameterList(formalParameterList);
-            function->setCode(functionBody);
-            function->setScope(object);
-            Register<ObjectValue> prototype = new ObjectValue;
-            function->put("prototype", prototype);
             object->put(identifier->toString(), function); // with { DontDelete, ReadOnly }
-            return function;
+            function->setScope(object);
         }
+        function->setCode(functionBody);
+        Register<ObjectValue> prototype = new ObjectValue;
+        function->put("prototype", prototype);
+        return function;
     };
 };
 

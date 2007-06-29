@@ -1053,10 +1053,7 @@ public:
         return parameterList;
     }
 
-    void setParameterList(FormalParameterList* list)
-    {
-        parameterList = list;
-    }
+    void setParameterList(FormalParameterList* list);
 
     void setCode(Code* body)
     {
