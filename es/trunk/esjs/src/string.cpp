@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <es/utf.h>
 #include "esjs.h"
 #include "parser.h"
 #include "interface.h"
@@ -29,6 +30,7 @@ class StringMethod : public Code
     {
         ToString,
         ValueOf,
+        CharAt,
         Match,
         Replace,
         Search,
@@ -41,6 +43,26 @@ class StringMethod : public Code
     enum Method             method;
 
     static const char*      names[MethodCount];
+
+    // Note charAt(pos) for esjs returns a string which contains a byte
+    // sequence of a valid UTF-8 character.
+    // i.e., The length of the returned string can be greater than one.
+    Value* charAt()
+    {
+        std::string s = getThis()->toString();
+        double pos = getScopeChain()->get("pos")->toInteger();
+        if (0.0 <= pos && pos < s.length())
+        {
+            u32 utf32;
+            int offset = pos;
+            char* next = utf8to32(s.c_str() + offset, &utf32);
+            if (next)
+            {
+                return new StringValue(s.substr(offset, next - (s.c_str() + offset)));
+            }
+        }
+        return new StringValue("");
+    }
 
     Value* slice(Value* value)
     {
@@ -96,6 +118,9 @@ public:
         ASSERT(method < MethodCount);
         switch (method)
         {
+        case CharAt:
+            arguments->add(new Identifier("pos"));
+            break;
         case Match:
         case Search:
             arguments->add(new Identifier("regexp"));
@@ -143,6 +168,9 @@ public:
                 throw getErrorInstance("TypeError");
             }
             break;
+        case CharAt:
+            value = charAt();
+            break;
         case Match:
             value = stringMatch();
             break;
@@ -177,6 +205,7 @@ const char* StringMethod::names[] =
 {
     "toString",
     "valueOf",
+    "charAt",
     "match",
     "replace",
     "search",
