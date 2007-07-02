@@ -28,6 +28,9 @@ es.img: es.elf
 fat32.img: fat32.img.gz
 	gunzip -c $< > $@
 
-es: makeScript
+es.elf : makeScript
 
 EXTRA_DIST = fat32.img.gz makeScript
+
+clean-local:
+	-rm -f es es.elf.map
