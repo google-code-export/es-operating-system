@@ -304,7 +304,10 @@ public:
 
         setSource(body);
         yyparse();
+
+#ifdef VERBOSE
         program->print();
+#endif
 
         Register<ObjectValue> function = new ObjectValue();
         function->setMortal();
@@ -561,7 +564,10 @@ public:
             s = x->toString();
             setSource(s.c_str());
             yyparse();
-            // program->print();
+
+#ifdef VERBOSE
+            program->print();
+#endif
 
             program->process();
 
@@ -592,6 +598,7 @@ public:
             else
             {
                 ASSERT(result.isThrow());
+                value = result.getValue();
                 Value::sweep(true);
                 throw result.getValue();
             }
@@ -863,7 +870,9 @@ int main(int argc, char* argv[])
 #endif
         report("yyparse() ok.\n");
 
+#ifdef VERBOSE
         mainProgram->print();
+#endif
 
         mainProgram->process();
 
