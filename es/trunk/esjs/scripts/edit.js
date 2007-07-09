@@ -51,6 +51,7 @@ var term2 = /^[+-][0-9]+/;                          // + or - term
 var term3 = /(.)((\\\1|.)*?)\1((\\\1|.)*?)\1(g?)/;  // substitute pattern
 var term4 = /^([ \t]+((\\ |[^ \t\n])+))?[ \t]*\n/;  // file name
 var term5 = /[gx][ \t]*(.)((\\\1|.)*?)\1/;          // global pattern
+var term6 = /^[^\n]*\n/;                            // single line
 
 var pat = /(?:)/;   // pattern
 var lin;            // input line
@@ -502,34 +503,41 @@ function getfn()
     return fil;
 }
 
-/** Gets a line of text from a stream
- * @return the string of line read; "" implies end of file.
- */
-function getline(stream)
-{
-    var inline = "";
-    var c;
-    while ((c = stream.read(1)) != '')
-    {
-        inline += c;
-        if (c == '\n')
-        {
-            return inline;
-        }
-    }
-    if (inline)
-    {
-        return inline + '\n';
-    }
-    return inline;
-}
-
 /** Reads "fil" after line n.
  * @param   fil  the file name
  * @return true on success, or false on failure.
  */
 function doread(n, fil)
 {
+    var linebuf = '';
+
+    /** Gets a line of text from a stream
+     * @return the string of line read; "" implies end of file.
+     */
+    function getline(stream)
+    {
+        var inline = "";
+        var a;
+
+        while (!(a = term6.exec(linebuf)))
+        {
+            var c = stream.read(128);
+            if (c == '')
+            {
+                if (linebuf == '')
+                {
+                    return '';
+                }
+                c = linebuf + '\n';
+                linebuf = '';
+                return c;
+            }
+            linebuf += c;
+        }
+        linebuf = linebuf.substring(a[0].length);
+        return a[0];
+    }
+
     try
     {
         var file = IFile(root.lookup(fil));
@@ -560,7 +568,12 @@ function dowrite(n1, n2, fil)
 {
     try
     {
-        var file = IFile(root.bind(fil));
+        var unknown = root.bind(fil);
+        if (!unknown)
+        {
+            unknown = root.lookup(fil);
+        }
+        var file = IFile(unknown);
         var stream = file.getStream();
         for (var i = n1; i <= n2; ++i)
         {
