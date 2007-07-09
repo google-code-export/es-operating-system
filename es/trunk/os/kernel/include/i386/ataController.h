@@ -59,6 +59,7 @@ class AtaController : public ICallback
     u8*             data;
     u8*             limit;
     volatile bool   done;
+    Rendezvous      rendezvous;
 
     u8              packet[16];
     u8              features;
@@ -67,6 +68,10 @@ class AtaController : public ICallback
 
     bool softwareReset();
     bool detectDevice(int dev, u8* signature);
+
+    int condDone(int);
+    void wait();
+    void notify();
 
     static bool isAtaDevice(const u8* signature);
     static bool isAtapiDevice(const u8* signature);

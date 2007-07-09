@@ -82,19 +82,33 @@ select(u8 device)
 {
     using namespace Status;
 
+    long timeout = 0;
     while (inpb(ctlPort + ALTERNATE_STATUS) & (DRQ | BSY))
     {
 #if defined(__i386__) || defined(__x86_64__)
         __asm__ __volatile__ ("pause\n");
 #endif
+        if (1000000L < ++timeout)
+        {
+            esPanic(__FILE__, __LINE__, "AtaController::%s -- timeout (%02x)",
+                    __func__, inpb(ctlPort + ALTERNATE_STATUS));
+            break;
+        }
     }
     outpb(cmdPort + DEVICE, device);
     esSleep(4);
+    timeout = 0;
     while (inpb(ctlPort + ALTERNATE_STATUS) & (DRQ | BSY))
     {
 #if defined(__i386__) || defined(__x86_64__)
         __asm__ __volatile__ ("pause\n");
 #endif
+        if (1000000L < ++timeout)
+        {
+            esPanic(__FILE__, __LINE__, "AtaController::%s -- timeout (%02x)",
+                    __func__, inpb(ctlPort + ALTERNATE_STATUS));
+            break;
+        }
     }
 }
 
@@ -103,7 +117,7 @@ sync(u8 status)
 {
     using namespace Status;
 
-    int timeout = 0;
+    long timeout = 0;
     while (inpb(ctlPort + ALTERNATE_STATUS) & BSY)
     {
 #if defined(__i386__) || defined(__x86_64__)
@@ -115,12 +129,32 @@ sync(u8 status)
 #endif
         if (1000000L < ++timeout)
         {
-            esReport("AtaController::sync() -- timeout\n");
+            esPanic(__FILE__, __LINE__, "AtaController::%s -- timeout (%02x)\n",
+                    __func__, inpb(ctlPort + ALTERNATE_STATUS));
             break;
         }
     }
     inpb(ctlPort + ALTERNATE_STATUS);
     return inpb(cmdPort + STATUS);
+}
+
+int AtaController::
+condDone(int)
+{
+    return done ? true : false;
+}
+
+void AtaController::
+wait()
+{
+    DelegateTemplate<AtaController> cond(this, &AtaController::condDone);
+    rendezvous.sleep(&cond);
+}
+
+void AtaController::
+notify()
+{
+    rendezvous.wakeup();
 }
 
 int AtaController::
@@ -245,10 +279,7 @@ issue(AtaDevice* device, u8 cmd, void* buffer, int count, long long lba)
     }
 
     lock.unlock();
-    while (!done)
-    {
-        monitor->wait(10000000);
-    }
+    wait();
     lock.lock();
 
     outpb(ctlPort + DEVICE_CONTROL, NIEN);
@@ -299,10 +330,7 @@ issue(AtaDevice* device, u8* packet, int packetSize,
     }
 
     outpb(ctlPort + DEVICE_CONTROL, 0);
-    while (!done)
-    {
-        monitor->wait(10000000);
-    }
+    wait();
     outpb(ctlPort + DEVICE_CONTROL, NIEN);
     return count;
 }
@@ -491,7 +519,7 @@ invoke(int param)
     if (done)
     {
         current = 0;
-        monitor->notify();  // XXX Fix timing issue
+        notify();
     }
 
     return 0;
