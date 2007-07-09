@@ -3080,6 +3080,8 @@ public:
         CompletionType  result;
         Register<Value> value;
 
+        process();
+
         SourceElement::List::Iterator iter = list.begin();
         while (SourceElement* element = iter.next())
         {

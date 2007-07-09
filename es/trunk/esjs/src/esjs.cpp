@@ -569,8 +569,6 @@ public:
             program->print();
 #endif
 
-            program->process();
-
             try
             {
                 result = program->evaluate();
@@ -873,9 +871,6 @@ int main(int argc, char* argv[])
 #ifdef VERBOSE
         mainProgram->print();
 #endif
-
-        mainProgram->process();
-
         result = mainProgram->evaluate();
     }
     catch (Value* value)
