@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -86,6 +86,12 @@ struct Segdesc
     {
         d0 = (sel << 16) | (exceptionAddress & 0xffff);
         d1 = (exceptionAddress & 0xffff0000) | SEGP | SEGTG;
+    }
+
+    void setTaskGate(u16 sel)
+    {
+        d0 = (sel << 16);
+        d1 = SEGP | SEGTASK;
     }
 
     void setDPL(u8 dpl)
@@ -229,6 +235,7 @@ struct Ureg
     void load()
     {
          __asm__ __volatile__ (
+            "cli\n"
             "movl   %0, %%esp\n"
             "popal\n"
             "popl   %%gs\n"
