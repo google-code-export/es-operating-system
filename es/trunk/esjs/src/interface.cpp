@@ -494,7 +494,7 @@ public:
                     argp->cls = Param::PTR;
                 }
             }
-            else
+            else if (param.isOutput())
             {
                 output = i;
                 if (param.isInterfacePointer())
