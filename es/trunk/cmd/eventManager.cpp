@@ -69,6 +69,7 @@ class EventManager : public IEventQueue
     int x;
     int y;
 
+    Handle<ICursor> cursor;
     static int id;
 
     void keyDown(u8 key)
@@ -462,6 +463,9 @@ public:
         monitor = System()->createMonitor();
         key[0] = 0;
         memset(key + 1, 255, 8);
+
+        Handle<IContext> root = System()->getRoot();
+        cursor = root->lookup("device/cursor");
     }
 
     ~EventManager()
@@ -652,6 +656,7 @@ public:
             }
 
             mouse(button, x, y);
+            cursor->setPosition(x, y);
             notify = true;
         }
 

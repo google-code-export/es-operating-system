@@ -307,7 +307,6 @@ int ioShowDisplay(
     gEventQueue->getMousePoint(x, y);
 
     cursor->hide();
-    cursor->setPosition(x, y);
     switch (bpp)
     {
     case 24:
@@ -404,6 +403,5 @@ void initInputProcess()
     bpp = 8 * (size / (WIDTH * HEIGHT));
 
     cursor = root->lookup("device/cursor");
-    cursor->setPosition(x, y);
     cursor->show();
 }
