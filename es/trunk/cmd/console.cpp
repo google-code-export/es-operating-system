@@ -385,6 +385,11 @@ public:
         Synchronized<IMonitor*> method(monitor);
         if (!available)
         {
+            // refresh screen.
+            updated = true;
+            topLeftUpdated = 0;
+            bottomRightUpdated = framebufferSize;
+
             available = true;
             monitor->notifyAll();
         }

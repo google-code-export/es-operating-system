@@ -108,6 +108,9 @@ int ioBeep(void)
 int ioExit(void)
 {
     Handle<IContext> root = System()->getRoot();
+    Handle<ICursor> cursor = root->lookup("device/cursor");
+    cursor->hide();
+
     Handle<IService> console = root->lookup("/device/console");
     if (console)
     {
