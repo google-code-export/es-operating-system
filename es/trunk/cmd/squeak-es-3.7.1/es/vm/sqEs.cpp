@@ -40,11 +40,13 @@
 #include <es/base/IPageable.h>
 #include <es/base/IProcess.h>
 #include <es/base/IStream.h>
+#include <es/base/IService.h>
 #include <es/device/IAudioFormat.h>
 #include <es/device/IBeep.h>
 #include <es/device/ICursor.h>
 #include <es/device/IRtc.h>
 #include <es/naming/IContext.h>
+#include "../IEventQueue.h"
 
 #ifndef _DEBUG
 #define FPRINTF(...)    (__VA_ARGS__)
@@ -66,7 +68,8 @@ extern "C"
     };
 }
 
-extern void* inputProcess(void* param);
+extern void initInputProcess();
+
 extern void* audioProcess(void* param);
 extern void* recordProcess(void* param);
 extern void* networkProcess(void* param);
@@ -104,6 +107,13 @@ int ioBeep(void)
 
 int ioExit(void)
 {
+    Handle<IContext> root = System()->getRoot();
+    Handle<IService> console = root->lookup("/device/console");
+    if (console)
+    {
+        console->start();
+    }
+
     /* optional; could be noop. exit from the Squeak application. */
     System()->exit(0);
 }
@@ -475,6 +485,12 @@ int main()
 
     Handle<IContext> root = System()->getRoot();
 
+    Handle<IService> console = root->lookup("/device/console");
+    if (console)
+    {
+        console->stop();
+    }
+
     Handle<IBeep> beep = root->lookup("device/beep");
 
     gIbeep = beep;
@@ -511,8 +527,7 @@ int main()
 
     esReport("Loaded image file\n");
 
-    IThread* thread = System()->createThread(inputProcess, 0);
-    thread->start();
+    initInputProcess();
 
     IThread* audioThread = System()->createThread(audioProcess, 0);
     audioThread->setPriority(IThread::Normal + 1);
