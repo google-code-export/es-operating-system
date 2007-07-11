@@ -49,13 +49,24 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = main$(EXEEXT) start$(EXEEXT) binder$(EXEEXT) \
-	location$(EXEEXT)
+	location$(EXEEXT) eventManager$(EXEEXT) console$(EXEEXT) \
+	upcallTest$(EXEEXT)
 am__EXEEXT_2 = $(am__EXEEXT_1)
 PROGRAMS = $(noinst_PROGRAMS)
 am_binder_OBJECTS = binder.$(OBJEXT)
 binder_OBJECTS = $(am_binder_OBJECTS)
 binder_LDADD = $(LDADD)
 binder_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
+	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
+am_console_OBJECTS = console.$(OBJEXT)
+console_OBJECTS = $(am_console_OBJECTS)
+console_LDADD = $(LDADD)
+console_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
+	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
+am_eventManager_OBJECTS = eventManager.$(OBJEXT)
+eventManager_OBJECTS = $(am_eventManager_OBJECTS)
+eventManager_LDADD = $(LDADD)
+eventManager_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
 	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
 am_location_OBJECTS = location.$(OBJEXT)
 location_OBJECTS = $(am_location_OBJECTS)
@@ -72,6 +83,11 @@ start_OBJECTS = $(am_start_OBJECTS)
 start_LDADD = $(LDADD)
 start_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
 	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
+am_upcallTest_OBJECTS = upcallTest.$(OBJEXT)
+upcallTest_OBJECTS = $(am_upcallTest_OBJECTS)
+upcallTest_LDADD = $(LDADD)
+upcallTest_DEPENDENCIES = ../../os/fs/fat/libesfat.a \
+	../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
 SCRIPTS = $(noinst_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -81,10 +97,12 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(binder_SOURCES) $(location_SOURCES) $(main_SOURCES) \
-	$(start_SOURCES)
-DIST_SOURCES = $(binder_SOURCES) $(location_SOURCES) $(main_SOURCES) \
-	$(start_SOURCES)
+SOURCES = $(binder_SOURCES) $(console_SOURCES) $(eventManager_SOURCES) \
+	$(location_SOURCES) $(main_SOURCES) $(start_SOURCES) \
+	$(upcallTest_SOURCES)
+DIST_SOURCES = $(binder_SOURCES) $(console_SOURCES) \
+	$(eventManager_SOURCES) $(location_SOURCES) $(main_SOURCES) \
+	$(start_SOURCES) $(upcallTest_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -190,26 +208,34 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
+LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a -lfreetype
 SUFFIXES = .img .gz
-TESTS = main start binder location
+TESTS = main start binder location eventManager console upcallTest
 noinst_SCRIPTS = $(TESTS)
 noinst_DATA = disk.img \
 	main.img \
 	start.img \
 	binder.img \
-	location.img
+	location.img \
+	eventManager.img \
+	console.img \
+	upcallTest.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
-AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
+AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map -L$(prefix)/lib
 main_SOURCES = main.cpp
 start_SOURCES = start.cpp
 binder_SOURCES = binder.cpp
 location_SOURCES = location.cpp
+eventManager_SOURCES = eventManager.cpp
+console_SOURCES = console.cpp
+upcallTest_SOURCES = upcallTest.cpp
 AM_CPPFLAGS = \
 	-I- \
 	-I../../include \
-	-I$(srcdir)/../../include
+	-I$(srcdir)/../../include \
+	-I$(prefix)/include \
+	-I$(prefix)/include/freetype2
 
 EXTRA_DIST = disk.img.gz makeScript
 all: all-am
@@ -251,6 +277,12 @@ clean-noinstPROGRAMS:
 binder$(EXEEXT): $(binder_OBJECTS) $(binder_DEPENDENCIES) 
 	@rm -f binder$(EXEEXT)
 	$(CXXLINK) $(binder_LDFLAGS) $(binder_OBJECTS) $(binder_LDADD) $(LIBS)
+console$(EXEEXT): $(console_OBJECTS) $(console_DEPENDENCIES) 
+	@rm -f console$(EXEEXT)
+	$(CXXLINK) $(console_LDFLAGS) $(console_OBJECTS) $(console_LDADD) $(LIBS)
+eventManager$(EXEEXT): $(eventManager_OBJECTS) $(eventManager_DEPENDENCIES) 
+	@rm -f eventManager$(EXEEXT)
+	$(CXXLINK) $(eventManager_LDFLAGS) $(eventManager_OBJECTS) $(eventManager_LDADD) $(LIBS)
 location$(EXEEXT): $(location_OBJECTS) $(location_DEPENDENCIES) 
 	@rm -f location$(EXEEXT)
 	$(CXXLINK) $(location_LDFLAGS) $(location_OBJECTS) $(location_LDADD) $(LIBS)
@@ -260,6 +292,9 @@ main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES)
 start$(EXEEXT): $(start_OBJECTS) $(start_DEPENDENCIES) 
 	@rm -f start$(EXEEXT)
 	$(CXXLINK) $(start_LDFLAGS) $(start_OBJECTS) $(start_LDADD) $(LIBS)
+upcallTest$(EXEEXT): $(upcallTest_OBJECTS) $(upcallTest_DEPENDENCIES) 
+	@rm -f upcallTest$(EXEEXT)
+	$(CXXLINK) $(upcallTest_LDFLAGS) $(upcallTest_OBJECTS) $(upcallTest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -268,9 +303,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/console.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eventManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/location.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/start.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upcallTest.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

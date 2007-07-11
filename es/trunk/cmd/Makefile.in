@@ -39,7 +39,10 @@ host_triplet = @host@
 target_triplet = @target@
 noinst_PROGRAMS = main$(EXEEXT) hello$(EXEEXT) server$(EXEEXT) \
 	client$(EXEEXT) binder$(EXEEXT) binderClient$(EXEEXT) \
-	location$(EXEEXT) locationClient$(EXEEXT)
+	location$(EXEEXT) locationClient$(EXEEXT) \
+	eventManager$(EXEEXT) eventManagerClient$(EXEEXT) \
+	console$(EXEEXT) consoleClient$(EXEEXT) upcallTest$(EXEEXT) \
+	upcallTestClient$(EXEEXT)
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure config.guess \
 	config.sub depcomp install-sh missing
@@ -56,36 +59,76 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_binder_OBJECTS = binder.$(OBJEXT)
 binder_OBJECTS = $(am_binder_OBJECTS)
 binder_LDADD = $(LDADD)
-binder_DEPENDENCIES = ../os/libes++/libes++.a
+binder_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_binderClient_OBJECTS = binderClient.$(OBJEXT)
 binderClient_OBJECTS = $(am_binderClient_OBJECTS)
 binderClient_LDADD = $(LDADD)
-binderClient_DEPENDENCIES = ../os/libes++/libes++.a
+binderClient_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_client_OBJECTS = client.$(OBJEXT)
 client_OBJECTS = $(am_client_OBJECTS)
 client_LDADD = $(LDADD)
-client_DEPENDENCIES = ../os/libes++/libes++.a
+client_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
+am_console_OBJECTS = console.$(OBJEXT)
+console_OBJECTS = $(am_console_OBJECTS)
+console_LDADD = $(LDADD)
+console_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
+am_consoleClient_OBJECTS = consoleClient.$(OBJEXT)
+consoleClient_OBJECTS = $(am_consoleClient_OBJECTS)
+consoleClient_LDADD = $(LDADD)
+consoleClient_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
+am_eventManager_OBJECTS = eventManager.$(OBJEXT)
+nodist_eventManager_OBJECTS = IEventQueue.$(OBJEXT)
+eventManager_OBJECTS = $(am_eventManager_OBJECTS) \
+	$(nodist_eventManager_OBJECTS)
+eventManager_LDADD = $(LDADD)
+eventManager_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
+am_eventManagerClient_OBJECTS = eventManagerClient.$(OBJEXT)
+eventManagerClient_OBJECTS = $(am_eventManagerClient_OBJECTS)
+eventManagerClient_LDADD = $(LDADD)
+eventManagerClient_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_hello_OBJECTS = hello.$(OBJEXT)
 hello_OBJECTS = $(am_hello_OBJECTS)
 hello_LDADD = $(LDADD)
-hello_DEPENDENCIES = ../os/libes++/libes++.a
+hello_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_location_OBJECTS = location.$(OBJEXT)
 nodist_location_OBJECTS = ILocation.$(OBJEXT)
 location_OBJECTS = $(am_location_OBJECTS) $(nodist_location_OBJECTS)
 location_LDADD = $(LDADD)
-location_DEPENDENCIES = ../os/libes++/libes++.a
+location_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_locationClient_OBJECTS = locationClient.$(OBJEXT)
 locationClient_OBJECTS = $(am_locationClient_OBJECTS)
 locationClient_LDADD = $(LDADD)
-locationClient_DEPENDENCIES = ../os/libes++/libes++.a
+locationClient_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_main_OBJECTS = main.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
-main_DEPENDENCIES = ../os/libes++/libes++.a
+main_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 am_server_OBJECTS = server.$(OBJEXT)
 server_OBJECTS = $(am_server_OBJECTS)
 server_LDADD = $(LDADD)
-server_DEPENDENCIES = ../os/libes++/libes++.a
+server_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
+am_upcallTest_OBJECTS = upcallTest.$(OBJEXT)
+upcallTest_OBJECTS = $(am_upcallTest_OBJECTS)
+upcallTest_LDADD = $(LDADD)
+upcallTest_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
+am_upcallTestClient_OBJECTS = upcallTestClient.$(OBJEXT)
+upcallTestClient_OBJECTS = $(am_upcallTestClient_OBJECTS)
+upcallTestClient_LDADD = $(LDADD)
+upcallTestClient_DEPENDENCIES = ../os/libes++/libes++.a \
+	$(prefix)/lib/libfreetype.a
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -99,12 +142,18 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) $(client_SOURCES) \
-	$(hello_SOURCES) $(location_SOURCES) \
-	$(nodist_location_SOURCES) $(locationClient_SOURCES) \
-	$(main_SOURCES) $(server_SOURCES)
+	$(console_SOURCES) $(consoleClient_SOURCES) \
+	$(eventManager_SOURCES) $(nodist_eventManager_SOURCES) \
+	$(eventManagerClient_SOURCES) $(hello_SOURCES) \
+	$(location_SOURCES) $(nodist_location_SOURCES) \
+	$(locationClient_SOURCES) $(main_SOURCES) $(server_SOURCES) \
+	$(upcallTest_SOURCES) $(upcallTestClient_SOURCES)
 DIST_SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) \
-	$(client_SOURCES) $(hello_SOURCES) $(location_SOURCES) \
-	$(locationClient_SOURCES) $(main_SOURCES) $(server_SOURCES)
+	$(client_SOURCES) $(console_SOURCES) $(consoleClient_SOURCES) \
+	$(eventManager_SOURCES) $(eventManagerClient_SOURCES) \
+	$(hello_SOURCES) $(location_SOURCES) $(locationClient_SOURCES) \
+	$(main_SOURCES) $(server_SOURCES) $(upcallTest_SOURCES) \
+	$(upcallTestClient_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -231,9 +280,11 @@ SUFFIXES = .h .idl .ird
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref
 AM_CPPFLAGS = -I- \
 	-I../include \
-	-I$(srcdir)/../include
+	-I$(srcdir)/../include \
+	-I$(prefix)/include \
+	-I$(prefix)/include/freetype2
 
-LDADD = ../os/libes++/libes++.a
+LDADD = ../os/libes++/libes++.a $(prefix)/lib/libfreetype.a
 hello_SOURCES = hello.cpp
 main_SOURCES = main.cpp
 server_SOURCES = server.cpp
@@ -243,7 +294,15 @@ binderClient_SOURCES = binderClient.cpp binder.h
 location_SOURCES = location.cpp location.h ILocation.idl
 locationClient_SOURCES = locationClient.cpp location.h ILocation.idl
 nodist_location_SOURCES = ILocation.c
-BUILT_SOURCES = ILocation.h ILocation.ird
+BUILT_SOURCES = ILocation.h ILocation.ird IEventQueue.h \
+	IEventQueue.ird
+eventManager_SOURCES = eventManager.cpp eventManager.h IEventQueue.idl
+eventManagerClient_SOURCES = eventManagerClient.cpp eventManager.h IEventQueue.idl
+nodist_eventManager_SOURCES = IEventQueue.c
+console_SOURCES = console.cpp
+consoleClient_SOURCES = consoleClient.cpp
+upcallTest_SOURCES = upcallTest.cpp
+upcallTestClient_SOURCES = upcallTestClient.cpp
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -294,6 +353,18 @@ binderClient$(EXEEXT): $(binderClient_OBJECTS) $(binderClient_DEPENDENCIES)
 client$(EXEEXT): $(client_OBJECTS) $(client_DEPENDENCIES) 
 	@rm -f client$(EXEEXT)
 	$(CXXLINK) $(client_LDFLAGS) $(client_OBJECTS) $(client_LDADD) $(LIBS)
+console$(EXEEXT): $(console_OBJECTS) $(console_DEPENDENCIES) 
+	@rm -f console$(EXEEXT)
+	$(CXXLINK) $(console_LDFLAGS) $(console_OBJECTS) $(console_LDADD) $(LIBS)
+consoleClient$(EXEEXT): $(consoleClient_OBJECTS) $(consoleClient_DEPENDENCIES) 
+	@rm -f consoleClient$(EXEEXT)
+	$(CXXLINK) $(consoleClient_LDFLAGS) $(consoleClient_OBJECTS) $(consoleClient_LDADD) $(LIBS)
+eventManager$(EXEEXT): $(eventManager_OBJECTS) $(eventManager_DEPENDENCIES) 
+	@rm -f eventManager$(EXEEXT)
+	$(CXXLINK) $(eventManager_LDFLAGS) $(eventManager_OBJECTS) $(eventManager_LDADD) $(LIBS)
+eventManagerClient$(EXEEXT): $(eventManagerClient_OBJECTS) $(eventManagerClient_DEPENDENCIES) 
+	@rm -f eventManagerClient$(EXEEXT)
+	$(CXXLINK) $(eventManagerClient_LDFLAGS) $(eventManagerClient_OBJECTS) $(eventManagerClient_LDADD) $(LIBS)
 hello$(EXEEXT): $(hello_OBJECTS) $(hello_DEPENDENCIES) 
 	@rm -f hello$(EXEEXT)
 	$(CXXLINK) $(hello_LDFLAGS) $(hello_OBJECTS) $(hello_LDADD) $(LIBS)
@@ -309,6 +380,12 @@ main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES)
 server$(EXEEXT): $(server_OBJECTS) $(server_DEPENDENCIES) 
 	@rm -f server$(EXEEXT)
 	$(CXXLINK) $(server_LDFLAGS) $(server_OBJECTS) $(server_LDADD) $(LIBS)
+upcallTest$(EXEEXT): $(upcallTest_OBJECTS) $(upcallTest_DEPENDENCIES) 
+	@rm -f upcallTest$(EXEEXT)
+	$(CXXLINK) $(upcallTest_LDFLAGS) $(upcallTest_OBJECTS) $(upcallTest_LDADD) $(LIBS)
+upcallTestClient$(EXEEXT): $(upcallTestClient_OBJECTS) $(upcallTestClient_DEPENDENCIES) 
+	@rm -f upcallTestClient$(EXEEXT)
+	$(CXXLINK) $(upcallTestClient_LDFLAGS) $(upcallTestClient_OBJECTS) $(upcallTestClient_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -316,15 +393,22 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IEventQueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ILocation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binderClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/console.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consoleClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eventManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eventManagerClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hello.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/location.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/locationClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upcallTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upcallTestClient.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

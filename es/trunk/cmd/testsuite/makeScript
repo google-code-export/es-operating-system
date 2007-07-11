@@ -17,6 +17,14 @@ echo 'vcopy '$DIR'/disk.img '$DIR'/../binder.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/disk.img '$DIR'/../binderClient.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/disk.img '$DIR'/../location.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/disk.img '$DIR'/../locationClient.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../eventManager.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../eventManagerClient.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../console.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../consoleClient.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img /usr/share/fonts/japanese/TrueType/sazanami-mincho.ttf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../upcallTest.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/disk.img '$DIR'/../upcallTestClient.elf > /dev/null 2>&1' >> $SCRIPT
+
 echo '' >> $SCRIPT
 echo '# run QEMU on the background.' >> $SCRIPT
 

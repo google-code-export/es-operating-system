@@ -15,14 +15,17 @@ SUFFIXES = .h .idl .ird
 	echo -n "InfoSize = sizeof" $(*F) >> $@;
 	echo "Info;" >> $@;
 
-noinst_PROGRAMS = main hello server client binder binderClient location locationClient
+noinst_PROGRAMS = main hello server client binder binderClient location locationClient \
+                  eventManager eventManagerClient console consoleClient upcallTest upcallTestClient
 
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref
 AM_CPPFLAGS = -I- \
 	-I../include \
-	-I$(srcdir)/../include
+	-I$(srcdir)/../include \
+	-I$(prefix)/include \
+	-I$(prefix)/include/freetype2
 
-LDADD = ../os/libes++/libes++.a
+LDADD = ../os/libes++/libes++.a $(prefix)/lib/libfreetype.a
 
 hello_SOURCES = hello.cpp
 
@@ -43,6 +46,22 @@ locationClient_SOURCES = locationClient.cpp location.h ILocation.idl
 nodist_location_SOURCES = ILocation.c
 
 BUILT_SOURCES = ILocation.h ILocation.ird
+
+eventManager_SOURCES = eventManager.cpp eventManager.h IEventQueue.idl
+
+eventManagerClient_SOURCES = eventManagerClient.cpp eventManager.h IEventQueue.idl
+
+nodist_eventManager_SOURCES = IEventQueue.c
+
+BUILT_SOURCES += IEventQueue.h IEventQueue.ird
+
+console_SOURCES = console.cpp
+
+consoleClient_SOURCES = consoleClient.cpp
+
+upcallTest_SOURCES = upcallTest.cpp
+
+upcallTestClient_SOURCES = upcallTestClient.cpp
 
 clean-local:
 	-rm -f $(BUILT_SOURCES)

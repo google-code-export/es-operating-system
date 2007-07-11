@@ -1,4 +1,4 @@
-LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a
+LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a -lfreetype
 
 SUFFIXES = .img .gz
 
@@ -8,7 +8,7 @@ SUFFIXES = .img .gz
 % :: %.elf
 	$(srcdir)/makeScript "`pwd`" $@
 
-TESTS = main start binder location
+TESTS = main start binder location eventManager console upcallTest
 
 noinst_SCRIPTS = $(TESTS)
 
@@ -18,14 +18,17 @@ noinst_DATA = disk.img \
 	main.img \
 	start.img \
 	binder.img \
-	location.img
+	location.img \
+	eventManager.img \
+	console.img \
+	upcallTest.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 
 clean-local:
 	-rm -f *.map *.log
 
-AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map
+AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map -L$(prefix)/lib
 
 main_SOURCES = main.cpp
 
@@ -35,6 +38,12 @@ binder_SOURCES = binder.cpp
 
 location_SOURCES = location.cpp
 
+eventManager_SOURCES = eventManager.cpp
+
+console_SOURCES = console.cpp
+
+upcallTest_SOURCES = upcallTest.cpp
+
 disk.img: disk.img.gz
 	gunzip -c $< > $@
 	vformat $@
@@ -42,6 +51,8 @@ disk.img: disk.img.gz
 AM_CPPFLAGS = \
 	-I- \
 	-I../../include \
-	-I$(srcdir)/../../include
+	-I$(srcdir)/../../include \
+	-I$(prefix)/include \
+	-I$(prefix)/include/freetype2
 
 EXTRA_DIST = disk.img.gz makeScript
