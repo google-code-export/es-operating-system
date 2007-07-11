@@ -44,11 +44,37 @@ extern void esRegisterDHCPClient(IContext* context);
 
 IStream* esReportStream();
 
+void startProcess(Handle<IContext> root, Handle<IProcess> process, Handle<IFile> file)
+{
+    ASSERT(root);
+    ASSERT(process);
+    ASSERT(file);
+
+    long long  size = 0;
+
+    size = file->getSize();
+    esReport("size: %lld\n", size);
+
+    process->setRoot(root);
+    process->setIn(esReportStream());
+    process->setOut(esReportStream());
+    process->setError(esReportStream());
+    process->start(file);
+}
+
 void init(Handle<IContext> root)
 {
     Handle<IIterator>   iter;
     Handle<IFile>       file;
     long long           size = 0;
+
+    // get console.
+    Handle<IStream> console = 0;
+    while (!console)
+    {
+        console = root->lookup("device/console");
+        esSleep(10000000 / 60);
+    }
 
     file = root->lookup("file/esjs.elf");
     if (!file)
@@ -64,9 +90,9 @@ void init(Handle<IContext> root)
                      reinterpret_cast<void**>(&process));
     ASSERT(process);
     process->setRoot(root);
-    process->setIn(esReportStream());
-    process->setOut(esReportStream());
-    process->setError(esReportStream());
+    process->setIn(console);
+    process->setOut(console);
+    process->setError(console);
     process->start(file, "esjs file/shell.js");
     process->wait();
     esReport("esjs exited.\n");
@@ -153,7 +179,25 @@ int main(int argc, char* argv[])
         fatFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
 
         nameSpace->bind("file", root);
+
+        // start event manager process.
+        Handle<IProcess> eventProcess;
+        esCreateInstance(CLSID_Process, IID_IProcess,
+                         reinterpret_cast<void**>(&eventProcess));
+        Handle<IFile> eventElf = nameSpace->lookup("file/eventManager.elf");
+        startProcess(nameSpace, eventProcess, eventElf);
+
+        // start console process.
+        Handle<IProcess> consoleProcess;
+        esCreateInstance(CLSID_Process, IID_IProcess,
+                         reinterpret_cast<void**>(&consoleProcess));
+        Handle<IFile> consoleElf = nameSpace->lookup("file/console.elf");
+        startProcess(nameSpace, consoleProcess, consoleElf);
+
         init(nameSpace);
+
+        consoleProcess->kill();
+        eventProcess->kill();
 
         fatFileSystem->getFreeSpace(freeSpace);
         fatFileSystem->getTotalSpace(totalSpace);
