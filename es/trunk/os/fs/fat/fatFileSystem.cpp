@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -207,12 +207,7 @@ lookup(u32 dirClus, u32 offset)
     {
         if (stream->dirClus == dirClus && stream->offset == offset && !stream->isRemoved())
         {
-            if (stream->addRef() == 2)
-            {
-                // This stream has been standing by.
-                ASSERT(standbyList.contains(stream));
-                standbyList.remove(stream);
-            }
+            stream->addRef();
             return stream;
         }
     }
@@ -241,19 +236,23 @@ remove(FatStream* stream)
     }
 }
 
-unsigned int FatFileSystem::
+void FatFileSystem::
+activate(FatStream* stream)
+{
+    Synchronized<IMonitor*> method(hashMonitor);
+
+    ASSERT(standbyList.contains(stream));
+    standbyList.remove(stream);
+}
+
+void FatFileSystem::
 standBy(FatStream* stream)
 {
     Synchronized<IMonitor*> method(hashMonitor);
 
-    unsigned int count = stream->ref.release();
-    if (count == 1)
-    {
-        ASSERT(!standbyList.contains(stream));
-        standbyList.addLast(stream);
-        // XXX Maintain standbyList
-    }
-    return count;
+    ASSERT(!standbyList.contains(stream));
+    standbyList.addLast(stream);
+    // XXX Maintain standbyList
 }
 
 // Returns the first sector number of the first sector of cluster 'n'.

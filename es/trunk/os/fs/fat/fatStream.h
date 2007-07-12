@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -231,7 +231,8 @@ public:
     FatStream* lookup(u32 dirClus, u32 offset);
     void add(FatStream* stream);
     void remove(FatStream* stream);
-    unsigned int standBy(FatStream* stream);
+    void activate(FatStream* stream);
+    void standBy(FatStream* stream);
     bool isClean();
     void setClean(bool clean);
 

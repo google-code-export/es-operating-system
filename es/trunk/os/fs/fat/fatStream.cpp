@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -310,8 +310,11 @@ flush()
 
 FatStream::
 FatStream(FatFileSystem* fileSystem, FatStream* parent, u32 offset, u8* fcb) :
-    fileSystem(fileSystem), cache(0),
-    parent(parent), offset(offset),
+    ref(2),     // Plus one for fileSystem->standbyList management
+    fileSystem(fileSystem),
+    cache(0),
+    parent(parent),
+    offset(offset),
     flags(0)
 {
     ASSERT(memcmp(fcb, FatFileSystem::nameDot, 11) != 0);
@@ -341,7 +344,6 @@ FatStream(FatFileSystem* fileSystem, FatStream* parent, u32 offset, u8* fcb) :
         dirClus = 0;
     }
 
-
     if (!isDirectory())
     {
         cache = fileSystem->cacheFactory->create(this);
@@ -355,6 +357,8 @@ FatStream(FatFileSystem* fileSystem, FatStream* parent, u32 offset, u8* fcb) :
 
     lastPosition = 0;
     lastClus = fstClus;
+
+    ref.release();  // Revert to normal
 }
 
 FatStream::
@@ -414,15 +418,23 @@ queryInterface(const Guid& riid, void** objectPtr)
 unsigned int FatStream::
 addRef(void)
 {
-    return ref.addRef();
+    unsigned int count = ref.addRef();
+    if (count == 2)
+    {
+        // This stream has been standing by.
+        fileSystem->activate(this);
+    }
+    return count;
 }
 
 unsigned int FatStream::
 release(void)
 {
+    unsigned int count;
+
     if (isRemoved())
     {
-        unsigned int count = ref.release();
+        count = ref.release();
         if (count == 0)
         {
             delete this;
@@ -444,8 +456,15 @@ release(void)
                 parent = 0;
             }
         }
-        return count;
     }
-    cache->flush();
-    return fileSystem->standBy(this);
+    else
+    {
+        cache->flush();
+        count = ref.release();
+        if (count == 1)
+        {
+            fileSystem->standBy(this);
+        }
+    }
+    return count;
 }
