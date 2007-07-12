@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -16,6 +16,7 @@
 #include "core.h"
 #include "elfFile.h"
 #include "process.h"
+#include "interfaceStore.h"
 
 extern ICurrentProcess* esCurrentProcess();
 
@@ -528,6 +529,7 @@ Process() :
     const unsigned stackSize = 2*1024*1024;
     Thread* thread(createThread(stackSize));
     ASSERT(thread);
+    syscallTable[1].set(thread, IID_IThread);   // just for reference counting
 
     Process* current(Process::getCurrentProcess());
     if (current)
@@ -553,7 +555,15 @@ Process::
     {
         if (1 < proxy->addRef())
         {
-            static_cast<IInterface*>(proxy->getObject())->release();
+            IInterface* object = static_cast<IInterface*>(proxy->getObject());
+            if (object)
+            {
+#ifdef VERBOSE
+                Reflect::Interface interface = getInterface(proxy->iid);   // XXX Should cache the result.
+                esReport("%s %s %p\n", __func__, interface.getName(), object);
+#endif
+                object->release();
+            }
         }
     }
 
@@ -577,7 +587,9 @@ load()
 {
     unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
+    ASSERT(core);
     core->currentProc = this;
+    ASSERT(mmu);
     mmu->load();
     Core::splX(x);
 }
@@ -844,6 +856,10 @@ start(IFile* file, const char* argument)
         }
     }
 
+    char name[32];
+    file->getName(name, sizeof name);
+    esReport("start %p %s\n", this, name);
+
 #ifdef VERBOSE
     dump();
     esReport("break: %p\n", end);
@@ -897,7 +913,8 @@ exit(int status)
 
     exitValue = status;
 
-    // Cancel all the threads
+    // Cancel all the threads. Note do not release threads here as they are
+    // stored in syscallTable.
     Thread* thread;
     List<Thread, &Thread::linkProcess>::Iterator iter = threadList.begin();
     while ((thread = iter.next()))
@@ -909,12 +926,9 @@ exit(int status)
         thread->setCancelState(ICurrentThread::CANCEL_ENABLE);
         thread->setCancelType(ICurrentThread::CANCEL_DEFERRED);
         thread->cancel();
-        thread->release();
     }
 
     thread = Thread::getCurrentThread();
-    thread->release();
-
     thread->exit(0);
     // NOT REACHED HERE
 
