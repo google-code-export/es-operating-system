@@ -51,12 +51,14 @@ unsigned int SyscallProxy::addRef()
 
 unsigned int SyscallProxy::release()
 {
-    IInterface* object(static_cast<IInterface*>(getObject()));
     unsigned int count = ref.release();
     if (count == 0)
     {
+        IInterface* object(static_cast<IInterface*>(getObject()));
         object->release();
+        object = 0;
     }
+    return count;
 }
 
 long SyscallProxy::addUser()
@@ -66,6 +68,7 @@ long SyscallProxy::addUser()
     {
         addRef();
     }
+    return count;
 }
 
 long SyscallProxy::releaseUser()
@@ -75,6 +78,7 @@ long SyscallProxy::releaseUser()
     {
         release();
     }
+    return count;
 }
 
 long long Process::
@@ -119,17 +123,6 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
     {
         log = false;
     }
-
-#if 1
-    if (interface.getIid() == IID_ISocket ||
-        interface.getIid() == IID_IInternetAddress ||
-        interface.getIid() == IID_IInternetConfig ||
-        interface.getIid() == IID_ISelectable ||
-        interface.getIid() == IID_IResolver)
-    {
-        log = true;
-    }
-#endif
 
     // If this interface inherits another interface,
     // methodNumber is checked accordingly.
