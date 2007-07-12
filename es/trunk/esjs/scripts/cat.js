@@ -2,9 +2,11 @@ var stdout = System.getOut();
 
 function print(stream)
 {
-    while ((c = stream.read(255)) != '')
+    var buf;
+
+    while ((buf = stream.read(255)) != '')
     {
-        stdout.write(c, c.length);
+        stdout.write(buf, buf.length);
     }
 }
 
@@ -16,7 +18,7 @@ for (var i = 1; i < params.length; ++i)
         var stream = file.getStream();
         print(stream);
     }
-    finally
+    catch (e)
     {
     }
 }
