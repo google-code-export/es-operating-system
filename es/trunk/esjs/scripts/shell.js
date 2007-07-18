@@ -36,7 +36,7 @@ function readLine(prompt)
     throw "EOF";
 }
 
-elem = /('([^'\\]|\\.)*')|(\"([^"\\]|\\.)*\"|(([^ \\\t\v\f]|\\.)+))/g;
+elem = /('([^'\\]|\\.)*')|(\"([^"\\]|\\.)*\"|(([^ \\\t]|\\.)+))/g;
 
 function getFile(pathname)
 {
@@ -61,8 +61,7 @@ function getFile(pathname)
     }
 }
 
-for (;;)
-{
+do {
     var line = readLine("% ");
 
     var params = line.match(elem);
@@ -101,4 +100,4 @@ for (;;)
         var message = String(e) + '\n';
         stdout.write(message, message.length);
     }
-}
+} while (params[0] != 'exit');
