@@ -526,11 +526,6 @@ Process() :
 
     syscallTable[0].set(esCurrentProcess(), IID_ICurrentProcess);
 
-    const unsigned stackSize = 2*1024*1024;
-    Thread* thread(createThread(stackSize));
-    ASSERT(thread);
-    syscallTable[1].set(thread, IID_IThread);   // just for reference counting
-
     Process* current(Process::getCurrentProcess());
     if (current)
     {
@@ -544,6 +539,10 @@ Process() :
 Process::
 ~Process()
 {
+#ifdef VERBOSE
+    esReport("Process::~Process %p\n", this);
+#endif
+
     setIn(0);
     setOut(0);
     setError(0);
@@ -775,6 +774,11 @@ start(IFile* file, const char* argument)
 
     // XXX Check no elf file is set yet.
 
+    const unsigned stackSize = 2*1024*1024;
+    Thread* thread(createThread(stackSize));
+    ASSERT(thread);
+    syscallTable[1].set(thread, IID_IThread);   // just for reference counting
+
     Elf elf(file);
 
     if (elf.getType() != ET_EXEC)
@@ -864,8 +868,6 @@ start(IFile* file, const char* argument)
     dump();
     esReport("break: %p\n", end);
 #endif // VERBOSE
-
-    Thread* thread(threadList.getFirst());
 
     // Copy-in the argument.
     Ureg* ureg(static_cast<Ureg*>(thread->param));
