@@ -92,7 +92,7 @@ int Binding::getName(char* name, unsigned int len)
         return -1;
     }
     strncpy(name, this->name, len);
-    return 0;
+    return strlen(name);    // for esjs
 }
 
 // Makes this binding invisible from the context so that iterators can
