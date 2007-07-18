@@ -23,6 +23,8 @@
 #include "io.h"
 #include "8042.h"
 
+// #define VERBOSE
+
 using namespace UsageID;
 
 u8 Keyboard::keycode[128] =
@@ -558,8 +560,13 @@ invoke(int param)
                     // make
                     map[key / (8 * sizeof(unsigned))] |= (1u << (key % (8 * sizeof(unsigned))));
                 }
-                // esReport("kbd: %02x (%02x) %s\n", key, data, (data & 0x80) ? "break" : "make");
             }
+#ifdef VERBOSE
+            if (key)
+            {
+                esReport("kbd: %02x (%02x) %s\n", key, data, (data & 0x80) ? "break" : "make");
+            }
+#endif  // VERBOSE
         }
     }
     return 0;
