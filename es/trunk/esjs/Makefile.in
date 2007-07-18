@@ -291,7 +291,14 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/../include \
 	-I$(prefix)/include
 
-EXTRA_DIST = scripts/cat.js scripts/echo.js scripts/ls.js scripts/shell.js scripts/edit.js
+EXTRA_DIST = \
+	scripts/cat.js		\
+	scripts/cd.js		\
+	scripts/echo.js		\
+	scripts/edit.js		\
+	scripts/ls.js		\
+	scripts/shell.js
+
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

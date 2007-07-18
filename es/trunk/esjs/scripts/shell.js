@@ -6,6 +6,7 @@ stdout = System.getOut();
 stderr = System.getError();
 root = System.getRoot();
 classStore = IClassStore(root.lookup("class"));
+cwd = root;
 
 path = [ "file" ];
 

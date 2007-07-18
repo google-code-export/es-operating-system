@@ -1,5 +1,3 @@
-var stdout = System.getOut();
-
 function print(stream)
 {
     var buf;
@@ -14,7 +12,7 @@ for (var i = 1; i < params.length; ++i)
 {
     try
     {
-        var file = IFile(root.lookup(params[i]));
+        var file = IFile(cwd.lookup(params[i]));
         var stream = file.getStream();
         print(stream);
     }

@@ -1,6 +1,3 @@
-var stdout = System.getOut();
-var root = System.getRoot();
-
 if (params.length < 2)
 {
     params[1] = "";
@@ -10,7 +7,7 @@ for (var i = 1; i < params.length; ++i)
 {
     try
     {
-        var iter = root.list(params[i]);
+        var iter = cwd.list(params[i]);
         while (iter.hasNext())
         {
             unknown = iter.next();
@@ -25,10 +22,7 @@ for (var i = 1; i < params.length; ++i)
         }
         iter.release();
     }
-    finally
+    catch (e)
     {
     }
 }
-
-stdout.release();
-root.release();

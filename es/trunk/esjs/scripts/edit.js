@@ -33,10 +33,6 @@
  *                                                   -- Brian Kernighan
  */
 
-var stdin = System.getIn();
-var stdout = System.getOut();
-var root = System.getRoot();
-
 var buf;        // edit buffer
 
 var line1;      // first line number
@@ -540,7 +536,7 @@ function doread(n, fil)
 
     try
     {
-        var file = IFile(root.lookup(fil));
+        var file = IFile(cwd.lookup(fil));
         var stream = file.getStream();
         var count = 0;
         curln = n;
@@ -568,10 +564,10 @@ function dowrite(n1, n2, fil)
 {
     try
     {
-        var unknown = root.bind(fil);
+        var unknown = cwd.bind(fil);
         if (!unknown)
         {
-            unknown = root.lookup(fil);
+            unknown = cwd.lookup(fil);
         }
         var file = IFile(unknown);
         var stream = file.getStream();
