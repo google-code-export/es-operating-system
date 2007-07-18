@@ -14,13 +14,13 @@ for (var i = 1; i < params.length; ++i)
         while (iter.hasNext())
         {
             unknown = iter.next();
-            file = IFile(unknown);
-            name = file.getName(256);
+            binding = IBinding(unknown);
+            name = binding.getName(256);
             if (name != "." && name != "..")
             {
                 stdout.write(name + '\n', name.length + 1);
             }
-            file.release();
+            binding.release();
             unknown.release();
         }
         iter.release();
