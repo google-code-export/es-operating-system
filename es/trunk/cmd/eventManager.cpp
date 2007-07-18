@@ -771,14 +771,6 @@ int main(int argc, char* argv[])
     Handle<IClassFactory> eventManagerFactory(new(ClassFactory<EventManager>));
     classStore->add(CLSID_EventManager, eventManagerFactory);
 
-    // Create a client process.
-    Handle<IProcess> client;
-    bool result =
-        classStore->createInstance(CLSID_Process,
-                                   client->interfaceID(),
-                                   reinterpret_cast<void**>(&client));
-    TEST(result);
-
     // Create Event manager objects.
     Handle<IEventQueue> eventQueue = new EventManager;
     ASSERT(eventQueue);
