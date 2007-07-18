@@ -363,9 +363,15 @@ cancel()
         return;
     }
 
+    if (process)
+    {
+        process->detach(this);
+    }
+
     switch (state)
     {
       case RUNNABLE:
+        unsetRun();
         break;
       case RUNNING:
         sched->runQueueHint = true;    // Hint to scheduler to check run queue
@@ -383,7 +389,7 @@ cancel()
         return;
     }
 
-    // OSClearContext(&context);
+    // XXX Clear FPU context
 
     ASSERT(0 < ref);    // i.e., not detached.
     unlockAllMonitors();// XXX deadlock
@@ -487,6 +493,9 @@ Thread(void* (*func)(void*), void* param, int priority,
 Thread::
 ~Thread()
 {
+#ifdef VERBOSE
+    esReport("Thread::%s %p\n", __func__, this);
+#endif
     delete[] (u8*) stack;
 }
 
@@ -557,7 +566,14 @@ returnToClient()
     {
         core->tcb->tcb = record->tcb;
         client = record->process;
+        ASSERT(client);
     }
+
+    if (client)
+    {
+        client->load();
+    }
+
     Core::splX(x);
 
     return client;
@@ -574,6 +590,8 @@ leapIntoServer(UpcallRecord* record)
     upcallList.addLast(record);
     core->tcb->tcb = record->tcb;
     server = record->process;
+    ASSERT(server);
+    server->load();
 
     Core::splX(x);
     return server;

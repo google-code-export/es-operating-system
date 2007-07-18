@@ -176,7 +176,6 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
     case UpcallRecord::INIT:
         // Leap into the server process.
         current->leapIntoServer(record);
-        server->load();
 
         // Initialize TLS.
         memmove(reinterpret_cast<void*>(record->ureg.esp),
@@ -194,8 +193,8 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
             // Make an upcall the server process.
             unsigned x = Core::splHi();
             Core* core = Core::getCurrentCore();
-            record->sp0 = core->tss->sp0;
-            core->tss->sp0 = current->sp0 = record->label.esp;
+            record->sp0 = core->tss0->sp0;
+            core->tss0->sp0 = current->sp0 = record->label.esp;
             Core::splX(x);
             record->ureg.load();
             // NOT REACHED HERE
@@ -207,10 +206,6 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
 
             // Return to the client process.
             Process* client = current->returnToClient();
-            if (client)
-            {
-                client->load();
-            }
         }
         // FALL THROUGH
     case UpcallRecord::READY:
@@ -223,7 +218,6 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
 
         // Leap into the server process.
         current->leapIntoServer(record);
-        server->load();
 
         // Invoke method
         record->ureg.eax = reinterpret_cast<u32>(record->proxy->object);
@@ -236,8 +230,8 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
             // Make an upcall the server process.
             unsigned x = Core::splHi();
             Core* core = Core::getCurrentCore();
-            record->sp0 = core->tss->sp0;
-            core->tss->sp0 = current->sp0 = record->label.esp;
+            record->sp0 = core->tss0->sp0;
+            core->tss0->sp0 = current->sp0 = record->label.esp;
             Core::splX(x);
             record->ureg.load();
             // NOT REACHED HERE
@@ -246,10 +240,6 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         {
             // Return to the client process.
             Process* client = current->returnToClient();
-            if (client)
-            {
-                client->load();
-            }
 
             // Copy output parameters from the user stack of the server process.
             errorCode = server->copyOut(record);
@@ -349,7 +339,7 @@ returnFromUpcall(Ureg* ureg)
 
     unsigned x = Core::splHi();
     Core* core = Core::getCurrentCore();
-    core->tss->sp0 = current->sp0 = record->sp0;
+    core->tss0->sp0 = current->sp0 = record->sp0;
     Core::splX(x);
     memmove(&record->ureg, ureg, sizeof(Ureg));
     record->label.jump();
@@ -512,14 +502,14 @@ copyIn(UpcallRecord* record)
                         return EFAULT;
                     }
                 }
-                if (log)
-                {
-                    esReport("[count = %d]", count);
-                }
             }
             else
             {
                 count = parameter.getType().getReferentSize();
+            }
+            if (log)
+            {
+                esReport("[count = %d]", count);
             }
 
             if (Page::SIZE < count)

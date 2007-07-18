@@ -153,6 +153,7 @@ public:
     static void busFreq();
 
     void setTimer(int vec, long hz);
+    void enableWatchdog();
 
     void startupAllAP(u32 hltAP, u32 startAP)
     {

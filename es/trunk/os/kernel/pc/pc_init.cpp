@@ -339,6 +339,19 @@ int esInit(IInterface** nameSpace)
         breakpoint();
         //  Core::pic->startup(4);
     }
+    else if (apic)
+    {
+        // Check Architectural Performance Monitoring leaf.
+        int eax, ebx, ecx, edx;
+        Core::cpuid(0x0a, &eax, &ebx, &ecx, &edx);
+        if (0 < (eax & 0x0f) && // Check the version identifier
+            !(ebx & 0x04))      // Check the availability of UnHalted Reference Cycles event
+        {
+            esReport("Enabled NMI kernel watchdog.\n");
+
+            apic->enableWatchdog();
+        }
+    }
 
     root->bind("device/beep", static_cast<IBeep*>(pit));
 
@@ -484,6 +497,15 @@ Reflect::Interface& getInterface(const Guid& iid)
 IThread* esCreateThread(void* (*start)(void* param), void* param)
 {
     return new Thread(start, param, IThread::Normal);
+}
+
+bool nmiHandler()
+{
+    if (apic)
+    {
+        apic->enableWatchdog();
+    }
+    return true;
 }
 
 /* write a single character      */

@@ -70,6 +70,7 @@ public:
     unsigned int release();
 
     friend class Apic;
+    friend class Core;
 };
 
 #endif // NINTENDO_ES_KERNEL_I386_8254_H_INCLUDED
