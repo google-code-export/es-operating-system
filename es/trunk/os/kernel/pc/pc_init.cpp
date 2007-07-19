@@ -144,7 +144,6 @@ static void initAP(...)
     apic->splHi();
     apic->setTimer(32, 1000);
     Core* core = new Core(sched);
-    apic->started();
     core->start();
     // NOT REACHED HERE
 }
@@ -200,20 +199,15 @@ int esInit(IInterface** nameSpace)
         apic->busFreq();
         Core::pic = apic;
 
+        Core::registerExceptionHandler(32, apic);
         if (2 <= mps->getProcessorCount())
         {
             // Startup APs
             u32 hltAP = 0x30000 + *(u16*) (0x30000 + 138);
             u32 startAP = 0x30000 + *(u16*) (0x30000 + 126);
-            *(u32*) (0x30000 + 132) = (u32) initAP;
-
-            esReport("Startap: %x\n", startAP);
-            esReport("Halt: %x\n", hltAP);
-
+            *(volatile u32*) (0x30000 + 132) = (u32) initAP;
             apic->startupAllAP(hltAP, startAP);
         }
-
-        Core::registerExceptionHandler(32, apic);
         apic->setTimer(32, 1000);
     }
 

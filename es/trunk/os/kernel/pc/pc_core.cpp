@@ -614,6 +614,7 @@ void Core::
 reschedule(void* param)
 {
     unsigned x = splHi();
+    Apic::started();
     Core* core = getCurrentCore();
     for (;;)
     {
