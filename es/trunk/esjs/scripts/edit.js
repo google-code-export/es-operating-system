@@ -571,6 +571,7 @@ function dowrite(n1, n2, fil)
         }
         var file = IFile(unknown);
         var stream = file.getStream();
+        stream.setSize(0);  // truncate
         for (var i = n1; i <= n2; ++i)
         {
             line = gettxt(i);
