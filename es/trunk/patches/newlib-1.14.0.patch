@@ -3515,10 +3515,10 @@ diff -bcrN newlib-1.14.0.org/libgloss/i386-es/es.ld newlib-1.14.0/libgloss/i386-
 + }
 diff -bcrN newlib-1.14.0.org/libgloss/i386-es/es-salib.c newlib-1.14.0/libgloss/i386-es/es-salib.c
 *** newlib-1.14.0.org/libgloss/i386-es/es-salib.c	1970-01-01 09:00:00.000000000 +0900
---- newlib-1.14.0/libgloss/i386-es/es-salib.c	2006-08-17 09:16:53.000000000 +0900
+--- newlib-1.14.0/libgloss/i386-es/es-salib.c	2007-07-10 17:30:53.000000000 +0900
 ***************
 *** 0 ****
---- 1,191 ----
+--- 1,202 ----
 + /*
 +  * Standard x86 syscalls for user programs running under es
 +  *
@@ -3683,18 +3683,26 @@ diff -bcrN newlib-1.14.0.org/libgloss/i386-es/es-salib.c newlib-1.14.0/libgloss/
 + void
 + esCreateMonitor(esMonitor* monitor)
 + {
-+     monitor->monitor = (void*) _syscall(0, 0, CREATE_MONITOR, (va_list) &monitor);
++     monitor->monitor = (void*) _syscall(0, 0, CREATE_MONITOR, 0);
 + }
 + 
 + void
 + esLockMonitor(esMonitor* monitor)
 + {
-+     _syscall(monitor->monitor, 0, LOCK, 0);
++     if (monitor->monitor)
++     {
++         _syscall(monitor->monitor, 0, LOCK, 0);
++     }
 + }
 + 
 + int
 + esTryLockMonitor(esMonitor* monitor)
 + {
++     if (!monitor->monitor)
++     {
++         return 0;
++     }
++ 
 +     if ((int) _syscall(monitor->monitor, 0, TRY_LOCK, 0))
 +     {
 +         return 0;
@@ -3708,7 +3716,10 @@ diff -bcrN newlib-1.14.0.org/libgloss/i386-es/es-salib.c newlib-1.14.0/libgloss/
 + void
 + esUnlockMonitor(esMonitor* monitor)
 + {
-+     _syscall(monitor->monitor, 0, UNLOCK, 0);
++     if (monitor->monitor)
++     {
++         _syscall(monitor->monitor, 0, UNLOCK, 0);
++     }
 + }
 diff -bcrN newlib-1.14.0.org/libgloss/i386-es/es-syscall.h newlib-1.14.0/libgloss/i386-es/es-syscall.h
 *** newlib-1.14.0.org/libgloss/i386-es/es-syscall.h	1970-01-01 09:00:00.000000000 +0900
