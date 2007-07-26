@@ -814,16 +814,3 @@ ObjectValue* constructSystemObject(void* system)
     object->setPrototype(getGlobal()->get("ICurrentProcess")->get("prototype"));
     return object;
 }
-
-int report(const char* spec, ...)
-{
-    va_list list;
-
-    va_start(list, spec);
-    IStream* output(System()->getOut());
-    Formatter formatter(output);
-    int count = formatter.format(spec, list);
-    output->release();
-    va_end(list);
-    return count;
-}

@@ -748,6 +748,10 @@ void constructGlobalObject()
     ObjectValue* array = constructArrayObject();
     global->put("Array", array);
 
+    // Register Boolean object
+    ObjectValue* boolean = constructBooleanObject();
+    global->put("Boolean", boolean);
+
     // Register RegExp object
     ObjectValue* regexp = constructRegExpObject();
     global->put("RegExp", regexp);
@@ -851,7 +855,7 @@ int main(int argc, char* argv[])
 
     constructGlobalObject();
     ExecutionContext* context = new ExecutionContext(getGlobal(), getGlobal());
-    Value::setThresh(1000);     // Set this thresh to one for testing GC
+    Value::setThresh(1000);    // Set this thresh to one for testing GC
 
     report("alloc count: %lld\n", Value::getAllocCount());
 
@@ -980,4 +984,18 @@ char* skipSpace(const char* str)
         }
     }
     return (char*) str;
+}
+
+int report(const char* spec, ...)
+{
+    va_list list;
+
+    va_start(list, spec);
+    IStream* output(System()->getOut());
+    Formatter formatter(output);
+    formatter.setMode(Formatter::Mode::ECMAScript);
+    int count = formatter.format(spec, list);
+    output->release();
+    va_end(list);
+    return count;
 }

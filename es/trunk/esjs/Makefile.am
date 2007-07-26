@@ -1,4 +1,6 @@
+if POSIX
 SUBDIRS = . testsuite
+endif POSIX
 
 SUFFIXES = .ird
 
@@ -53,11 +55,15 @@ nodist_esjs_SOURCES = \
 
 BUILT_SOURCES = lexer.cc parser.cc parser.h
 
-esjs_SOURCES = src/apply.S src/lexer.ll src/parser.yy \
-	src/esjs.cpp src/value.cpp src/interface.cpp \
-	src/array.cpp src/math.cpp src/string.cpp src/regexp.cpp \
+esjs_SOURCES = \
+	src/apply.S src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
+	src/array.cpp \
+	src/boolean.cpp \
+	src/interface.cpp \
+	src/math.cpp \
+	src/regexp.cpp \
+	src/string.cpp \
 	include/esjs.h include/value.h include/interface.h include/smartptr.h
-	
 
 bin_PROGRAMS = esjs 
 

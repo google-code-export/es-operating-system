@@ -1297,6 +1297,7 @@ public:
     {
         std::string s;
         Formatter f(s);
+        f.setMode(Formatter::Mode::ECMAScript);
         f.format("%g", value);
         return s;
     }

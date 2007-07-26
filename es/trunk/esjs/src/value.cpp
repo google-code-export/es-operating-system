@@ -164,6 +164,11 @@ ObjectValue::~ObjectValue()
 
 Value* ObjectValue::toPrimitive(int hint)
 {
+    if (hint == Value::UndefinedType)
+    {
+        hint = Value::NumberType;
+    }
+
     Register<ListValue> list = new ListValue;
     Register<Value> value;
     bool number = (hint == Value::NumberType) ? true : false;

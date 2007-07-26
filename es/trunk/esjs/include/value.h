@@ -155,7 +155,7 @@ public:
         return false;
     }
 
-    virtual Value* toPrimitive(int hint = NumberType)
+    virtual Value* toPrimitive(int hint = UndefinedType)
     {
         return this;
     }
@@ -677,6 +677,8 @@ public:
         return value ? "true" : "false";
     }
 
+    ObjectValue* toObject();
+
     void clear()
     {
     }
@@ -800,6 +802,7 @@ public:
     {
         std::string s;
         Formatter f(s);
+        f.setMode(Formatter::Mode::ECMAScript);
         f.format("%g", value);
         return s;
     }
@@ -933,12 +936,17 @@ public:
         return true;
     }
 
-    Value* toPrimitive(int hint = Value::NumberType);
+    Value* toPrimitive(int hint);
 
     bool toBoolean()
     {
         return true;
     }
+
+    double toNumber()
+    {
+        return toPrimitive(Value::NumberType)->toNumber();
+    };
 
     ObjectValue* toObject()
     {
@@ -1482,9 +1490,12 @@ public:
 extern ObjectValue* getScopeChain();
 extern Value* getThis();
 
-extern ObjectValue* constructStringObject();
 extern ObjectValue* constructArrayObject();
+extern ObjectValue* constructBooleanObject();
+extern ObjectValue* constructDateObject();
 extern ObjectValue* constructMathObject();
 extern ObjectValue* constructRegExpObject();
+extern ObjectValue* constructStringObject();
+extern ObjectValue* constructNumberObject();
 
 #endif  // NINTENDO_ESJS_VALUE_H_INCLUDED
