@@ -177,26 +177,43 @@ tryLock()
 int Thread::Monitor::
 condUnlock(int)
 {
-    Thread* current = getCurrentThread();
-
-    ASSERT(0 < lockCount);
-    ASSERT(current == owner);
-    --lockCount;
-    if (0 < lockCount)
+    if (!owner)
     {
         return false;
     }
+    ASSERT(0 < lockCount);
 
-    // Recalculate the effective scheduling priority after
-    // removing the monitor from the queue.
-    current->lock();
-    current->monitorList.remove(this);
-    current->unlock();
-    owner = 0;
-    release();
+    // owner is locked and is being terminated.
+    if (owner->state == TERMINATED)
+    {
+        lockCount = 0;
+        owner->monitorList.remove(this);
+        owner = 0;
+        release();
+        return true;
+    }
 
-    current->updatePriority();
-    return true;
+    Thread* current = getCurrentThread();
+    if (current == owner)
+    {
+        --lockCount;
+        if (0 < lockCount)
+        {
+            return false;
+        }
+
+        // Recalculate the effective scheduling priority after
+        // removing the monitor from the queue.
+        current->lock();
+        current->monitorList.remove(this);
+        current->unlock();
+        owner = 0;
+        release();
+        current->updatePriority();
+        return true;
+    }
+
+    return false;
 }
 
 void Thread::Monitor::

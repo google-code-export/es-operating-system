@@ -177,16 +177,15 @@ updatePriority()
 }
 
 /** Unlocks all the monitors locked by this thread.
+ * This thread is being locked.
  */
 void Thread::
 unlockAllMonitors()
 {
+    ASSERT(state == TERMINATED);
     while (!monitorList.isEmpty())
     {
-        lock();
         Monitor* monitor = monitorList.getFirst();
-        unlock();
-        monitor->lockCount = 1;
         monitor->unlock();
     }
 }
@@ -235,11 +234,10 @@ exit(void* val)
     ASSERT(state == RUNNING);
     ASSERT(getCurrentThread() == this);
 
-    unlockAllMonitors();
-
     lock();
-    // ClearContext(context);
+    // XXX Clear FPU context
     state = TERMINATED;
+    unlockAllMonitors();
     this->val = val;
     joinPoint.wakeup();
     unlock();
@@ -392,8 +390,8 @@ cancel()
     // XXX Clear FPU context
 
     ASSERT(0 < ref);    // i.e., not detached.
-    unlockAllMonitors();// XXX deadlock
     state = TERMINATED;
+    unlockAllMonitors();
     joinPoint.wakeup();
 
     unlock();
