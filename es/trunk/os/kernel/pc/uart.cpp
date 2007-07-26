@@ -23,20 +23,15 @@ Uart(int baseaddr, int bus, int irq) :
     baseaddr(baseaddr),
     ring(buffer, sizeof buffer)
 {
-    esReport("COM %x: ", baseaddr);
-
     outpb(baseaddr + FCR, 0xC7); // FIFO Control Register
     u8 x = inpb(baseaddr + IIR);
     switch (x & 0xc0)
     {
-      case 0xc0:
-        esReport("16550a\n");
+      case 0xc0:    // 16550a
         break;
-      case 0x80:
-        esReport("16550\n");
+      case 0x80:    // 16550
         break;
-      case 0x00:
-        esReport("16450\n");
+      case 0x00:    // 16450
         break;
     }
 
