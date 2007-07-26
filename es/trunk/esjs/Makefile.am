@@ -59,8 +59,10 @@ esjs_SOURCES = \
 	src/apply.S src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
 	src/array.cpp \
 	src/boolean.cpp \
+	src/date.cpp \
 	src/interface.cpp \
 	src/math.cpp \
+	src/number.cpp \
 	src/regexp.cpp \
 	src/string.cpp \
 	include/esjs.h include/value.h include/interface.h include/smartptr.h
@@ -106,4 +108,5 @@ EXTRA_DIST = \
 	scripts/echo.js		\
 	scripts/edit.js		\
 	scripts/ls.js		\
-	scripts/shell.js
+	scripts/shell.js	\
+	scripts/date.js

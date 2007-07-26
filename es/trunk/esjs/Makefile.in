@@ -54,7 +54,8 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_esjs_OBJECTS = apply.$(OBJEXT) esjs-lexer.$(OBJEXT) \
 	esjs-parser.$(OBJEXT) esjs-esjs.$(OBJEXT) esjs-value.$(OBJEXT) \
 	esjs-array.$(OBJEXT) esjs-boolean.$(OBJEXT) \
-	esjs-interface.$(OBJEXT) esjs-math.$(OBJEXT) \
+	esjs-date.$(OBJEXT) esjs-interface.$(OBJEXT) \
+	esjs-math.$(OBJEXT) esjs-number.$(OBJEXT) \
 	esjs-regexp.$(OBJEXT) esjs-string.$(OBJEXT)
 nodist_esjs_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	ICallback.$(OBJEXT) IClassFactory.$(OBJEXT) \
@@ -282,8 +283,10 @@ esjs_SOURCES = \
 	src/apply.S src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
 	src/array.cpp \
 	src/boolean.cpp \
+	src/date.cpp \
 	src/interface.cpp \
 	src/math.cpp \
+	src/number.cpp \
 	src/regexp.cpp \
 	src/string.cpp \
 	include/esjs.h include/value.h include/interface.h include/smartptr.h
@@ -307,7 +310,8 @@ EXTRA_DIST = \
 	scripts/echo.js		\
 	scripts/edit.js		\
 	scripts/ls.js		\
-	scripts/shell.js
+	scripts/shell.js	\
+	scripts/date.js
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -431,10 +435,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/apply.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-boolean.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-date.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-esjs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-lexer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-math.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-number.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-regexp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-string.Po@am__quote@
@@ -1099,6 +1105,20 @@ esjs-boolean.obj: src/boolean.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-boolean.obj `if test -f 'src/boolean.cpp'; then $(CYGPATH_W) 'src/boolean.cpp'; else $(CYGPATH_W) '$(srcdir)/src/boolean.cpp'; fi`
 
+esjs-date.o: src/date.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-date.o -MD -MP -MF $(DEPDIR)/esjs-date.Tpo -c -o esjs-date.o `test -f 'src/date.cpp' || echo '$(srcdir)/'`src/date.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-date.Tpo $(DEPDIR)/esjs-date.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/date.cpp' object='esjs-date.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-date.o `test -f 'src/date.cpp' || echo '$(srcdir)/'`src/date.cpp
+
+esjs-date.obj: src/date.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-date.obj -MD -MP -MF $(DEPDIR)/esjs-date.Tpo -c -o esjs-date.obj `if test -f 'src/date.cpp'; then $(CYGPATH_W) 'src/date.cpp'; else $(CYGPATH_W) '$(srcdir)/src/date.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-date.Tpo $(DEPDIR)/esjs-date.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/date.cpp' object='esjs-date.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-date.obj `if test -f 'src/date.cpp'; then $(CYGPATH_W) 'src/date.cpp'; else $(CYGPATH_W) '$(srcdir)/src/date.cpp'; fi`
+
 esjs-interface.o: src/interface.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-interface.o -MD -MP -MF $(DEPDIR)/esjs-interface.Tpo -c -o esjs-interface.o `test -f 'src/interface.cpp' || echo '$(srcdir)/'`src/interface.cpp
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-interface.Tpo $(DEPDIR)/esjs-interface.Po
@@ -1126,6 +1146,20 @@ esjs-math.obj: src/math.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/math.cpp' object='esjs-math.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-math.obj `if test -f 'src/math.cpp'; then $(CYGPATH_W) 'src/math.cpp'; else $(CYGPATH_W) '$(srcdir)/src/math.cpp'; fi`
+
+esjs-number.o: src/number.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-number.o -MD -MP -MF $(DEPDIR)/esjs-number.Tpo -c -o esjs-number.o `test -f 'src/number.cpp' || echo '$(srcdir)/'`src/number.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-number.Tpo $(DEPDIR)/esjs-number.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/number.cpp' object='esjs-number.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-number.o `test -f 'src/number.cpp' || echo '$(srcdir)/'`src/number.cpp
+
+esjs-number.obj: src/number.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-number.obj -MD -MP -MF $(DEPDIR)/esjs-number.Tpo -c -o esjs-number.obj `if test -f 'src/number.cpp'; then $(CYGPATH_W) 'src/number.cpp'; else $(CYGPATH_W) '$(srcdir)/src/number.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-number.Tpo $(DEPDIR)/esjs-number.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/number.cpp' object='esjs-number.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-number.obj `if test -f 'src/number.cpp'; then $(CYGPATH_W) 'src/number.cpp'; else $(CYGPATH_W) '$(srcdir)/src/number.cpp'; fi`
 
 esjs-regexp.o: src/regexp.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-regexp.o -MD -MP -MF $(DEPDIR)/esjs-regexp.Tpo -c -o esjs-regexp.o `test -f 'src/regexp.cpp' || echo '$(srcdir)/'`src/regexp.cpp

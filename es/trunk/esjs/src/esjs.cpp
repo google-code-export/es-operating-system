@@ -756,11 +756,18 @@ void constructGlobalObject()
     ObjectValue* regexp = constructRegExpObject();
     global->put("RegExp", regexp);
 
+    // Register Date object
+    ObjectValue* date = constructDateObject();
+    global->put("Date", date);
+
     // Register Interface object
     global->put("Interface", constructInterfaceObject());
 
     // Register System object
     global->put("System", constructSystemObject(0));
+
+    // Register Number object
+    global->put("Number", constructNumberObject());
 }
 
 //

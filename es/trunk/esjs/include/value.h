@@ -793,6 +793,8 @@ public:
         return (value == 0 || value == NAN) ? false : true;
     }
 
+    ObjectValue* toObject();
+
     double toNumber()
     {
         return value;
