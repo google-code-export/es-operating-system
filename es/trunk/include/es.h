@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -28,6 +28,8 @@ void esDump(const void* ptr, s32 len);
 void esSleep(s64 timeout);
 void esThrow(int result);
 
+#ifndef ES_ONCE_INIT
+
 typedef struct esOnceControl
 {
     int  done;
@@ -53,6 +55,8 @@ void esCreateMonitor(esMonitor* monitor);
 void esLockMonitor(esMonitor* monitor);
 int  esTryLockMonitor(esMonitor* monitor);
 void esUnlockMonitor(esMonitor* monitor);
+
+#endif  // ES_ONCE_INIT
 
 #ifdef __es__
 

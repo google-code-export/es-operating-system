@@ -24,9 +24,13 @@
 
 extern ICurrentProcess* System();
 
-int esReport(const char* spec, ...) __attribute__((weak));
-int esReportv(const char* spec, va_list list) __attribute__((weak));
-void esPanic(const char* file, int line, const char* msg, ...) __attribute__((weak));
+extern "C"
+{
+    int esReport(const char* spec, ...) __attribute__((weak));
+    int esReportv(const char* spec, va_list list) __attribute__((weak));
+    void esPanic(const char* file, int line, const char* msg, ...) __attribute__((weak));
+}
+
 bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr) __attribute__((weak));
 
 int esReport(const char* spec, ...)
