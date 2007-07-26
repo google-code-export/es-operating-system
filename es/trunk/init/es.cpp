@@ -50,7 +50,7 @@ void startProcess(Handle<IContext> root, Handle<IProcess> process, Handle<IFile>
     ASSERT(process);
     ASSERT(file);
 
-    long long  size = 0;
+    long long size = 0;
 
     size = file->getSize();
     esReport("size: %lld\n", size);
