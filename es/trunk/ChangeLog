@@ -1,3 +1,351 @@
+2007-07-26 09:22  okasaka
+
+	* os/kernel/port/monitor.cpp, os/kernel/port/thread.cpp:
+	  (Monitor::condUnlock, unlockAllMonitors, exit, cancel) : Fix
+	  bugs.
+
+2007-07-26 07:50  ueno9
+
+	* include/es/net/arp.h: (arp.h) : Update.
+
+2007-07-26 06:54  okasaka
+
+	* cmd/configure, cmd/configure.ac, cmd/squeak-es-3.7.1/configure,
+	  cmd/squeak-es-3.7.1/configure.ac, configure, configure.ac,
+	  esidl/configure, esidl/configure.ac, esjs/configure,
+	  esjs/configure.ac, init/configure, init/configure.ac,
+	  os/configure, os/configure.ac, tools/configure,
+	  tools/configure.ac: Set version to 0.0.12.
+
+2007-07-26 06:20  ueno9
+
+	* esjs/Makefile.am, esjs/Makefile.in, esjs/include/value.h,
+	  esjs/scripts/date.js, esjs/src/date.cpp, esjs/src/esjs.cpp,
+	  esjs/src/number.cpp, esjs/testsuite/1000.js,
+	  esjs/testsuite/1001.js, esjs/testsuite/1002.js,
+	  esjs/testsuite/1003.js, esjs/testsuite/1004.js,
+	  esjs/testsuite/1005.js, esjs/testsuite/1006.js,
+	  esjs/testsuite/1007.js, esjs/testsuite/1008.js,
+	  esjs/testsuite/1009.js, esjs/testsuite/1010.js,
+	  esjs/testsuite/1011.js, esjs/testsuite/1012.js,
+	  esjs/testsuite/1013.js, esjs/testsuite/1014.js,
+	  esjs/testsuite/1015.js, esjs/testsuite/1016.js,
+	  esjs/testsuite/1017.js, esjs/testsuite/1018.js,
+	  esjs/testsuite/1019.js, esjs/testsuite/1020.js,
+	  esjs/testsuite/1021.js, esjs/testsuite/1022.js,
+	  esjs/testsuite/1023.js, esjs/testsuite/1024.js,
+	  esjs/testsuite/1025.js, esjs/testsuite/1026.js,
+	  esjs/testsuite/1027.js, esjs/testsuite/1028.js,
+	  esjs/testsuite/1029.js, esjs/testsuite/1030.js,
+	  esjs/testsuite/1031.js, esjs/testsuite/1032.js,
+	  esjs/testsuite/1033.js, esjs/testsuite/1034.js,
+	  esjs/testsuite/1035.js, esjs/testsuite/1036.js,
+	  esjs/testsuite/1037.js, esjs/testsuite/1038.js,
+	  esjs/testsuite/1039.js, esjs/testsuite/1040.js,
+	  esjs/testsuite/1041.js, esjs/testsuite/1042.js,
+	  esjs/testsuite/1043.js, esjs/testsuite/1044.js,
+	  esjs/testsuite/1045.js, esjs/testsuite/1046.js,
+	  esjs/testsuite/73.js, esjs/testsuite/74.js, esjs/testsuite/75.js,
+	  esjs/testsuite/Makefile.am, esjs/testsuite/Makefile.in: (esjs) :
+	  Support Date and Number objects.
+
+2007-07-26 05:26  okasaka
+
+	* init/makeScript: (eventManager.elf, date.js) : New.
+
+2007-07-26 04:12  okasaka
+
+	* esjs/Makefile.am, esjs/Makefile.in, esjs/include/esjs.h,
+	  esjs/include/value.h, esjs/src/boolean.cpp, esjs/src/esjs.cpp,
+	  esjs/src/interface.cpp, esjs/src/value.cpp, esjs/testsuite/72.js,
+	  esjs/testsuite/Makefile.am, esjs/testsuite/Makefile.in:
+	  (constructBooleanObject) : New to support Boolean Objects.
+	  (ObjectValue::toNumber) : New.
+	  (Formatter) : Use ECMAScript mode.
+
+2007-07-26 02:56  okasaka
+
+	* init/es.cpp: (startProcess) : Clean up.
+
+2007-07-26 02:55  okasaka
+
+	* os/kernel/pc/uart.cpp: (Uart) : Clean up.
+
+2007-07-26 02:34  okasaka
+
+	* esjs/Makefile.in, esjs/aclocal.m4, esjs/config.guess,
+	  esjs/config.sub, esjs/configure, esjs/depcomp, esjs/install-sh,
+	  esjs/missing, esjs/testsuite/Makefile.in: Switch to aclocal 1.10,
+	  autoconf 2.61, and automake 1.10 of F7.
+
+2007-07-26 02:23  okasaka
+
+	* cmd/squeak-es-3.7.1/Makefile.in, cmd/squeak-es-3.7.1/aclocal.m4,
+	  cmd/squeak-es-3.7.1/config.guess, cmd/squeak-es-3.7.1/config.sub,
+	  cmd/squeak-es-3.7.1/configure, cmd/squeak-es-3.7.1/depcomp,
+	  cmd/squeak-es-3.7.1/install-sh, cmd/squeak-es-3.7.1/missing:
+	  Switch to aclocal 1.10, autoconf 2.61, and automake 1.10 of F7.
+
+2007-07-26 02:17  okasaka
+
+	* include/es.h, os/libes++/src/report.cpp, patches/gcc-4.1.1.patch,
+	  patches/newlib-1.14.0.patch: Clean up the build system.
+
+2007-07-26 01:59  okasaka
+
+	* Makefile.in, aclocal.m4, cmd/Makefile.in, cmd/aclocal.m4,
+	  cmd/config.guess, cmd/config.sub, cmd/configure, cmd/depcomp,
+	  cmd/install-sh, cmd/missing, cmd/testsuite/Makefile.in,
+	  configure, esidl/Makefile.in, esidl/aclocal.m4, esidl/configure,
+	  esidl/depcomp, esidl/install-sh, esidl/missing,
+	  include/Makefile.in, init/Makefile.in, init/aclocal.m4,
+	  init/config.guess, init/config.sub, init/configure, init/depcomp,
+	  init/install-sh, init/missing, install-sh, missing,
+	  os/Makefile.in, os/aclocal.m4, os/bootsect/Makefile.in,
+	  os/config.guess, os/config.sub, os/configure, os/depcomp,
+	  os/fs/Makefile.in, os/fs/fat/Makefile.in,
+	  os/fs/fat/testsuite/Makefile.in, os/fs/iso9660/Makefile.in,
+	  os/fs/iso9660/testsuite/Makefile.in, os/install-sh,
+	  os/kernel/Makefile.in, os/kernel/testsuite/Makefile.in,
+	  os/libes++/Makefile.in, os/libes++/testsuite/Makefile.in,
+	  os/missing, os/net/Makefile.in, os/net/testsuite/Makefile.in,
+	  tools/Makefile.in, tools/aclocal.m4, tools/configure,
+	  tools/depcomp, tools/install-sh, tools/missing: Switch to aclocal
+	  1.10, autoconf 2.61, and automake 1.10 of F7.
+
+2007-07-26 01:52  okasaka
+
+	* include/es/formatter.h, os/libes++/src/formatter.cpp,
+	  os/libes++/testsuite/formatter.cpp: (Formatter) : Add ECMAScript
+	  mode.
+
+2007-07-20 00:25  okasaka
+
+	* patches/newlib-1.14.0.patch: (esCreateMonitor, esLockMonitor,
+	  esTryLockMonitor, esUnlockMonitor) : Fix bugs.
+
+2007-07-19 08:35  okasaka
+
+	* os/kernel/pc/pc_core.cpp, os/kernel/pc/pc_init.cpp: (esInit,
+	  Core::reschedule, initAP) : Fix SMP mode initialization sequence.
+
+2007-07-19 08:34  okasaka
+
+	* os/bootsect/loader.S: (_startap) : Fix bugs.
+
+2007-07-19 01:08  okasaka
+
+	* esjs/scripts/edit.js: (dowrite) : Fix a bug.
+
+2007-07-18 09:30  okasaka
+
+	* esjs/Makefile.am, esjs/Makefile.in, esjs/scripts/cat.js,
+	  esjs/scripts/cd.js, esjs/scripts/echo.js, esjs/scripts/edit.js,
+	  esjs/scripts/ls.js, esjs/scripts/shell.js, init/makeScript:
+	  (cd.js) : New to support the current working directory concept.
+
+2007-07-18 08:49  okasaka
+
+	* esjs/scripts/shell.js: Add exit built-in command.
+	  (elem) : Remove \v which is not a valid non-printing characters
+	  in PCRE.
+
+2007-07-18 08:48  okasaka
+
+	* esjs/scripts/ls.js: Use IBinding instead of IFile.
+
+2007-07-18 08:42  okasaka
+
+	* os/kernel/include/i386/8254.h, os/kernel/include/i386/apic.h,
+	  os/kernel/include/i386/core.h, os/kernel/include/i386/cpu.h,
+	  os/kernel/pc/apic.cpp, os/kernel/pc/pc_core.cpp,
+	  os/kernel/pc/pc_init.cpp, os/kernel/port/thread.cpp,
+	  os/kernel/port/upcall.cpp: (Core::reschedule) : Fix to clear
+	  core->currentProc when running kernel threads.
+	  (Thread::cancel) : Fix bugs.
+	  (Apic::enableWatchdog) : New for kernel lock up detection.
+	  (Core::doubleFault) : New for double fault detection.
+	  (Core::tss1) : New.
+	  (Tss::dump) : New.
+	  (nmiHandler) : New.
+	  (Thread::returnToClient, leapIntoServer) : Reload MMU atomically.
+
+2007-07-18 08:35  okasaka
+
+	* os/kernel/include/thread.h: (UpcallRecord) : Add an assertion.
+
+2007-07-18 08:31  okasaka
+
+	* os/kernel/port/process.cpp: (Process::Process, start) : Create
+	  the default thread in start() so that the owner can safely call
+	  the release method for a non-starting process.
+
+2007-07-18 08:30  okasaka
+
+	* os/kernel/pc/8042.cpp: (invoke) : Add verbose mode.
+
+2007-07-18 08:29  okasaka
+
+	* os/kernel/include/i386/label.h: (where) : New for debugging.
+
+2007-07-18 08:28  okasaka
+
+	* os/libes++/src/context.cpp: (getName) : Return strlen for esjs.
+
+2007-07-18 08:24  okasaka
+
+	* cmd/eventManager.cpp: (EventManager) : Cleanup.
+
+2007-07-12 09:38  okasaka
+
+	* os/kernel/port/process.cpp: (Process) : Save the default
+	  process's thread in syscallTable for reference counting.
+	  (exit) : Do not release threads that are stored in syscallTable.
+
+2007-07-12 09:35  okasaka
+
+	* os/kernel/port/syscall.cpp: (release, addUser, releaseUser) : Fix
+	  bugs.
+
+2007-07-12 02:23  okasaka
+
+	* esjs/scripts/cat.js: Clean up.
+
+2007-07-12 02:19  okasaka
+
+	* os/fs/fat/fatFileSystem.cpp, os/fs/fat/fatStream.cpp,
+	  os/fs/fat/fatStream.h: (FatFileSystem) : Fix standbyList
+	  management.
+
+2007-07-11 09:39  ueno9
+
+	* cmd/eventManager.cpp, cmd/squeak-es-3.7.1/es/vm/sqEsInput.cpp:
+	  (EventManager::mouseEvent, Squeak) : Update mouse position in
+	  event manager.
+
+2007-07-11 08:40  ueno9
+
+	* cmd/console.cpp, cmd/squeak-es-3.7.1/es/vm/sqEs.cpp: (Squeak,
+	  Console::start) : refresh screen.
+
+2007-07-11 07:41  ueno9
+
+	* cmd/squeak-es-3.7.1/es/vm/sqEs.cpp,
+	  cmd/squeak-es-3.7.1/es/vm/sqEsInput.cpp: (Squeak) : Support
+	  IEventQueue.
+
+2007-07-11 07:23  ueno9
+
+	* init/es.cpp, init/makeScript: (es.cpp) : Support console.
+
+2007-07-11 07:22  ueno9
+
+	* cmd/IEventQueue.idl, cmd/Makefile.am, cmd/Makefile.in,
+	  cmd/console.cpp, cmd/consoleClient.cpp, cmd/eventManager.cpp,
+	  cmd/eventManager.h, cmd/eventManagerClient.cpp,
+	  cmd/testsuite/Makefile.am, cmd/testsuite/Makefile.in,
+	  cmd/testsuite/console.cpp, cmd/testsuite/eventManager.cpp,
+	  cmd/testsuite/makeScript, cmd/testsuite/upcallTest.cpp,
+	  cmd/upcallTest.cpp, cmd/upcallTestClient.cpp: (IEventQeueu,
+	  Console) : New.
+
+2007-07-11 06:03  okasaka
+
+	* esjs/src/interface.cpp: (InterfaceMethodCode::evaluate) : Fix a
+	  bug.
+
+2007-07-11 05:17  okasaka
+
+	* os/kernel/include/i386/cpu.h: (Ureg::load) : Disable interrupts
+	  while loading.
+
+2007-07-09 09:54  okasaka
+
+	* esjs/scripts/edit.js: (doread) : Add line buffer for better
+	  performance.
+	  (dowrite) : Fix to be able to save files on real machines.
+
+2007-07-09 09:50  okasaka
+
+	* esjs/include/esjs.h, esjs/src/esjs.cpp, esjs/testsuite/71.js,
+	  esjs/testsuite/Makefile.am, esjs/testsuite/Makefile.in:
+	  (SourceElements::evaluate) : Process function declarations before
+	  evaluating statements.
+
+2007-07-09 04:34  okasaka
+
+	* esjs/src/esjs.cpp: (GlobalMethod::evaluate) : Fix a GC related
+	  bug in eval method.
+
+2007-07-09 02:21  okasaka
+
+	* os/kernel/include/i386/ataController.h,
+	  os/kernel/pc/ataController.cpp: (AtaController::issue) : Blocks
+	  further requests to be issued while busy.
+
+2007-07-02 09:41  okasaka
+
+	* init/Makefile.am, init/Makefile.in: (es.elf : makeScript) : Fix
+	  clean build problem.
+
+2007-06-29 03:33  okasaka
+
+	* init/Makefile.am, init/Makefile.in, init/makeScript: (edit.js) :
+	  New.
+
+2007-06-29 03:31  okasaka
+
+	* esjs/src/interface.cpp: (InterfaceMethodCode::evaluate) : Arrow a
+	  non interface pointer object to be passed for an interface
+	  pointer as zero for such as the bind method.
+
+2007-06-29 03:29  okasaka
+
+	* esjs/src/string.cpp: (StringMethod::charAt) : New.
+
+2007-06-29 03:29  okasaka
+
+	* esjs/src/regexp.cpp: (RegExpValue::match) : Fix not to match ^ if
+	  offset is not zero.
+
+2007-06-29 03:00  okasaka
+
+	* esjs/include/esjs.h, esjs/include/value.h, esjs/src/value.cpp:
+	  (ObjectValue::setParameterList) : Support length property of the
+	  function.
+
+2007-06-29 02:56  okasaka
+
+	* esjs/src/esjs.cpp: (main) : Adjust GC thresh for better
+	  performance.
+
+2007-06-29 02:54  okasaka
+
+	* esjs/Makefile.am, esjs/Makefile.in, esjs/scripts/edit.js,
+	  esjs/testsuite/68.js, esjs/testsuite/69.js, esjs/testsuite/70.js,
+	  esjs/testsuite/Makefile.am, esjs/testsuite/Makefile.in: (edit.js)
+	  : New.
+
+2007-06-29 02:50  okasaka
+
+	* os/libes++/src/posix_system.cpp: (System) : To make its semantics
+	  more close to the current es model, use the file descriptor
+	  directly rather than FILE* and set the standard input to the raw
+	  mode.
+
+2007-06-28 07:45  ueno9
+
+	* Makefile.am, Makefile.in, patches/README,
+	  patches/freetype-2.3.4.patch: (freetype-2.3.4.patch) : New.
+
+2007-06-22 07:58  okasaka
+
+	* esjs/COPYING, esjs/ChangeLog, esjs/Makefile.in, esjs/README: New.
+
+2007-06-22 07:30  okasaka
+
+	* ChangeLog: es 0.0.11 released.
+
 2007-06-22 07:29  okasaka
 
 	* cmd/configure, cmd/configure.ac, configure, configure.ac,
