@@ -19,7 +19,9 @@ echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/edit.js > /dev/null 2>&1' >>
 echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/cat.js > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/cd.js > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/ls.js > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/date.js > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/hello.elf > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/eventManager.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/console.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img /usr/share/fonts/japanese/TrueType/sazanami-mincho.ttf > /dev/null 2>&1' >> $SCRIPT
 
