@@ -165,11 +165,16 @@ DIST_SUBDIRS = esidl include os tools init cmd
 EXTRA_DIST = \
 	patches/README \
 	patches/binutils-2.16.1.patch \
+	patches/binutils-2.17.patch \
 	patches/gcc-4.1.0.patch \
 	patches/gcc-4.1.1.patch \
+	patches/gcc-4.2.1.patch \
 	patches/newlib-1.14.0.patch \
+	patches/newlib-1.15.0.patch \
 	patches/pcre-7.1.patch \
-	patches/freetype-2.3.4.patch
+	patches/pcre-7.2.patch \
+	patches/freetype-2.3.4.patch \
+	patches/freetype-2.3.5.patch
 
 all: all-recursive
 
