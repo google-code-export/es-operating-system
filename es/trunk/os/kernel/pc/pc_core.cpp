@@ -123,6 +123,8 @@ u8 Core::isaBus;
 
 extern "C"
 {
+    asm("   .text");
+    asm("   .align  16, 0");
     asm("catchException:");
     asm("   pushl   %ds");
     asm("   pushl   %es");
