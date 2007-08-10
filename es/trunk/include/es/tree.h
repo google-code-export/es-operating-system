@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -150,11 +150,13 @@ public:
                     if (left == nil)
                     {
                         root = right;
+                        root->parent = nil;
                         delete this;
                     }
                     else if (right == nil)
                     {
                         root = left;
+                        root->parent = nil;
                         delete this;
                     }
                     else
