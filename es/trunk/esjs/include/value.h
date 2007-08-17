@@ -233,6 +233,25 @@ public:
         return (u32) x;
     }
 
+    u16 toUint16()
+    {
+        double x = toNumber();
+        if (isnan(x) || x == 0.0 || isinf(x))
+        {
+            return 0;
+        }
+        if (0 <= x)
+        {
+            x = floor(fabs(x));
+        }
+        else
+        {
+            x = -floor(fabs(x));
+        }
+        x = fmod(x, 65536.0);
+        return (u16) x;
+    }
+
     virtual std::string toString()
     {
         return "";
@@ -256,6 +275,10 @@ public:
         return false;
     }
     virtual bool hasProperty(const std::string&) const
+    {
+        return false;
+    }
+    virtual bool remove(const std::string& name)    // Aka [[Delete]]
     {
         return false;
     }
