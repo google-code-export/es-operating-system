@@ -15,7 +15,7 @@ import "es/base/ICallback.idl", "es/base/IFile.idl", "es/base/IPageable.idl", "e
 
 /** This interface provides methods for handling child processes of the current process.
  */
-[object, uuid(8a122054-1f92-11dc-9c02-0009bf000001)]
+[object, uuid(3b6bc7bd-44c2-11dc-9c02-0009bf000001)]
 interface IProcess : IInterface
 {
     /**
@@ -71,11 +71,16 @@ interface IProcess : IInterface
      * @param error an output stream.
      */
     void setError(IStream* error);
+    /**
+     * Sets the current working context in the namespace for this process.
+     * @param context the current working context.
+     */
+    void setCurrent(IContext* context);
 }
 
 /** This interface provides methods for handling the current process.
  */
-[object, uuid(765edc68-41f9-11db-9c02-0009bf000001)]
+[object, uuid(3c10827b-44c2-11dc-9c02-0009bf000001)]
 interface ICurrentProcess : IInterface
 {
     const unsigned int PROT_NONE = 0x0;
@@ -171,4 +176,16 @@ interface ICurrentProcess : IInterface
      * @param on    enable/disable trace.
      */
     boolean trace(boolean on);
+
+    /**
+     * Sets the current working context in the namespace.
+     * @param context the current working context.
+     */
+    void setCurrent(IContext* context);
+
+    /**
+     * Gets the current working context in the namespace.
+     * @return the current working context.
+     */
+    IContext* getCurrent();
 }

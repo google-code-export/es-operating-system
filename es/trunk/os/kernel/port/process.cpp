@@ -514,6 +514,7 @@ Process() :
     tlsSize(0),
     threadCount(0),
     root(0),
+    current(0),
     in(0),
     out(0),
     error(0),
@@ -983,6 +984,35 @@ setRoot(IContext* root)
         root->addRef();
     }
     this->root = root;
+    if (prev)
+    {
+        prev->release();
+    }
+}
+
+IContext* Process::
+getCurrent()
+{
+    Monitor::Synchronized method(monitor);
+
+    if (current)
+    {
+        current->addRef();
+    }
+    return current;
+}
+
+void Process::
+setCurrent(IContext* current)
+{
+    Monitor::Synchronized method(monitor);
+
+    IContext* prev(this->current);
+    if (current)
+    {
+        current->addRef();
+    }
+    this->current = current;
     if (prev)
     {
         prev->release();

@@ -420,6 +420,8 @@ public:
     void* setBreak(long long increment);
     long long getNow();
     bool trace(bool on);
+    void setCurrent(IContext* context);
+    IContext* getCurrent();
 
     // IRuntime
     void setStartup(void (*startup)(void* (*start)(void* param), void* param));

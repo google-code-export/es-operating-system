@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -249,6 +249,20 @@ trace(bool on)
 {
     Process* current(Process::getCurrentProcess());
     return current->trace(on);
+}
+
+void Sched::
+setCurrent(IContext* context)
+{
+    Process* current(Process::getCurrentProcess());
+    return current->setCurrent(context);
+}
+
+IContext* Sched::
+getCurrent()
+{
+    Process* current(Process::getCurrentProcess());
+    return current->getCurrent();
 }
 
 void Sched::

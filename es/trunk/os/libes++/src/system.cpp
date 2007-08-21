@@ -200,6 +200,16 @@ public:
         return currentProcess->trace(on);
     }
 
+    void setCurrent(IContext* context)
+    {
+        return currentProcess->setCurrent(context);
+    }
+
+    IContext* getCurrent()
+    {
+        return currentProcess->getCurrent();
+    }
+
     bool queryInterface(const Guid& riid, void** objectPtr)
     {
         return currentProcess->queryInterface(riid, objectPtr);

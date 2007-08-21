@@ -1,5 +1,5 @@
 CLSID_Process = "3979e8b4-2e86-11db-9c02-0009bf000001";
-IID_IProcess = "8a122054-1f92-11dc-9c02-0009bf000001";
+IID_IProcess = "3b6bc7bd-44c2-11dc-9c02-0009bf000001";
 
 stdin = System.getIn();
 stdout = System.getOut();

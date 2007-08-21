@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -237,6 +237,7 @@ private:
                     threadList;
 
     IContext*       root;
+    IContext*       current;
     IStream*        in;
     IStream*        out;
     IStream*        error;
@@ -301,6 +302,8 @@ public:
     IStream* getError();
     void* setBreak(long long increment);
     bool trace(bool on);
+    void setCurrent(IContext* context);
+    IContext* getCurrent();
 
     // IRuntime
     void setStartup(void (*startup)(void* (*start)(void* param), void* param));

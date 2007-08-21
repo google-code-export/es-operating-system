@@ -740,6 +740,7 @@ public:
     void setIn(IStream* in) {}
     void setOut(IStream* out) {}
     void setError(IStream* error) {}
+    void setCurrent(IContext* context) {}
 
     // IInterface
     bool queryInterface(const Guid& riid, void** objectPtr)
@@ -785,9 +786,11 @@ class System : public ICurrentProcess
     Stream*     out;    // 1
     Stream*     error;  // 2
     IContext*   root;
+    IContext*   current;
 
 public:
-    System()
+    System() :
+        current(0)
     {
         struct termio tty;
         ioctl(0, TCGETA, &tty);
@@ -874,6 +877,28 @@ public:
     {
         error->addRef();
         return error;
+    }
+
+    void setCurrent(IContext* context)
+    {
+        if (context)
+        {
+            context->addRef();
+        }
+        if (current)
+        {
+            current->release();
+        }
+        current = context;
+    }
+
+    IContext* getCurrent()
+    {
+        if (current)
+        {
+            current->addRef();
+        }
+        return current;
     }
 
     void* setBreak(long long increment)
