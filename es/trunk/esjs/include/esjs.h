@@ -33,7 +33,14 @@ class SourceElement
 
 public:
     virtual ~SourceElement() {};
-    virtual void print() const {};
+    virtual void print() const
+    {
+        report("%s", toString("").c_str());
+    };
+    virtual std::string toString(std::string indent) const
+    {
+        return "";
+    }
 
     // Process for function declarations
     virtual void process() {};
@@ -67,10 +74,10 @@ public:
 
     virtual void print() const
     {
-        report("%s", toString().c_str());
+        report("%s", toString("").c_str());
     }
 
-    virtual std::string toString() const
+    virtual std::string toString(std::string indent = "") const
     {
         return "";
     }
@@ -118,49 +125,52 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
+        std::string s;
+
+        s = left->toString(indent);
         switch (op)
         {
         case Assign:
-            report(" = ");
+            s += " = ";
             break;
         case Multiple:
-            report(" *= ");
+            s += " *= ";
             break;
         case Divide:
-            report(" /= ");
+            s += " /= ";
             break;
         case Remainder:
-            report(" %= ");
+            s += " %= ";
             break;
         case Plus:
-            report(" += ");
+            s += " += ";
             break;
         case Minus:
-            report(" -= ");
+            s += " -= ";
             break;
         case LeftShift:
-            report(" <<= ");
+            s += " <<= ";
             break;
         case SignedRightShift:
-            report(" >>= ");
+            s += " >>= ";
             break;
         case UnsignedRightShift:
-            report(" >>>= ");
+            s += " >>>= ";
             break;
         case And:
-            report(" &= ");
+            s += " &= ";
             break;
         case Xor:
-            report(" ^= ");
+            s += " ^= ";
             break;
         case Or:
-            report(" |= ");
+            s += " |= ";
             break;
         }
-        expression->print();
+        s += expression->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -255,13 +265,9 @@ public:
         delete third;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        first->print();
-        report(" ? ");
-        second->print();
-        report(" : ");
-        third->print();
+        return first->toString(indent) + " ? " + second->toString(indent) + " : " + third->toString(indent);
     }
 
     Value* evaluate()
@@ -305,19 +311,22 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
+        std::string s;
+
+        s = left->toString(indent);
         switch (op)
         {
         case And:
-            report(" && ");
+            s += " && ";
             break;
         case Or:
-            report(" || ");
+            s += " || ";
             break;
         }
-        right->print();
+        s += right->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -373,25 +382,28 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
+        std::string s;
+
+        s = left->toString(indent);
         switch (op)
         {
         case Equal:
-            report(" == ");
+            s += " == ";
             break;
         case NotEqual:
-            report(" != ");
+            s += " != ";
             break;
         case StrictEqual:
-            report(" === ");
+            s += " === ";
             break;
         case StrictNotEqual:
-            report(" !== ");
+            s += " !== ";
             break;
         }
-        right->print();
+        s += right->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -561,25 +573,28 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
+        std::string s;
+
+        s += left->toString(indent);
         switch (op)
         {
         case LessThan:
-            report(" < ");
+            s += " < ";
             break;
         case GreaterThan:
-            report(" > ");
+            s += " > ";
             break;
         case LessEqual:
-            report(" <= ");
+            s += " <= ";
             break;
         case GreaterEqual:
-            report(" >= ");
+            s += " >= ";
             break;
         }
-        right->print();
+        s += right->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -608,11 +623,14 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
-        report(" instanceof ");
-        right->print();
+        std::string s;
+
+        s = left->toString(indent);
+        s += " instanceof ";
+        s += right->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -659,31 +677,34 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
+        std::string s;
+
+        s = left->toString(indent);
         switch (op)
         {
         case LeftShift:
-            report(" << ");
+            s += " << ";
             break;
         case SignedRightShift:
-            report(" >> ");
+            s += " >> ";
             break;
         case UnsignedRightShift:
-            report(" >>> ");
+            s += " >>> ";
             break;
         case And:
-            report(" & ");
+            s += " & ";
             break;
         case Xor:
-            report(" ^ ");
+            s += " ^ ";
             break;
         case Or:
-            report(" | ");
+            s += " | ";
             break;
         }
-        right->print();
+        s += right->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -733,11 +754,9 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
-        report(" + ");
-        right->print();
+        return left->toString(indent) + " + " + right->toString(indent);
     }
 
     Value* evaluate()
@@ -780,11 +799,9 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
-        report(" - ");
-        right->print();
+        return left->toString(indent) + " - " + right->toString(indent);
     }
 
     Value* evaluate()
@@ -824,22 +841,25 @@ public:
         delete right;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        left->print();
+        std::string s;
+
+        s = left->toString(indent);
         switch (op)
         {
         case Multiple:
-            report(" * ");
+            s += " * ";
             break;
         case Divide:
-            report(" / ");
+            s += " / ";
             break;
         case Remainder:
-            report(" %% ");
+            s += " % ";
             break;
         }
-        right->print();
+        s += right->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -888,24 +908,27 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s;
+
         switch (op)
         {
         case Plus:
-            report("+");
+            s += "+";
             break;
         case Minus:
-            report("-");
+            s += "-";
             break;
         case BitwiseNot:
-            report("~");
+            s += "~";
             break;
         case LogicalNot:
-            report("!");
+            s += "!";
             break;
         }
-        expression->print();
+        s += expression->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -944,10 +967,9 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("delete ");
-        expression->print();
+        return "delete " + expression->toString(indent);
     }
 
     Value* evaluate()
@@ -984,10 +1006,9 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("void ");
-        expression->print();
+        return "void " + expression->toString(indent);
     }
 
     Value* evaluate()
@@ -1012,10 +1033,9 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("typeof ");
-        expression->print();
+        return "typeof " + expression->toString(indent);
     }
 
     Value* evaluate()
@@ -1085,18 +1105,21 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s;
+
         switch (op)
         {
         case Increment:
-            report("++");
+            s += "++";
             break;
         case Decrement:
-            report("--");
+            s += "--";
             break;
         }
-        expression->print();
+        s += expression->toString(indent);
+        return s;
     }
 
     Value* evaluate()
@@ -1143,18 +1166,21 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        expression->print();
+        std::string s;
+
+        s = expression->toString(indent);
         switch (op)
         {
         case Increment:
-            report("++");
+            s += "++";
             break;
         case Decrement:
-            report("--");
+            s += "--";
             break;
         }
+        return s;
     }
 
     Value* evaluate()
@@ -1197,9 +1223,9 @@ class PrimaryExpression : public Expression
 class This : public Expression
 {
 public:
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("this");
+        return "this";
     }
 
     Value* evaluate()
@@ -1221,11 +1247,6 @@ public:
         }
     }
 
-    void print() const
-    {
-        report("%s", identifier.c_str());
-    }
-
     // 10.1.4
     Value* evaluate()
     {
@@ -1239,7 +1260,7 @@ public:
         return new ReferenceValue(NullValue::getInstance(), identifier);
     };
 
-    std::string toString() const
+    std::string toString(std::string indent = "") const
     {
         return identifier;
     }
@@ -1248,9 +1269,9 @@ public:
 class NullLiteral : public Expression
 {
 public:
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("null");
+        return "null";
     }
     Value* evaluate()
     {
@@ -1269,9 +1290,9 @@ public:
     ~BoolLiteral()
     {
     };
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report(value ? "true" : "false");
+        return value ? "true" : "false";
     }
     Value* evaluate()
     {
@@ -1293,7 +1314,7 @@ public:
         return new NumberValue(value);
     }
 
-    std::string toString() const
+    std::string toString(std::string indent) const
     {
         std::string s;
         Formatter f(s);
@@ -1377,60 +1398,63 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("\"");
+        std::string s = "\"";
+        Formatter f(s);
+        f.setMode(Formatter::Mode::ECMAScript);
         for (const char* p = value.c_str(); char c = *p; ++p)
         {
             switch (c)
             {
             case '"':
-                report("\\%c", c);
+                s += "\\\"";
                 break;
             case '\b':
-                report("\\b");
+                s += "\\b";
                 break;
             case '\f':
-                report("\\f");
+                s += "\\f";
                 break;
             case '\n':
-                report("\\n");
+                s += "\\n";
                 break;
             case '\r':
-                report("\\r");
+                s += "\\r";
                 break;
             case '\t':
-                report("\\t");
+                s += "\\t";
                 break;
             case '\v':
-                report("\\v");
+                s += "\\v";
                 break;
             case '\0':
-                report("\\0");
+                s += "\\0";
                 break;
             case '\\':
                 if (strchr("bfnrtvxu", p[1]))
                 {
-                    report("\\\\");
+                    s += "\\\\";
                 }
                 else
                 {
-                    report("\\");
+                    s += "\\";
                 }
                 break;
             default:
                 if (c < ' ' || c == 127)
                 {
-                    report("\\x%02x", (u8) c);
+                    f.format("\\x%02x", (u8) c);
                 }
                 else
                 {
-                    report("%c", c);
+                    f.format("%c", c);
                 }
                 break;
             }
         }
-        report("\"");
+        s += "\"";
+        return s;
     }
 
     Value* evaluate()
@@ -1457,7 +1481,7 @@ public:
 
     Value* evaluate();
 
-    std::string toString() const
+    std::string toString(std::string indent) const
     {
         return value;
     }
@@ -1466,10 +1490,6 @@ public:
 class Elision : public Expression
 {
 public:
-    void print() const
-    {
-    }
-
     Value* evaluate()
     {
         return UndefinedValue::getInstance();
@@ -1504,19 +1524,20 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("[ ");
+        std::string s = "[ ";
         Expression::List::Iterator iter = list.begin();
         while (Expression* element = iter.next())
         {
-            element->print();
+            s += element->toString(indent);
             if (iter.hasNext() || dynamic_cast<Elision*>(element))
             {
-                report(", ");
+                s += ", ";
             }
         }
-        report(" ]");
+        s += " ]";
+        return s;
     }
 
     Value* evaluate()
@@ -1560,11 +1581,9 @@ public:
         object->put(name->toString(), v);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        name->print();
-        report(": ");
-        value->print();
+        return name->toString(indent) + ": " + value->toString(indent);
     }
 
     friend class ObjectLiteral;
@@ -1590,19 +1609,20 @@ public:
         list.addLast(property);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("{ ");
+        std::string s = "{ ";
         PropertyNameAndValue::List::Iterator iter = list.begin();
         while (PropertyNameAndValue* property = iter.next())
         {
-            property->print();
+            s += property->toString(indent);
             if (iter.hasNext())
             {
-                report(", ");
+                s += ", ";
             }
         }
-        report(" }");
+        s += " }";
+        return s;
     }
 
     Value* evaluate()
@@ -1631,11 +1651,9 @@ public:
     {
         delete expression;
     };
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("(");
-        expression->print();
-        report(")");
+        return "(" + expression->toString(indent) + ")";
     }
     Value* evaluate()
     {
@@ -1671,22 +1689,26 @@ public:
         Expression::List::Iterator iter = list.begin();
         while (Expression* expression = iter.next())
         {
-            arguments->push(expression->evaluate()->getValue());
+            Register<Value> value = expression->evaluate()->getValue();
+            arguments->push(value);
         }
         return arguments;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s;
+
         Expression::List::Iterator iter = list.begin();
         while (Expression* expression = iter.next())
         {
-            expression->print();
+            s += expression->toString(indent);
             if (iter.hasNext())
             {
-                report(", ");
+                s += ", ";
             }
         }
+        return s;
     };
 
     bool isEmpty()
@@ -1732,12 +1754,9 @@ public:
         return function->call(self, list);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        expression->print();
-        report("(");
-        arguments->print();
-        report(")");
+        return expression->toString(indent) + "(" + arguments->toString(indent) + ")";
     };
 };
 
@@ -1767,12 +1786,9 @@ public:
         return new ReferenceValue(object, name->toString());
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        expression->print();
-        report("[");
-        identifier->print();
-        report("]");
+        return expression->toString(indent) + "[" + identifier->toString(indent) + "]";
     };
 };
 
@@ -1801,11 +1817,9 @@ public:
         return new ReferenceValue(object, identifier->toString());
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        expression->print();
-        report(".");
-        identifier->print();
+        return expression->toString(indent) + "." + identifier->toString(indent);
     };
 };
 
@@ -1840,16 +1854,17 @@ public:
         return function->construct(list);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("new ");
-        expression->print();
+        std::string s = "new ";
+        s += expression->toString(indent);
         if (!arguments->isEmpty())
         {
-            report("(");
-            arguments->print();
-            report(")");
+            s += "(";
+            s += arguments->toString(indent);
+            s += ")";
         }
+        return s;
     };
 };
 
@@ -1871,11 +1886,9 @@ public:
         delete second;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        first->print();
-        report(", ");
-        second->print();
+        return first->toString(indent) + ", " + second->toString(indent);
     }
 
     Value* evaluate()
@@ -1911,14 +1924,17 @@ public:
         list.addLast(statement);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s;
+
         SourceElement::List::Iterator iter = list.begin();
         while (SourceElement* statement = iter.next())
         {
-            statement->print();
+            s += statement->toString(indent);
         }
-    };
+        return s;
+    }
 
     CompletionType evaluate()
     {
@@ -1962,14 +1978,17 @@ public:
         }
     };
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("{\n");
+        std::string s;
+
+        s += indent + "{\n";
         if (list)
         {
-            list->print();
+            s += list->toString(indent + "    ");
         }
-        report("}\n");
+        s += indent + "}\n";
+        return s;
     };
 
     CompletionType evaluate()
@@ -2008,14 +2027,15 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        identifier->print();
+        std::string s = identifier->toString(indent);
         if (initialiser)
         {
-            report(" = ");
-            initialiser->print();
+            s += " = ";
+            s += initialiser->toString(indent);
         }
+        return s;
     }
 
     Value* evaluate()
@@ -2062,18 +2082,19 @@ public:
         list.addLast(var);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("var ");
+        std::string s = "var ";
         VariableDeclaration::List::Iterator iter = list.begin();
         while (VariableDeclaration* var = iter.next())
         {
-            var->print();
+            s += var->toString(indent);
             if (iter.hasNext())
             {
-                report(", ");
+                s += ", ";
             }
         }
+        return s;
     }
 
     Value* evaluate()
@@ -2103,10 +2124,9 @@ public:
         delete list;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        list->print();
-        report(";\n");
+        return indent + list->toString(indent) + ";\n";
     }
 
     CompletionType evaluate()
@@ -2119,9 +2139,9 @@ public:
 class EmptyStatement : public Statement
 {
 public:
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report(";\n");
+        return indent + ";\n";
     }
 
     CompletionType evaluate()
@@ -2144,10 +2164,9 @@ public:
         delete expression;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        expression->print();
-        report(";\n");
+        return indent + expression->toString(indent) + ";\n";
     }
 
     CompletionType evaluate()
@@ -2196,24 +2215,27 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("if (");
-        condition->print();
-        report(")\n");
-        then->print();
+        std::string s = indent;
+
+        s += "if (";
+        s += condition->toString(indent);
+        s += ")\n";
+        s += then->toString(indent);
         if (otherwise)
         {
             if (dynamic_cast<IfStatement*>(otherwise))
             {
-                report("else ");
+                s += indent + "else ";
             }
             else
             {
-                report("else\n");
+                s += indent + "else\n";
             }
-            otherwise->print();
+            s += otherwise->toString(indent);
         }
+        return s;
     }
 };
 
@@ -2264,13 +2286,16 @@ public:
         return CompletionType(CompletionType::Normal, value, "");
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("do\n");
-        statement->print();
-        report("while (");
-        expression->print();
-        report(");\n");
+        std::string s;
+
+        s = indent + "do\n";
+        s += statement->toString(indent);
+        s += indent + "while (";
+        s += expression->toString(indent);
+        s += ");\n";
+        return s;
     }
 };
 
@@ -2317,12 +2342,15 @@ public:
         return CompletionType(CompletionType::Normal, value, "");
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("while (");
-        expression->print();
-        report(")\n");
-        statement->print();
+        std::string s;
+
+        s = indent + "while (";
+        s += expression->toString(indent);
+        s += ")\n";
+        s += statement->toString(indent);
+        return s;
     }
 };
 
@@ -2387,27 +2415,30 @@ public:
         return CompletionType(CompletionType::Normal, value, "");
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("for (");
+        std::string s;
+
+        s = indent + "for (";
         if (first)
         {
-            first->print();
+            s += first->toString(indent);
         }
-        report(";");
+        s += ";";
         if (second)
         {
-            report(" ");
-            second->print();
+            s += " ";
+            s += second->toString(indent);
         }
-        report(";");
+        s += ";";
         if (third)
         {
-            report(" ");
-            third->print();
+            s += " ";
+            s += third->toString(indent);
         }
-        report(")\n");
-        statement->print();
+        s += ")\n";
+        s += statement->toString(indent);
+        return s;
     }
 };
 
@@ -2438,14 +2469,17 @@ public:
         return object->iterate(first, statement);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("for (");
-        first->print();
-        report(" in ");
-        second->print();
-        report(")\n");
-        statement->print();
+        std::string s;
+
+        s = indent + "for (";
+        s += first->toString(indent);
+        s += " in ";
+        s += second->toString(indent);
+        s += ")\n";
+        s += statement->toString(indent);
+        return s;
     }
 };
 
@@ -2478,15 +2512,18 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("continue");
+        std::string s;
+
+        s = indent + "continue";
         if (identifier)
         {
-            report(" ");
-            identifier->print();
+            s += " ";
+            s += identifier->toString(indent);
         }
-        report(";\n");
+        s += ";\n";
+        return s;
     }
 };
 
@@ -2519,15 +2556,18 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("break");
+        std::string s;
+
+        s = indent + "break";
         if (identifier)
         {
-            report(" ");
-            identifier->print();
+            s += " ";
+            s += identifier->toString(indent);
         }
-        report(";\n");
+        s += ";\n";
+        return s;
     }
 };
 
@@ -2560,15 +2600,15 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("return");
+        std::string s = indent + "return";
         if (expression)
         {
-            report(" ");
-            expression->print();
+            s += " " + expression->toString(indent);
         }
-        report(";\n");
+        s += ";\n";
+        return s;
     }
 };
 
@@ -2611,12 +2651,15 @@ public:
         return result;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("with (");
-        expression->print();
-        report(")\n");
-        statement->print();
+        std::string s = indent;
+
+        s += "with (";
+        s += expression->toString(indent);
+        s += ")\n";
+        s += statement->toString(indent);
+        return s;
     }
 };
 
@@ -2651,11 +2694,14 @@ public:
         return result;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        identifier->print();
-        report(":\n");
-        statement->print();
+        std::string s = indent;
+
+        s += identifier->toString(indent);
+        s += ":\n";
+        s += statement->toString(indent);
+        return s;
     }
 };
 
@@ -2702,22 +2748,25 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s = indent;
+
         if (expression)
         {
-            report("case ");
-            expression->print();
-            report(":\n");
+            s += "case ";
+            s += expression->toString(indent);
+            s += ":\n";
         }
         else
         {
-            report("default:\n");
+            s += "default:\n";
         }
         if (list)
         {
-            list->print();
+            s += list->toString(indent + "    ");
         }
+        return s;
     }
 
     friend class CaseBlock;
@@ -2752,15 +2801,18 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("{\n");
+        std::string s;
+
+        s += indent + "{\n";
         CaseClause::List::Iterator iter = list.begin();
         while (CaseClause* clause = iter.next())
         {
-            clause->print();
+            s += clause->toString(indent);
         }
-        report("}\n");
+        s += indent + "}\n";
+        return s;
     }
 
     CompletionType evaluate(Value* param)
@@ -2859,12 +2911,15 @@ public:
         return result;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("switch (");
-        expression->print();
-        report(")\n");
-        caseBlock->print();
+        std::string s = indent;
+
+        s += "switch (";
+        s += expression->toString(indent);
+        s += ")\n";
+        s += caseBlock->toString(indent);
+        return s;
     }
 };
 
@@ -2887,11 +2942,14 @@ public:
         return CompletionType(CompletionType::Throw, expression->evaluate()->getValue(), "");
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("throw ");
-        expression->print();
-        report(";\n");
+        std::string s = indent;
+
+        s += "throw ";
+        s += expression->toString(indent);
+        s += ";\n";
+        return s;
     }
 };
 
@@ -2912,12 +2970,15 @@ public:
         delete block;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("catch (");
-        identifier->print();
-        report(")\n");
-        block->print();
+        std::string s = indent;
+
+        s += "catch (";
+        s += identifier->toString(indent);
+        s += ")\n";
+        s += block->toString(indent);
+        return s;
     };
 
     CompletionType evaluate(CompletionType& c)
@@ -2956,10 +3017,9 @@ public:
         delete block;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("finally\n");
-        block->print();
+        return indent + "finally\n" + block->toString(indent);
     };
 
     CompletionType evaluate()
@@ -2994,18 +3054,21 @@ public:
         }
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("try\n");
-        block->print();
+        std::string s = indent;
+
+        s += "try\n";
+        s += block->toString(indent);
         if (catchBlock)
         {
-            catchBlock->print();
+            s += catchBlock->toString(indent);
         }
         if (finallyBlock)
         {
-            finallyBlock->print();
+            s += finallyBlock->toString(indent);
         }
+        return s;
     };
 
     CompletionType evaluate()
@@ -3058,14 +3121,17 @@ public:
         list.addLast(element);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s;
+
         SourceElement::List::Iterator iter = list.begin();
         while (SourceElement* element = iter.next())
         {
-            element->print();
+            s += element->toString(indent);
         }
-    };
+        return s;
+    }
 
     void process()
     {
@@ -3125,17 +3191,20 @@ public:
         list.addLast(parameter);
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
+        std::string s;
+
         Expression::List::Iterator iter = list.begin();
         while (Expression* parameter = iter.next())
         {
-            parameter->print();
+            s += parameter->toString(indent);
             if (iter.hasNext())
             {
-                report(", ");
+                s += ", ";
             }
         }
+        return s;
     };
 
     void instantiate(ObjectValue* variableObject, ListValue* arguments)
@@ -3178,16 +3247,19 @@ public:
         delete functionBody;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("function ");
-        identifier->print();
-        report("(");
-        formalParameterList->print();
-        report(")\n");
-        report("{\n");
-        functionBody->print();
-        report("}\n");
+        std::string s = indent;
+
+        s += "function ";
+        s += identifier->toString(indent);
+        s += "(";
+        s += formalParameterList->toString(indent);
+        s += ")\n";
+        s += indent + "{\n";
+        s += functionBody->toString(indent + "    ");
+        s += indent + "}\n";
+        return s;
     }
 
     // 13 Function Definition
@@ -3198,6 +3270,7 @@ public:
         function->setParameterList(formalParameterList);
         function->setCode(functionBody);
         function->setScope(getScopeChain());
+        function->setIdentifier(identifier);
         Register<ObjectValue> prototype = new ObjectValue;
         function->put("prototype", prototype);
         getScopeChain()->put(identifier->toString(), function);
@@ -3235,19 +3308,22 @@ public:
         delete functionBody;
     }
 
-    void print() const
+    std::string toString(std::string indent) const
     {
-        report("function ");
+        std::string s;
+
+        s += "function ";
         if (identifier)
         {
-            identifier->print();
+            s += identifier->toString(indent);
         }
-        report("(");
-        formalParameterList->print();
-        report(")\n");
-        report("{\n");
-        functionBody->print();
-        report("}");
+        s += "(";
+        s += formalParameterList->toString(indent);
+        s += ")\n";
+        s += indent + "{\n";
+        s += functionBody->toString(indent + "    ");
+        s += indent + "}";
+        return s;
     }
 
     Value* evaluate()
@@ -3265,6 +3341,7 @@ public:
             object->setNext(getScopeChain());
             object->put(identifier->toString(), function); // with { DontDelete, ReadOnly }
             function->setScope(object);
+            function->setIdentifier(identifier);
         }
         function->setCode(functionBody);
         Register<ObjectValue> prototype = new ObjectValue;
@@ -3273,6 +3350,10 @@ public:
     };
 };
 
+SourceElements* getProgram();
 void setProgram(SourceElements* elements);
+
+void setSource(const std::string& s);
+void setSource(IStream* stream);
 
 #endif  // NINTENDO_ESJS_H_INCLUDED

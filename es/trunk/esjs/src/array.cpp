@@ -586,18 +586,19 @@ class ArrayConstructor : public Code
 {
     ObjectValue*            array;
     FormalParameterList*    arguments;
-    ObjectValue*            prototype;  // Array.prototype
+    ArrayValue*             prototype;  // Array.prototype
 
 public:
     ArrayConstructor(ObjectValue* array) :
         array(array),
         arguments(new FormalParameterList),
-        prototype(new ObjectValue)
+        prototype(0)
     {
         ObjectValue* function = static_cast<ObjectValue*>(getGlobal()->get("Function"));
 
+        ArrayValue::prototype = static_cast<ObjectValue*>(function->getPrototype()->getPrototype());
+        prototype = new ArrayValue;
         prototype->put("constructor", array);
-        prototype->setPrototype(function->getPrototype()->getPrototype());
 
         for (int i = 0; i < ArrayMethod::methodCount(); ++i)
         {

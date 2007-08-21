@@ -38,6 +38,7 @@ class Value;
 class ObjectValue;
 class ListValue;
 
+class Identifier;
 class Expression;
 class Statement;
 
@@ -58,8 +59,7 @@ public:
         NumberType,
         PropertyType,
         ObjectType,
-        ReferenceType,
-        ListType
+        ReferenceType
     };
 
 private:
@@ -105,6 +105,11 @@ public:
     }
 
     virtual enum Type getType() const = 0;
+
+    virtual const char* getClass() const
+    {
+        return 0;
+    };
 
     virtual Value* getPrototype()
     {
@@ -274,7 +279,15 @@ public:
     {
         return false;
     }
+    virtual bool hasOwnProperty(const std::string& name) const
+    {
+        return false;
+    }
     virtual bool hasProperty(const std::string&) const
+    {
+        return false;
+    }
+    virtual bool propertyIsEnumerable(const std::string& name) const
     {
         return false;
     }
@@ -580,6 +593,14 @@ class Code
 {
 public:
     virtual CompletionType evaluate() = 0;
+    virtual void print() const
+    {
+        report("%s", toString("").c_str());
+    };
+    virtual std::string toString(std::string indent) const
+    {
+        return "";
+    }
 };
 
 class UndefinedValue : public Value
@@ -675,6 +696,11 @@ public:
         return Value::BoolType;
     }
 
+    virtual const char* getClass() const
+    {
+        return "Boolean";
+    };
+
     bool isPrimitive() const
     {
         return true;
@@ -727,6 +753,11 @@ public:
     {
         return Value::StringType;
     }
+
+    virtual const char* getClass() const
+    {
+        return "String";
+    };
 
     bool isPrimitive() const
     {
@@ -800,6 +831,11 @@ public:
     {
         return Value::NumberType;
     }
+
+    virtual const char* getClass() const
+    {
+        return "Number";
+    };
 
     bool isPrimitive() const
     {
@@ -912,6 +948,7 @@ protected:
     bool                    mortal;
     FormalParameterList*    parameterList;
     Code*                   code;       // Aka [[Call]]
+    Identifier*             identifier; // function name
 
 public:
     ObjectValue() :
@@ -921,7 +958,8 @@ public:
         next(0),
         mortal(false),
         parameterList(0),
-        code(0)
+        code(0),
+        identifier(0)
     {
     }
 
@@ -930,6 +968,18 @@ public:
     enum Value::Type getType() const
     {
         return Value::ObjectType;
+    }
+
+    virtual const char* getClass() const
+    {
+        if (!value)
+        {
+            return (!code) ? "Object" : "Function";
+        }
+        else
+        {
+            return value->getClass();
+        }
     }
 
     Value* getPrototype()
@@ -1036,9 +1086,14 @@ public:
         return prototype->canPut(name);
     }
 
+    bool hasOwnProperty(const std::string& name) const
+    {
+        return properties.contains(name);
+    }
+
     bool hasProperty(const std::string& name) const
     {
-        if (properties.contains(name))
+        if (hasOwnProperty(name))
         {
             return true;
         }
@@ -1047,6 +1102,19 @@ public:
             return false;
         }
         return prototype->hasProperty(name);
+    }
+
+    bool propertyIsEnumerable(const std::string& name) const
+    {
+        try
+        {
+            Property* property = properties.get(name);
+            return !property->dontEnum();
+        }
+        catch (Exception& e)
+        {
+            return false;
+        }
     }
 
     bool remove(const std::string& name)    // Aka [[Delete]]
@@ -1096,6 +1164,16 @@ public:
     Code* getCode()
     {
         return code;
+    }
+
+    Identifier* getIdentifier()
+    {
+        return identifier;
+    }
+
+    void setIdentifier(Identifier* identifier)
+    {
+        this->identifier = identifier;
     }
 
     Value* call(Value* self, ListValue* list);
@@ -1253,11 +1331,16 @@ class ArrayValue : public ObjectValue
 public:
     ArrayValue()
     {
-        Register<ObjectValue> tmp(this);    // Not to be swept
+        Register<ObjectValue> self(this);   // Not to be swept
         setPrototype(prototype);
         Register<NumberValue> length = new NumberValue(0);
-        this->ObjectValue::put("length", length,
-                               ObjectValue::DontEnum | ObjectValue::DontDelete);
+        ObjectValue::put("length", length,
+                         ObjectValue::DontEnum | ObjectValue::DontDelete);
+    }
+
+    const char* getClass() const
+    {
+        return "Array";
     }
 
     void put(const std::string& name, Value* value, int attributes = 0);
@@ -1338,108 +1421,43 @@ public:
     }
 };
 
-class ListValue : public Value
+class ListValue : public ObjectValue
 {
-    std::vector<Value*> list;
+    int size;
+
 public:
-    class Iterator
+    ListValue() :
+        size(0)
     {
-        std::vector<Value*>::iterator bottom;
-        std::vector<Value*>::iterator top;
-
-        Iterator(std::vector<Value*>::iterator bottom,
-                 std::vector<Value*>::iterator top) :
-            bottom(bottom),
-            top(top)
-        {
-        }
-
-    public:
-        Value* next()
-        {
-            if (bottom == top)
-            {
-                return 0;
-            };
-            return *top++;
-        }
-
-        friend class ListValue;
-    };
-
-    enum Value::Type getType() const
-    {
-        return Value::ListType;
+        Register<ListValue> self(this); // Not to be swept
+        setPrototype(getGlobal()->get("Object")->get("prototype"));
+        Register<NumberValue> length = new NumberValue(size);
+        put("length", length, ObjectValue::DontEnum);
     }
 
     void push(Value* value)
     {
         ASSERT(value);
-        list.push_back(value);
+        char name[12];
 
-        remember(value);
-    }
-
-    void pop()
-    {
-        list.pop_back();
+        sprintf(name, "%u", size);
+        put(name, value, ObjectValue::DontEnum);
+        ++size;
+        Register<NumberValue> length = new NumberValue(size);
+        put("length", length, ObjectValue::DontEnum);
     }
 
     int length()
     {
-        return list.size();
+        return size;
     }
 
     Value* operator[](const size_t index)
     {
-        if (index < list.size())
-        {
-            return list[index];
-        }
-        else
-        {
-            return UndefinedValue::getInstance();
-        }
-    }
+        char name[12];
 
-    Iterator begin()
-    {
-        return Iterator(list.end(), list.begin());
-    }
-
-    virtual void print()
-    {
-        report("list");
-    }
-
-    bool hasNew()
-    {
-        Iterator iter = begin();
-        while (Value* value = iter.next())
-        {
-            if (value->isNew())
-            {
-                ASSERT(!isOld());
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void mark()
-    {
-        if (isMarked())
-        {
-            return;
-        }
-
-        Value::mark();
-
-        Iterator iter = begin();
-        while (Value* value = iter.next())
-        {
-            value->mark();
-        }
+        sprintf(name, "%u", index);
+        return get(name);
     }
 };
 
@@ -1515,9 +1533,12 @@ public:
 extern ObjectValue* getScopeChain();
 extern Value* getThis();
 
+extern void constructGlobalObject();
+extern ObjectValue* constructObjectConstructor();
 extern ObjectValue* constructArrayObject();
 extern ObjectValue* constructBooleanObject();
 extern ObjectValue* constructDateObject();
+extern ObjectValue* constructFunctionConstructor();
 extern ObjectValue* constructMathObject();
 extern ObjectValue* constructRegExpObject();
 extern ObjectValue* constructStringObject();

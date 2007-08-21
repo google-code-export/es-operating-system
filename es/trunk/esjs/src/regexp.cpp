@@ -86,6 +86,11 @@ public:
         regfree(&regex);
     }
 
+    const char* getClass() const
+    {
+        return "RegExp";
+    }
+
     int match(std::string& s, int nmatch, regmatch_t* pmatch, int offset = 0)
     {
         if (offset < 0 || s.length() < offset)

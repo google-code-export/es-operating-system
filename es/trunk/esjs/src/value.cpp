@@ -60,7 +60,8 @@ ExecutionContext::ExecutionContext(Value* self, ObjectValue* object, ListValue* 
     thisValue = self->isObject() ? self : getGlobal();
     scopeChain = new ObjectValue;   // 10.1.6 Activation Object
 
-    scopeChain->put("arguments", list);   // with { DontDelete }
+    list->put("callee", object, ObjectValue::DontEnum);
+    scopeChain->put("arguments", list, ObjectValue::DontEnum);
     // 10.1.3 Variable Instantiation
     object->getParameterList()->instantiate(scopeChain, list);
     scopeChain->setNext(object->getScope());
@@ -229,4 +230,40 @@ void ObjectValue::setParameterList(FormalParameterList* list)
     parameterList = list;
     Register<NumberValue> length = new NumberValue(parameterList->getLength());
     put("length", length);  // { DontDelete, ReadOnly, DontEnum }
+}
+
+// 13.2.1
+Value* ObjectValue::call(Value* self, ListValue* list)
+{
+    // Establish a new execution context using F's FormalParameterList,
+    // the passed arguments list, and the this value as described in 10.2.3.
+    ExecutionContext* context = new ExecutionContext(self, this, list);
+
+    CompletionType result;
+    Value*         value;
+    try
+    {
+        result = code->evaluate();
+        value = result.getValue();
+    }
+    catch (Value* e)
+    {
+        result.setType(CompletionType::Throw);
+        value = e;
+    }
+
+    // Exit the execution context established in step 1, restoring the
+    // previous execution context.
+    delete context;
+
+    if (result.isThrow())
+    {
+        throw value;
+    }
+    if (result.isReturn())
+    {
+        return value;
+    }
+    ASSERT(result.isNormal());
+    return UndefinedValue::getInstance();
 }

@@ -54,9 +54,11 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_esjs_OBJECTS = apply.$(OBJEXT) esjs-lexer.$(OBJEXT) \
 	esjs-parser.$(OBJEXT) esjs-esjs.$(OBJEXT) esjs-value.$(OBJEXT) \
 	esjs-array.$(OBJEXT) esjs-boolean.$(OBJEXT) \
-	esjs-date.$(OBJEXT) esjs-interface.$(OBJEXT) \
+	esjs-date.$(OBJEXT) esjs-function.$(OBJEXT) \
+	esjs-global.$(OBJEXT) esjs-interface.$(OBJEXT) \
 	esjs-math.$(OBJEXT) esjs-number.$(OBJEXT) \
-	esjs-regexp.$(OBJEXT) esjs-string.$(OBJEXT)
+	esjs-object.$(OBJEXT) esjs-regexp.$(OBJEXT) \
+	esjs-string.$(OBJEXT)
 nodist_esjs_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	ICallback.$(OBJEXT) IClassFactory.$(OBJEXT) \
 	IClassStore.$(OBJEXT) IFile.$(OBJEXT) IInterface.$(OBJEXT) \
@@ -284,9 +286,12 @@ esjs_SOURCES = \
 	src/array.cpp \
 	src/boolean.cpp \
 	src/date.cpp \
+	src/function.cpp \
+	src/global.cpp \
 	src/interface.cpp \
 	src/math.cpp \
 	src/number.cpp \
+	src/object.cpp \
 	src/regexp.cpp \
 	src/string.cpp \
 	include/esjs.h include/value.h include/interface.h include/smartptr.h
@@ -437,10 +442,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-boolean.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-date.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-esjs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-function.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-lexer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-math.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-number.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-regexp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-string.Po@am__quote@
@@ -1119,6 +1127,34 @@ esjs-date.obj: src/date.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-date.obj `if test -f 'src/date.cpp'; then $(CYGPATH_W) 'src/date.cpp'; else $(CYGPATH_W) '$(srcdir)/src/date.cpp'; fi`
 
+esjs-function.o: src/function.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-function.o -MD -MP -MF $(DEPDIR)/esjs-function.Tpo -c -o esjs-function.o `test -f 'src/function.cpp' || echo '$(srcdir)/'`src/function.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-function.Tpo $(DEPDIR)/esjs-function.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/function.cpp' object='esjs-function.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-function.o `test -f 'src/function.cpp' || echo '$(srcdir)/'`src/function.cpp
+
+esjs-function.obj: src/function.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-function.obj -MD -MP -MF $(DEPDIR)/esjs-function.Tpo -c -o esjs-function.obj `if test -f 'src/function.cpp'; then $(CYGPATH_W) 'src/function.cpp'; else $(CYGPATH_W) '$(srcdir)/src/function.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-function.Tpo $(DEPDIR)/esjs-function.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/function.cpp' object='esjs-function.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-function.obj `if test -f 'src/function.cpp'; then $(CYGPATH_W) 'src/function.cpp'; else $(CYGPATH_W) '$(srcdir)/src/function.cpp'; fi`
+
+esjs-global.o: src/global.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-global.o -MD -MP -MF $(DEPDIR)/esjs-global.Tpo -c -o esjs-global.o `test -f 'src/global.cpp' || echo '$(srcdir)/'`src/global.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-global.Tpo $(DEPDIR)/esjs-global.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/global.cpp' object='esjs-global.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-global.o `test -f 'src/global.cpp' || echo '$(srcdir)/'`src/global.cpp
+
+esjs-global.obj: src/global.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-global.obj -MD -MP -MF $(DEPDIR)/esjs-global.Tpo -c -o esjs-global.obj `if test -f 'src/global.cpp'; then $(CYGPATH_W) 'src/global.cpp'; else $(CYGPATH_W) '$(srcdir)/src/global.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-global.Tpo $(DEPDIR)/esjs-global.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/global.cpp' object='esjs-global.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-global.obj `if test -f 'src/global.cpp'; then $(CYGPATH_W) 'src/global.cpp'; else $(CYGPATH_W) '$(srcdir)/src/global.cpp'; fi`
+
 esjs-interface.o: src/interface.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-interface.o -MD -MP -MF $(DEPDIR)/esjs-interface.Tpo -c -o esjs-interface.o `test -f 'src/interface.cpp' || echo '$(srcdir)/'`src/interface.cpp
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-interface.Tpo $(DEPDIR)/esjs-interface.Po
@@ -1160,6 +1196,20 @@ esjs-number.obj: src/number.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/number.cpp' object='esjs-number.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-number.obj `if test -f 'src/number.cpp'; then $(CYGPATH_W) 'src/number.cpp'; else $(CYGPATH_W) '$(srcdir)/src/number.cpp'; fi`
+
+esjs-object.o: src/object.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-object.o -MD -MP -MF $(DEPDIR)/esjs-object.Tpo -c -o esjs-object.o `test -f 'src/object.cpp' || echo '$(srcdir)/'`src/object.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-object.Tpo $(DEPDIR)/esjs-object.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/object.cpp' object='esjs-object.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-object.o `test -f 'src/object.cpp' || echo '$(srcdir)/'`src/object.cpp
+
+esjs-object.obj: src/object.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-object.obj -MD -MP -MF $(DEPDIR)/esjs-object.Tpo -c -o esjs-object.obj `if test -f 'src/object.cpp'; then $(CYGPATH_W) 'src/object.cpp'; else $(CYGPATH_W) '$(srcdir)/src/object.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/esjs-object.Tpo $(DEPDIR)/esjs-object.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/object.cpp' object='esjs-object.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -c -o esjs-object.obj `if test -f 'src/object.cpp'; then $(CYGPATH_W) 'src/object.cpp'; else $(CYGPATH_W) '$(srcdir)/src/object.cpp'; fi`
 
 esjs-regexp.o: src/regexp.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esjs_CXXFLAGS) $(CXXFLAGS) -MT esjs-regexp.o -MD -MP -MF $(DEPDIR)/esjs-regexp.Tpo -c -o esjs-regexp.o `test -f 'src/regexp.cpp' || echo '$(srcdir)/'`src/regexp.cpp

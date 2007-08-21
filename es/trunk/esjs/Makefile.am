@@ -60,9 +60,12 @@ esjs_SOURCES = \
 	src/array.cpp \
 	src/boolean.cpp \
 	src/date.cpp \
+	src/function.cpp \
+	src/global.cpp \
 	src/interface.cpp \
 	src/math.cpp \
 	src/number.cpp \
+	src/object.cpp \
 	src/regexp.cpp \
 	src/string.cpp \
 	include/esjs.h include/value.h include/interface.h include/smartptr.h

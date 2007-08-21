@@ -14,7 +14,15 @@
 #include <math.h>
 #include "esjs.h"
 #include "parser.h"
-#include "interface.h"
+
+class MathValue : public ObjectValue
+{
+public:
+    const char* getClass() const
+    {
+        return "Math";
+    }
+};
 
 //
 // Math Object
@@ -233,7 +241,7 @@ const char* MathMethod::names[] =
 
 ObjectValue* constructMathObject()
 {
-    ObjectValue* math = new ObjectValue;
+    MathValue* math = new MathValue;
 
     math->put("E", new NumberValue(2.7182818284590452354));
     math->put("LN10", new NumberValue(2.302585092994046));
