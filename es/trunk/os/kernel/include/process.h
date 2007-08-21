@@ -93,7 +93,8 @@ public:
     {
     }
 
-    bool set(Process* process, void* object, const Guid& iid);
+    bool set(Process* process, void* object, const Guid& iid, bool used);
+
     bool isUsed();
 
     // IInterface
@@ -339,7 +340,7 @@ public:
     static long long upcall(void* self, void* base, int m, va_list ap);
     static Broker<upcall, INTERFACE_POINTER_MAX> broker;
     static UpcallProxy upcallTable[INTERFACE_POINTER_MAX];
-    static int set(Process* process, void* object, const Guid& iid);
+    static int set(Process* process, void* object, const Guid& iid, bool used);
 
     UpcallRecord* createUpcallRecord(const unsigned stackSize);
     UpcallRecord* getUpcallRecord();

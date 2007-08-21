@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -34,8 +34,9 @@ ICurrentProcess* System();
 
 class TestServer : public IStream
 {
-    Ref     ref;
 public:
+    Ref     ref;
+
     TestServer()
     {
     }
@@ -135,18 +136,21 @@ int main(int argc, char* argv[])
     Handle<ICurrentThread> currentThread = System()->currentThread();
 
     // create server
-    TestServer server;
+    TestServer* server = new TestServer;
 
     // register this console.
     Handle<IContext> device = nameSpace->lookup("device");
     ASSERT(device);
-    IBinding* ret = device->bind("testServer", static_cast<IStream*>(&server));
+    IBinding* ret = device->bind("testServer", static_cast<IStream*>(server));
     ASSERT(ret);
+    ret->release();
 
-    for (;;)
+    while (1 < server->ref)
     {
-        currentThread->sleep(180 * 10000000LL);
+        currentThread->sleep(10000000LL);
     }
+
+    server->release();
 
     System()->trace(false);
 }

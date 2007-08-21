@@ -22,8 +22,6 @@
 
 // #define VERBOSE
 
-extern "C" void _exit(int i);
-
 extern void debug(Ureg* ureg);
 
 extern bool nmiHandler();

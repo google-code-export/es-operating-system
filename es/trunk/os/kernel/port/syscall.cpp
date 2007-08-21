@@ -55,8 +55,15 @@ unsigned int SyscallProxy::release()
     if (count == 0)
     {
         IInterface* object(static_cast<IInterface*>(getObject()));
-        object->release();
-        object = 0;
+        if (object)
+        {
+#ifdef VERBOSE
+            Reflect::Interface interface = getInterface(iid);
+            esReport("SyscallProxy::%s %s %p\n", __func__, interface.getName(), object);
+#endif
+            this->object = 0;
+            object->release();
+        }
     }
     return count;
 }
@@ -105,6 +112,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
         throw SystemException<EBADF>();
     }
     unsigned interfaceNumber(self - base);
+
     if (INTERFACE_POINTER_MAX <= interfaceNumber)
     {
         throw SystemException<EBADF>();
@@ -122,6 +130,11 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
         interfaceNumber == 0 && methodNumber == 15) // IProcess::getNow()
     {
         log = false;
+    }
+
+    if (log)
+    {
+        esReport("system call[%d:%p]: ", interfaceNumber, this);
     }
 
     // If this interface inherits another interface,
@@ -145,8 +158,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
 
     if (log)
     {
-        esReport("system call[%d:%p]: %s::%s(",
-                 interfaceNumber, this, interface.getName(), method.getName());
+        esReport("%s::%s(", interface.getName(), method.getName());
     }
 
     // Process addRef() and release() locally
@@ -273,7 +285,7 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
                     {
                         // Allocate an entry in the upcall table and set the
                         // interface pointer to the broker for the upcall table.
-                        int n = set(this, (IInterface*) ip, parameter.getType().getInterface().getIid());
+                        int n = set(this, (IInterface*) ip, parameter.getType().getInterface().getIid(), false);
                         if (n < 0)
                         {
                             throw SystemException<ENFILE>();
@@ -409,6 +421,27 @@ systemCall(void** self, unsigned methodNumber, va_list paramv, void** base)
         {
             IInterface* object(*reinterpret_cast<IInterface**>(&outputProxies[i]));
             object->addRef();
+        }
+    }
+
+    // Process addRef() and release() locally
+    if (interface.getIid() == IID_IMonitor)
+    {
+        unsigned long count;
+        switch (methodNumber)
+        {
+        case 3: // lock
+            count = proxy->addUser();
+            break;
+        case 4: // tryLock
+            if (rc)
+            {
+                count = proxy->addUser();
+            }
+            break;
+        case 5: // unlock
+            count = proxy->releaseUser();
+            break;
         }
     }
 

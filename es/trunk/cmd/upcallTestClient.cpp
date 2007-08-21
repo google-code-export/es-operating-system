@@ -36,7 +36,6 @@ int main(int argc, char* argv[])
 
     Handle<IContext> nameSpace = System()->getRoot();
 
-
     Handle<IStream> server;
     while (!(server = nameSpace->lookup("device/testServer")))
     {
@@ -44,14 +43,11 @@ int main(int argc, char* argv[])
         currentThread->sleep(10000000);
     }
 
-    u32 i;
-    for (i = 0; i < 2^16; ++i)
-    {
-        char message[64];
-        sprintf(message, "test message %d.", i);
-        server->write(message, strlen(message) + 1);
-        // currentThread->sleep(10000000 / 60);
-    }
+    char message[64];
+    sprintf(message, "test message.");
+    server->write(message, strlen(message) + 1);
+
+    nameSpace->unbind("device/testServer");
 
     System()->trace(false);
 }

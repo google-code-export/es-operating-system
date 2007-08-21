@@ -553,19 +553,10 @@ Process::
          proxy < &syscallTable[INTERFACE_POINTER_MAX];
          ++proxy)
     {
-        if (1 < proxy->addRef())
-        {
-            IInterface* object = static_cast<IInterface*>(proxy->getObject());
-            if (object)
-            {
-#ifdef VERBOSE
-                Reflect::Interface interface = getInterface(proxy->iid);   // XXX Should cache the result.
-                esReport("%s %s %p\n", __func__, interface.getName(), object);
-#endif
-                object->release();
-            }
-        }
-    }
+        proxy->addRef();
+        while (0 < proxy->release())
+            ;
+   }
 
     while (!upcallList.isEmpty())
     {
@@ -915,6 +906,15 @@ exit(int status)
     Monitor::Synchronized method(monitor);
 
     exitValue = status;
+
+    for (SyscallProxy* proxy(syscallTable);
+         proxy < &syscallTable[INTERFACE_POINTER_MAX];
+         ++proxy)
+    {
+        proxy->addRef();
+        while (0 < proxy->release())
+            ;
+    }
 
     // Cancel all the threads. Note do not release threads here as they are
     // stored in syscallTable.

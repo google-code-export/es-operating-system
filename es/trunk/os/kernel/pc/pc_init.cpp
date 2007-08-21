@@ -519,6 +519,17 @@ int getDebugChar()
     return data;
 }
 
+extern "C"
+{
+    int _close(int file);
+    void _exit(int i);
+}
+
+int _close(int file)
+{
+    return 0;
+}
+
 void _exit(int i)
 {
     if (!mps->getFloatingPointerStructure())

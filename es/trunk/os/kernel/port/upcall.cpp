@@ -28,7 +28,7 @@ typedef long long (*Method)(void* self, ...);
 Broker<Process::upcall, Process::INTERFACE_POINTER_MAX> Process::broker;
 UpcallProxy Process::upcallTable[Process::INTERFACE_POINTER_MAX];
 
-bool UpcallProxy::set(Process* process, void* object, const Guid& iid)
+bool UpcallProxy::set(Process* process, void* object, const Guid& iid, bool used)
 {
     if (ref.addRef() != 1)
     {
@@ -38,7 +38,7 @@ bool UpcallProxy::set(Process* process, void* object, const Guid& iid)
     this->object = object;
     this->iid = iid;
     this->process = process;
-    use.exchange(0);
+    use.exchange(used ? 1 : 0);
     return true;
 }
 
@@ -58,13 +58,13 @@ bool UpcallProxy::isUsed()
 }
 
 int Process::
-set(Process* process, void* object, const Guid& iid)
+set(Process* process, void* object, const Guid& iid, bool used)
 {
     for (UpcallProxy* proxy(upcallTable);
          proxy < &upcallTable[INTERFACE_POINTER_MAX];
          ++proxy)
     {
-        if (proxy->set(process, object, iid))
+        if (proxy->set(process, object, iid, used))
         {
 #ifdef VERBOSE
             esReport("Process::set(%p, {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}) : %d;\n",
@@ -275,7 +275,7 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
                 {
                     // Allocate an entry in the upcall table and set the
                     // interface pointer to the broker for the upcall table.
-                    int n = set(server, reinterpret_cast<IInterface*>(ip), returnType.getInterface().getIid());
+                    int n = set(server, reinterpret_cast<IInterface*>(ip), returnType.getInterface().getIid(), true);
                     if (0 <= n)
                     {
                         result = reinterpret_cast<long>(&(broker.getInterfaceTable())[n]);
@@ -666,7 +666,7 @@ copyOut(UpcallRecord* record)
                         iid = parameter.getType().getInterface().getIid();
                     }
 
-                    int n = set(this, reinterpret_cast<IInterface*>(ip), iid);
+                    int n = set(this, reinterpret_cast<IInterface*>(ip), iid, true);
                     if (0 <= n)
                     {
                         **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = &(broker.getInterfaceTable())[n];
