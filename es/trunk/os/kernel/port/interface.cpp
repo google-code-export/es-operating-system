@@ -59,6 +59,8 @@ unsigned char* InterfaceStore::defaultInterfaceInfo[] =
 
     IIteratorInfo,
     ISetInfo,
+
+    ICanvasRenderingContext2DInfo,
 };
 
 InterfaceStore::

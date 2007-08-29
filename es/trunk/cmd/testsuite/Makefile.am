@@ -4,9 +4,7 @@ SUFFIXES = .img .gz
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
-
-% :: %.elf
-	$(srcdir)/makeScript "`pwd`" $@
+	$(srcdir)/makeScript "`pwd`" $(*F)
 
 TESTS = main start binder location eventManager console upcallTest
 

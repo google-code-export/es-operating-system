@@ -64,7 +64,8 @@ nodist_libeskernel_a_SOURCES = \
 	net/IResolver.c \
 	net/ISocket.c \
 	util/IIterator.c \
-	util/ISet.c
+	util/ISet.c \
+	util/ICanvasRenderingContext2D.c
 
 #
 # port

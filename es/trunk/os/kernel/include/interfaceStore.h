@@ -96,6 +96,8 @@ extern unsigned char ISocketInfo[];
 extern unsigned char IIteratorInfo[];
 extern unsigned char ISetInfo[];
 
+extern unsigned char ICanvasRenderingContext2DInfo[];
+
 Reflect::Interface& getInterface(const Guid& iid);
 
 #endif // NINTENDO_ES_KERNEL_INTERFACE_STORE_H_INCLUDED

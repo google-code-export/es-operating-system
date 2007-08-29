@@ -73,7 +73,7 @@ nodist_esjs_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	IPartition.$(OBJEXT) IBinding.$(OBJEXT) IContext.$(OBJEXT) \
 	IInternetAddress.$(OBJEXT) IInternetConfig.$(OBJEXT) \
 	IResolver.$(OBJEXT) ISocket.$(OBJEXT) IIterator.$(OBJEXT) \
-	ISet.$(OBJEXT)
+	ISet.$(OBJEXT) ICanvasRenderingContext2D.$(OBJEXT)
 esjs_OBJECTS = $(am_esjs_OBJECTS) $(nodist_esjs_OBJECTS)
 esjs_LDADD = $(LDADD)
 @ES_FALSE@@POSIX_TRUE@esjs_DEPENDENCIES = ../os/libes++/libes++.a \
@@ -278,7 +278,8 @@ nodist_esjs_SOURCES = \
 	net/IResolver.c \
 	net/ISocket.c \
 	util/IIterator.c \
-	util/ISet.c
+	util/ISet.c \
+	util/ICanvasRenderingContext2D.c
 
 BUILT_SOURCES = lexer.cc parser.cc parser.h
 esjs_SOURCES = \
@@ -316,7 +317,9 @@ EXTRA_DIST = \
 	scripts/edit.js		\
 	scripts/ls.js		\
 	scripts/shell.js	\
-	scripts/date.js
+	scripts/date.js		\
+	scripts/clear.js	\
+	scripts/figure.js
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -406,6 +409,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IBinding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ICache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ICallback.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ICanvasRenderingContext2D.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IClassFactory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IClassStore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IContext.Po@am__quote@
@@ -1014,6 +1018,20 @@ ISet.obj: util/ISet.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ISet.c' object='ISet.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ISet.obj `if test -f 'util/ISet.c'; then $(CYGPATH_W) 'util/ISet.c'; else $(CYGPATH_W) '$(srcdir)/util/ISet.c'; fi`
+
+ICanvasRenderingContext2D.o: util/ICanvasRenderingContext2D.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ICanvasRenderingContext2D.o -MD -MP -MF $(DEPDIR)/ICanvasRenderingContext2D.Tpo -c -o ICanvasRenderingContext2D.o `test -f 'util/ICanvasRenderingContext2D.c' || echo '$(srcdir)/'`util/ICanvasRenderingContext2D.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ICanvasRenderingContext2D.Tpo $(DEPDIR)/ICanvasRenderingContext2D.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ICanvasRenderingContext2D.c' object='ICanvasRenderingContext2D.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ICanvasRenderingContext2D.o `test -f 'util/ICanvasRenderingContext2D.c' || echo '$(srcdir)/'`util/ICanvasRenderingContext2D.c
+
+ICanvasRenderingContext2D.obj: util/ICanvasRenderingContext2D.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ICanvasRenderingContext2D.obj -MD -MP -MF $(DEPDIR)/ICanvasRenderingContext2D.Tpo -c -o ICanvasRenderingContext2D.obj `if test -f 'util/ICanvasRenderingContext2D.c'; then $(CYGPATH_W) 'util/ICanvasRenderingContext2D.c'; else $(CYGPATH_W) '$(srcdir)/util/ICanvasRenderingContext2D.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ICanvasRenderingContext2D.Tpo $(DEPDIR)/ICanvasRenderingContext2D.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ICanvasRenderingContext2D.c' object='ICanvasRenderingContext2D.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ICanvasRenderingContext2D.obj `if test -f 'util/ICanvasRenderingContext2D.c'; then $(CYGPATH_W) 'util/ICanvasRenderingContext2D.c'; else $(CYGPATH_W) '$(srcdir)/util/ICanvasRenderingContext2D.c'; fi`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

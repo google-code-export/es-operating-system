@@ -60,7 +60,7 @@ nodist_eventManager_SOURCES = IEventQueue.c
 
 BUILT_SOURCES += IEventQueue.h IEventQueue.ird
 
-console_SOURCES = console.cpp
+console_SOURCES = console.cpp canvas.cpp canvas.h
 
 consoleClient_SOURCES = consoleClient.cpp
 

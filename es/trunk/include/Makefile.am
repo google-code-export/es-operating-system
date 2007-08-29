@@ -90,7 +90,8 @@ nobase_nodist_include_HEADERS = \
 	es/net/IResolver.h \
 	es/net/ISocket.h \
 	es/util/IIterator.h \
-	es/util/ISet.h
+	es/util/ISet.h \
+	es/util/ICanvasRenderingContext2D.h
 
 nobase_nodist_include_HEADERS += \
 	es/base/IAlarm.ird \
@@ -129,7 +130,8 @@ nobase_nodist_include_HEADERS += \
 	es/net/IResolver.ird \
 	es/net/ISocket.ird \
 	es/util/IIterator.ird \
-	es/util/ISet.ird
+	es/util/ISet.ird \
+	es/util/ICanvasRenderingContext2D.ird
 
 nobase_include_HEADERS += \
 	es/base/IAlarm.idl \
@@ -168,7 +170,8 @@ nobase_include_HEADERS += \
 	es/net/IResolver.idl \
 	es/net/ISocket.idl \
 	es/util/IIterator.idl \
-	es/util/ISet.idl
+	es/util/ISet.idl \
+	es/util/ICanvasRenderingContext2D.idl
 
 clean-local:
 	-rm -rf es

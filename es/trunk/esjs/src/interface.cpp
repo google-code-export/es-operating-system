@@ -101,6 +101,8 @@ extern unsigned char ISocketInfo[];
 extern unsigned char IIteratorInfo[];
 extern unsigned char ISetInfo[];
 
+extern unsigned char ICanvasRenderingContext2DInfo[];
+
 unsigned char* InterfaceStore::defaultInterfaceInfo[] =
 {
     // Base classes first
@@ -145,6 +147,8 @@ unsigned char* InterfaceStore::defaultInterfaceInfo[] =
 
     IIteratorInfo,
     ISetInfo,
+
+    ICanvasRenderingContext2DInfo,
 };
 
 namespace

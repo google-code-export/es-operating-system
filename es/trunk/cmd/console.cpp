@@ -15,6 +15,7 @@
 #include <es/handle.h>
 #include <es/exception.h>
 #include <es/formatter.h>
+#include <es/interlocked.h>
 #include <es/list.h>
 #include <es/ref.h>
 #include <es/ring.h>
@@ -26,6 +27,7 @@
 #include <es/base/IStream.h>
 #include <es/base/IService.h>
 #include "IEventQueue.h"
+#include "canvas.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -33,6 +35,20 @@
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
+
+namespace
+{
+    Interlocked registered = 0;
+
+    struct CanvasInfo
+    {
+        int x; // top-left
+        int y; // top-left
+        cairo_format_t format;
+        int width;
+        int height;
+    };
+};
 
 ICurrentProcess* System();
 
@@ -52,11 +68,14 @@ class Console : public IStream, public IService
     // framebuffer
     Handle<IPageable> framebufferMap;
     void* framebuffer;
-    u8* screenCache; // copy of the framebuffer in the main memory.
+    // copy of the framebuffer in the main memory.
+    u8* textCache;
+    u8* screenCache;
+
     u32 framebufferSize;
     u32 lineSize;
-    int bpp;           // bits per pixel
-    bool updated;     // indicate if the screen is updated.
+    int bpp;            // bits per pixel
+    bool updated;       // indicate if the screen is updated.
     u32 topLeftUpdated; // offset of the updated pixel in the screen cache.
     u32 bottomRightUpdated;
 
@@ -194,7 +213,7 @@ class Console : public IStream, public IService
     };
     LineBuffer* lineBuf; // keep information of the characters in the current line.
 
-    void checkScreenUpdate(FT_Int x, FT_Int y, u8* tail);
+    void addNewLine();
     u8* drawBitmapGray(FT_Bitmap* bitmap, FT_Int x, FT_Int y);
     u8* drawBitmapMono(FT_Bitmap* bitmap, FT_Int x, FT_Int y);
     u8* drawBitmap(FT_Bitmap*  bitmap, FT_Int x, FT_Int y);
@@ -204,15 +223,7 @@ class Console : public IStream, public IService
     void hideCursor();
     void initializeFramebuffer();
     void initializeFreeType(Handle<IFile> font);
-    void addNewLine();
-    void paintScreen(u8* start, int size, Color& bg);
-    FT_Int writeCharacter(FT_ULong charCode);
-
-    void setLineHead()
-    {
-        currentPosition.x = leftMargin;
-        lineBuf->setPosition(0);
-    }
+    void invalidate(int topLeft, int bottomRight);
 
     void nextPosition(FT_Int shift)
     {
@@ -223,6 +234,7 @@ class Console : public IStream, public IService
         }
     }
 
+    void paintScreen(u8* start, int size, Color& bg);
     void prevPosition()
     {
         lineBuf->backward();
@@ -232,6 +244,15 @@ class Console : public IStream, public IService
             currentPosition.x = leftMargin;
         }
     }
+
+    void refreshLine();
+    void setLineHead()
+    {
+        currentPosition.x = leftMargin;
+        lineBuf->setPosition(0);
+    }
+
+    FT_Int writeCharacter(FT_ULong charCode);
 
     inline void paint24(u8* start, u8* end, Color& color) // for 24-bit.
     {
@@ -253,6 +274,63 @@ class Console : public IStream, public IService
             ++start;
         }
     };
+
+    inline void textOverlay24(u8* frame, u8* end, u8* text, u8* canvas)
+    {
+        u8 pixel[3];
+        while (frame < end)
+        {
+            if (*text == fg.blue &&
+                *(text+1) == fg.green &&
+                *(text+2) == fg.red)
+            {
+                pixel[0] = *text++;
+                pixel[1] = *text++;
+                pixel[2] = *text++;
+                canvas += sizeof(pixel);
+            }
+            else
+            {
+                pixel[0] = *canvas++;
+                pixel[1] = *canvas++;
+                pixel[2] = *canvas++;
+                text += sizeof(pixel);
+            }
+            memmove(frame, pixel, sizeof(pixel));
+            frame += sizeof(pixel);
+        }
+    }
+
+    inline void textOverlay32(u8* frame, u8* frameEnd, u8* text, u8* canvas)
+    {
+        u32* dst = (u32*) frame;
+        u32* srcText = (u32*) text;
+        u32* srcCanvas = (u32*) canvas;
+        u32* end = (u32*) frameEnd;
+        while (dst < end)
+        {
+            text = (u8*) srcText;
+            if (*text == fg.blue &&
+                *(text+1) == fg.green &&
+                *(text+2) == fg.red)
+            {
+                *dst++ = *srcText++;
+                ++srcCanvas;
+            }
+            else
+            {
+                *dst++ = *srcCanvas++;
+                ++srcText;
+            }
+        }
+    }
+
+    inline void refreshScreen()
+    {
+        updated = true;
+        topLeftUpdated = 0;
+        bottomRightUpdated = framebufferSize;
+    }
 
     inline int roundUp64(int x)
     {
@@ -280,15 +358,15 @@ public:
         }
         monitor = System()->createMonitor();
 
-        // white
-        fg.blue  = 0xff;
-        fg.green = 0xff;
-        fg.red   = 0xff;
-
         // black
-        bg.blue  = 0x0;
-        bg.green = 0x0;
-        bg.red   = 0x0;
+        fg.blue  = 0x0;
+        fg.green = 0x0;
+        fg.red   = 0x0;
+
+        // white
+        bg.blue  = 0xff;
+        bg.green = 0xff;
+        bg.red   = 0xff;
 
         initializeFramebuffer();
         initializeFreeType(font);
@@ -303,6 +381,7 @@ public:
         System()->unmap(framebuffer, framebufferSize);
 
         delete [] lineBuf;
+        delete [] textCache;
         delete [] screenCache;
         if (monitor)
         {
@@ -310,20 +389,25 @@ public:
         }
     }
 
+    void clear(u8* screen);
     void clearLine();
+    void compose(u8* data, CanvasInfo* info);
     void displayCursor();
     void erase();
+    int getBpp()
+    {
+        return bpp;
+    }
     bool isAvailable()
     {
         Synchronized<IMonitor*> method(monitor);
         return available;
     }
     void keyInput(char letter);
-    void refleshLine();
     bool suspend()
     {
         Synchronized<IMonitor*> method(monitor);
-        while (!available)
+        while (!available && registered)
         {
             monitor->wait();
         }
@@ -369,8 +453,21 @@ public:
         Synchronized<IMonitor*> method(monitor);
         if (updated && available)
         {
-            ASSERT(topLeftUpdated < bottomRightUpdated);
-            memmove((u8*) framebuffer + topLeftUpdated, screenCache + topLeftUpdated, bottomRightUpdated - topLeftUpdated);
+            u8* frame = (u8*) framebuffer + topLeftUpdated;
+            u8* frameEnd = (u8*) framebuffer + bottomRightUpdated;
+            u8* text = textCache + topLeftUpdated;
+            u8* canvas = screenCache + topLeftUpdated;
+
+            switch (bpp)
+            {
+              case 24:
+                textOverlay24(frame, frameEnd, text, canvas);
+                break;
+
+              case 32:
+                textOverlay32(frame, frameEnd, text, canvas);
+                break;
+            }
             updated = false;
             topLeftUpdated = framebufferSize;
             bottomRightUpdated = 0;
@@ -385,11 +482,7 @@ public:
         Synchronized<IMonitor*> method(monitor);
         if (!available)
         {
-            // refresh screen.
-            updated = true;
-            topLeftUpdated = 0;
-            bottomRightUpdated = framebufferSize;
-
+            refreshScreen();
             available = true;
             monitor->notifyAll();
         }
@@ -428,14 +521,25 @@ public:
 
     unsigned int addRef(void)
     {
-        return ref.addRef();
+        int count = ref.addRef();
+        if (count == 2)
+        {
+            registered = true;
+        }
+        return count;
     }
 
     unsigned int release(void)
     {
         unsigned int count = ref.release();
-        if (count == 0)
+        if (count == 1)
         {
+            registered = false;
+        }
+        else if (count == 0)
+        {
+            available = false; // stop this service.
+            monitor->notifyAll();
             delete this;
             return 0;
         }
@@ -492,7 +596,7 @@ write(const void* src, int count)
             lineBuf->add(charCode, shift);
             if (!lineBuf->isLast())
             {
-                refleshLine();
+                refreshLine();
             }
 #else
             if (!lineBuf->isLast())
@@ -521,30 +625,11 @@ read(void* dst, int count)
     }
 
     int n;
-    while ((n = ring.read(dst, count)) == 0)
+    while (available && (n = ring.read(dst, count)) == 0)
     {
         monitor->wait();
     }
     return n;
-}
-
-void Console::
-checkScreenUpdate(FT_Int topLeftX, FT_Int topLeftY, u8* bottomRight)
-{
-    // bottomRight is the pointer in the screen cache.
-    // It points the pixel at the bottom-right of the updated screen area.
-    // topLeftX, Y are the coordinates of the top-left of the updated screen area.
-    if (bottomRight && bottomRightUpdated < bottomRight - screenCache)
-    {
-        bottomRightUpdated = bottomRight - screenCache;
-        u32 topLeft = (bpp/8) * (topLeftX + screenWidth * topLeftY);
-        if (topLeft < topLeftUpdated)
-        {
-            topLeftUpdated = topLeft;
-        }
-        updated = true;
-        ASSERT(topLeftUpdated < bottomRightUpdated);
-    }
 }
 
 u8* Console::
@@ -552,7 +637,7 @@ drawBitmapGray(FT_Bitmap* bitmap, FT_Int x, FT_Int y)
 {
     const FT_Int y_max = y + bitmap->rows;
     const u8 factor = bpp/8;
-    const u8* top = screenCache + factor * x;
+    const u8* top = textCache + factor * x;
     FT_Int index;
     FT_Int i;
     FT_Int j = 0;
@@ -593,7 +678,7 @@ u8* Console::
 drawBitmapMono(FT_Bitmap* bitmap, FT_Int x, FT_Int y)
 {
     const u8 factor = bpp/8;
-    const u8* topLeft = screenCache + factor * x;
+    const u8* topLeft = textCache + factor * x;
     FT_Int  i;
     FT_Int  j;
     u8 pixelR;
@@ -718,6 +803,20 @@ getScalableParameters()
 }
 
 void Console::
+clear(u8* screen)
+{
+    switch (bpp)
+    {
+      case 24:
+        paint24(screen, screen + framebufferSize, bg);
+        break;
+      case 32:
+        paint32(screen, screen + framebufferSize, bg);
+        break;
+    }
+}
+
+void Console::
 initializeFramebuffer()
 {
     Handle<IContext> nameSpace = System()->getRoot();
@@ -728,29 +827,23 @@ initializeFramebuffer()
                              ICurrentProcess::PROT_READ | ICurrentProcess::PROT_WRITE,
                              ICurrentProcess::MAP_SHARED,
                              framebufferMap, 0);
+    textCache = new u8[framebufferSize];
     screenCache = new u8[framebufferSize];
-    TEST(screenCache);
+    TEST(textCache && screenCache);
 
     bpp = 8 * (framebufferSize / (screenWidth * screenHeight));
     TEST(bpp == 24 || bpp == 32); // [check] 8 and 16bit mode are not supported.
-    switch (bpp)
-    {
-      case 24:
-        paint24(screenCache, screenCache + framebufferSize, bg);
-        break;
-      case 32:
-        paint32(screenCache, screenCache + framebufferSize, bg);
-        break;
-    }
 
-    updated = true;
-    topLeftUpdated = 0;
-    bottomRightUpdated = framebufferSize;
+    clear(textCache);
+    clear(screenCache);
+
+    refreshScreen();
 }
 
 void Console::
 initializeFreeType(Handle<IFile> font)
 {
+    ASSERT(font);
     fontMap = font->getPageable();
     long long size = font->getSize();
     fontBuffer = System()->map(0, size,
@@ -794,8 +887,8 @@ initializeFreeType(Handle<IFile> font)
     u32 bottomMarginSize = bpp/8 * bottomMargin * screenWidth;
     scrollSize = screenSize - scrollOffset - lineSize - bottomMarginSize;
 
-    nextScreenTop = screenCache + scrollOffset + lineSize;
-    newLine = screenCache + scrollOffset + scrollSize;
+    nextScreenTop = textCache + scrollOffset + lineSize;
+    newLine = textCache + scrollOffset + scrollSize;
 }
 
 void Console::
@@ -810,12 +903,9 @@ addNewLine()
     }
 
     // scroll screen.
-    memmove(screenCache + scrollOffset, nextScreenTop, scrollSize);
-    paintScreen(screenCache, scrollOffset, bg);
+    memmove(textCache + scrollOffset, nextScreenTop, scrollSize);
+    paintScreen(textCache, scrollOffset, bg);
     paintScreen(newLine, lineSize, bg);
-    updated = true;
-    topLeftUpdated = 0;
-    bottomRightUpdated = framebufferSize;
 }
 
 void Console::
@@ -830,9 +920,7 @@ paintScreen(u8* start, int size, Color& bg)
         paint32(start, start + size, bg);
         break;
     }
-    updated = true;
-    topLeftUpdated = 0;
-    bottomRightUpdated = framebufferSize;
+    refreshScreen();
 }
 
 FT_Int Console::
@@ -864,7 +952,7 @@ writeCharacter(FT_ULong charCode)
     FT_Int y = currentPosition.y - slot->bitmap_top;
 
     u8* bottomRight = drawBitmap(&slot->bitmap, x, y);
-    checkScreenUpdate(x, y, bottomRight);
+    invalidate((bpp/8) * (x + screenWidth * y), bottomRight - textCache);
 
     return slot->advance.x / 64;
 }
@@ -890,12 +978,12 @@ clearLine()
         lineSize += y;
         y = 0;
     }
-    u8* top = screenCache + y * bpp/8 * screenWidth;
+    u8* top = textCache + y * bpp/8 * screenWidth;
     paintScreen(top, lineSize, bg);
 }
 
 void Console::
-refleshLine()
+refreshLine()
 {
     Synchronized<IMonitor*> method(monitor);
 
@@ -921,6 +1009,21 @@ refleshLine()
     currentPosition.x = restore;
 }
 
+void Console::
+invalidate(int topLeft, int bottomRight)
+{
+    if (topLeft < topLeftUpdated)
+    {
+        topLeftUpdated = topLeft;
+        updated = true;
+    }
+    if (bottomRightUpdated < bottomRight)
+    {
+        bottomRightUpdated = bottomRight;
+        updated = true;
+    }
+}
+
 /*
  *   Cursor
  *   +-----+  A <---- yMin
@@ -944,7 +1047,7 @@ drawCursor(Color& color, FT_Int width)
     FT_Int x = currentPosition.x;
     FT_Int yMin = currentPosition.y - ascender;
 
-    const u8* topLeft = screenCache + factor * x;
+    const u8* topLeft = textCache + factor * x;
     u8* ptr = 0;
     FT_Int i;
     FT_Int y;
@@ -979,7 +1082,7 @@ drawCursor(Color& color, FT_Int width)
         }
     }
 
-    checkScreenUpdate(x, yMin, ptr);
+    invalidate((bpp/8) * (x + screenWidth * yMin), ptr - textCache);
 }
 
 void Console::
@@ -1026,6 +1129,59 @@ erase()
     }
 }
 
+void Console::
+compose(u8* data, CanvasInfo* info)
+{
+    Synchronized<IMonitor*> method(monitor);
+
+    int factor = bpp / 8;
+    int offset = (screenWidth * info->y + info->x) * factor;
+
+    int len = std::min(screenWidth - info->x, info->width);
+    if (len <= 0)
+    {
+        return;
+    }
+
+    u8* dst = static_cast<u8*>(screenCache) + offset;
+    u8* end = static_cast<u8*>(screenCache) + framebufferSize;
+    u8* src = data;
+    u8* ptr;
+    for (int y = 0; y < info->height && dst < end; ++y)
+    {
+        switch (info->format)
+        {
+        case CAIRO_FORMAT_RGB24:
+            src = data;
+            ptr = dst;
+            for (int x = 0; x < len; ++x)
+            {
+                *ptr++ = *src++;
+                *ptr++ = *src++;
+                *ptr++ = *src++;
+                ++src;
+            }
+            data += 4 * info->width;
+            dst += factor * screenWidth;
+            break;
+
+        case CAIRO_FORMAT_ARGB32:
+            memmove(dst, src, factor * len);
+            src += 4 * info->width;
+            dst += factor * screenWidth;
+            break;
+
+        case CAIRO_FORMAT_A8:
+        case CAIRO_FORMAT_A1:
+        case CAIRO_FORMAT_RGB16_565:
+        default:
+            return;
+        }
+    }
+
+    invalidate(offset, dst - static_cast<u8*>(screenCache));
+}
+
 int main(int argc, char* argv[])
 {
     // System()->trace(true);
@@ -1037,7 +1193,7 @@ int main(int argc, char* argv[])
     int bufSize = 4096;
     u8* keyBuffer = new u8[bufSize];
     Handle<IFile> font = nameSpace->lookup("file/sazanami-mincho.ttf");
-    Console console(font, 12, keyBuffer, bufSize); // font size is set to 12 pt.
+    Console* console = new Console(font, 12, keyBuffer, bufSize); // font size is set to 12 pt.
 
     // check if the event queue is ready.
     Handle<IEventQueue> eventQueue = 0;
@@ -1051,30 +1207,63 @@ int main(int argc, char* argv[])
     // register this console.
     Handle<IContext> device = nameSpace->lookup("device");
     ASSERT(device);
-    IBinding* ret = device->bind("console", static_cast<IStream*>(&console));
+    IBinding* ret = device->bind("console", static_cast<IStream*>(console));
     ASSERT(ret);
+
+    // register canvas
+    cairo_surface_t* surface;
+    CanvasInfo canvasInfo;
+    canvasInfo.x = 0;
+    canvasInfo.y = 0;
+    canvasInfo.width = 1024;
+    canvasInfo.height = 768;
+
+    switch (console->getBpp())
+    {
+    case 24:
+        canvasInfo.format = CAIRO_FORMAT_RGB24;
+        break;
+    case 32:
+        canvasInfo.format = CAIRO_FORMAT_ARGB32;
+        break;
+    }
+
+    surface = cairo_image_surface_create(canvasInfo.format, canvasInfo.width, canvasInfo.height);
+    Canvas* canvas = new Canvas(surface, canvasInfo.width, canvasInfo.height);
+    ASSERT(canvas);
+    device->bind("canvas", static_cast<ICanvasRenderingContext2D*>(canvas));
+    ASSERT(nameSpace->lookup("device/canvas"));
 
     esReport("start console.\n");
     int stroke;
     char letter;
-    for (;;)
+    u8* data;
+    while (registered)
     {
-        while (console.isAvailable())
+        if (console->isAvailable())
         {
-            console.displayCursor();
+            console->displayCursor();
             if (eventQueue->getKeystroke(&stroke))
             {
                 letter = stroke & 0xff;
-                console.keyInput(letter); // save a character into the buffer.
+                console->keyInput(letter); // save a character into the buffer.
             }
-            console.flush();
+            data = canvas->getData();
+            if (data)
+            {
+                console->compose(data, &canvasInfo);
+            }
+            console->flush();
             currentThread->sleep(10000000 / 60);
         }
-        console.suspend();
+        else
+        {
+            console->suspend();
+        }
     }
 
-    // [check] how to stop this console?
-
+    canvas->release();
+    console->release();
     delete [] keyBuffer;
 
     // System()->trace(false);

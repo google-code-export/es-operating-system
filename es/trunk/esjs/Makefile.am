@@ -51,7 +51,8 @@ nodist_esjs_SOURCES = \
 	net/IResolver.c \
 	net/ISocket.c \
 	util/IIterator.c \
-	util/ISet.c
+	util/ISet.c \
+	util/ICanvasRenderingContext2D.c
 
 BUILT_SOURCES = lexer.cc parser.cc parser.h
 
@@ -112,4 +113,6 @@ EXTRA_DIST = \
 	scripts/edit.js		\
 	scripts/ls.js		\
 	scripts/shell.js	\
-	scripts/date.js
+	scripts/date.js		\
+	scripts/clear.js	\
+	scripts/figure.js
