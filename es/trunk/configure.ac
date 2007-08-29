@@ -7,7 +7,7 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_LEX
 AC_CONFIG_FILES(Makefile include/Makefile)
-AC_CONFIG_SUBDIRS(esidl tools os init cmd)
+AC_CONFIG_SUBDIRS(esidl tools os init cmd esjs)
 
 case ${target} in
   *-*-es)

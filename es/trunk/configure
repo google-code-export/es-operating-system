@@ -685,7 +685,7 @@ CPPFLAGS
 CCC
 CC
 CFLAGS'
-ac_subdirs_all='esidl tools os init cmd'
+ac_subdirs_all='esidl tools os init cmd esjs'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -4003,7 +4003,7 @@ rm -f conftest.l $LEX_OUTPUT_ROOT.c
 fi
 ac_config_files="$ac_config_files Makefile include/Makefile"
 
-subdirs="$subdirs esidl tools os init cmd"
+subdirs="$subdirs esidl tools os init cmd esjs"
 
 
 case ${target} in
