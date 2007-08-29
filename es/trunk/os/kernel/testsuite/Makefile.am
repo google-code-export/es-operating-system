@@ -4,9 +4,7 @@ SUFFIXES = .img .gz .iso
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
-
-% :: %.elf
-	$(srcdir)/makeScript "`pwd`" $@
+	$(srcdir)/makeScript "`pwd`" $(*F)
 
 AM_CPPFLAGS = \
 	-I $(srcdir)/../include \
@@ -42,7 +40,7 @@ if I386
 AM_CPPFLAGS += -iquote $(srcdir)/../include/i386
 endif I386
 
-TESTS = handle interlocked exception utf ring fpu tsd \
+TESTS = handle interlocked exception utf ring fpu \
 	context datetime thread thread_cancel thread_smp \
 	monitor0 monitor1 monitor2 monitor3 \
 	bpi bpi2 bpi3 \
@@ -59,7 +57,7 @@ noinst_SCRIPTS = $(TESTS)
 noinst_PROGRAMS = $(TESTS)
 
 noinst_DATA = fat16.img isotest.iso \
-	handle.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+	handle.img interlocked.img exception.img utf.img ring.img fpu.img \
 	context.img datetime.img thread.img thread_cancel.img thread_smp.img \
 	monitor0.img monitor1.img monitor2.img monitor3.img \
 	bpi.img bpi2.img bpi3.img \
@@ -92,8 +90,6 @@ utf_SOURCES = utf.cpp
 ring_SOURCES = ring.cpp
 
 fpu_SOURCES = fpu.cpp
-
-tsd_SOURCES = tsd.cpp
 
 heap_SOURCES = heap.cpp
 

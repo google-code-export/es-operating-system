@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -29,69 +29,41 @@ int esReport(const char* spec, ...)
     return count;
 }
 
-void esDump(const void* ptr, s32 len)
-{
-    int j;
-    int i;
-    int n;
-
-    for (j = 0; j < len; j += 16)
-    {
-        n = len - j;
-        if (16 < n)
-        {
-            n = 16;
-        }
-
-        esReport("%08x: ", (const u8*) ptr + j);
-        for (i = 0; i < n; i++)
-        {
-            esReport("%02x ", ((const u8*) ptr)[j + i]);
-        }
-
-        for (; i < 16; i++)
-        {
-            esReport("   ");
-        }
-
-        esReport("  ");
-        for (i = 0; i < n; i++)
-        {
-            esReport("%c", (isprint)(((const u8*) ptr)[j + i]) ? ((const u8*) ptr)[j + i] : '.');
-        }
-
-        esReport("\n");
-    }
-}
-
 #ifdef __es__
 
 // If malloc uses synchronization primitives other than Lock,
 // the following monitorFactory lock type must also be changed.
 static Lock monitorFactory;
 
-int
-esOnce(esOnceControl* control, void (*func)(void))
+#include <errno.h>
+#include <pthread.h>
+#include <stdarg.h>
+#include <unistd.h>
+
+#ifdef PTHREAD_MUTEX_INITIALIZER
+
+int pthread_once(pthread_once_t* once, void (*func) (void))
 {
-    if (!control->done)
+    if (!once->init_executed)
     {
-        int value = 0;
+        int initialized = 0;
 
         __asm__ __volatile__ (
             "xchgl  %0, %1\n"
-            : "=a"(value), "=m"(control->started) : "0"(value), "m"(control->started));
+            : "=a"(initialized), "=m"(once->is_initialized)
+            : "0"(initialized), "m"(once->is_initialized));
 
-        if (value == -1)
+        if (initialized)
         {
             if (func)
             {
                 func();
             }
-            control->done = 1;
+            once->init_executed = 1;
         }
         else
         {
-            while (!control->done)
+            while (!once->init_executed)
             {
                 Thread* current(Thread::getCurrentThread());
                 if (current)
@@ -104,91 +76,97 @@ esOnce(esOnceControl* control, void (*func)(void))
     return 0;
 }
 
-// Must create monitor atomically
-void
-esCreateMonitor(esMonitor* monitor)
+static Monitor* getMonitor(pthread_mutex_t* mutex)
 {
-    Thread* current(Thread::getCurrentThread());
+    Thread* current = Thread::getCurrentThread();
     if (!current)
-    {
-        monitor->monitor = 0;
-        return;
-    }
-
-    monitor->monitor = new Monitor;
-}
-
-void
-esLockMonitor(esMonitor* monitor)
-{
-    Thread* current(Thread::getCurrentThread());
-    if (!current)
-    {
-        monitor->monitor = 0;
-        return;
-    }
-
-    if (!monitor->monitor)
-    {
-        Lock::Synchronized method(monitorFactory);
-        if (monitor->monitor == 0)
-        {
-            monitor->monitor = new Monitor;
-        }
-    }
-
-    static_cast<Monitor*>(monitor->monitor)->lock();
-}
-
-int
-esTryLockMonitor(esMonitor* monitor)
-{
-    Thread* current(Thread::getCurrentThread());
-    if (!current)
-    {
-        monitor->monitor = 0;
-        return 0;
-    }
-
-    if (!monitor->monitor)
-    {
-        Lock::Synchronized method(monitorFactory);
-        if (monitor->monitor == 0)
-        {
-            monitor->monitor = new Monitor;
-        }
-    }
-
-    if (static_cast<Monitor*>(monitor->monitor)->tryLock())
     {
         return 0;
     }
-    else
-    {
-        return EBUSY;
-    }
-}
-
-void
-esUnlockMonitor(esMonitor* monitor)
-{
-    Thread* current(Thread::getCurrentThread());
-    if (!current)
-    {
-        monitor->monitor = 0;
-        return;
-    }
-
-    if (!monitor->monitor)
+    if (*mutex == PTHREAD_MUTEX_INITIALIZER)
     {
         Lock::Synchronized method(monitorFactory);
-        if (monitor->monitor == 0)
+        if (*mutex == PTHREAD_MUTEX_INITIALIZER)
         {
-            monitor->monitor = new Monitor;
+            pthread_mutex_init(mutex, 0);
         }
     }
-
-    static_cast<Monitor*>(monitor->monitor)->unlock();
+    return reinterpret_cast<Monitor*>(*mutex);
 }
+
+int pthread_mutex_lock(pthread_mutex_t* mutex)
+{
+    Monitor* monitor = getMonitor(mutex);
+    if (monitor)
+    {
+        monitor->lock();
+    }
+    return 0;
+}
+
+int pthread_mutex_trylock(pthread_mutex_t* mutex)
+{
+    Monitor* monitor = getMonitor(mutex);
+    if (monitor)
+    {
+        if (monitor->tryLock())
+        {
+            return 0;
+        }
+        else
+        {
+            return EBUSY;
+        }
+    }
+    return 0;
+}
+
+int pthread_mutex_unlock(pthread_mutex_t* mutex)
+{
+    Monitor* monitor = getMonitor(mutex);
+    if (monitor)
+    {
+        monitor->unlock();
+    }
+    return 0;
+}
+
+int pthread_mutexattr_init(pthread_mutexattr_t* attr)
+{
+    return 0;
+}
+
+int pthread_mutexattr_settype(pthread_mutexattr_t* attr, int type)
+{
+    return 0;
+}
+
+int pthread_mutexattr_destroy(pthread_mutexattr_t* attr)
+{
+    return 0;
+}
+
+int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t* attr)
+{
+    Thread* current = Thread::getCurrentThread();
+    if (!current)
+    {
+        *mutex = PTHREAD_MUTEX_INITIALIZER;
+        return 0;
+    }
+    *mutex = (pthread_mutex_t) new Monitor;
+    return 0;
+}
+
+int pthread_mutex_destroy(pthread_mutex_t* mutex)
+{
+    if (*mutex && *mutex != PTHREAD_MUTEX_INITIALIZER)
+    {
+        reinterpret_cast<Monitor*>(*mutex)->release();
+    }
+    return 0;
+}
+
+#endif  // PTHREAD_MUTEX_INITIALIZER
 
 #endif // __es__

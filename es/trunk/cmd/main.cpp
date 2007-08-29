@@ -11,6 +11,7 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
+#include <pthread.h>
 #include <setjmp.h>
 #include <stdlib.h>
 #include <unwind.h>
@@ -52,9 +53,9 @@ void* start(void* param)
     testB = 5;
     esReport("start(): %x %x %x\n", testA, testB, &testA);
 
-    unsigned int key;
-    esCreateThreadKey(&key, dtor);
-    esSetThreadSpecific(key, (void*) 0x1234);
+    pthread_key_t key;
+    pthread_key_create(&key, dtor);
+    pthread_setspecific(key, (void*) 0x1234);
 
     esReport("m->lock();\n");
     m->lock();

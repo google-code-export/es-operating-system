@@ -15,19 +15,24 @@ SUFFIXES = .h .idl .ird
 	echo -n "InfoSize = sizeof" $(*F) >> $@;
 	echo "Info;" >> $@;
 
-noinst_PROGRAMS = main hello server client binder binderClient location locationClient \
+noinst_PROGRAMS = main hello cairo expat server client binder binderClient location locationClient \
                   eventManager eventManagerClient console consoleClient upcallTest upcallTestClient
 
-AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref
+AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref -L$(prefix)/lib
 AM_CPPFLAGS = -I- \
 	-I../include \
 	-I$(srcdir)/../include \
 	-I$(prefix)/include \
-	-I$(prefix)/include/freetype2
+	-I$(prefix)/include/freetype2 \
+	-I$(prefix)/include/cairo
 
-LDADD = ../os/libes++/libes++.a $(prefix)/lib/libfreetype.a
+LDADD = ../os/libes++/libes++.a -lcairo -lfontconfig -lexpat -lfreetype -lm
 
 hello_SOURCES = hello.cpp
+
+cairo_SOURCES = cairo.cpp
+
+expat_SOURCES = expat.cpp
 
 main_SOURCES = main.cpp
 

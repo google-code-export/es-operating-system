@@ -248,6 +248,8 @@ ICurrentProcess* System()
     return &current;
 }
 
+extern "C" void esDeallocateSpecific(void);
+
 void System::
 start(void* (*func)(void*), void* param)
 {

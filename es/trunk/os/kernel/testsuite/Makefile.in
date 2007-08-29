@@ -60,21 +60,20 @@ target_triplet = @target@
 @ES_FALSE@@POSIX_TRUE@	timer$(EXEEXT)
 @ES_TRUE@TESTS = handle$(EXEEXT) interlocked$(EXEEXT) \
 @ES_TRUE@	exception$(EXEEXT) utf$(EXEEXT) ring$(EXEEXT) \
-@ES_TRUE@	fpu$(EXEEXT) tsd$(EXEEXT) context$(EXEEXT) \
-@ES_TRUE@	datetime$(EXEEXT) thread$(EXEEXT) \
-@ES_TRUE@	thread_cancel$(EXEEXT) thread_smp$(EXEEXT) \
-@ES_TRUE@	monitor0$(EXEEXT) monitor1$(EXEEXT) monitor2$(EXEEXT) \
-@ES_TRUE@	monitor3$(EXEEXT) bpi$(EXEEXT) bpi2$(EXEEXT) \
-@ES_TRUE@	bpi3$(EXEEXT) ata$(EXEEXT) beep$(EXEEXT) \
-@ES_TRUE@	8042$(EXEEXT) vesa$(EXEEXT) fdc$(EXEEXT) \
-@ES_TRUE@	fdc_diskChange$(EXEEXT) sb16$(EXEEXT) es1370$(EXEEXT) \
-@ES_TRUE@	cdrom$(EXEEXT) page$(EXEEXT) cache$(EXEEXT) \
-@ES_TRUE@	replace$(EXEEXT) position$(EXEEXT) size$(EXEEXT) \
-@ES_TRUE@	write_read$(EXEEXT) write_read2$(EXEEXT) \
-@ES_TRUE@	write$(EXEEXT) read$(EXEEXT) create_release$(EXEEXT) \
-@ES_TRUE@	getPageCount$(EXEEXT) invalidate$(EXEEXT) \
-@ES_TRUE@	pageSet$(EXEEXT) process$(EXEEXT) loopback$(EXEEXT) \
-@ES_TRUE@	ethernet$(EXEEXT)
+@ES_TRUE@	fpu$(EXEEXT) context$(EXEEXT) datetime$(EXEEXT) \
+@ES_TRUE@	thread$(EXEEXT) thread_cancel$(EXEEXT) \
+@ES_TRUE@	thread_smp$(EXEEXT) monitor0$(EXEEXT) \
+@ES_TRUE@	monitor1$(EXEEXT) monitor2$(EXEEXT) monitor3$(EXEEXT) \
+@ES_TRUE@	bpi$(EXEEXT) bpi2$(EXEEXT) bpi3$(EXEEXT) ata$(EXEEXT) \
+@ES_TRUE@	beep$(EXEEXT) 8042$(EXEEXT) vesa$(EXEEXT) \
+@ES_TRUE@	fdc$(EXEEXT) fdc_diskChange$(EXEEXT) sb16$(EXEEXT) \
+@ES_TRUE@	es1370$(EXEEXT) cdrom$(EXEEXT) page$(EXEEXT) \
+@ES_TRUE@	cache$(EXEEXT) replace$(EXEEXT) position$(EXEEXT) \
+@ES_TRUE@	size$(EXEEXT) write_read$(EXEEXT) \
+@ES_TRUE@	write_read2$(EXEEXT) write$(EXEEXT) read$(EXEEXT) \
+@ES_TRUE@	create_release$(EXEEXT) getPageCount$(EXEEXT) \
+@ES_TRUE@	invalidate$(EXEEXT) pageSet$(EXEEXT) process$(EXEEXT) \
+@ES_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT)
 @ES_FALSE@@POSIX_TRUE@noinst_PROGRAMS = $(am__EXEEXT_1)
 @ES_TRUE@noinst_PROGRAMS = $(am__EXEEXT_1)
 @POSIX_TRUE@am__append_2 = -lpthread -lrt -lstdc++
@@ -111,21 +110,20 @@ CONFIG_CLEAN_FILES =
 @ES_FALSE@@POSIX_TRUE@	timer$(EXEEXT)
 @ES_TRUE@am__EXEEXT_1 = handle$(EXEEXT) interlocked$(EXEEXT) \
 @ES_TRUE@	exception$(EXEEXT) utf$(EXEEXT) ring$(EXEEXT) \
-@ES_TRUE@	fpu$(EXEEXT) tsd$(EXEEXT) context$(EXEEXT) \
-@ES_TRUE@	datetime$(EXEEXT) thread$(EXEEXT) \
-@ES_TRUE@	thread_cancel$(EXEEXT) thread_smp$(EXEEXT) \
-@ES_TRUE@	monitor0$(EXEEXT) monitor1$(EXEEXT) monitor2$(EXEEXT) \
-@ES_TRUE@	monitor3$(EXEEXT) bpi$(EXEEXT) bpi2$(EXEEXT) \
-@ES_TRUE@	bpi3$(EXEEXT) ata$(EXEEXT) beep$(EXEEXT) \
-@ES_TRUE@	8042$(EXEEXT) vesa$(EXEEXT) fdc$(EXEEXT) \
-@ES_TRUE@	fdc_diskChange$(EXEEXT) sb16$(EXEEXT) es1370$(EXEEXT) \
-@ES_TRUE@	cdrom$(EXEEXT) page$(EXEEXT) cache$(EXEEXT) \
-@ES_TRUE@	replace$(EXEEXT) position$(EXEEXT) size$(EXEEXT) \
-@ES_TRUE@	write_read$(EXEEXT) write_read2$(EXEEXT) \
-@ES_TRUE@	write$(EXEEXT) read$(EXEEXT) create_release$(EXEEXT) \
-@ES_TRUE@	getPageCount$(EXEEXT) invalidate$(EXEEXT) \
-@ES_TRUE@	pageSet$(EXEEXT) process$(EXEEXT) loopback$(EXEEXT) \
-@ES_TRUE@	ethernet$(EXEEXT)
+@ES_TRUE@	fpu$(EXEEXT) context$(EXEEXT) datetime$(EXEEXT) \
+@ES_TRUE@	thread$(EXEEXT) thread_cancel$(EXEEXT) \
+@ES_TRUE@	thread_smp$(EXEEXT) monitor0$(EXEEXT) \
+@ES_TRUE@	monitor1$(EXEEXT) monitor2$(EXEEXT) monitor3$(EXEEXT) \
+@ES_TRUE@	bpi$(EXEEXT) bpi2$(EXEEXT) bpi3$(EXEEXT) ata$(EXEEXT) \
+@ES_TRUE@	beep$(EXEEXT) 8042$(EXEEXT) vesa$(EXEEXT) \
+@ES_TRUE@	fdc$(EXEEXT) fdc_diskChange$(EXEEXT) sb16$(EXEEXT) \
+@ES_TRUE@	es1370$(EXEEXT) cdrom$(EXEEXT) page$(EXEEXT) \
+@ES_TRUE@	cache$(EXEEXT) replace$(EXEEXT) position$(EXEEXT) \
+@ES_TRUE@	size$(EXEEXT) write_read$(EXEEXT) \
+@ES_TRUE@	write_read2$(EXEEXT) write$(EXEEXT) read$(EXEEXT) \
+@ES_TRUE@	create_release$(EXEEXT) getPageCount$(EXEEXT) \
+@ES_TRUE@	invalidate$(EXEEXT) pageSet$(EXEEXT) process$(EXEEXT) \
+@ES_TRUE@	loopback$(EXEEXT) ethernet$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_8042_OBJECTS = 8042.$(OBJEXT)
 8042_OBJECTS = $(am_8042_OBJECTS)
@@ -359,11 +357,6 @@ timer_OBJECTS = $(am_timer_OBJECTS)
 timer_LDADD = $(LDADD)
 timer_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
 	$(am__DEPENDENCIES_1)
-am_tsd_OBJECTS = tsd.$(OBJEXT)
-tsd_OBJECTS = $(am_tsd_OBJECTS)
-tsd_LDADD = $(LDADD)
-tsd_DEPENDENCIES = ../libeskernel.a ../../libes++/libessup++.a \
-	$(am__DEPENDENCIES_1)
 am_utf_OBJECTS = utf.$(OBJEXT)
 utf_OBJECTS = $(am_utf_OBJECTS)
 utf_LDADD = $(LDADD)
@@ -419,9 +412,9 @@ SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
 	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
 	$(thread_SOURCES) $(thread_cancel_SOURCES) \
-	$(thread_smp_SOURCES) $(timer_SOURCES) $(tsd_SOURCES) \
-	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
-	$(write_read_SOURCES) $(write_read2_SOURCES)
+	$(thread_smp_SOURCES) $(timer_SOURCES) $(utf_SOURCES) \
+	$(vesa_SOURCES) $(write_SOURCES) $(write_read_SOURCES) \
+	$(write_read2_SOURCES)
 DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(bpi_SOURCES) $(bpi2_SOURCES) $(bpi3_SOURCES) \
 	$(cache_SOURCES) $(cdrom_SOURCES) $(context_SOURCES) \
@@ -439,9 +432,9 @@ DIST_SOURCES = $(8042_SOURCES) $(ata_SOURCES) $(beep_SOURCES) \
 	$(process_SOURCES) $(read_SOURCES) $(replace_SOURCES) \
 	$(ring_SOURCES) $(sb16_SOURCES) $(size_SOURCES) \
 	$(thread_SOURCES) $(thread_cancel_SOURCES) \
-	$(thread_smp_SOURCES) $(am__timer_SOURCES_DIST) $(tsd_SOURCES) \
-	$(utf_SOURCES) $(vesa_SOURCES) $(write_SOURCES) \
-	$(write_read_SOURCES) $(write_read2_SOURCES)
+	$(thread_smp_SOURCES) $(am__timer_SOURCES_DIST) $(utf_SOURCES) \
+	$(vesa_SOURCES) $(write_SOURCES) $(write_read_SOURCES) \
+	$(write_read2_SOURCES)
 DATA = $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -552,7 +545,7 @@ SUFFIXES = .img .gz .iso
 AM_CPPFLAGS = -I $(srcdir)/../include -I- -I ../../../include -I \
 	$(srcdir)/../../../include $(am__append_1) $(am__append_3)
 @ES_TRUE@noinst_DATA = fat16.img isotest.iso \
-@ES_TRUE@	handle.img interlocked.img exception.img utf.img ring.img fpu.img tsd.img \
+@ES_TRUE@	handle.img interlocked.img exception.img utf.img ring.img fpu.img \
 @ES_TRUE@	context.img datetime.img thread.img thread_cancel.img thread_smp.img \
 @ES_TRUE@	monitor0.img monitor1.img monitor2.img monitor3.img \
 @ES_TRUE@	bpi.img bpi2.img bpi3.img \
@@ -575,7 +568,6 @@ exception_SOURCES = exception.cpp
 utf_SOURCES = utf.cpp
 ring_SOURCES = ring.cpp
 fpu_SOURCES = fpu.cpp
-tsd_SOURCES = tsd.cpp
 heap_SOURCES = heap.cpp
 page_SOURCES = page.cpp
 cache_SOURCES = cache.cpp memoryStream.h
@@ -796,9 +788,6 @@ thread_smp$(EXEEXT): $(thread_smp_OBJECTS) $(thread_smp_DEPENDENCIES)
 timer$(EXEEXT): $(timer_OBJECTS) $(timer_DEPENDENCIES) 
 	@rm -f timer$(EXEEXT)
 	$(CXXLINK) $(timer_OBJECTS) $(timer_LDADD) $(LIBS)
-tsd$(EXEEXT): $(tsd_OBJECTS) $(tsd_DEPENDENCIES) 
-	@rm -f tsd$(EXEEXT)
-	$(CXXLINK) $(tsd_OBJECTS) $(tsd_LDADD) $(LIBS)
 utf$(EXEEXT): $(utf_OBJECTS) $(utf_DEPENDENCIES) 
 	@rm -f utf$(EXEEXT)
 	$(CXXLINK) $(utf_OBJECTS) $(utf_LDADD) $(LIBS)
@@ -867,7 +856,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_cancel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_smp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vesa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wave.Po@am__quote@
@@ -1143,9 +1131,7 @@ uninstall-am:
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
-
-% :: %.elf
-	$(srcdir)/makeScript "`pwd`" $@
+	$(srcdir)/makeScript "`pwd`" $(*F)
 
 @ES_TRUE@clean-local:
 @ES_TRUE@	-rm -f *.map *.log 2hd.img es.img
