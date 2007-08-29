@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
     esInit(&ns);
     Handle<IContext> nameSpace(ns);
 
-    // initNetwork(nameSpace);
+    initNetwork(nameSpace);
 
     Handle<IClassStore> classStore(nameSpace->lookup("class"));
     esRegisterFatFileSystemClass(classStore);
