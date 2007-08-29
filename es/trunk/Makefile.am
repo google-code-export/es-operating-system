@@ -1,5 +1,5 @@
-SUBDIRS = $(ESIDL) include os $(TOOLS) $(INIT) $(CMD)
-DIST_SUBDIRS = esidl include os tools init cmd
+SUBDIRS = $(ESIDL) include os $(TOOLS) $(INIT) $(CMD) esjs
+DIST_SUBDIRS = esidl include os tools init cmd esjs
 
 EXTRA_DIST = \
 	patches/README \
@@ -13,4 +13,7 @@ EXTRA_DIST = \
 	patches/pcre-7.1.patch \
 	patches/pcre-7.2.patch \
 	patches/freetype-2.3.4.patch \
-	patches/freetype-2.3.5.patch
+	patches/freetype-2.3.5.patch \
+	patches/expat-2.0.1.patch \
+	patches/fontconfig-2.4.2.patch \
+	patches/cairo-1.4.10.patch
