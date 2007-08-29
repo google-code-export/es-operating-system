@@ -1202,22 +1202,6 @@ public:
     };
 };
 
-class LeftHandSideExpression : public Expression
-{
-};
-
-class CallExpression : public Expression
-{
-};
-
-class MemberExpression : public Expression
-{
-};
-
-class PrimaryExpression : public Expression
-{
-};
-
 // PrimaryExpression
 
 class This : public Expression
@@ -2237,10 +2221,6 @@ public:
         }
         return s;
     }
-};
-
-class IterationStatement : public Statement
-{
 };
 
 class DoWhileStatement : public Statement
