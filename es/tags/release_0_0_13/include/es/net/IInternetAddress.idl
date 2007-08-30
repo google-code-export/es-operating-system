@@ -1,0 +1,107 @@
+/*
+ * Copyright (c) 2006, 2007
+ * Nintendo Co., Ltd.
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+/** This interface represents an internet address.
+ */
+[object, uuid(5e951e76-b27e-11db-9c02-0009bf000001)]
+interface IInternetAddress : IInterface
+{
+    /** Gets the raw internet address of this internet address.
+     * @param address the raw internet address.
+     * @param len     the length of the buffer to contain the internet address.
+     */
+    int getAddress([out, size_is(len)] void* address, unsigned int len);
+
+    /** Gets the address family of this internet address.
+     * @return AF_INET or AF_INET6.
+     */
+    int getAddressFamily();
+
+    /** Gets the canonical host name which is a fully qualified domain name for this internet address.
+     * @param hostName the canonical host name.
+     * @param len      the length of the buffer to contain the canonical host name.
+     */
+    int getCanonicalHostName([out, size_is(len)] char* hostName, unsigned int len);
+
+    /** Gets the raw internet address of this internet address in a string format.
+     * @param hostAddress the host address in a string format.
+     * @param len         the length of the buffer to contain the host address.
+     */
+    int getHostAddress([out, size_is(len)] char* hostAddress, unsigned int len);
+
+    /** Gets the host name for this internet address.
+     * @param hostName the host name.
+     * @param len      the length of the buffer to contain the host name.
+     */
+    int getHostName([out, size_is(len)] char* hostName, unsigned int len);
+
+    /** Gets the path MTU to this internet address.
+     * @return the path MTU.
+     */
+    int getPathMTU();
+
+    /** Gets the scope identifier of this internet address.
+     * @return the scope identifier.
+     */
+    int getScopeID();
+
+    /** Checks whether this address is the unspecified address.
+     * @return true if this address is the unspecified address.
+     */
+    boolean isUnspecified();
+
+    /** Checks whether this address is a link-local address.
+     * @return true if this address is a link-local address.
+     */
+    boolean isLinkLocal();
+
+    /** Checks whether this address is a loopback address.
+     * @return true if this address is a loopback address.
+     */
+    boolean isLoopback();
+
+    /** Checks whether this address is a multicast address.
+     * @return true if this address is a multicast address.
+     */
+    boolean isMulticast();
+
+    /** Sends an ICMP echo request message to this internet address, and waits for the ICMP echo reply message.
+     * @param timeout the time before the call aborts.
+     * @return true if the reply is received before the timeout. Otherwise, false.
+     */
+    boolean isReachable(long timeout);
+
+    /** Checks whether this address is assigned to one of the interfaces of the host.
+     * @return true if this address is assigned to the host.
+     */
+    boolean isLocalAddress();
+
+    /** Gets the next internet address
+     * @return the next internet address.
+     */
+    IInternetAddress* getNext();
+
+    /** Creates a socket.
+     * If this is a local address or a multicast address, the created socket
+     * is bound to this address. If this is a remote address, the created
+     * socket is connected to this address by using an ephemeral local port.
+     * Otherwise, the socket is neither bound nor connected to any address.
+     * @param type     the type of this socket.
+     * @param protocol the protocol of this socket.
+     * @param port     the port number.
+     * @return <code>ISocket</code> interface of the new socket.
+     */
+    IInterface* socket(int type, int protocol, int port);
+}
