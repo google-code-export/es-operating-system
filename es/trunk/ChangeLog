@@ -1,3 +1,136 @@
+2007-08-30 08:04  okasaka
+
+	* cmd/configure, cmd/configure.ac, configure, configure.ac,
+	  esidl/configure, esidl/configure.ac, esjs/configure,
+	  esjs/configure.ac, init/configure, init/configure.ac,
+	  os/configure, os/configure.ac, tools/configure,
+	  tools/configure.ac: Set version to 0.0.13.
+
+2007-08-29 08:50  ueno9
+
+	* init/es.cpp: (es.cpp) : reverted.
+
+2007-08-29 08:37  ueno9
+
+	* cmd/Makefile.am, cmd/Makefile.in, cmd/canvas.cpp, cmd/canvas.h,
+	  cmd/console.cpp, cmd/eventManager.cpp, cmd/testsuite/Makefile.am,
+	  cmd/testsuite/Makefile.in, esjs/Makefile.am, esjs/Makefile.in,
+	  esjs/scripts/clear.js, esjs/scripts/figure.js,
+	  esjs/src/interface.cpp, include/Makefile.am, include/Makefile.in,
+	  include/es/util/ICanvasRenderingContext2D.idl, init/es.cpp,
+	  init/makeScript, os/kernel/Makefile.am, os/kernel/Makefile.in,
+	  os/kernel/include/interfaceStore.h, os/kernel/port/interface.cpp:
+	  (ICanvasRenderingContext2D) : New to support graphics on console.
+
+2007-08-29 01:49  okasaka
+
+	* Makefile.in, configure, configure.ac: (AC_CONFIG_SUBDIRS) : Add
+	  esjs.
+
+2007-08-29 01:47  okasaka
+
+	* Makefile.am: (cairo, expat, fontconfig) : New.
+
+2007-08-29 01:44  okasaka
+
+	* cmd/Makefile.am, cmd/Makefile.in, cmd/cairo.cpp, cmd/expat.cpp,
+	  cmd/hello.cpp, cmd/main.cpp, include/es.h,
+	  os/kernel/include/i386/cpu.h, os/kernel/port/init.cpp,
+	  os/kernel/testsuite/Makefile.am, os/kernel/testsuite/Makefile.in,
+	  os/libes++/Makefile.am, os/libes++/Makefile.in,
+	  os/libes++/src/dump.cpp, os/libes++/src/system.cpp,
+	  patches/README, patches/cairo-1.4.10.patch,
+	  patches/expat-2.0.1.patch, patches/fontconfig-2.4.2.patch,
+	  patches/gcc-4.1.1.patch, patches/gcc-4.2.1.patch,
+	  patches/newlib-1.15.0.patch: (pthread) : Add primitive pthread
+	  interface to support cairo.
+
+2007-08-29 01:35  okasaka
+
+	* esjs/include/esjs.h: Clean up.
+
+2007-08-21 02:27  okasaka
+
+	* cmd/upcallTest.cpp, cmd/upcallTestClient.cpp,
+	  os/kernel/include/process.h, os/kernel/pc/pc_core.cpp,
+	  os/kernel/pc/pc_init.cpp, os/kernel/port/process.cpp,
+	  os/kernel/port/syscall.cpp, os/kernel/port/upcall.cpp: (Process)
+	  : Fix reference counting of upcall/syscall proxies.
+
+2007-08-21 01:56  okasaka
+
+	* esjs/scripts/shell.js, include/es/base/IProcess.idl,
+	  os/kernel/include/process.h, os/kernel/include/thread.h,
+	  os/kernel/port/process.cpp, os/kernel/port/sched.cpp,
+	  os/libes++/src/posix_system.cpp, os/libes++/src/system.cpp:
+	  (Process) : Support the current working directory.
+
+2007-08-21 01:14  okasaka
+
+	* esjs/Makefile.am, esjs/Makefile.in, esjs/include/esjs.h,
+	  esjs/include/value.h, esjs/src/array.cpp, esjs/src/date.cpp,
+	  esjs/src/esjs.cpp, esjs/src/function.cpp, esjs/src/global.cpp,
+	  esjs/src/math.cpp, esjs/src/object.cpp, esjs/src/regexp.cpp,
+	  esjs/src/value.cpp, esjs/testsuite/76.js, esjs/testsuite/77.js,
+	  esjs/testsuite/78.js, esjs/testsuite/79.js, esjs/testsuite/80.js,
+	  esjs/testsuite/Makefile.am, esjs/testsuite/Makefile.in: (esjs) :
+	  Add more properties to Object, Function, and Arguments objects.
+
+2007-08-17 02:18  ueno9
+
+	* esjs/Makefile.in, esjs/include/value.h, esjs/src/array.cpp,
+	  esjs/src/regexp.cpp, esjs/src/string.cpp, esjs/testsuite/1047.js,
+	  esjs/testsuite/1048.js, esjs/testsuite/1049.js,
+	  esjs/testsuite/1050.js, esjs/testsuite/1051.js,
+	  esjs/testsuite/1052.js, esjs/testsuite/1053.js,
+	  esjs/testsuite/1054.js, esjs/testsuite/1055.js,
+	  esjs/testsuite/1056.js, esjs/testsuite/1057.js,
+	  esjs/testsuite/1058.js, esjs/testsuite/1059.js,
+	  esjs/testsuite/1060.js, esjs/testsuite/1061.js,
+	  esjs/testsuite/1062.js, esjs/testsuite/1063.js,
+	  esjs/testsuite/1064.js, esjs/testsuite/1065.js,
+	  esjs/testsuite/1066.js, esjs/testsuite/1067.js,
+	  esjs/testsuite/1068.js, esjs/testsuite/1069.js,
+	  esjs/testsuite/1070.js, esjs/testsuite/1071.js,
+	  esjs/testsuite/1072.js, esjs/testsuite/1073.js,
+	  esjs/testsuite/1074.js, esjs/testsuite/Makefile.am,
+	  esjs/testsuite/Makefile.in: (esjs) : Add properties of Array and
+	  String objects.
+
+2007-08-10 04:54  ueno9
+
+	* include/es/utf.h, os/libes++/src/utf.c: (utftoupper) : New.
+
+2007-08-10 01:46  okasaka
+
+	* include/es/tree.h: (Node::remove) : Fix bugs.
+
+2007-07-31 04:53  okasaka
+
+	* Makefile.am, Makefile.in, patches/README,
+	  patches/binutils-2.17.patch, patches/freetype-2.3.5.patch,
+	  patches/gcc-4.2.1.patch, patches/newlib-1.15.0.patch,
+	  patches/pcre-7.2.patch: Support binutils-2.17, gcc-4.2.1,
+	  newlib-1.15.0, pcre-7.2, and freetype-2.3.5.
+
+2007-07-31 04:52  okasaka
+
+	* os/kernel/pc/pc_core.cpp: (catchException) : Explicitly put this
+	  in the .text section.
+
+2007-07-26 09:40  okasaka
+
+	* esjs/Makefile.in: (ChangeLog) : Add to dist.
+
+2007-07-26 09:31  okasaka
+
+	* cmd/squeak-es-3.7.1/ChangeLog, esjs/ChangeLog: es 0.0.12
+	  released.
+
+2007-07-26 09:31  okasaka
+
+	* ChangeLog: es 0.0.12 released.
+
 2007-07-26 09:22  okasaka
 
 	* os/kernel/port/monitor.cpp, os/kernel/port/thread.cpp:
