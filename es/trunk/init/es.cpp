@@ -38,6 +38,8 @@
 #include <es/net/dns.h>
 #include <es/net/udp.h>
 
+using namespace es;
+
 int esInit(IInterface** nameSpace);
 extern void esRegisterInternetProtocol(IContext* context);
 extern void esRegisterDHCPClient(IContext* context);
@@ -56,8 +58,8 @@ void startProcess(Handle<IContext> root, Handle<IProcess> process, Handle<IFile>
     esReport("size: %lld\n", size);
 
     process->setRoot(root);
-    process->setIn(esReportStream());
-    process->setOut(esReportStream());
+    process->setInput(esReportStream());
+    process->setOutput(esReportStream());
     process->setError(esReportStream());
     process->start(file);
 }
@@ -86,12 +88,12 @@ void init(Handle<IContext> root)
     esReport("main size: %lld\n", size);
 
     Handle<IProcess> process;
-    esCreateInstance(CLSID_Process, IID_IProcess,
-                     reinterpret_cast<void**>(&process));
+    process = reinterpret_cast<IProcess*>(
+        esCreateInstance(CLSID_Process, IProcess::iid()));
     ASSERT(process);
     process->setRoot(root);
-    process->setIn(console);
-    process->setOut(console);
+    process->setInput(console);
+    process->setOutput(console);
     process->setError(console);
     process->start(file, "esjs file/shell.js");
     process->wait();
@@ -170,28 +172,30 @@ int main(int argc, char* argv[])
     long long freeSpace;
     long long totalSpace;
 
-    esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&fatFileSystem));
+    fatFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
     {
         Handle<IContext> root;
 
-        fatFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
+        root = fatFileSystem->getRoot();
 
         nameSpace->bind("file", root);
 
         // start event manager process.
         Handle<IProcess> eventProcess;
-        esCreateInstance(CLSID_Process, IID_IProcess,
-                         reinterpret_cast<void**>(&eventProcess));
+        eventProcess = reinterpret_cast<IProcess*>(
+            esCreateInstance(CLSID_Process, IProcess::iid()));
         Handle<IFile> eventElf = nameSpace->lookup("file/eventManager.elf");
+        ASSERT(eventElf);
         startProcess(nameSpace, eventProcess, eventElf);
 
         // start console process.
         Handle<IProcess> consoleProcess;
-        esCreateInstance(CLSID_Process, IID_IProcess,
-                         reinterpret_cast<void**>(&consoleProcess));
+        consoleProcess = reinterpret_cast<IProcess*>(
+            esCreateInstance(CLSID_Process, IProcess::iid()));
         Handle<IFile> consoleElf = nameSpace->lookup("file/console.elf");
+        ASSERT(consoleElf);
         startProcess(nameSpace, consoleProcess, consoleElf);
 
         init(nameSpace);
@@ -199,8 +203,8 @@ int main(int argc, char* argv[])
         consoleProcess->kill();
         eventProcess->kill();
 
-        fatFileSystem->getFreeSpace(freeSpace);
-        fatFileSystem->getTotalSpace(totalSpace);
+        freeSpace = fatFileSystem->getFreeSpace();
+        totalSpace = fatFileSystem->getTotalSpace();
         esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
     }
     fatFileSystem->dismount();

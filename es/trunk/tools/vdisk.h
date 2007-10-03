@@ -24,6 +24,8 @@
 #include <es/base/IStream.h>
 #include <es/device/IDiskManagement.h>
 
+using namespace es;
+
 int esInit(IInterface** nameSpace);
 
 class VDisk : public IStream, public IDiskManagement
@@ -250,47 +252,46 @@ public:
         return -1;
     }
 
-    int getGeometry(Geometry* geometry)
+    void getGeometry(Geometry* geometry)
     {
         memmove(geometry, &this->geometry, sizeof(Geometry));
-        return 0;
     }
 
-    int getLayout(Partition* partition)
+    void getLayout(Partition* partition)
     {
-        return -1;
+        // [check] thow exception.
     }
 
-    int setLayout(Partition* partition)
+    void setLayout(const Partition* partition)
     {
-        return -1;
+        // [check] thow exception.
     }
 
     //
     // IInterface
     //
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IStream)
+        void* objectPtr;
+        if (riid == IStream::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
-        else if (riid == IID_IDiskManagement)
+        else if (riid == IDiskManagement::iid())
         {
-            *objectPtr = static_cast<IDiskManagement*>(this);
+            objectPtr = static_cast<IDiskManagement*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef(void)

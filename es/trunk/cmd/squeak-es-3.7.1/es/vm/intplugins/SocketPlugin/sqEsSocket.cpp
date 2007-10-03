@@ -50,6 +50,8 @@
 
 typedef unsigned long u_long;
 
+using namespace es;
+
 ICurrentProcess* System();
 
 /* sqUnixSocket.c -- Unix socket support

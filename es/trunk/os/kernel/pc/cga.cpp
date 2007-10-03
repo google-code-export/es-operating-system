@@ -32,6 +32,22 @@ putc(int c)
         x += BASE;
         cga = (char*) x;
         break;
+    case 0x08: // backspace
+        x = (unsigned long) cga;
+        x -= BASE;
+        x -= x % 160;
+        x += BASE;
+
+        if ((unsigned long) (cga - 2) < x)
+        {
+            cga = (char*) x; // head of line.
+        }
+        else
+        {
+            cga -= 2;
+        }
+        *cga = ' ';
+        break;
     default:
         *cga = (char) c;
         cga += 2;
@@ -133,24 +149,25 @@ flush()
 {
 }
 
-bool Cga::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Cga::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IStream)
+    void* objectPtr;
+    if (riid == IStream::iid())
     {
-        *objectPtr = static_cast<IStream*>(this);
+        objectPtr = static_cast<IStream*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IStream*>(this);
+        objectPtr = static_cast<IStream*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
+
 }
 
 unsigned int Cga::

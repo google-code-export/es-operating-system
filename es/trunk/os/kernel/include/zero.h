@@ -17,6 +17,8 @@
 #include <es/ref.h>
 #include <es/base/IStream.h>
 
+using namespace es;
+
 class Zero : public IStream
 {
     Ref ref;
@@ -33,7 +35,7 @@ public:
     int write(const void* src, int count);
     int write(const void* src, int count, long long offset);
     void flush();
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 };

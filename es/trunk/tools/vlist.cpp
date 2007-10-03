@@ -41,7 +41,7 @@ void list(Handle<IContext> root, const char* filename)
         long long size;
         size = file->getSize();
         long long t;
-        file->getLastWriteTime(t);
+        t = file->getLastWriteTime();
         DateTime d(t);
         esReport("%8lld %2d/%2d/%2d %02d:%02d:%02d %s\t\n",
                  size,
@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
 
     Handle<IStream> disk = new VDisk(static_cast<char*>(argv[1]));
     Handle<IFileSystem> fatFileSystem;
-    esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&fatFileSystem));
+    fatFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
     fatFileSystem->checkDisk(false);
     esReport("\n");
@@ -81,14 +81,14 @@ int main(int argc, char* argv[])
     {
         Handle<IContext> root;
 
-        fatFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
+        root = fatFileSystem->getRoot();
         list(root, argv[2]);
     }
 
     long long freeSpace;
     long long totalSpace;
-    fatFileSystem->getFreeSpace(freeSpace);
-    fatFileSystem->getTotalSpace(totalSpace);
+    freeSpace = fatFileSystem->getFreeSpace();
+    totalSpace = fatFileSystem->getTotalSpace();
     esReport("\nFree space %lld, Total space %lld\n", freeSpace, totalSpace);
 
     fatFileSystem->dismount();

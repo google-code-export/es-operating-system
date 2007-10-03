@@ -94,7 +94,7 @@ static long TestFileSystem(Handle<IContext> root)
 #endif // VERBOSE
 
     // check creation time.
-    file->getCreationTime(creationTime);
+    creationTime = file->getCreationTime();
 
     TEST(start.getTicks() <= creationTime &&
          creationTime <= end.getTicks());
@@ -111,8 +111,8 @@ static long TestFileSystem(Handle<IContext> root)
     start = DateTime(d.getYear(), d.getMonth(), d.getDay(), d.getHour(), d.getMinute(),
         d.getSecond() - d.getSecond() % 2);
 
-    file->getLastAccessTime(lastAccessTime);
-    file->getLastWriteTime(lastWriteTime);
+    lastAccessTime = file->getLastAccessTime();
+    lastWriteTime = file->getLastWriteTime();
 
     TEST(day.getTicks() <= lastAccessTime &&
          lastAccessTime <= end.getTicks());
@@ -146,11 +146,11 @@ static long TestFileSystem(Handle<IContext> root)
         d.getHour(), d.getMinute(), d.getSecond());
 
     long long lastWriteTime2;
-    file->getLastWriteTime(lastWriteTime2);
+    lastWriteTime2 = file->getLastWriteTime();
     TEST(lastWriteTime == lastWriteTime2);
 
     long long creationTime2;
-    file->getCreationTime(creationTime2);
+    creationTime2 = file->getCreationTime();
     TEST(creationTime == creationTime2);
 
     d = DateTime::getNow();
@@ -159,18 +159,18 @@ static long TestFileSystem(Handle<IContext> root)
 
     // check setCreationTime, setLastAccessTime and setLastWriteTime.
     file->setCreationTime(now.getTicks());
-    file->getCreationTime(creationTime);
+    creationTime = file->getCreationTime();
     TEST(now.getTicks() == creationTime);
 
     now = DateTime(d.getYear(), d.getMonth(), d.getDay(), 0, 0, 0, 0);
     file->setLastAccessTime(now.getTicks());
-    file->getLastAccessTime(lastAccessTime);
+    lastAccessTime = file->getLastAccessTime();
     TEST(now.getTicks() == lastAccessTime);
 
     now = DateTime(d.getYear(), d.getMonth(), d.getDay(), d.getHour(), d.getMinute(),
         d.getSecond() - d.getSecond() % 2);
     file->setLastWriteTime(now.getTicks());
-    file->getLastWriteTime(lastWriteTime);
+    lastWriteTime = file->getLastWriteTime();
 
     TEST(now.getTicks() == lastWriteTime);
 
@@ -199,20 +199,20 @@ int main(void)
     long long freeSpace;
     long long totalSpace;
 
-    esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&fatFileSystem));
+    fatFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
     fatFileSystem->format();
-    fatFileSystem->getFreeSpace(freeSpace);
-    fatFileSystem->getTotalSpace(totalSpace);
+    freeSpace = fatFileSystem->getFreeSpace();
+    totalSpace = fatFileSystem->getTotalSpace();
     esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
     {
         Handle<IContext> root;
 
-        fatFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
+        root = fatFileSystem->getRoot();
         TestFileSystem(root);
-        fatFileSystem->getFreeSpace(freeSpace);
-        fatFileSystem->getTotalSpace(totalSpace);
+        freeSpace = fatFileSystem->getFreeSpace();
+        totalSpace = fatFileSystem->getTotalSpace();
         esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
         esReport("\nChecking the file system...\n");
         TEST(fatFileSystem->checkDisk(false));
@@ -220,11 +220,11 @@ int main(void)
     fatFileSystem->dismount();
     fatFileSystem = 0;
 
-    esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&fatFileSystem));
+    fatFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
-    fatFileSystem->getFreeSpace(freeSpace);
-    fatFileSystem->getTotalSpace(totalSpace);
+    freeSpace = fatFileSystem->getFreeSpace();
+    totalSpace = fatFileSystem->getTotalSpace();
     esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
     esReport("\nChecking the file system...\n");
     TEST(fatFileSystem->checkDisk(false));

@@ -34,7 +34,7 @@ public:
     int invoke(int result);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };
@@ -97,9 +97,8 @@ int main()
     esInit(&ns);
 
     Handle<IAlarm> alarm;
-    esCreateInstance(CLSID_Alarm,
-                     IID_IAlarm,
-                     reinterpret_cast<void**>(&alarm));
+    alarm = reinterpret_cast<IAlarm*>(
+        esCreateInstance(CLSID_Alarm, IAlarm::iid()));
 
     AlarmCallback* alarmCallback = new AlarmCallback;
     alarm->setInterval(50000000LL);
@@ -153,24 +152,24 @@ invoke(int result)
 // IInterface
 //
 
-bool AlarmCallback::
-queryInterface(const Guid& riid, void** objectPtr)
+void* AlarmCallback::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_ICallback)
+    void* objectPtr;
+    if (riid == ICallback::iid())
     {
-        *objectPtr = static_cast<ICallback*>(this);
+        objectPtr = static_cast<ICallback*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<ICallback*>(this);
+        objectPtr = static_cast<ICallback*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int AlarmCallback::

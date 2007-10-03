@@ -44,6 +44,8 @@
 #include <es/naming/IContext.h>
 #include "../IEventQueue.h"
 
+using namespace es;
+
 ICurrentProcess* System();
 
 #define WIDTH   1024
@@ -159,7 +161,7 @@ int ioMousePoint(void)
     int x;
     int y;
     ASSERT(gEventQueue);
-    gEventQueue->getMousePoint(x, y);
+    gEventQueue->getMousePoint(&x, &y);
     return (x << 16) | y;   // x is high 16 bits; y is low 16 bits */
 }
 
@@ -304,7 +306,7 @@ int ioShowDisplay(
         return 1;
     }
 
-    gEventQueue->getMousePoint(x, y);
+    gEventQueue->getMousePoint(&x, &y);
 
     cursor->hide();
     switch (bpp)
@@ -391,7 +393,7 @@ void initInputProcess()
 
     int x;
     int y;
-    gEventQueue->getMousePoint(x, y);
+    gEventQueue->getMousePoint(&x, &y);
 
     framebuffer = root->lookup("device/framebuffer");
     long long size;

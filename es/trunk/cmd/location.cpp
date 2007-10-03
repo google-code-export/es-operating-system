@@ -29,6 +29,8 @@
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
 
+using namespace es;
+
 ICurrentProcess* System();
 
 class Location : public ILocation
@@ -66,12 +68,16 @@ public:
         point.y += direction->y;
     }
 
-    void setName(const char* name)
+    int setName(const char* name, int len)
     {
-        strncpy(this->name, name, sizeof name);
+        if (sizeof(name) < len)
+        {
+            len = sizeof(name);
+        }
+        strncpy(this->name, name, len);
     }
 
-    int getName(char* name, unsigned int len)
+    int getName(char* name, int len)
     {
         unsigned count(strlen(this->name) + 1);
         if (len < count)
@@ -82,23 +88,23 @@ public:
         return count;
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IInterface)
+        void* objectPtr;
+        if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<ILocation*>(this);
+            objectPtr = static_cast<ILocation*>(this);
         }
-        else if (riid == IID_ILocation)
+        else if (riid == ILocation::iid())
         {
-            *objectPtr = static_cast<ILocation*>(this);
+            objectPtr = static_cast<ILocation*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -140,11 +146,10 @@ int main(int argc, char* argv[])
 
     // Create a client process.
     Handle<IProcess> client;
-    bool result =
+    client = reinterpret_cast<IProcess*>(
         classStore->createInstance(CLSID_Process,
-                                   client->interfaceID(),
-                                   reinterpret_cast<void**>(&client));
-    TEST(result);
+                                   client->iid()));
+    TEST(client);
 
     // Start the client process.
     Handle<IFile> file = nameSpace->lookup("file/locationClient.elf");

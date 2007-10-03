@@ -28,6 +28,8 @@
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
 
+using namespace es;
+
 extern int esInit(IInterface** nameSpace);
 extern void esRegisterInternetProtocol(IContext* context);
 

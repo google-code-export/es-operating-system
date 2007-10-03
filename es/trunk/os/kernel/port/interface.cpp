@@ -14,7 +14,6 @@
 #include <string.h>
 #include <es.h>
 #include <es/hashtable.h>
-#include <es/reflect.h>
 #include "interfaceStore.h"
 
 unsigned char* InterfaceStore::defaultInterfaceInfo[] =
@@ -63,6 +62,24 @@ unsigned char* InterfaceStore::defaultInterfaceInfo[] =
     ICanvasRenderingContext2DInfo,
 };
 
+void InterfaceStore::
+registerInterface(Reflect::Module& module)
+{
+    for (int i = 0; i < module.getInterfaceCount(); ++i)
+    {
+        Reflect::Interface interface(module.getInterface(i));
+
+        SpinLock::Synchronized method(spinLock);
+        hashtable.add(interface.getIid(), interface);
+    }
+
+    for (int i = 0; i < module.getModuleCount(); ++i)
+    {
+        Reflect::Module m(module.getModule(i));
+        registerInterface(m);
+    }
+}
+
 InterfaceStore::
 InterfaceStore(int capacity) :
     hashtable(capacity)
@@ -72,14 +89,8 @@ InterfaceStore(int capacity) :
          ++i)
     {
         Reflect r(defaultInterfaceInfo[i]);
-        for (int j = 0; j < r.getInterfaceCount(); ++j)
-        {
-            if (r.getInterface(j).getType().isImported())
-            {
-                continue;
-            }
-            hashtable.add(r.getInterface(j).getIid(), r.getInterface(j));
-        }
+        Reflect::Module global(r.getGlobalModule());
+        registerInterface(global);
     }
 }
 
@@ -94,18 +105,8 @@ add(const void* data, int length)
     void* buffer = new u8[length];
     memmove(buffer, data, length);
     Reflect r(buffer);
-    for (int i = 0; i < r.getInterfaceCount(); ++i)
-    {
-        if (r.getInterface(i).getType().isImported())
-        {
-            continue;
-        }
-        {
-            SpinLock::Synchronized method(spinLock);
-
-            hashtable.add(r.getInterface(i).getIid(), r.getInterface(i));
-        }
-    }
+    Reflect::Module global(r.getGlobalModule());
+    registerInterface(global);
 }
 
 void InterfaceStore::
@@ -114,26 +115,27 @@ remove(const Guid& riid)
     SpinLock::Synchronized method(spinLock);
 
     hashtable.remove(riid);
+    // XXX release buffer
 }
 
-bool InterfaceStore::
-queryInterface(const Guid& riid, void** objectPtr)
+void* InterfaceStore::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IInterfaceStore)
+    void* objectPtr;
+    if (riid == IInterfaceStore::iid())
     {
-        *objectPtr = static_cast<IInterfaceStore*>(this);
+        objectPtr = static_cast<IInterfaceStore*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IInterfaceStore*>(this);
+        objectPtr = static_cast<IInterfaceStore*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int InterfaceStore::

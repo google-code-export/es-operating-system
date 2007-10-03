@@ -18,6 +18,8 @@
 #include "esjs.h"
 #include "parser.h"
 
+using namespace es;
+
 //
 // yacc declarations
 //
@@ -216,7 +218,7 @@ int report(const char* spec, ...)
     va_list list;
 
     va_start(list, spec);
-    IStream* output(System()->getOut());
+    IStream* output(System()->getOutput());
     Formatter formatter(output);
     formatter.setMode(Formatter::Mode::ECMAScript);
     int count = formatter.format(spec, list);

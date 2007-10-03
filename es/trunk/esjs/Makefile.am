@@ -2,11 +2,11 @@ if POSIX
 SUBDIRS = . testsuite
 endif POSIX
 
-SUFFIXES = .ird
+SUFFIXES = .ent
 
-vpath %.ird = ../include/es
+vpath %.ent = ../include/es
 
-%.c : %.ird
+%.c : %.ent
 	mkdir -p $(*D);
 	echo -n "unsigned char" $(*F) > $@;
 	echo "Info[] = {" >> $@;
@@ -57,7 +57,7 @@ nodist_esjs_SOURCES = \
 BUILT_SOURCES = lexer.cc parser.cc parser.h
 
 esjs_SOURCES = \
-	src/apply.S src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
+	src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
 	src/array.cpp \
 	src/boolean.cpp \
 	src/date.cpp \
@@ -98,6 +98,7 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/src \
 	-I- \
 	-I$(srcdir)/../include \
+	-I../include \
 	-I$(prefix)/include
 
 clean-local:

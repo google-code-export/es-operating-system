@@ -86,7 +86,7 @@ class UpcallRecord
     UpcallProxy*        proxy;
     int                 methodNumber;
     va_list             param;
-    Reflect::Function   method;
+    Reflect::Method     method;
 
     friend class Core;
     friend class Thread;
@@ -226,7 +226,7 @@ public:
         void spinUnlock();
 
         // IInterface
-        bool queryInterface(const Guid& riid, void** objectPtr);
+        void* queryInterface(const Guid& riid);
         unsigned int addRef(void);
         unsigned int release(void);
 
@@ -359,7 +359,7 @@ public:
     //
     // IInterface
     //
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -397,7 +397,7 @@ public:
     //
     // ICurrentThread
     //
-    void exit(void* val);
+    void exit(const void* val);
     void sleep(long long timeout);
     int setCancelState(int state);
     int setCancelType(int type);
@@ -410,12 +410,14 @@ public:
               IPageable* pageable, long long offset);
     void unmap(const void* start, long long length);
     ICurrentThread* currentThread();
-    IThread* createThread(void* (*start)(void* param), void* param);
+    // [check] start must be a function pointer.
+    // IThread* createThread(void* (*start)(void* param), void* param);
+    IThread* createThread(const void* start, const void* param);
     void yield(void);
     IMonitor* createMonitor();
     IContext* getRoot();
-    IStream* getIn();
-    IStream* getOut();
+    IStream* getInput();
+    IStream* getOutput();
     IStream* getError();
     void* setBreak(long long increment);
     long long getNow();
@@ -424,13 +426,17 @@ public:
     IContext* getCurrent();
 
     // IRuntime
+    /* [check] function pointer.
     void setStartup(void (*startup)(void* (*start)(void* param), void* param));
     void setFocus(void* (*focus)(void* param));
+    */
+    void setStartup(const void* startup);
+    void setFocus(const void* focus);
 
     //
     // IInterface
     //
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

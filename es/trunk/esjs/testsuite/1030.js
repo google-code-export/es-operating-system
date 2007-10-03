@@ -1,6 +1,6 @@
 // test setSeconds().
 
-stdout = System.getOut();
+stdout = System.output;
 function check(result)
 {
     if (result)

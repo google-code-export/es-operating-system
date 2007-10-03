@@ -79,11 +79,11 @@ public:
 
     // IDiskManagement
     int initialize();
-    int getGeometry(Geometry* geometry);
-    int getLayout(Partition* partition);
-    int setLayout(Partition* partition);
+    void getGeometry(Geometry* geometry);
+    void getLayout(Partition* partition);
+    void setLayout(const Partition* partition);
 
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };
@@ -150,7 +150,7 @@ public:
     int mount(IStream* disk);
     int unmount();
 
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -221,10 +221,10 @@ public:
 
     // IBinding
     IInterface* getObject();
-    int setObject(IInterface* object);
-    int getName(char* name, unsigned int len);
+    void setObject(IInterface* object);
+    int getName(char* name, int len);
 
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

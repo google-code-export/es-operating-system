@@ -15,13 +15,13 @@ c_source_files = \
 	src/utf.c
 
 cpp_source_files = \
+	src/apply.cpp \
 	src/context.cpp \
 	src/dateTime.cpp \
 	src/dump.cpp \
 	src/inet.cpp \
 	src/throw.cpp \
 	src/formatter.cpp \
-	src/reflect.cpp \
 	src/ring.cpp
 
 header_files = \

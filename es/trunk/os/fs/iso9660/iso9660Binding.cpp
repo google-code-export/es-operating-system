@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -15,6 +15,7 @@
 // IBinding
 //
 
+#include <errno.h>
 #include <string.h>
 #include <es/formatter.h>
 #include <es/handle.h>
@@ -27,10 +28,10 @@ getObject()
     return static_cast<IContext*>(this);
 }
 
-int Iso9660Stream::
+void Iso9660Stream::
 setObject(IInterface* object)
 {
-    return -1;
+    esThrow(EACCES); // [check] appropriate?
 }
 
 // Note getName() is implemented in "iso9660Ucs2.cpp" and in

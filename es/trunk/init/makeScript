@@ -22,6 +22,7 @@ echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/ls.js > /dev/null 2>&1' >> $
 echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/date.js > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/figure.js > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/clear.js > /dev/null 2>&1' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/gradinet.js > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/hello.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/eventManager.elf > /dev/null 2>&1' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/console.elf > /dev/null 2>&1' >> $SCRIPT

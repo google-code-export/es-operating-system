@@ -18,6 +18,8 @@
 #include <es/ref.h>
 #include <es/device/IRtc.h>
 
+using namespace es;
+
 class Rtc : public IRtc
 {
     friend DateTime DateTime::getNow();
@@ -29,7 +31,7 @@ class Rtc : public IRtc
 
     static int getCounter(int addr);
     static void setCounter(int addr, int count);
-    static DateTime getTime();
+    static DateTime getDateTime();
 
 public:
 
@@ -52,11 +54,11 @@ public:
     Rtc();
 
     // IRtc
-    void getTime(long long& time);
+    long long getTime();
     void setTime(long long time);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 

@@ -147,24 +147,24 @@ create(IStream* backingStore, IPageSet* pageSet)
     return new Cache(this, backingStore, ps);
 }
 
-bool CacheFactory::
-queryInterface(const Guid& riid, void** objectPtr)
+void* CacheFactory::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_ICacheFactory)
+    void* objectPtr;
+    if (riid == ICacheFactory::iid())
     {
-        *objectPtr = static_cast<ICacheFactory*>(this);
+        objectPtr = static_cast<ICacheFactory*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<ICacheFactory*>(this);
+        objectPtr = static_cast<ICacheFactory*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int CacheFactory::

@@ -319,10 +319,10 @@ public:
     void reserve(unsigned long long reserveCount);
 
     // IClassFactory
-    bool createInstance(const Guid& riid, void** objectPtr);
+    void* createInstance(const Guid& riid);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -428,7 +428,7 @@ public:
 
     void setSize(long long size);
 
-    void getSectorSize(int& size);
+    int getSectorSize();
 
     void setSectorSize(int size);
 
@@ -443,7 +443,7 @@ public:
     unsigned long long getPageCount();
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -489,7 +489,7 @@ public:
     ICache* create(IStream* backingStore, IPageSet* pageSet);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -520,7 +520,7 @@ public:
     int write(const void* src, int count);
     int write(const void* src, int count, long long offset);
     void flush();
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 

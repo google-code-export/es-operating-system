@@ -6,6 +6,8 @@ SUFFIXES = .img .gz
 	$(host_alias)-objcopy -O binary $< $@
 	$(srcdir)/makeScript "`pwd`" $(*F)
 
+TESTS_ENVIRONMENT = $(srcdir)/testLoader
+
 TESTS = main start binder location eventManager console upcallTest
 
 noinst_SCRIPTS = $(TESTS)
@@ -53,4 +55,4 @@ AM_CPPFLAGS = \
 	-I$(prefix)/include \
 	-I$(prefix)/include/freetype2
 
-EXTRA_DIST = disk.img.gz makeScript
+EXTRA_DIST = disk.img.gz makeScript testLoader

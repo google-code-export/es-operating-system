@@ -1,11 +1,11 @@
 SUBDIRS = . testsuite
 
-SUFFIXES = .h .idl .ird
+SUFFIXES = .h .idl .ent
 
-%.h %.ird : %.idl
+%.h %.ent: %.idl
 	esidl -I $(srcdir)/../include $<
 
-%.c : %.ird
+%.c : %.ent
 	mkdir -p $(*D);
 	echo -n "unsigned char" $(*F) > $@;
 	echo "Info[] = {" >> $@;
@@ -50,7 +50,7 @@ locationClient_SOURCES = locationClient.cpp location.h ILocation.idl
 
 nodist_location_SOURCES = ILocation.c
 
-BUILT_SOURCES = ILocation.h ILocation.ird
+BUILT_SOURCES = ILocation.h ILocation.ent
 
 eventManager_SOURCES = eventManager.cpp eventManager.h IEventQueue.idl
 
@@ -58,7 +58,7 @@ eventManagerClient_SOURCES = eventManagerClient.cpp eventManager.h IEventQueue.i
 
 nodist_eventManager_SOURCES = IEventQueue.c
 
-BUILT_SOURCES += IEventQueue.h IEventQueue.ird
+BUILT_SOURCES += IEventQueue.h IEventQueue.ent
 
 console_SOURCES = console.cpp canvas.cpp canvas.h
 

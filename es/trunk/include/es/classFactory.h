@@ -27,41 +27,41 @@
  *        C must have a default constructor.
  */
 template<class C>
-class ClassFactory : public IClassFactory
+class ClassFactory : public es::IClassFactory
 {
     Ref ref;
 
 public:
-    bool createInstance(const Guid& riid, void** objectPtr)
+    void* createInstance(const Guid& riid)
     {
-        *objectPtr = 0;
+        void* objectPtr = 0;
         C* instance = new(std::nothrow) C;
         if (!instance)
         {
             throw SystemException<ENOMEM>();
         }
-        bool rc = instance->queryInterface(riid, objectPtr);
+        objectPtr = instance->queryInterface(riid);
         instance->release();
-        return rc;
+        return objectPtr;
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IClassFactory)
+        void* objectPtr;
+        if (riid == es::IClassFactory::iid())
         {
-            *objectPtr = static_cast<IClassFactory*>(this);
+            objectPtr = static_cast<es::IClassFactory*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == es::IInterface::iid())
         {
-            *objectPtr = static_cast<IClassFactory*>(this);
+            objectPtr = static_cast<es::IClassFactory*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<es::IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef(void)

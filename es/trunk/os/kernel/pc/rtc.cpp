@@ -25,7 +25,7 @@ Rtc::
 Rtc() :
     ref(1)
 {
-    getTime(epoch);
+    epoch = getTime();
 }
 
 int Rtc::
@@ -46,7 +46,7 @@ setCounter(int addr, int count)
 }
 
 DateTime Rtc::
-getTime()
+getDateTime()
 {
     Lock::Synchronized method(spinLock);
 
@@ -96,32 +96,35 @@ setTime(long long ticks)
     epoch += ticks - DateTime::getNow().getTicks();
 }
 
-void Rtc::
-getTime(long long& ticks)
+long long Rtc::
+getTime()
 {
+    long long ticks;
     do {
-        ticks = getTime().getTicks();
-    } while (ticks != getTime().getTicks());
+        ticks = getDateTime().getTicks();
+    } while (ticks != getDateTime().getTicks());
+
+    return ticks;
 }
 
-bool Rtc::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Rtc::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IRtc)
+    void* objectPtr;
+    if (riid == IRtc::iid())
     {
-        *objectPtr = static_cast<IRtc*>(this);
+        objectPtr = static_cast<IRtc*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IRtc*>(this);
+        objectPtr = static_cast<IRtc*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Rtc::

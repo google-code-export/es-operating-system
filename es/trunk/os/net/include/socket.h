@@ -272,7 +272,7 @@ public:
     int remove(IMonitor* selector);
 
     // IMulticastSocket
-    int getLoopbackMode();
+    bool isLoopbackMode();
     void setLoopbackMode(bool disable);
     void joinGroup(IInternetAddress* addr);
     void leaveGroup(IInternetAddress* addr);
@@ -280,7 +280,7 @@ public:
     //
     // IInterface
     //
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 

@@ -1,3 +1,7 @@
+2007-07-26 09:31  okasaka
+
+	* ChangeLog: es 0.0.12 released.
+
 2007-07-26 06:54  okasaka
 
 	* configure, configure.ac: Set version to 0.0.12.

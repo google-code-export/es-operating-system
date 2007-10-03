@@ -21,6 +21,8 @@
 #include <es/base/IProcess.h>
 #include <es/base/ISelectable.h>
 
+using namespace es;
+
 ICurrentProcess* System();
 
 class Selector

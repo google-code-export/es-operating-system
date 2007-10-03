@@ -1,6 +1,6 @@
 // test toUTCString() and toGMString().
 
-stdout = System.getOut();
+stdout = System.output;
 function print(s)
 {
     stdout.write(s + '\n', s.length + 1);

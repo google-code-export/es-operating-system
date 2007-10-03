@@ -30,6 +30,8 @@
 class FloppyController;
 class FloppyDrive;
 
+using namespace es;
+
 class FloppyDrive : public IDiskManagement, public IStream , public ICallback // public IRemovableMedia
 {
     friend class FloppyController;
@@ -80,12 +82,12 @@ public:
 
     // IDiskManagement
     int initialize();
-    int getGeometry(Geometry* geometry);
-    int getLayout(Partition* partition);
-    int setLayout(Partition* partition);
+    void getGeometry(Geometry* geometry);
+    void getLayout(Partition* partition);
+    void setLayout(const Partition* partition);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 };
@@ -142,7 +144,7 @@ public:
     int invoke(int);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 };

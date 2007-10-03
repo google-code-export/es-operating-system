@@ -116,7 +116,7 @@ public:
     int stop();
     int probe();
 
-    bool getPromiscuousMode();
+    bool isPromiscuousMode();
     void setPromiscuousMode(bool on);
     int addMulticastAddress(const u8 mac[6]);
     int removeMulticastAddress(const u8 mac[6]);
@@ -172,7 +172,7 @@ public:
     int invoke(int irq);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 

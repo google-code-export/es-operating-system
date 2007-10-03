@@ -61,7 +61,7 @@ public:
     virtual int write(const void* src, int count) = 0;
     int write(const void* src, int count, long long offset);
 
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

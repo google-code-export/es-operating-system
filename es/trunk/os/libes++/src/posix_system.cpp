@@ -29,6 +29,8 @@
 #include <es/classFactory.h>
 #include <es/clsid.h>
 
+using namespace es;
+
 int esInit(IInterface** nameSpace);
 
 namespace
@@ -111,23 +113,23 @@ public:
     // IInterface
     //
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IStream)
+        void* objectPtr;
+        if (riid == IStream::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -187,28 +189,28 @@ public:
     }
 
     // IFile
-    int getAttributes(unsigned int& attributes)
+    unsigned int getAttributes()
     {
     }
-    int getCreationTime(long long& time)
+    long long getCreationTime()
     {
     }
-    int getLastAccessTime(long long& time)
+    long long getLastAccessTime()
     {
     }
-    int getLastWriteTime(long long& time)
+    long long getLastWriteTime()
     {
     }
-    int setAttributes(unsigned int attributes)
+    void setAttributes(unsigned int attributes)
     {
     }
-    int setCreationTime(long long time)
+    void setCreationTime(long long time)
     {
     }
-    int setLastAccessTime(long long time)
+    void setLastAccessTime(long long time)
     {
     }
-    int setLastWriteTime(long long time)
+    void setLastWriteTime(long long time)
     {
     }
     bool canRead()
@@ -250,12 +252,12 @@ public:
         return static_cast<IFile*>(this);
     }
 
-    int setObject(IInterface* object)
+    void setObject(IInterface* object)
     {
-        return -1;
+        esThrow(EACCES); // [check] appropriate?
     }
 
-    int getName(char* name, unsigned int len)
+    int getName(char* name, int len)
     {
         const char* p = this->name;
         int i;
@@ -274,27 +276,27 @@ public:
     // IInterface
     //
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IFile)
+        void* objectPtr;
+        if (riid == IFile::iid())
         {
-            *objectPtr = static_cast<IFile*>(this);
+            objectPtr = static_cast<IFile*>(this);
         }
-        else if (riid == IID_IBinding)
+        else if (riid == IBinding::iid())
         {
-            *objectPtr = static_cast<IBinding*>(this);
+            objectPtr = static_cast<IBinding*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IFile*>(this);
+            objectPtr = static_cast<IFile*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -373,23 +375,23 @@ public:
     // IInterface
     //
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IIterator)
+        void* objectPtr;
+        if (riid == IIterator::iid())
         {
-            *objectPtr = static_cast<IIterator*>(this);
+            objectPtr = static_cast<IIterator*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IIterator*>(this);
+            objectPtr = static_cast<IIterator*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -569,31 +571,31 @@ public:
     // IInterface
     //
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IFile)
+        void* objectPtr;
+        if (riid == IFile::iid())
         {
-            *objectPtr = static_cast<IFile*>(this);
+            objectPtr = static_cast<IFile*>(this);
         }
-        else if (riid == IID_IBinding)
+        else if (riid == IBinding::iid())
         {
-            *objectPtr = static_cast<IBinding*>(this);
+            objectPtr = static_cast<IBinding*>(this);
         }
-        else if (riid == IID_IContext)
+        else if (riid == IContext::iid())
         {
-            *objectPtr = static_cast<IContext*>(this);
+            objectPtr = static_cast<IContext*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IContext*>(this);
+            objectPtr = static_cast<IContext*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -737,29 +739,50 @@ public:
     int getExitValue() { return 0; }
     bool hasExited() { return true; }
     void setRoot(IContext* root) {}
-    void setIn(IStream* in) {}
-    void setOut(IStream* out) {}
+    void setInput(IStream* in) {}
+    void setOutput(IStream* out) {}
     void setError(IStream* error) {}
     void setCurrent(IContext* context) {}
 
-    // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    IContext* getRoot()
     {
-        if (riid == IID_IProcess)
+        esThrow(ENOSYS); // [check]
+    }
+    IStream* getInput()
+    {
+        esThrow(ENOSYS); // [check]
+    }
+    IStream* getOutput()
+    {
+        esThrow(ENOSYS); // [check]
+    }
+    IStream* getError()
+    {
+        esThrow(ENOSYS); // [check]
+    }
+    IContext* getCurrent()
+    {
+        esThrow(ENOSYS); // [check]
+    }
+
+    // IInterface
+    void* queryInterface(const Guid& riid)
+    {
+        void* objectPtr;
+        if (riid == IProcess::iid())
         {
-            *objectPtr = static_cast<IProcess*>(this);
+            objectPtr = static_cast<IProcess*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IProcess*>(this);
+            objectPtr = static_cast<IProcess*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -803,7 +826,7 @@ public:
 
         IInterface* unknown = 0;
         esInit(&unknown);
-        unknown->queryInterface(IID_IContext, (void**) &root);
+        root = reinterpret_cast<IContext*>(unknown->queryInterface(IContext::iid()));
 
         int fd = open(".", O_RDONLY);
         Dir* file = new Dir(fd, "");
@@ -830,7 +853,6 @@ public:
     {
         ::exit(status);
     }
-
     void* map(const void* start, long long length, unsigned int prot, unsigned int flags, IPageable* pageable, long long offset)
     {
     }
@@ -843,7 +865,7 @@ public:
     {
     }
 
-    IThread* createThread(void* (*start)(void* param), void* param)
+    IThread* createThread(const void* start, const void* param) // [check] start must be a function pointer.
     {
     }
 
@@ -861,13 +883,13 @@ public:
         return root;
     }
 
-    IStream* getIn()
+    IStream* getInput()
     {
         in->addRef();
         return in;
     }
 
-    IStream* getOut()
+    IStream* getOutput()
     {
         out->addRef();
         return out;
@@ -918,23 +940,23 @@ public:
     {
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_ICurrentProcess)
+        void* objectPtr;
+        if (riid == ICurrentProcess::iid())
         {
-            *objectPtr = static_cast<ICurrentProcess*>(this);
+            objectPtr = static_cast<ICurrentProcess*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<ICurrentProcess*>(this);
+            objectPtr = static_cast<ICurrentProcess*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()

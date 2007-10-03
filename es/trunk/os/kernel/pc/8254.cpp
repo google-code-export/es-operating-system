@@ -115,28 +115,28 @@ beep()
 // IInterface
 //
 
-bool Pit::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Pit::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_ICallback)
+    void* objectPtr;
+    if (riid == ICallback::iid())
     {
-        *objectPtr = static_cast<ICallback*>(this);
+        objectPtr = static_cast<ICallback*>(this);
     }
-    else if (riid == IID_IBeep)
+    else if (riid == IBeep::iid())
     {
-        *objectPtr = static_cast<IBeep*>(this);
+        objectPtr = static_cast<IBeep*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<ICallback*>(this);
+        objectPtr = static_cast<ICallback*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Pit::

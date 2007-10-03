@@ -1,7 +1,7 @@
 // Date as Constructor called as a function.
 function print(s)
 {
-    stdout = System.getOut();
+    stdout = System.output;
     stdout.write(s, s.length);
     stdout.write("\n", 1);
     return 0;
@@ -9,7 +9,7 @@ function print(s)
 
 function check(result)
 {
-    stdout = System.getOut();
+    stdout = System.output;
     if (result)
     {
         stdout.write("OK\n", 3);

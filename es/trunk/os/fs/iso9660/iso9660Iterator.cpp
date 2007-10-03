@@ -73,24 +73,24 @@ remove(void)
     return -1;
 }
 
-bool Iso9660Iterator::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Iso9660Iterator::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IIterator)
+    void* objectPtr;
+    if (riid == IIterator::iid())
     {
-        *objectPtr = static_cast<IIterator*>(this);
+        objectPtr = static_cast<IIterator*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IIterator*>(this);
+        objectPtr = static_cast<IIterator*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Iso9660Iterator::

@@ -245,32 +245,32 @@ unlock()
     return preventAllowMediumRemoval(false);
 }
 
-bool AtaPacketDevice::
-queryInterface(const Guid& riid, void** objectPtr)
+void* AtaPacketDevice::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IStream)
+    void* objectPtr;
+    if (riid == IStream::iid())
     {
-        *objectPtr = static_cast<IStream*>(this);
+        objectPtr = static_cast<IStream*>(this);
     }
-    else if (riid == IID_IDiskManagement)
+    else if (riid == IDiskManagement::iid())
     {
-        *objectPtr = static_cast<IDiskManagement*>(this);
+        objectPtr = static_cast<IDiskManagement*>(this);
     }
-    else if (riid == IID_IRemovableMedia && removal)
+    else if (riid == IRemovableMedia::iid() && removal)
     {
-        *objectPtr = static_cast<IRemovableMedia*>(this);
+        objectPtr = static_cast<IRemovableMedia*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IStream*>(this);
+        objectPtr = static_cast<IStream*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int AtaPacketDevice::

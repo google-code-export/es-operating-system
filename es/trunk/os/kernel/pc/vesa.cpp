@@ -147,12 +147,12 @@ move(int dx, int dy)
 }
 
 void Vesa::
-getPosition(int& x, int& y)
+getPosition(int* x, int* y)
 {
     Monitor::Synchronized method(monitor);
 
-    x = xPosition;
-    y = yPosition;
+    *x = xPosition;
+    *y = yPosition;
 }
 
 void Vesa::
@@ -463,32 +463,32 @@ put(long long offset, unsigned long long pte)
 {
 }
 
-bool Vesa::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Vesa::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_ICursor)
+    void* objectPtr;
+    if (riid == ICursor::iid())
     {
-        *objectPtr = static_cast<ICursor*>(this);
+        objectPtr = static_cast<ICursor*>(this);
     }
-    else if (riid == IID_IStream)
+    else if (riid == IStream::iid())
     {
-        *objectPtr = static_cast<IStream*>(this);
+        objectPtr = static_cast<IStream*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<ICursor*>(this);
+        objectPtr = static_cast<ICursor*>(this);
     }
-    else if (riid == IID_IPageable)
+    else if (riid == IPageable::iid())
     {
-        *objectPtr = static_cast<IPageable*>(this);
+        objectPtr = static_cast<IPageable*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Vesa::

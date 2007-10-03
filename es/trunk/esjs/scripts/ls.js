@@ -12,7 +12,7 @@ for (var i = 1; i < params.length; ++i)
         {
             unknown = iter.next();
             binding = IBinding(unknown);
-            name = binding.getName(256);
+            name = binding.name;
             if (name != "." && name != "..")
             {
                 stdout.write(name + '\n', name.length + 1);

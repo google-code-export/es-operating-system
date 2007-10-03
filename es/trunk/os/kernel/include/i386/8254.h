@@ -65,7 +65,7 @@ public:
     void beep();
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 

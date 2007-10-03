@@ -41,6 +41,8 @@
 #include <es/naming/IContext.h>
 #include <es/handle.h>
 
+using namespace es;
+
 extern Handle<IContext> gRoot;
 
 extern "C"
@@ -175,9 +177,9 @@ int dir_Lookup(char *pathString, int pathStringLength, int index /* starting at 
             if (file)
             {
                 long long tick;
-                file->getCreationTime(tick);
+                tick = file->getCreationTime();
                 *creationDate = convertToSqueakTime(tick);
-                file->getLastWriteTime(tick);
+                tick = file->getLastWriteTime();
                 *modificationDate = convertToSqueakTime(tick);
             }
 

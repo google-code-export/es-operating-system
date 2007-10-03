@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -11,16 +11,25 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-import "es/base/IInterface.idl";
+#ifndef NINTENDO_ES_DEVICE_IDEVICE_IDL_INCLUDED
+#define NINTENDO_ES_DEVICE_IDEVICE_IDL_INCLUDED
 
-/**
- * This interface represents a device which generates interrupts.
- */
-[object, uuid(83a32b6a-25dc-11db-9c02-0009bf000001)]
-interface IDevice : IInterface
+#include "es/base/IInterface.idl"
+
+module es
 {
     /**
-     * Interrupt handler for this device.
+     * This interface represents a device which generates interrupts.
      */
-    void interrupt();
-}
+    interface IDevice : IInterface
+    {
+        #pragma ID IDevice = "DCE:83a32b6a-25dc-11db-9c02-0009bf000001";
+        /**
+         * Interrupt handler for this device.
+         */
+        void interrupt();
+    };
+};
+
+#endif // NINTENDO_ES_DEVICE_IDEVICE_IDL_INCLUDED
+

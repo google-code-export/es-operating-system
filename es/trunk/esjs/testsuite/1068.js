@@ -1,6 +1,6 @@
 function check(result)
 {
-    stdout = System.getOut();
+    stdout = System.output;
     if (result)
     {
         stdout.write("OK\n", 3);
@@ -12,4 +12,9 @@ function check(result)
     return result;
 }
 
-check(1); // dummy.
+s = "lineTo(  12 ,  34 )".replace(/\s/g, ""); // remove white spaces.
+check(s == "lineTo(12,34)");
+
+s = "lineTo(12,34,56)".split(/[\( \) ,]/).join(" "); // get argv[].
+check(s == "lineTo 12 34 56 ");
+

@@ -181,24 +181,24 @@ notifyAll()
     }
 }
 
-bool Monitor::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Monitor::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IMonitor)
+    void* objectPtr;
+    if (riid == IMonitor::iid())
     {
-        *objectPtr = static_cast<IMonitor*>(this);
+        objectPtr = static_cast<IMonitor*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IMonitor*>(this);
+        objectPtr = static_cast<IMonitor*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Monitor::

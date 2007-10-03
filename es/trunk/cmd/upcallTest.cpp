@@ -26,6 +26,8 @@
 #include <es/base/IInterfaceStore.h>
 #include <es/naming/IContext.h>
 
+using namespace es;
+
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
@@ -90,23 +92,23 @@ public:
     {
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IStream)
+        void* objectPtr;
+        if (riid == IStream::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef(void)

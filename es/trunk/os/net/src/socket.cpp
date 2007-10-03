@@ -607,8 +607,8 @@ isWritable()
 // IMulticastSocket
 //
 
-int Socket::
-getLoopbackMode()
+bool Socket::
+isLoopbackMode()
 {
 }
 
@@ -684,32 +684,32 @@ remove(IMonitor* selector)
 // IInterface
 //
 
-bool Socket::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Socket::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_ISocket)
+    void* objectPtr;
+    if (riid == ISocket::iid())
     {
-        *objectPtr = static_cast<ISocket*>(this);
+        objectPtr = static_cast<ISocket*>(this);
     }
-    else if (riid == IID_ISelectable)
+    else if (riid == ISelectable::iid())
     {
-        *objectPtr = static_cast<ISelectable*>(this);
+        objectPtr = static_cast<ISelectable*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<ISocket*>(this);
+        objectPtr = static_cast<ISocket*>(this);
     }
-    else if (riid == IID_IMulticastSocket && type == ISocket::Datagram)
+    else if (riid == IMulticastSocket::iid() && type == ISocket::Datagram)
     {
-        *objectPtr = static_cast<Socket*>(this);
+        objectPtr = static_cast<Socket*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Socket::

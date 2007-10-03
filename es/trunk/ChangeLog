@@ -1,3 +1,7 @@
+2007-08-30 08:14  okasaka
+
+	* ChangeLog: es 0.0.13 released.
+
 2007-08-30 08:04  okasaka
 
 	* cmd/configure, cmd/configure.ac, configure, configure.ac,

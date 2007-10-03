@@ -21,6 +21,8 @@
 #include "address.h"
 #include "conduit.h"
 
+using namespace es;
+
 class InetMessenger;
 
 class InetReceiver : public virtual Receiver

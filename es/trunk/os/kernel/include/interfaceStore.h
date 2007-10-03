@@ -30,6 +30,8 @@ class InterfaceStore : public IInterfaceStore
     Hashtable<Guid, Reflect::Interface>
                 hashtable;
 
+    void registerInterface(Reflect::Module& module);
+
 public:
     InterfaceStore(int capacity = 128);
     ~InterfaceStore();
@@ -46,7 +48,7 @@ public:
     void remove(const Guid& riid);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

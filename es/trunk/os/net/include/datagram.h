@@ -74,9 +74,8 @@ public:
         errorCode(0),
         socket(0)
     {
-        esCreateInstance(CLSID_Monitor,
-                         IID_IMonitor,
-                         reinterpret_cast<void**>(&monitor));
+        monitor = reinterpret_cast<IMonitor*>(
+            esCreateInstance(CLSID_Monitor, IMonitor::iid()));
     }
 
     ~DatagramReceiver()

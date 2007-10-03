@@ -53,7 +53,7 @@ cancel()
 
 // IInternetAddress
 int Inet4Address::
-getAddress(void* address, unsigned int len)
+getAddress(void* address, int len)
 {
     if (sizeof(addr) <= len)
     {
@@ -70,19 +70,19 @@ getAddressFamily()
 }
 
 int Inet4Address::
-getCanonicalHostName(char* hostName, unsigned int len)
+getCanonicalHostName(char* hostName, int len)
 {
 }
 
 int Inet4Address::
-getHostAddress(char* hostAddress, unsigned int len)
+getHostAddress(char* hostAddress, int len)
 {
 }
 
 int Inet4Address::
-getHostName(char* hostName, unsigned int len)
+getHostName(char* hostName, int len)
 {
-    return Socket::resolver->getHostName(this, hostName, len);
+    return Socket::resolver->getHostName(hostName, len, this);
 }
 
 void Inet4Address::
@@ -151,24 +151,24 @@ socket(int type, int protocol, int port)
 }
 
 // IInterface
-bool Inet4Address::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Inet4Address::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IInternetAddress)
+    void* objectPtr;
+    if (riid == IInternetAddress::iid())
     {
-        *objectPtr = static_cast<IInternetAddress*>(this);
+        objectPtr = static_cast<IInternetAddress*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IInternetAddress*>(this);
+        objectPtr = static_cast<IInternetAddress*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Inet4Address::

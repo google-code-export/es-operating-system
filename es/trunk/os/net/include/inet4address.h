@@ -326,11 +326,11 @@ public:
     void cancel();
 
     // IInternetAddress
-    int getAddress(void* address, unsigned int len);
+    int getAddress(void* address, int len);
     int getAddressFamily();
-    int getCanonicalHostName(char* hostName, unsigned int len);
-    int getHostAddress(char* hostAddress, unsigned int len);
-    int getHostName(char* hostName, unsigned int len);
+    int getCanonicalHostName(char* hostName, int len);
+    int getHostAddress(char* hostAddress, int len);
+    int getHostName(char* hostName, int len);
 
     int getScopeID()
     {
@@ -381,7 +381,7 @@ public:
     IInterface* socket(int type, int protocol, int port);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 

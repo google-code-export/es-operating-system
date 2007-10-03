@@ -270,7 +270,7 @@ public:
     //
     // Object Type methods
     //
-    virtual Value* get(const std::string& name) const;
+    virtual Value* get(const std::string& name);
     virtual void put(const std::string& name, Value* value, int attributes = 0)
     {
         // Do nothing.
@@ -307,6 +307,19 @@ public:
     virtual void putValue(Value* value)
     {
         throw getErrorInstance("ReferenceError");
+    }
+
+    //
+    // Getter/Setter
+    //
+    virtual Value* get(Value* self)
+    {
+        return this;
+    }
+
+    virtual bool put(Value* self, Value* v)
+    {
+        return false;
     }
 
     //
@@ -930,7 +943,7 @@ protected:
             return value;
         }
 
-        void setValue(Value* v)
+        void putValue(Value* v)
         {
             value = v;
         }
@@ -1028,22 +1041,26 @@ public:
         return this;
     };
 
-    Value* get(const std::string& name) const
+    Value* get(const std::string& name)
     {
-        try
+        ObjectValue* object = this;
+        for (;;)
         {
-            Property* property = properties.get(name);
-            ASSERT(property->value);
-            return property->value;
-        }
-        catch (Exception& e)
-        {
-            if (prototype->isNull())
+            try
             {
-                return UndefinedValue::getInstance();
+                Property* property = object->properties.get(name);
+                Value* getter = property->getValue();
+                return getter->get(this);
+            }
+            catch (Exception& e)
+            {
+                if (object->prototype->isNull())
+                {
+                    return UndefinedValue::getInstance();
+                }
+                object = static_cast<ObjectValue*>(object->prototype);
             }
         }
-        return prototype->get(name);
     }
 
     void put(const std::string& name, Value* value, int attributes = 0)
@@ -1053,11 +1070,36 @@ public:
         {
             return;
         }
+
+        // Try to call setter
+        ObjectValue* object = this;
+        for (;;)
+        {
+            try
+            {
+                Property* property = object->properties.get(name);
+                Value* setter = property->getValue();
+                if (setter->put(this, value))
+                {
+                    return;
+                }
+            }
+            catch (Exception& e)
+            {
+            }
+            if (object->prototype->isNull())
+            {
+                break;
+            }
+            object = static_cast<ObjectValue*>(object->prototype);
+        }
+
+        // Use the standard method
         Property* property;
         try
         {
             property = properties.get(name);
-            property->setValue(value);
+            property->putValue(value);
         }
         catch (Exception& e)
         {

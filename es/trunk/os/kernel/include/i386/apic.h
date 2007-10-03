@@ -20,6 +20,8 @@
 #include <es.h>
 #include "mps.h"
 
+using namespace es;
+
 class Apic : public IPic, public ICallback
 {
     // Memory mapped registers for accessing IOAPIC registers
@@ -172,7 +174,7 @@ public:
     static void broadcastIPI(u8 vec);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 

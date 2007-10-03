@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -95,20 +95,20 @@ int main(int argc, char* argv[])
 
     Handle<IStream> disk = new VDisk(static_cast<char*>(argv[1]));
     Handle<IFileSystem> fatFileSystem;
-    esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&fatFileSystem));
+    fatFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
 
     long long freeSpace;
     long long totalSpace;
-    fatFileSystem->getFreeSpace(freeSpace);
-    fatFileSystem->getTotalSpace(totalSpace);
+    freeSpace = fatFileSystem->getFreeSpace();
+    totalSpace = fatFileSystem->getTotalSpace();
     esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
 
     {
         Handle<IContext> root;
 
-        fatFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
+        root = fatFileSystem->getRoot();
         copy(root, argv[2]);
     }
     fatFileSystem->dismount();

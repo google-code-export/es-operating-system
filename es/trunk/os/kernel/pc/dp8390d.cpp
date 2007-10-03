@@ -603,9 +603,8 @@ Dp8390d(u8 bus, unsigned base, int irq) :
     overflow(false),
     lastOverflow(0)
 {
-    esCreateInstance(CLSID_Monitor,
-                     IID_IMonitor,
-                     reinterpret_cast<void**>(&monitor));
+    monitor = reinterpret_cast<IMonitor*>(
+        esCreateInstance(CLSID_Monitor, IMonitor::iid()));
 
     u8 tmp = inpb(base + RESET);
     esSleep(20000);    // wait for 2 milliseconds
@@ -741,7 +740,7 @@ probe()
 }
 
 bool Dp8390d::
-getPromiscuousMode()
+isPromiscuousMode()
 {
     Synchronized<IMonitor*> method(monitor);
     return rcr & RCR_PRO;
@@ -1020,28 +1019,28 @@ invoke(int irq)
 // IInterface
 //
 
-bool Dp8390d::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Dp8390d::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IStream)
+    void* objectPtr;
+    if (riid == IStream::iid())
     {
-        *objectPtr = static_cast<IStream*>(this);
+        objectPtr = static_cast<IStream*>(this);
     }
-    else if (riid == IID_INetworkInterface)
+    else if (riid == INetworkInterface::iid())
     {
-        *objectPtr = static_cast<INetworkInterface*>(this);
+        objectPtr = static_cast<INetworkInterface*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<INetworkInterface*>(this);
+        objectPtr = static_cast<INetworkInterface*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Dp8390d::

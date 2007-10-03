@@ -20,6 +20,8 @@
 #include <es/base/IProcess.h>
 #include "location.h"
 
+using namespace es;
+
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
@@ -39,18 +41,17 @@ int main(int argc, char* argv[])
     Handle<ILocation> location[2];
     for (int i(0); i < 2; ++i)
     {
-        bool result =
+        location[i] = reinterpret_cast<IProcess*>(
             classStore->createInstance(CLSID_Location,
-                                       location[i]->interfaceID(),
-                                       reinterpret_cast<void**>(&location[i]));
-        TEST(result);
+                                       location[i]->iid()));
+        TEST(location[i]);
 
         char name[14];
         location[i]->getName(name, sizeof(name));
         esReport("%s\n", name);
 
         sprintf(name, "foo%d", i);
-        location[i]->setName(name);
+        location[i]->setName(name, sizeof(name));
         memset(name, 0, sizeof(name));
         location[i]->getName(name, sizeof(name));
         esReport("%s\n", name);

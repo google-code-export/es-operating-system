@@ -19,6 +19,8 @@
 #include "io.h"
 #include "mps.h"
 
+using namespace es;
+
 class Pci
 {
     static const int CONFIG_ADDRESS = 0xcf8;

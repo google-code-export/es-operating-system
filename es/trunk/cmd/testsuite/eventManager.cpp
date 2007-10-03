@@ -19,6 +19,8 @@
 #include <es/base/IProcess.h>
 #include <es/device/IFileSystem.h>
 
+using namespace es;
+
 int esInit(IInterface** nameSpace);
 IStream* esReportStream();
 
@@ -38,8 +40,8 @@ void startProcess(Handle<IContext> root, Handle<IProcess> process, Handle<IFile>
     esReport("size: %lld\n", size);
 
     process->setRoot(root);
-    process->setIn(esReportStream());
-    process->setOut(esReportStream());
+    process->setInput(esReportStream());
+    process->setOutput(esReportStream());
     process->setError(esReportStream());
     process->start(file);
 }
@@ -63,26 +65,26 @@ int main(int argc, char* argv[])
     long long freeSpace;
     long long totalSpace;
 
-    esCreateInstance(CLSID_FatFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&fatFileSystem));
+    fatFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
     {
         Handle<IContext> root;
 
-        fatFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
+        root = fatFileSystem->getRoot();
         nameSpace->bind("file", root);
 
         // start server process.
         Handle<IProcess> serverProcess;
-        esCreateInstance(CLSID_Process, IID_IProcess,
-                         reinterpret_cast<void**>(&serverProcess));
+        serverProcess = reinterpret_cast<IProcess*>(
+            esCreateInstance(CLSID_Process, IProcess::iid()));
         Handle<IFile> server = nameSpace->lookup("file/eventManager.elf");
         startProcess(nameSpace, serverProcess, server);
 
         // start cilent process.
         Handle<IProcess> clientProcess;
-        esCreateInstance(CLSID_Process, IID_IProcess,
-                         reinterpret_cast<void**>(&clientProcess));
+        clientProcess = reinterpret_cast<IProcess*>(
+            esCreateInstance(CLSID_Process, IProcess::iid()));
         Handle<IFile> client = nameSpace->lookup("file/eventManagerClient.elf");
         startProcess(nameSpace, clientProcess, client);
 
@@ -91,8 +93,8 @@ int main(int argc, char* argv[])
         serverProcess->wait();
         esReport("server process exited.\n");
 
-        fatFileSystem->getFreeSpace(freeSpace);
-        fatFileSystem->getTotalSpace(totalSpace);
+        freeSpace = fatFileSystem->getFreeSpace();
+        totalSpace = fatFileSystem->getTotalSpace();
         esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
 
         nameSpace->unbind("file");

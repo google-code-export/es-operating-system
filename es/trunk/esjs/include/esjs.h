@@ -3334,6 +3334,6 @@ SourceElements* getProgram();
 void setProgram(SourceElements* elements);
 
 void setSource(const std::string& s);
-void setSource(IStream* stream);
+void setSource(es::IStream* stream);
 
 #endif  // NINTENDO_ESJS_H_INCLUDED

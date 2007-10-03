@@ -20,16 +20,15 @@
 
 extern ICurrentProcess* esCurrentProcess();
 
-CacheFactory* Process::cacheFactory;
+ICacheFactory* Process::cacheFactory;
 Swap* Process::swap;
 Zero* Process::zero;
 
 void Process::
 initialize()
 {
-    esCreateInstance(CLSID_CacheFactory,
-                     IID_ICacheFactory,
-                     reinterpret_cast<void**>(&cacheFactory));
+    cacheFactory = reinterpret_cast<CacheFactory*>(
+        esCreateInstance(CLSID_CacheFactory, ICacheFactory::iid()));
     ASSERT(cacheFactory);
 
     zero = new Zero;
@@ -525,14 +524,14 @@ Process() :
     mmu = new Mmu(dynamic_cast<Cache*>(cache));
     ASSERT(mmu);
 
-    syscallTable[0].set(esCurrentProcess(), IID_ICurrentProcess);
+    syscallTable[0].set(esCurrentProcess(), ICurrentProcess::iid(), true);
 
     Process* current(Process::getCurrentProcess());
     if (current)
     {
         setRoot(current->root);
-        setIn(current->in);
-        setOut(current->out);
+        setInput(current->in);
+        setOutput(current->out);
         setError(current->error);
     }
 }
@@ -544,8 +543,8 @@ Process::
     esReport("Process::~Process %p\n", this);
 #endif
 
-    setIn(0);
-    setOut(0);
+    setInput(0);
+    setOutput(0);
     setError(0);
     setRoot(0);
 
@@ -589,7 +588,7 @@ load()
 // that has been assigned for the interface. However, the reference count of
 // the interface pointer must also be adjusted to do this.
 int Process::
-set(SyscallProxy* table, void* interface, const Guid& iid)
+set(SyscallProxy* table, void* interface, const Guid& iid, bool used)
 {
     Monitor::Synchronized method(monitor);
 
@@ -597,7 +596,7 @@ set(SyscallProxy* table, void* interface, const Guid& iid)
          proxy < &table[INTERFACE_POINTER_MAX];
          ++proxy)
     {
-        if (proxy->set(interface, iid))
+        if (proxy->set(interface, iid, used))
         {
 #ifdef VERBOSE
             esReport("Process::set(%p, {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}) : %d;\n",
@@ -615,9 +614,11 @@ set(SyscallProxy* table, void* interface, const Guid& iid)
 }
 
 void Process::
-setStartup(void (*startup)(void* (*start)(void* param), void* param))
+// setStartup(void (*startup)(void* (*start)(void* param), void* param)) // [check] startup must be a function pointer.
+setStartup(const void* startup)
 {
-    this->startup = startup;
+    typedef void (*Startup)(void* (*start)(void* param), void* param); // [check]
+    this->startup = reinterpret_cast<Startup>(startup);
 }
 
 void* Process::
@@ -769,7 +770,7 @@ start(IFile* file, const char* argument)
     const unsigned stackSize = 2*1024*1024;
     Thread* thread(createThread(stackSize));
     ASSERT(thread);
-    syscallTable[1].set(thread, IID_IThread);   // just for reference counting
+    syscallTable[1].set(thread, IThread::iid(), true);   // just for reference counting
 
     Elf elf(file);
 
@@ -1020,7 +1021,7 @@ setCurrent(IContext* current)
 }
 
 IStream* Process::
-getIn()
+getInput()
 {
     Monitor::Synchronized method(monitor);
 
@@ -1032,7 +1033,7 @@ getIn()
 }
 
 void Process::
-setIn(IStream* in)
+setInput(IStream* in)
 {
     Monitor::Synchronized method(monitor);
 
@@ -1049,7 +1050,7 @@ setIn(IStream* in)
 }
 
 IStream* Process::
-getOut()
+getOutput()
 {
     Monitor::Synchronized method(monitor);
 
@@ -1061,7 +1062,7 @@ getOut()
 }
 
 void Process::
-setOut(IStream* out)
+setOutput(IStream* out)
 {
     Monitor::Synchronized method(monitor);
 
@@ -1106,24 +1107,24 @@ setError(IStream* error)
     }
 }
 
-bool Process::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Process::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IInterface)
+    void* objectPtr;
+    if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IProcess*>(this);
+        objectPtr = static_cast<IProcess*>(this);
     }
-    else if (riid == IID_IProcess)
+    else if (riid == IProcess::iid())
     {
-        *objectPtr = static_cast<IProcess*>(this);
+        objectPtr = static_cast<IProcess*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Process::
@@ -1201,6 +1202,10 @@ write(const void* src, int count, long long offset)
          len < count;
          len += n, addr += n, src = (u8*) src + n)
     {
+        if (validityFault(addr, ICurrentProcess::PROT_READ) < 0)
+        {
+            break;
+        }
         if (protectionFault(addr, ICurrentProcess::PROT_WRITE) < 0)
         {
             break;

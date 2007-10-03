@@ -25,6 +25,8 @@
 #include <es/naming/IBinding.h>
 #include "binder.h"
 
+using namespace es;
+
 #define TEST(exp)                           \
     (void) ((exp) ||                        \
             (esPanic(__FILE__, __LINE__, "\nFailed test " #exp), 0))
@@ -59,7 +61,7 @@ public:
         return object;
     }
 
-    int setObject(IInterface* element)
+    void setObject(IInterface* element)
     {
         if (element)
         {
@@ -72,7 +74,7 @@ public:
         object = element;
     }
 
-    int getName(char* name, unsigned int len)
+    int getName(char* name, int len)
     {
         unsigned count(strlen(this->name) + 1);
         if (len < count)
@@ -83,23 +85,23 @@ public:
         return count;
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IInterface)
+        void* objectPtr;
+        if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IBinding*>(this);
+            objectPtr = static_cast<IBinding*>(this);
         }
-        else if (riid == IID_IBinding)
+        else if (riid == IBinding::iid())
         {
-            *objectPtr = static_cast<IBinding*>(this);
+            objectPtr = static_cast<IBinding*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef()
@@ -136,11 +138,9 @@ int main(int argc, char* argv[])
 
     // Create a client process.
     Handle<IProcess> client;
-    bool result =
-        classStore->createInstance(CLSID_Process,
-                                   client->interfaceID(),
-                                   reinterpret_cast<void**>(&client));
-    TEST(result);
+    client = reinterpret_cast<IProcess*>(
+        classStore->createInstance(CLSID_Process, client->iid()));
+    TEST(client);
 
     // Start the client process.
     Handle<IFile> file = nameSpace->lookup("file/binderClient.elf");

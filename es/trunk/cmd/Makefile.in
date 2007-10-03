@@ -272,7 +272,7 @@ target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = . testsuite
-SUFFIXES = .h .idl .ird
+SUFFIXES = .h .idl .ent
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref -L$(prefix)/lib
 AM_CPPFLAGS = -I- \
 	-I../include \
@@ -293,8 +293,8 @@ binderClient_SOURCES = binderClient.cpp binder.h
 location_SOURCES = location.cpp location.h ILocation.idl
 locationClient_SOURCES = locationClient.cpp location.h ILocation.idl
 nodist_location_SOURCES = ILocation.c
-BUILT_SOURCES = ILocation.h ILocation.ird IEventQueue.h \
-	IEventQueue.ird
+BUILT_SOURCES = ILocation.h ILocation.ent IEventQueue.h \
+	IEventQueue.ent
 eventManager_SOURCES = eventManager.cpp eventManager.h IEventQueue.idl
 eventManagerClient_SOURCES = eventManagerClient.cpp eventManager.h IEventQueue.idl
 nodist_eventManager_SOURCES = IEventQueue.c
@@ -306,7 +306,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .h .idl .ird .c .cpp .o .obj
+.SUFFIXES: .h .idl .ent .c .cpp .o .obj
 am--refresh:
 	@:
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -832,10 +832,10 @@ uninstall-am:
 	tags tags-recursive uninstall uninstall-am
 
 
-%.h %.ird : %.idl
+%.h %.ent: %.idl
 	esidl -I $(srcdir)/../include $<
 
-%.c : %.ird
+%.c : %.ent
 	mkdir -p $(*D);
 	echo -n "unsigned char" $(*F) > $@;
 	echo "Info[] = {" >> $@;

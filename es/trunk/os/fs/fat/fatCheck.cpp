@@ -25,6 +25,8 @@
 #include <es/handle.h>
 #include "fatStream.h"
 
+using namespace es;
+
 bool FatStream::
 check(u8* clusRefs)
 {

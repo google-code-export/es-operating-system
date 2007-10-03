@@ -1,7 +1,7 @@
 // check Date(string)
 function check(result)
 {
-    stdout = System.getOut();
+    stdout = System.output;
     if (result)
     {
         stdout.write("OK\n", 3);

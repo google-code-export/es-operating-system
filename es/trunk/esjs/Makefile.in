@@ -38,8 +38,8 @@ bin_PROGRAMS = esjs$(EXEEXT)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure COPYING \
-	config.guess config.sub depcomp install-sh lexer.cc missing \
-	parser.cc parser.h ylwrap
+	ChangeLog config.guess config.sub depcomp install-sh lexer.cc \
+	missing parser.cc parser.h ylwrap
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -51,14 +51,13 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_esjs_OBJECTS = apply.$(OBJEXT) esjs-lexer.$(OBJEXT) \
-	esjs-parser.$(OBJEXT) esjs-esjs.$(OBJEXT) esjs-value.$(OBJEXT) \
-	esjs-array.$(OBJEXT) esjs-boolean.$(OBJEXT) \
-	esjs-date.$(OBJEXT) esjs-function.$(OBJEXT) \
-	esjs-global.$(OBJEXT) esjs-interface.$(OBJEXT) \
-	esjs-math.$(OBJEXT) esjs-number.$(OBJEXT) \
-	esjs-object.$(OBJEXT) esjs-regexp.$(OBJEXT) \
-	esjs-string.$(OBJEXT)
+am_esjs_OBJECTS = esjs-lexer.$(OBJEXT) esjs-parser.$(OBJEXT) \
+	esjs-esjs.$(OBJEXT) esjs-value.$(OBJEXT) esjs-array.$(OBJEXT) \
+	esjs-boolean.$(OBJEXT) esjs-date.$(OBJEXT) \
+	esjs-function.$(OBJEXT) esjs-global.$(OBJEXT) \
+	esjs-interface.$(OBJEXT) esjs-math.$(OBJEXT) \
+	esjs-number.$(OBJEXT) esjs-object.$(OBJEXT) \
+	esjs-regexp.$(OBJEXT) esjs-string.$(OBJEXT)
 nodist_esjs_OBJECTS = IAlarm.$(OBJEXT) ICache.$(OBJEXT) \
 	ICallback.$(OBJEXT) IClassFactory.$(OBJEXT) \
 	IClassStore.$(OBJEXT) IFile.$(OBJEXT) IInterface.$(OBJEXT) \
@@ -93,8 +92,6 @@ valueptr_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-CPPASCOMPILE = $(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CCASFLAGS) $(CCASFLAGS)
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -238,7 +235,7 @@ target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @POSIX_TRUE@SUBDIRS = . testsuite
-SUFFIXES = .ird
+SUFFIXES = .ent
 
 # default interface information
 nodist_esjs_SOURCES = \
@@ -283,7 +280,7 @@ nodist_esjs_SOURCES = \
 
 BUILT_SOURCES = lexer.cc parser.cc parser.h
 esjs_SOURCES = \
-	src/apply.S src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
+	src/lexer.ll src/parser.yy src/esjs.cpp src/value.cpp \
 	src/array.cpp \
 	src/boolean.cpp \
 	src/date.cpp \
@@ -308,6 +305,7 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/src \
 	-I- \
 	-I$(srcdir)/../include \
+	-I../include \
 	-I$(prefix)/include
 
 EXTRA_DIST = \
@@ -325,7 +323,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .ird .S .c .cc .cpp .ll .o .obj .yy
+.SUFFIXES: .ent .c .cc .cpp .ll .o .obj .yy
 am--refresh:
 	@:
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -441,7 +439,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ISocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IStream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IThread.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/apply.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-boolean.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-date.Po@am__quote@
@@ -458,34 +455,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esjs-value.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/valueptr.Po@am__quote@
-
-.S.o:
-@am__fastdepCCAS_TRUE@	$(CPPASCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCCAS_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCCAS_FALSE@	$(CPPASCOMPILE) -c -o $@ $<
-
-.S.obj:
-@am__fastdepCCAS_TRUE@	$(CPPASCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCCAS_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCCAS_FALSE@	$(CPPASCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-apply.o: src/apply.S
-@am__fastdepCCAS_TRUE@	$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CCASFLAGS) $(CCASFLAGS) -MT apply.o -MD -MP -MF $(DEPDIR)/apply.Tpo -c -o apply.o `test -f 'src/apply.S' || echo '$(srcdir)/'`src/apply.S
-@am__fastdepCCAS_TRUE@	mv -f $(DEPDIR)/apply.Tpo $(DEPDIR)/apply.Po
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	source='src/apply.S' object='apply.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCCAS_FALSE@	$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CCASFLAGS) $(CCASFLAGS) -c -o apply.o `test -f 'src/apply.S' || echo '$(srcdir)/'`src/apply.S
-
-apply.obj: src/apply.S
-@am__fastdepCCAS_TRUE@	$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CCASFLAGS) $(CCASFLAGS) -MT apply.obj -MD -MP -MF $(DEPDIR)/apply.Tpo -c -o apply.obj `if test -f 'src/apply.S'; then $(CYGPATH_W) 'src/apply.S'; else $(CYGPATH_W) '$(srcdir)/src/apply.S'; fi`
-@am__fastdepCCAS_TRUE@	mv -f $(DEPDIR)/apply.Tpo $(DEPDIR)/apply.Po
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	source='src/apply.S' object='apply.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCCAS_FALSE@	$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CCASFLAGS) $(CCASFLAGS) -c -o apply.obj `if test -f 'src/apply.S'; then $(CYGPATH_W) 'src/apply.S'; else $(CYGPATH_W) '$(srcdir)/src/apply.S'; fi`
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1696,9 +1665,9 @@ uninstall-am: uninstall-binPROGRAMS
 	uninstall-binPROGRAMS
 
 
-vpath %.ird = ../include/es
+vpath %.ent = ../include/es
 
-%.c : %.ird
+%.c : %.ent
 	mkdir -p $(*D);
 	echo -n "unsigned char" $(*F) > $@;
 	echo "Info[] = {" >> $@;

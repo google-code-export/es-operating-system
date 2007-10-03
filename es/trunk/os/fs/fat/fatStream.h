@@ -42,6 +42,7 @@
 #include <es/clsid.h>
 #include "fat.h"
 
+using namespace es;
 using namespace LittleEndian;
 
 class FatStream;
@@ -96,14 +97,14 @@ public:
     int hashCode() const;
 
     // IFile
-    int getAttributes(unsigned int& attributes);
-    int getCreationTime(long long& time);
-    int getLastAccessTime(long long& time);
-    int getLastWriteTime(long long& time);
-    int setAttributes(unsigned int attributes);
-    int setCreationTime(long long time);
-    int setLastAccessTime(long long time);
-    int setLastWriteTime(long long time);
+    unsigned int getAttributes();
+    long long getCreationTime();
+    long long getLastAccessTime();
+    long long getLastWriteTime();
+    void setAttributes(unsigned int attributes);
+    void setCreationTime(long long time);
+    void setLastAccessTime(long long time);
+    void setLastWriteTime(long long time);
     bool canRead();
     bool canWrite();
     bool isDirectory();
@@ -125,8 +126,8 @@ public:
 
     // IBinding
     IInterface* getObject();
-    int setObject(IInterface* object);
-    int getName(char* name, unsigned int len);
+    void setObject(IInterface* object);
+    int getName(char* name, int len);
 
     // IContext
     IBinding* bind(const char* name, IInterface* object);
@@ -138,7 +139,7 @@ public:
     IIterator* list(const char* name);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -147,9 +148,6 @@ private:
     bool check(u8* clusRefs);
 
     // fatTime.cpp
-    DateTime getCreationTime();
-    DateTime getLastAccessTime();
-    DateTime getLastWriteTime();
     void setCreationTime(DateTime);
     void setLastAccessTime(DateTime);
     void setLastWriteTime(DateTime);
@@ -284,14 +282,14 @@ public:
     void mount(IStream* disk);
     void dismount(void);
     void getRoot(IContext** root);
-    void getFreeSpace(long long& freeBytes);
-    void getTotalSpace(long long& bytes);
+    long long getFreeSpace();
+    long long getTotalSpace();
     int checkDisk(bool fixError);
     void format();
     int defrag();
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };
@@ -311,7 +309,7 @@ public:
     IInterface* next();
     int remove(void);
 
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

@@ -67,7 +67,7 @@ void PrintPartitions(IContext* context)
 void CheckGeometry(Handle<IDiskManagement> dm)
 {
     IDiskManagement::Geometry geometry;
-    TEST(dm->getGeometry(&geometry) == 0);
+    dm->getGeometry(&geometry); // throw exception when error occurs.
 #ifdef VERBOSE
     esReport("Geometry\n");
     esReport("  heads           %u\n", geometry.heads);
@@ -108,11 +108,11 @@ void CreatePartition(IContext* context, const char* name, long long& size, u8 ty
     if (type != 0x05 && type != 0x0f)
     {
         // set the partition type.
-        TEST(diskManagement->getLayout(&params) == 0);
+        diskManagement->getLayout(&params);
         params.partitionType = type;
 
-        TEST(diskManagement->setLayout(&params) == 0);
-        TEST(diskManagement->getLayout(&params) == 0);
+        diskManagement->setLayout(&params);
+        diskManagement->getLayout(&params);
         TEST(params.partitionType == type);
     }
 }

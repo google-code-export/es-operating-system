@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006
  * Nintendo Co., Ltd.
- *  
+ *
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies and
@@ -46,8 +46,8 @@ isHidden()
     return (flags & FF_Existence) ? true : false;
 }
 
-int Iso9660Stream::
-getAttributes(unsigned int& attributes)
+unsigned int Iso9660Stream::
+getAttributes()
 {
     u32 attr = IFile::ReadOnly;
     if (flags & FF_Existence)
@@ -58,53 +58,50 @@ getAttributes(unsigned int& attributes)
     {
         attr |= IFile::Directory;
     }
-    attributes = attr;
-    return 0;
+
+    return attr;
 }
 
-int Iso9660Stream::
-getCreationTime(long long& time)
+long long Iso9660Stream::
+getCreationTime()
 {
-    time = dateTime.getTicks();
-    return 0;
+    return dateTime.getTicks();
 }
 
-int Iso9660Stream::
-getLastAccessTime(long long& time)
+long long Iso9660Stream::
+getLastAccessTime()
 {
-    time = dateTime.getTicks();
-    return 0;
+    return dateTime.getTicks();
 }
 
-int Iso9660Stream::
-getLastWriteTime(long long& time)
+long long Iso9660Stream::
+getLastWriteTime()
 {
-    time = dateTime.getTicks();
-    return 0;
+    return dateTime.getTicks();
 }
 
-int Iso9660Stream::
+void Iso9660Stream::
 setAttributes(unsigned int attributes)
 {
-    return -1;
+    esThrow(EROFS);
 }
 
-int Iso9660Stream::
+void Iso9660Stream::
 setCreationTime(long long time)
 {
-    return -1;
+    esThrow(EROFS);
 }
 
-int Iso9660Stream::
+void Iso9660Stream::
 setLastAccessTime(long long time)
 {
-    return -1;
+    esThrow(EROFS);
 }
 
-int Iso9660Stream::
+void Iso9660Stream::
 setLastWriteTime(long long time)
 {
-    return -1;
+    esThrow(EROFS);
 }
 
 IStream* Iso9660Stream::
@@ -126,6 +123,6 @@ getPageable()
     }
 
     IPageable* pageable;
-    cache->queryInterface(IID_IPageable, (void**) &pageable);
+    pageable = reinterpret_cast<IPageable*>(cache->queryInterface(IPageable::iid()));
     return pageable;
 }

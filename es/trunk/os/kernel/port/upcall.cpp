@@ -69,10 +69,10 @@ set(Process* process, void* object, const Guid& iid, bool used)
 #ifdef VERBOSE
             esReport("Process::set(%p, {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}) : %d;\n",
                      object,
-                     iid->Data1, iid->Data2, iid->Data3,
-                     iid->Data4[0], iid->Data4[1], iid->Data4[2], iid->Data4[3],
-                     iid->Data4[4], iid->Data4[5], iid->Data4[6], iid->Data4[7],
-                     proxy - table);
+                     iid.Data1, iid.Data2, iid.Data3,
+                     iid.Data4[0], iid.Data4[1], iid.Data4[2], iid.Data4[3],
+                     iid.Data4[4], iid.Data4[5], iid.Data4[6], iid.Data4[7],
+                     proxy - upcallTable);
 #endif
             return proxy - upcallTable;
         }
@@ -90,17 +90,18 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
 
     // Now we need to identify which process is to be used for this upcall.
     Process* server = proxy->process;
+    bool log(server->log);
+
 #ifdef VERBOSE
     esReport("Process(%p)::upcall[%d] %d\n", server, interfaceNumber, methodNumber);
 #endif
-    bool log(server->log);
 
     // Determine the type of interface and which method is being invoked.
     Reflect::Interface interface = getInterface(proxy->iid);   // XXX Should cache the result
 
     // If this interface inherits another interface,
     // methodNumber is checked accordingly.
-    if (interface.getTotalMethodCount() <= methodNumber)
+    if (interface.getInheritedMethodCount() + interface.getMethodCount() <= methodNumber)
     {
         throw SystemException<ENOSYS>();
     }
@@ -108,14 +109,14 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
     Reflect::Interface super(interface);
     for (;;)
     {
-        baseMethodCount = super.getTotalMethodCount() - super.getMethodCount();
+        baseMethodCount = super.getInheritedMethodCount();
         if (baseMethodCount <= methodNumber)
         {
             break;
         }
         super = getInterface(super.getSuperIid());
     }
-    Reflect::Function method(Reflect::Function(super.getMethod(methodNumber - baseMethodCount)));
+    Reflect::Method method(Reflect::Method(super.getMethod(methodNumber - baseMethodCount)));
 
     if (log)
     {
@@ -124,7 +125,7 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
     }
 
     unsigned long ref;
-    if (super.getIid() == IID_IInterface)
+    if (super.getIid() == IInterface::iid())
     {
         switch (methodNumber - baseMethodCount)
         {
@@ -222,9 +223,10 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         // Invoke method
         record->ureg.eax = reinterpret_cast<u32>(record->proxy->object);
         record->ureg.edx = record->methodNumber;
-#ifdef VERBOSE
-        esReport("ureg->eip: %p of %p[%d]\n", ureg->eax, object, record->methodNumber);
-#endif
+        if (log)
+        {
+            esReport("object: %p, method: %d @ %p:%p\n", record->ureg.eax, record->ureg.edx, record->ureg.eip, record->ureg.esp);
+        }
         if (record->label.set() == 0)
         {
             // Make an upcall the server process.
@@ -238,11 +240,13 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
         }
         else
         {
+            Guid iid = IInterface::iid();
+
             // Return to the client process.
             Process* client = current->returnToClient();
 
             // Copy output parameters from the user stack of the server process.
-            errorCode = server->copyOut(record);
+            errorCode = server->copyOut(record, iid);
 
             // Get result code
             if (errorCode == 0)
@@ -252,55 +256,68 @@ upcall(void* self, void* base, int methodNumber, va_list ap)
             }
 
             // Process return code
-            Reflect::Type returnType(record->method.getReturnType());
-            if (errorCode == 0 && returnType.isInterfacePointer())
+            if (errorCode == 0)
             {
-                // Convert the received interface pointer to kernel's interface pointer
-                void** ip(reinterpret_cast<void**>(result));
-                if (server->ipt <= ip && ip < server->ipt + INTERFACE_POINTER_MAX)
+                Reflect::Type returnType(record->method.getReturnType());
+
+                switch (returnType.getType())
                 {
-                    unsigned interfaceNumber(ip - server->ipt);
-                    Handle<SyscallProxy> proxy(&server->syscallTable[interfaceNumber], true);
-                    if (proxy->isValid())
+                case Ent::TypeInterface:
+                    iid = returnType.getInterface().getIid();
+                    // FALL THROUGH
+                case Ent::SpecObject:
+                    // Convert the received interface pointer to kernel's interface pointer
+                    void** ip(reinterpret_cast<void**>(result));
+                    if (ip == 0)
                     {
-                        result = reinterpret_cast<long>(proxy->getObject());
+                        result = 0;
+                    }
+                    else if (server->ipt <= ip && ip < server->ipt + INTERFACE_POINTER_MAX)
+                    {
+                        unsigned interfaceNumber(ip - server->ipt);
+                        Handle<SyscallProxy> proxy(&server->syscallTable[interfaceNumber], true);
+                        if (proxy->isValid())
+                        {
+                            result = reinterpret_cast<long>(proxy->getObject());
+                        }
+                        else
+                        {
+                            result = 0;
+                            errorCode = EBADFD;
+                        }
+                    }
+                    else if (server->isValid(ip, sizeof(void*)))
+                    {
+                        // Allocate an entry in the upcall table and set the
+                        // interface pointer to the broker for the upcall table.
+                        int n = set(server, reinterpret_cast<IInterface*>(ip), iid, true);
+                        if (0 <= n)
+                        {
+                            result = reinterpret_cast<long>(&(broker.getInterfaceTable())[n]);
+                        }
+                        else
+                        {
+                            // XXX object pointed by ip would be left allocated.
+                            result = 0;
+                            errorCode = ENFILE;
+                        }
+                        if (log)
+                        {
+                            esReport(" = %p", ip);
+                        }
                     }
                     else
                     {
-                        result = 0;
                         errorCode = EBADFD;
                     }
-                }
-                else if (server->isValid(ip, sizeof(void*)))
-                {
-                    // Allocate an entry in the upcall table and set the
-                    // interface pointer to the broker for the upcall table.
-                    int n = set(server, reinterpret_cast<IInterface*>(ip), returnType.getInterface().getIid(), true);
-                    if (0 <= n)
-                    {
-                        result = reinterpret_cast<long>(&(broker.getInterfaceTable())[n]);
-                    }
-                    else
-                    {
-                        // XXX object pointed by ip would be left allocated.
-                        result = 0;
-                        errorCode = ENFILE;
-                    }
-                    if (log)
-                    {
-                        esReport(" = %p", ip);
-                    }
-                }
-                else
-                {
-                    errorCode = EBADFD;
+                    break;
                 }
             }
         }
         break;
     }
 
-    if (super.getIid() == IID_IInterface)
+    if (super.getIid() == IInterface::iid())
     {
         switch (methodNumber - baseMethodCount)
         {
@@ -347,9 +364,11 @@ returnFromUpcall(Ureg* ureg)
 }
 
 void Process::
-setFocus(void* (*focus)(void* param))
+// setFocus(void* (*focus)(void* param)) // [check] focus must be a function pointer.
+setFocus(const void* focus)
 {
-    this->focus = focus;
+    typedef void* (*Focus)(void* param); // [check]
+    this->focus = reinterpret_cast<Focus>(focus); // [check]
 }
 
 UpcallRecord* Process::
@@ -420,113 +439,248 @@ copyIn(UpcallRecord* record)
     UpcallProxy* proxy(record->proxy);
     int methodNumber(record->methodNumber);
     va_list paramv(record->param);
+    int* paramp = reinterpret_cast<int*>(paramv);
     u8* esp(reinterpret_cast<u8*>(record->ureg.esp));
     Ureg* ureg(&record->ureg);
 
-    unsigned arg[sizeof(void*) / sizeof(unsigned) + 8]; // XXX 8 is enough?
-    int paramc(0);
-    unsigned* param(arg + sizeof(void*) / sizeof(unsigned));
-    for (int i(0); i < record->method.getParameterCount(); ++i)
+    int argv[sizeof(long long) / sizeof(int) * 9]; // XXX 9
+    int argc = 0;
+    int* argp = argv;
+
+    int count = 0;
+
+    Guid iid = IInterface::iid();
+
+    // Set this
+    *argp++ = (int) proxy->object;
+
+    Reflect::Type returnType = record->method.getReturnType();
+    switch (returnType.getType())
     {
-        Reflect::Identifier parameter(record->method.getParameter(i));
+    case Ent::SpecString:
+        // int op(char* buf, int len, ...);
+        count = paramp[1];                          // XXX check count
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        *argp++ = (int) esp;
+        *argp++ = count;
+        paramp += 2;
+        break;
+    case Ent::SpecWString:
+        // int op(wchar_t* buf, int len, ...);
+        count = sizeof(wchar_t) * paramp[1];        // XXX check count
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        *argp++ = (int) esp;
+        *argp++ = paramp[1];
+        paramp += 2;
+        break;
+    case Ent::TypeSequence: // XXX
+        // int op(xxx* buf, int len, ...);
+        count = returnType.getSize() * paramp[1];   // XXX check count
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        *argp++ = (int) esp;
+        *argp++ = paramp[1];
+        paramp += 2;
+        break;
+    case Ent::SpecUuid:
+    case Ent::TypeStructure:
+    case Ent::TypeArray:
+        // void op(struct* buf, ...);
+        // void op(xxx[x] buf, ...);
+        count = returnType.getSize();               // XXX check count
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        *argp++ = (int) esp;
+        ++paramp;
+        break;
+    default:
+        break;
+    }
+
+    for (int i = 0; i < record->method.getParameterCount(); ++i)
+    {
+        Reflect::Parameter param(record->method.getParameter(i));
+        Reflect::Type type(param.getType());
         if (log)
         {
-            esReport("%s", parameter.getName());
+            esReport("%s ", param.getName());
         }
-        int size = parameter.getType().getSize();
-        size += sizeof(unsigned) - 1;
-        size &= ~(sizeof(unsigned) - 1);
-        memmove(&param[paramc], &reinterpret_cast<int*>(paramv)[paramc], size);
-        if (parameter.isInterfacePointer() && !parameter.isOutput())
-        {
-            void** ip(*reinterpret_cast<void***>(param + paramc));
-            if (ip)
-            {
-                // Check the IID of the interface pointer.
-                Guid iid;
-                if (0 <= parameter.getIidIs())
-                {
-                    iid = **reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
-                    Reflect::Interface interface;
-                    try
-                    {
-                        interface = getInterface(iid);
-                    }
-                    catch (Exception& error)
-                    {
-                        return error.getResult();
-                    }
-                    iid = interface.getIid();
-                }
-                else
-                {
-                    iid = parameter.getType().getInterface().getIid();
-                }
 
-                // Set up a new system call proxy.
-                IInterface* object(reinterpret_cast<IInterface*>(ip));
-                int n = set(syscallTable, object, iid);
-                if (0 <= n)
-                {
-                    // Set ip to proxy ip
-                    ip = &ipt[n];
-                    object->addRef();
-                }
-                else
-                {
-                    ip = 0;
-                }
-                *reinterpret_cast<void***>(param + paramc) = *reinterpret_cast<void***>(reinterpret_cast<int*>(paramv) + paramc) = ip;
-            }
-
-            // Note the reference count to the created syscall proxy must
-            // be decremented by one at the end of this upcall.
-        }
-        else if (parameter.getType().isPointer() || parameter.getType().isReference())
+        switch (type.getType())
         {
-            // Determine the size of the object pointed.
-            int count(0);
-            if (0 <= parameter.getSizeIs())
+        case Ent::SpecAny:  // XXX x86 specific
+        case Ent::SpecBool:
+        case Ent::SpecChar:
+        case Ent::SpecWChar:
+        case Ent::SpecS8:
+        case Ent::SpecS16:
+        case Ent::SpecS32:
+        case Ent::SpecU8:
+        case Ent::SpecU16:
+        case Ent::SpecU32:
+        case Ent::SpecF32:
+            if (param.isInput())
             {
-                count = *reinterpret_cast<int*>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getSizeIs()));
+                *argp++ = *paramp++;
             }
-            else if (parameter.getType().isString())
+            else
+            {
+                count = sizeof(int);
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                *argp++ = (int) esp;
+                ++paramp;
+            }
+            break;
+        case Ent::SpecS64:
+        case Ent::SpecU64:
+        case Ent::SpecF64:
+            if (param.isInput())
+            {
+                *argp++ = *paramp++;
+                *argp++ = *paramp++;
+            }
+            else
+            {
+                count = sizeof(long long);
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                *argp++ = (int) esp;
+                ++paramp;
+            }
+            break;
+        case Ent::SpecString:
+            if (param.isInput())
             {
                 // Check zero termination
-                char* ptr = *reinterpret_cast<char**>(&param[paramc]);
-                for (count = 1; *ptr != '\0'; ++count)
+                char* ptr = *reinterpret_cast<char**>(paramp);
+                count = 0;
+                do
                 {
-                    ++ptr;
                     if (!isValid(ptr, 1))
                     {
                         return EFAULT;
                     }
-                }
+                    ++count;
+                } while (*ptr++);
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                write(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                *argp++ = (int) esp;
+                ++paramp;
             }
             else
             {
-                count = parameter.getType().getReferentSize();
+                count = paramp[1];              // XXX check count
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                if (!param.isOutput())
+                {
+                    write(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                }
+                *argp++ = (int) esp;
+                *argp++ = count;
+                paramp += 2;
             }
-            if (log)
+            break;
+        case Ent::SpecWString:
+            if (param.isInput())
             {
-                esReport("[count = %d]", count);
+                // Check zero termination
+                wchar_t* ptr = *reinterpret_cast<wchar_t**>(paramp);
+                count = 0;
+                do
+                {
+                    if (!isValid(ptr, sizeof(wchar_t)))
+                    {
+                        return EFAULT;
+                    }
+                    count += sizeof(wchar_t);
+                } while (*ptr++);
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                write(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                *argp++ = (int) esp;
+                ++paramp;
             }
-
-            if (Page::SIZE < count)
+            else
             {
-                return ENOBUFS;
+                count = sizeof(wchar_t) * paramp[1];
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                if (!param.isOutput())
+                {
+                    write(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                }
+                *argp++ = (int) esp;
+                *argp++ = paramp[1];
+                paramp += 2;
             }
-
-            // Reserve count space in the server user stack.
+            break;
+        case Ent::TypeSequence:
+            // xxx* buf, int len, ...
+            count = type.getSize() * paramp[1]; // XXX check count
             esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
-            if (!parameter.isOutput())
+            if (!param.isOutput())
             {
-                write(*reinterpret_cast<void**>(reinterpret_cast<int*>(paramv) + paramc), count, reinterpret_cast<long long>(esp));
+                write(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
             }
-            *reinterpret_cast<void**>(param + paramc) = esp;
+            *argp++ = (int) esp;
+            *argp++ = paramp[1];
+            paramp += 2;
+            break;
+        case Ent::SpecUuid:         // Guid* guid, ...
+            if (param.isInput())
+            {
+                iid = **reinterpret_cast<Guid**>(paramp);
+            }
+            // FALL THROUGH
+        case Ent::TypeStructure:    // struct* buf, ...
+        case Ent::TypeArray:        // xxx[x] buf, ...
+            count = type.getSize();
+            esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+            if (!param.isOutput())
+            {
+                write(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+            }
+            *argp++ = (int) esp;
+            ++paramp;
+            break;
+        case Ent::TypeInterface:
+            iid = type.getInterface().getIid();
+            // FALL THROUGH
+        case Ent::SpecObject:
+            if (param.isInput())
+            {
+                if (void** ip = *reinterpret_cast<void***>(paramp))
+                {
+
+                    // Set up a new system call proxy.
+                    IInterface* object(reinterpret_cast<IInterface*>(ip));
+                    int n = set(syscallTable, object, iid);
+                    if (0 <= n)
+                    {
+                        // Set ip to proxy ip
+                        ip = &ipt[n];
+                        object->addRef();
+                    }
+                    else
+                    {
+                        ip = 0; // XXX should raise an exception
+                    }
+                    *argp++ = *paramp = (int) ip;   // XXX
+                }
+                else
+                {
+                    *argp++ = *paramp;
+                }
+
+                // Note the reference count to the created syscall proxy must
+                // be decremented by one at the end of this upcall.
+            }
+            else
+            {
+                // The output interface pointer parameter is no longer supported.
+                throw SystemException<EINVAL>();
+            }
+            ++paramp;
+            break;
+        default:
+            break;
         }
-        paramc += size / sizeof(unsigned);
-        ASSERT(paramc <= 8);    // XXX
+
         if (log && i + 1 < record->method.getParameterCount())
         {
             esReport(", ");
@@ -537,10 +691,9 @@ copyIn(UpcallRecord* record)
         esReport(");\n");
     }
 
-    // Copy arguments with 'this' pointer
-    memmove(arg, &proxy->object, sizeof(void*));
-    esp -= sizeof(void*) + sizeof(int) * paramc;
-    write(arg, sizeof(void*) + sizeof(int) * paramc, reinterpret_cast<long>(esp));
+    // Copy arguments
+    esp -= sizeof(int) * (argp - argv);
+    write(argv, sizeof(int) * (argp - argv), reinterpret_cast<long>(esp));
     ureg->esp = reinterpret_cast<long>(esp);
 
     return 0;
@@ -548,12 +701,15 @@ copyIn(UpcallRecord* record)
 
 // Note copyOut() is called against the server process.
 int Process::
-copyOut(UpcallRecord* record)
+copyOut(UpcallRecord* record, Guid& iid)
 {
     UpcallProxy* proxy(record->proxy);
     int methodNumber(record->methodNumber);
     void* paramv(record->param);
+    int* paramp = reinterpret_cast<int*>(paramv);
     u8* esp(reinterpret_cast<u8*>(record->ureg.esp));  // XXX should be saved separately
+
+    long long rc = (static_cast<long long>(record->ureg.edx) << 32) | record->ureg.eax;
 
     if (log)
     {
@@ -566,136 +722,190 @@ copyOut(UpcallRecord* record)
         {
             return error.getResult();
         }
-        esReport("return from upcall: %s::%s(",
-                 interface.getName(), record->method.getName());
+        esReport("return from upcall %p: %s::%s(",
+                 esp, interface.getName(), record->method.getName());
     }
 
-    int paramc(0);
-    for (int i(0); i < record->method.getParameterCount(); ++i)
+    int count;
+
+    Reflect::Type returnType = record->method.getReturnType();
+    switch (returnType.getType())
     {
-        Reflect::Identifier parameter(record->method.getParameter(i));
+    case Ent::SpecString:
+        // int op(char* buf, int len, ...);
+        count = paramp[1];
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        if (0 < rc)
+        {
+            // XXX check string length
+            read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+        }
+        paramp += 2;
+        break;
+    case Ent::SpecWString:
+        // int op(wchar_t* buf, int len, ...);
+        count = sizeof(wchar_t) * paramp[1];
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        if (0 < rc)
+        {
+            read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+        }
+        paramp += 2;
+        break;
+    case Ent::TypeSequence:
+        // int op(xxx* buf, int len, ...);
+        count = returnType.getSize() * paramp[1];
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        if (0 < rc && rc <= paramp[1])
+        {
+            read(*reinterpret_cast<void**>(paramp), returnType.getSize() * rc, reinterpret_cast<long long>(esp));
+        }
+        paramp += 2;
+        break;
+    case Ent::SpecUuid:
+    case Ent::TypeStructure:
+    case Ent::TypeArray:
+        // void op(struct* buf, ...);
+        // void op(xxx[x] buf, ...);
+        count = returnType.getSize();   // XXX check count
+        esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+        read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+        ++paramp;
+        break;
+    default:
+        break;
+    }
+
+    int argc(0);
+    for (int i = 0; i < record->method.getParameterCount(); ++i)
+    {
+        Reflect::Parameter param(record->method.getParameter(i));
+        Reflect::Type type(param.getType());
         if (log)
         {
-            esReport("%s", parameter.getName());
+            esReport("%s", param.getName());
         }
-        int size = parameter.getType().getSize();
-        size += sizeof(unsigned) - 1;
-        size &= ~(sizeof(unsigned) - 1);
 
-        if (parameter.isInterfacePointer() && !parameter.isOutput())
+        switch (type.getType())
         {
-            void** ip(*reinterpret_cast<void***>(reinterpret_cast<int*>(paramv) + paramc));
-            if (log)
+        case Ent::SpecAny:  // XXX x86 specific
+        case Ent::SpecBool:
+        case Ent::SpecChar:
+        case Ent::SpecWChar:
+        case Ent::SpecS8:
+        case Ent::SpecS16:
+        case Ent::SpecS32:
+        case Ent::SpecU8:
+        case Ent::SpecU16:
+        case Ent::SpecU32:
+        case Ent::SpecF32:
+            if (param.isInput())
             {
-                esReport(" = %p", ip);
-            }
-            if (ip)
-            {
-                // Release the created syscall proxy.
-                SyscallProxy* proxy(&syscallTable[ip - ipt]);
-                proxy->release();
-            }
-        }
-        else if (parameter.getType().isPointer() || parameter.getType().isReference())
-        {
-            // Determine the size of the object pointed.
-            int count(0);
-            if (0 <= parameter.getSizeIs())
-            {
-                count = *reinterpret_cast<int*>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getSizeIs()));
+                ++paramp;
             }
             else
             {
-                count = parameter.getType().getReferentSize();
+                count = sizeof(int);
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                ++paramp;
             }
-
-            if (Page::SIZE < count)
+            break;
+        case Ent::SpecS64:
+        case Ent::SpecU64:
+        case Ent::SpecF64:
+            if (param.isInput())
             {
-                return ENOBUFS;
+                paramp += 2;
             }
-
-            // Reserve count space in the server user stack.
+            else
+            {
+                count = sizeof(long long);
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                ++paramp;
+            }
+            break;
+        case Ent::SpecString:
+            if (param.isInput())
+            {
+                ++paramp;
+            }
+            else
+            {
+                count = paramp[1];
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                if (0 < rc)
+                {
+                    // XXX check string length
+                    read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                }
+                paramp += 2;
+            }
+            break;
+        case Ent::SpecWString:
+            if (param.isInput())
+            {
+                ++paramp;
+            }
+            else
+            {
+                count = sizeof(wchar_t) * paramp[1];
+                esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+                if (0 < rc)
+                {
+                    // XXX check string length
+                    read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+                }
+                paramp += 2;
+            }
+            break;
+        case Ent::TypeSequence:
+            // xxx* buf, int len, ...
+            count = type.getSize() * paramp[1];
             esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
-            if (parameter.isOutput())
+            if (!param.isInput())
             {
-                read(*reinterpret_cast<void**>(reinterpret_cast<int*>(paramv) + paramc), count, reinterpret_cast<long long>(esp));
-            }
-        }
-
-        if (parameter.isInterfacePointer())
-        {
-            if (parameter.isOutput())
-            {
-                // Convert the received interface pointer to kernel's interface pointer
-                void** ip(**reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc));
-
-                if (ipt <= ip && ip < ipt + INTERFACE_POINTER_MAX)
+                if (0 < rc && rc <= paramp[1])
                 {
-                    Handle<SyscallProxy> proxy(&syscallTable[ip - ipt], true);
-                    if (proxy->isValid())
-                    {
-                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = static_cast<void**>(proxy->getObject());
-                    }
-                    else
-                    {
-                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = 0;
-                        return EBADFD;
-                    }
-                }
-                else if (isValid(ip, sizeof(void*)))
-                {
-                    // Allocate an entry in the upcall table and set the
-                    // interface pointer to the broker for the upcall table.
-                    Guid iid;
-                    if (0 <= parameter.getIidIs())
-                    {
-                        iid = **reinterpret_cast<Guid**>(reinterpret_cast<u8*>(paramv) + record->method.getParameterOffset(parameter.getIidIs()));
-                        Reflect::Interface interface;
-                        try
-                        {
-                            interface = getInterface(iid);
-                        }
-                        catch (Exception& error)
-                        {
-                            return error.getResult();
-                        }
-                        iid = interface.getIid();
-                    }
-                    else
-                    {
-                        iid = parameter.getType().getInterface().getIid();
-                    }
-
-                    int n = set(this, reinterpret_cast<IInterface*>(ip), iid, true);
-                    if (0 <= n)
-                    {
-                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = &(broker.getInterfaceTable())[n];
-                    }
-                    else
-                    {
-                        // XXX object pointed by ip would be left allocated.
-                        **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = 0;
-                        return ENFILE;
-                    }
-                    if (log)
-                    {
-                        esReport(" = %p", ip);
-                    }
-                }
-                else if (ip == 0)
-                {
-                    // Requested interface is not returned.
-                    **reinterpret_cast<void****>(reinterpret_cast<int*>(paramv) + paramc) = 0;
-                }
-                else
-                {
-                    return EFAULT;
+                    read(*reinterpret_cast<void**>(paramp), type.getSize() * rc, reinterpret_cast<long long>(esp));
                 }
             }
+            paramp += 2;
+            break;
+        case Ent::SpecUuid:         // Guid* guid, ...
+            if (param.isInput())
+            {
+                iid = **reinterpret_cast<Guid**>(paramp);
+            }
+            // FALL THROUGH
+        case Ent::TypeStructure:    // struct* buf, ...
+        case Ent::TypeArray:        // xxx[x] buf, ...
+            count = type.getSize();
+            esp -= (count + sizeof(int) - 1) & ~(sizeof(int) - 1);
+            if (!param.isInput())
+            {
+                read(*reinterpret_cast<void**>(paramp), count, reinterpret_cast<long long>(esp));
+            }
+            ++paramp;
+            break;
+        case Ent::SpecObject:
+        case Ent::TypeInterface:
+            if (param.isInput())
+            {
+                if (void** ip = *reinterpret_cast<void***>(paramp))
+                {
+                    // Release the created syscall proxy.
+                    SyscallProxy* proxy(&syscallTable[ip - ipt]);
+                    proxy->release();
+                }
+            }
+            ++paramp;
+            break;
+        default:
+            break;
         }
 
-        paramc += size / sizeof(unsigned);
-        ASSERT(paramc <= 8);    // XXX
         if (log && i + 1 < record->method.getParameterCount())
         {
             esReport(", ");

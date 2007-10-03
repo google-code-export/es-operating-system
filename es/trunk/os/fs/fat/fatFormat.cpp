@@ -23,8 +23,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <es.h>
+#include <es/exception.h>
 #include <es/handle.h>
 #include "fatStream.h"
+
+using namespace es;
 
 extern "C"
 {
@@ -172,8 +175,9 @@ getGeometry(IStream* partition, IDiskManagement::Geometry* geometry)
     Handle<IDiskManagement> dm(partition, true);
     if (dm)
     {
-        if (0 <= dm->getGeometry(geometry))
+        try
         {
+            dm->getGeometry(geometry);
             if (geometry->diskSize < (512LL << 24) &&   // less than 8GB?
                 geometry->sectorsPerTrack < (1 << 6))   // less than 64?
             {
@@ -189,6 +193,10 @@ getGeometry(IStream* partition, IDiskManagement::Geometry* geometry)
                     geometry->heads = 255;
                 }
             }
+        }
+        catch (Exception& error)
+        {
+            // [check]
         }
     }
 }
@@ -318,9 +326,17 @@ formatFat16(IStream* partition)
     ASSERT(0 <= diff);
 
     Handle<IDiskManagement> dm(partition, true);
-    if (dm && 0 <= dm->getLayout(&layout))
+    if (dm)
     {
-        hiddSec = layout.startingOffset / geometry.bytesPerSector;
+        try
+        {
+            dm->getLayout(&layout);
+            hiddSec = layout.startingOffset / geometry.bytesPerSector;
+        }
+        catch (Exception& error)
+        {
+            // [check]
+        }
     }
 
     u8* sector = new u8[geometry.bytesPerSector];
@@ -405,9 +421,17 @@ formatFat32(IStream* partition)
     ASSERT(0 <= diff);
 
     Handle<IDiskManagement> dm(partition, true);
-    if (dm && 0 <= dm->getLayout(&layout))
+    if (dm)
     {
-        hiddSec = layout.startingOffset / geometry.bytesPerSector;
+        try
+        {
+            dm->getLayout(&layout);
+            hiddSec = layout.startingOffset / geometry.bytesPerSector;
+        }
+        catch (Exception& error)
+        {
+            // [check]
+        }
     }
 
     u8* sector = new u8[geometry.bytesPerSector];

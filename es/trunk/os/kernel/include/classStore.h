@@ -34,10 +34,10 @@ public:
     // IClassStore
     void add(const Guid& clsid, IClassFactory* factory);
     void remove(const Guid& clsid);
-    bool createInstance(const Guid& rclsid, const Guid& riid, void** objectPtr);
+    void* createInstance(const Guid& rclsid, const Guid& riid);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

@@ -23,7 +23,7 @@
 #include <es/base/IMonitor.h>
 #include <es/base/IThread.h>
 
-IThread* esCreateThread(void* (*start)(void* param), void* param);
+es::IThread* esCreateThread(void* (*start)(void* param), void* param);
 
 class Timer;
 
@@ -80,8 +80,8 @@ class Timer
     };
 
     Tree<DateTime, Value>   queue;
-    IThread*                thread;
-    IMonitor*               monitor;
+    es::IThread*            thread;
+    es::IMonitor*           monitor;
     bool                    canceled;
 
     static void* run(void* param)
@@ -97,7 +97,7 @@ class Timer
             TimerTask* task;
             while (!canceled)
             {
-                Synchronized<IMonitor*> method(monitor);
+                Synchronized<es::IMonitor*> method(monitor);
                 Tree<DateTime, Value>::Node* node(queue.getFirst());
                 if (node)
                 {
@@ -142,11 +142,10 @@ public:
         thread(0),
         canceled(false)
     {
-        esCreateInstance(CLSID_Monitor,
-                         IID_IMonitor,
-                         reinterpret_cast<void**>(&monitor));
+        monitor = reinterpret_cast<es::IMonitor*>(
+                    esCreateInstance(CLSID_Monitor, es::IMonitor::iid()));
         thread = esCreateThread(run, this);
-        thread->setPriority(IThread::Highest);
+        thread->setPriority(es::IThread::Highest);
         thread->start();
         thread->release();
     }
@@ -156,7 +155,7 @@ public:
         canceled = true;
         monitor->notifyAll();
         {
-            Synchronized<IMonitor*> method(monitor);
+            Synchronized<es::IMonitor*> method(monitor);
 
             while (thread)
             {
@@ -168,7 +167,7 @@ public:
 
     void schedule(TimerTask* timerTask, DateTime time)
     {
-        Synchronized<IMonitor*> method(monitor);
+        Synchronized<es::IMonitor*> method(monitor);
 
         Value v(timerTask, 0);
         timerTask->period = 0;
@@ -193,7 +192,7 @@ public:
 
     void schedule(TimerTask* timerTask, DateTime firstTime, TimeSpan period)
     {
-        Synchronized<IMonitor*> method(monitor);
+        Synchronized<es::IMonitor*> method(monitor);
 
         Value v(timerTask, period);
         timerTask->period = period;
@@ -228,7 +227,7 @@ public:
 
     void cancel(TimerTask* timerTask)
     {
-        Synchronized<IMonitor*> method(monitor);
+        Synchronized<es::IMonitor*> method(monitor);
         if (timerTask->isEnabled())
         {
             queue.remove(timerTask->executionTime);

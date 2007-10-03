@@ -27,6 +27,8 @@
 #include <es/clsid.h>
 #include "fatStream.h"
 
+using namespace es;
+
 u8* FatFileSystem::zero;
 
 bool FatFileSystem::
@@ -306,24 +308,20 @@ init()
     hashSize = 20;
     hashTable = new FatStreamChain[hashSize];
 
-    esCreateInstance(CLSID_Monitor,
-                     IID_IMonitor,
-                     reinterpret_cast<void**>(&hashMonitor));
+    hashMonitor = reinterpret_cast<IMonitor*>(
+        esCreateInstance(CLSID_Monitor, IMonitor::iid()));
 
-    esCreateInstance(CLSID_Monitor,
-                     IID_IMonitor,
-                     reinterpret_cast<void**>(&fatMonitor));
+    fatMonitor = reinterpret_cast<IMonitor*>(
+        esCreateInstance(CLSID_Monitor, IMonitor::iid()));
 
-    esCreateInstance(CLSID_CacheFactory,
-                     IID_ICacheFactory,
-                     reinterpret_cast<void**>(&cacheFactory));
+    cacheFactory = reinterpret_cast<ICacheFactory*>(
+        esCreateInstance(CLSID_CacheFactory, ICacheFactory::iid()));
 
     // We must reserve a few pages for diskCache so that
     // we can access to FAT to write back file streams
     // under any low memory condition.
-    esCreateInstance(CLSID_PageSet,
-                     IID_IPageSet,
-                     reinterpret_cast<void**>(&pageSet));
+    pageSet = reinterpret_cast<IPageSet*>(
+        esCreateInstance(CLSID_PageSet, IPageSet::iid()));
     pageSet->reserve(1);
 }
 
@@ -624,16 +622,16 @@ getRoot(IContext** root)
     }
 }
 
-void FatFileSystem::
-getFreeSpace(long long& freeBytes)
+long long FatFileSystem::
+getFreeSpace()
 {
-    freeBytes = (long long) freeCount * bytsPerClus;
+    return (long long) freeCount * bytsPerClus;
 }
 
-void FatFileSystem::
-getTotalSpace(long long& bytes)
+long long FatFileSystem::
+getTotalSpace()
 {
-    bytes = (long long) countOfClusters * bytsPerClus;
+    return (long long) countOfClusters * bytsPerClus;
 }
 
 int FatFileSystem::
@@ -666,24 +664,24 @@ defrag()
     return 0;
 }
 
-bool FatFileSystem::
-queryInterface(const Guid& riid, void** objectPtr)
+void* FatFileSystem::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IFileSystem)
+    void* objectPtr;
+    if (riid == IFileSystem::iid())
     {
-        *objectPtr = static_cast<IFileSystem*>(this);
+        objectPtr = static_cast<IFileSystem*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IFileSystem*>(this);
+        objectPtr = static_cast<IFileSystem*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int FatFileSystem::

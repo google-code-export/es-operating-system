@@ -16,9 +16,11 @@
 // separately from the hard disk device drivers.
 
 #include <ctype.h>
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <es.h>
+#include <es/exception.h>
 #include <es/handle.h>
 #include "partition.h"
 
@@ -130,14 +132,14 @@ getObject()
     return 0;
 }
 
-int PartitionIterator::
+void PartitionIterator::
 setObject(IInterface* object)
 {
-    return -1;
+    esThrow(EACCES); // [check] appropriate?
 }
 
 int PartitionIterator::
-getName(char* name, unsigned int len)
+getName(char* name, int len)
 {
     Monitor::Synchronized method(context->monitor);
 
@@ -193,28 +195,28 @@ getName(char* name, unsigned int len)
 // PartitionIterator : IInterface
 //
 
-bool PartitionIterator::
-queryInterface(const Guid& riid, void** objectPtr)
+void* PartitionIterator::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IIterator)
+    void* objectPtr;
+    if (riid == IIterator::iid())
     {
-        *objectPtr = static_cast<IIterator*>(this);
+        objectPtr = static_cast<IIterator*>(this);
     }
-    else if (riid == IID_IBinding)
+    else if (riid == IBinding::iid())
     {
-        *objectPtr = static_cast<IBinding*>(this);
+        objectPtr = static_cast<IBinding*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IIterator*>(this);
+        objectPtr = static_cast<IIterator*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int PartitionIterator::

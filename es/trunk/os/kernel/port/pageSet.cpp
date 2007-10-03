@@ -241,42 +241,42 @@ standby(Page* page)
     }
 }
 
-bool PageSet::
-createInstance(const Guid& riid, void** objectPtr)
+void* PageSet::
+createInstance(const Guid& riid)
 {
-    *objectPtr = 0;
+    void* objectPtr = 0;
     PageSet* instance = new PageSet(this);
     if (!instance)
     {
         throw SystemException<ENOMEM>();
     }
-    bool rc = instance->queryInterface(riid, objectPtr);
+    objectPtr = instance->queryInterface(riid);
     instance->release();
-    return rc;
+    return objectPtr;
 }
 
-bool PageSet::
-queryInterface(const Guid& riid, void** objectPtr)
+void* PageSet::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IPageSet)
+    void* objectPtr;
+    if (riid == IPageSet::iid())
     {
-        *objectPtr = static_cast<IPageSet*>(this);
+        objectPtr = static_cast<IPageSet*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IClassFactory*>(this);
+        objectPtr = static_cast<IClassFactory*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IPageSet*>(this);
+        objectPtr = static_cast<IPageSet*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int PageSet::

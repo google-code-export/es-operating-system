@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, 2007
+ * Copyright (c) 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -11,23 +11,12 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#include <es/reflect.h>
+#ifndef GUID_H_INCLUDED
+#define GUID_H_INCLUDED
 
-const char* Reflect::typeID[ReflectionFile::TAG_MAX] =
-{
-    "signed char",
-    "short",
-    "int",
-    "long long",
-    "unsigned char",
-    "unsigned short",
-    "unsigned int",
-    "unsigned long long",
-    "float",
-    "double",
-    "bool",
-    "char",
-    "wchar_t",
-    "void",
-    "Guid"
-};
+#include <es/uuid.h>
+
+bool parseGuid(const char* str, Guid* u);
+void printGuid(const Guid& guid);
+
+#endif  // GUID_H_INCLUDED

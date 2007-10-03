@@ -21,6 +21,8 @@
 #include <es/base/IProcess.h>
 #include <es/base/IThread.h>
 
+using namespace es;
+
 class Core;
 class Thread;
 class Monitor;
@@ -40,8 +42,8 @@ public:
     void yield();
     IMonitor* createMonitor();
     IContext* getRoot();
-    IStream* getIn();
-    IStream* getOut();
+    IStream* getInput();
+    IStream* getOutput();
     IStream* getError();
     void* setBreak(long long increment);
     long long getNow();
@@ -55,7 +57,7 @@ public:
     void testCancel();
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };
@@ -80,7 +82,7 @@ public:
     void notifyAll();
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 
@@ -139,7 +141,7 @@ public:
     void cancel();
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 

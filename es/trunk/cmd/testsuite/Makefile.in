@@ -208,6 +208,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 LDADD = ../../os/fs/fat/libesfat.a ../../os/kernel/libeskernel.a ../../os/libes++/libessup++.a -lfreetype
 SUFFIXES = .img .gz
+TESTS_ENVIRONMENT = $(srcdir)/testLoader
 noinst_SCRIPTS = $(TESTS)
 noinst_DATA = disk.img \
 	main.img \
@@ -234,7 +235,7 @@ AM_CPPFLAGS = \
 	-I$(prefix)/include \
 	-I$(prefix)/include/freetype2
 
-EXTRA_DIST = disk.img.gz makeScript
+EXTRA_DIST = disk.img.gz makeScript testLoader
 all: all-am
 
 .SUFFIXES:

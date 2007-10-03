@@ -149,9 +149,9 @@ int esReportv(const char* spec, va_list list)
     return len;
 }
 
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
+void* esCreateInstance(const Guid& rclsid, const Guid& riid)
 {
-    return classStore->createInstance(rclsid, riid, objectPtr);
+    return classStore->createInstance(rclsid, riid);
 }
 
 void esSleep(s64 timeout)

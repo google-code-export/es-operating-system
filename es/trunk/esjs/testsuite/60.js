@@ -1,5 +1,5 @@
-stdin = System.getIn();
-stdout = System.getOut();
+stdin = System.input;
+stdout = System.output;
 
 function readLine(prompt)
 {

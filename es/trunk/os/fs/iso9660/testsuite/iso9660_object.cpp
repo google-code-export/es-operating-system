@@ -14,6 +14,7 @@
 #include <new>
 #include <stdlib.h>
 #include <es.h>
+#include <es/exception.h>
 #include <es/handle.h>
 #include "vdisk.h"
 #include "iso9660Stream.h"
@@ -72,20 +73,21 @@ int main(int argc, char* argv[])
 #else
     IStream* disk = new VDisk(static_cast<char*>("isotest.iso"));
 #endif
+    TEST(disk);
     long long diskSize;
     diskSize = disk->getSize();
     esReport("diskSize: %lld\n", diskSize);
-
+    TEST(0 < diskSize);
 
     Handle<IFileSystem> isoFileSystem;
-    esCreateInstance(CLSID_IsoFileSystem, IID_IFileSystem,
-                     reinterpret_cast<void**>(&isoFileSystem));
+    isoFileSystem = reinterpret_cast<IFileSystem*>(
+        esCreateInstance(CLSID_IsoFileSystem, IFileSystem::iid()));
     TEST(isoFileSystem);
     isoFileSystem->mount(disk);
     {
         Handle<IContext> root;
 
-        isoFileSystem->getRoot(reinterpret_cast<IContext**>(&root));
+        root = isoFileSystem->getRoot();
         TEST(root);
 
         Handle<IBinding> binding = root;
@@ -98,9 +100,15 @@ int main(int argc, char* argv[])
         TEST(object);
         TEST(object == root);
 
-        // setObject() returns an error.
-        long rc = binding->setObject(interface);
-        TEST(rc < 0);
+        // setObject() must return an exception.
+        try
+        {
+            binding->setObject(interface);
+            TEST(false);
+        }
+        catch (Exception& error)
+        {
+        }
     }
     isoFileSystem->dismount();
 

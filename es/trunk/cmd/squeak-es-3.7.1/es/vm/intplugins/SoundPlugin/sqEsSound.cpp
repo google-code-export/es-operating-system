@@ -39,6 +39,8 @@
 #include <es/device/IAudioFormat.h>
 #include <es/synchronized.h>
 
+using namespace es;
+
 ICurrentProcess* System();
 
 extern "C" {

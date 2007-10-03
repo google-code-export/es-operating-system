@@ -19,6 +19,8 @@
 #include <es/exception.h>
 #include <es/base/IProcess.h>
 
+using namespace es;
+
 ICurrentProcess* System();
 
 __thread int testA = 3;
@@ -84,11 +86,11 @@ int main(int argc, char* argv[])
 
     esReport("%x %x %x\n", testA, testB, &testA);
 
-    System()->trace(false);
+    System()->trace(true);
 
     m = System()->createMonitor();
 
-    IThread* thread = System()->createThread(start, 0);
+    IThread* thread = System()->createThread((void*) start, 0);
     thread->start();
 
     ICurrentThread* current(System()->currentThread());
@@ -105,17 +107,8 @@ int main(int argc, char* argv[])
 
     esReport("main(): %x %x %x\n", testA, testB, &testA);
 
-    // Check kernel page fault
-    try
-    {
-        current->queryInterface(IID_IInterface, (void**) 0x8000);
-    }
-    catch (Exception& error)
-    {
-        esReport("catch error: %d\n", error.getResult());
-    }
-
-    current->queryInterface(IID_IInterface, (void**) &current);
+#if 1
+    current = reinterpret_cast<ICurrentThread*>(current->queryInterface(IInterface::iid()));
     try
     {
         current->sleep(30000000);   // Should raise an exception.
@@ -124,6 +117,7 @@ int main(int argc, char* argv[])
     {
         esReport("catch error: %d\n", error.getResult());
     }
+#endif
 
     esReport("hello, world.\n");
 }

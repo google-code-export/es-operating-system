@@ -49,9 +49,8 @@ int main()
 #endif // VERBOSE
     // Reserved all pages except for NON_RESERVER_PAGE pages.
     IPageSet* pageSet;
-    esCreateInstance(CLSID_PageSet,
-                     IID_IPageSet,
-                     reinterpret_cast<void**>(&pageSet));
+    pageSet = reinterpret_cast<IPageSet*>(
+        esCreateInstance(CLSID_PageSet, IPageSet::iid()));
     unsigned long long reserved = maxPage - NON_RESERVED_PAGE;
     pageSet->reserve(reserved);
 
@@ -69,9 +68,9 @@ int main()
         setData(buf1, size1, 1);
         buf2 = new u8[size1];
         setData(buf2, size1, 2);
-        esCreateInstance(CLSID_CacheFactory,
-                         IID_ICacheFactory,
-                         reinterpret_cast<void**>(&cacheFactory));
+
+        cacheFactory = reinterpret_cast<ICacheFactory*>(
+            esCreateInstance(CLSID_CacheFactory, ICacheFactory::iid()));
     }
     catch (...)
     {

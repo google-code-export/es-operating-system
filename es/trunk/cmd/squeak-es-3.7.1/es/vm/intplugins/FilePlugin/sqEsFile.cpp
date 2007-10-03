@@ -38,6 +38,8 @@
 #include <es/base/IStream.h>
 #include <es/naming/IContext.h>
 
+using namespace es;
+
 #ifndef _DEBUG
 #define FPRINTF(...)    (__VA_ARGS__)
 #else
@@ -238,7 +240,8 @@ int sqFileOpen(SQFile* f, int sqFileNameIndex, int sqFileNameSize, int writeFlag
     if (node)
     {
         IFile* file;
-        if (!node->queryInterface(IID_IFile, (void**) &file))
+        file = reinterpret_cast<IFile*>(node->queryInterface(IFile::iid()));
+        if (!file)
         {
             f->file = 0;
         }

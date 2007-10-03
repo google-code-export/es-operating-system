@@ -11,20 +11,30 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-import "es/base/IInterface.idl";
+#ifndef NINTENDO_ES_BASE_ISERVICE_IDL_INCLUDED
+#define NINTENDO_ES_BASE_ISERVICE_IDL_INCLUDED
 
-/**
- * This interface represents a restartable service.
- */
-[object, uuid(e9e58a92-c6c9-11db-8100-0009bf000001)]
-interface IService : IInterface
+#include "es/base/IInterface.idl"
+
+module es
 {
     /**
-     * Starts this service.
+     * This interface represents a restartable service.
      */
-    boolean start();
-    /**
-     * Stops this service.
-     */
-    boolean stop();
-}
+    interface IService : IInterface
+    {
+        #pragma ID IService = "DCE:e9e58a92-c6c9-11db-8100-0009bf000001";
+
+        /**
+         * Starts this service.
+         */
+        boolean start();
+        /**
+         * Stops this service.
+         */
+        boolean stop();
+    };
+};
+
+#endif // NINTENDO_ES_BASE_ISERVICE_IDL_INCLUDED
+

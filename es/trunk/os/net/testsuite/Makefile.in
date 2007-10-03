@@ -253,6 +253,7 @@ AM_CPPFLAGS = \
 	-I ../../../include \
 	-I $(srcdir)/../../../include
 
+@ES_TRUE@TESTS_ENVIRONMENT = $(srcdir)/testLoader
 @ES_TRUE@noinst_SCRIPTS = $(TESTS)
 @ES_TRUE@noinst_DATA = config.img dhcp.img
 @ES_TRUE@CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
@@ -269,7 +270,7 @@ config_SOURCES = config.cpp
 dhcp_SOURCES = dhcp.cpp
 dns_SOURCES = dns.cpp
 unreach_SOURCES = unreach.cpp
-EXTRA_DIST = makeScript
+EXTRA_DIST = makeScript testLoader
 all: all-am
 
 .SUFFIXES:
@@ -630,9 +631,7 @@ uninstall-am:
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
-
-% :: %.elf
-	$(srcdir)/makeScript "`pwd`" $@
+	$(srcdir)/makeScript "`pwd`" $(*F)
 
 @ES_TRUE@clean-local:
 @ES_TRUE@	-rm -f *.map *.log 2hd.img es.img

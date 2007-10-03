@@ -31,6 +31,8 @@
 #include <es/handle.h>
 #include "fatStream.h"
 
+using namespace es;
+
 namespace
 {
     template <typename T>

@@ -87,7 +87,7 @@ public:
     int issue(AtaDevice* device, u8* packet, int packetSize,
               void* buffer = 0, int count = 0, u8 features = 0);
     int invoke(int);
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 
@@ -145,11 +145,11 @@ public:
 
     // IDiskManagement
     int initialize();
-    int getGeometry(Geometry* geometry);
-    int getLayout(Partition* partition);
-    int setLayout(Partition* partition);
+    void getGeometry(Geometry* geometry);
+    void getLayout(Partition* partition);
+    void setLayout(const Partition* partition);
 
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 
@@ -178,7 +178,7 @@ public:
 
     int read(void* dst, int count, long long offset);
     int write(const void* src, int count, long long offset);
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef();
     unsigned int release();
 

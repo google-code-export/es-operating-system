@@ -376,24 +376,24 @@ splX(unsigned x)
 // IInterface
 //
 
-bool Apic::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Apic::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IPic)
+    void* objectPtr;
+    if (riid == IPic::iid())
     {
-        *objectPtr = static_cast<IPic*>(this);
+        objectPtr = static_cast<IPic*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IPic*>(this);
+        objectPtr = static_cast<IPic*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Apic::

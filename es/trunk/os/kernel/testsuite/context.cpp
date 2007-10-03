@@ -33,19 +33,19 @@ public:
     {
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IInterface)
+        void* objectPtr;
+        if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IInterface*>(this);
+            objectPtr = static_cast<IInterface*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef(void)
@@ -110,7 +110,7 @@ static int test_without_smart_pointer(IContext* context)
     while (iterator->hasNext())
     {
         unknown = iterator->next();
-        unknown->queryInterface(IID_IBinding, reinterpret_cast<void**>(&binding));
+        binding = reinterpret_cast<IBinding*>(unknown->queryInterface(IBinding::iid()));
         unknown->release();
         binding->getName(name, sizeof name);
 #ifdef VERBOSE
@@ -144,7 +144,7 @@ static int test_without_smart_pointer(IContext* context)
     while (iterator->hasNext())
     {
         unknown = iterator->next();
-        unknown->queryInterface(IID_IBinding, reinterpret_cast<void**>(&binding));
+        binding = reinterpret_cast<IBinding*>(unknown->queryInterface(IBinding::iid()));
         unknown->release();
         binding->getName(name, sizeof name);
 #ifdef VERBOSE

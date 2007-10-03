@@ -1,7 +1,9 @@
 noinst_PROGRAMS = squeak
 
 AM_LDFLAGS = -static -Wl,--no-omagic,-Map,$@.map,--cref -L$(prefix)/lib
-AM_CPPFLAGS = -I$(prefix)/include -DSQUEAK_BUILTIN_PLUGIN -DDISABLE_SECURITY
+AM_CPPFLAGS = -I$(srcdir)/../../include -I../../include \
+	-I$(prefix)/include -DSQUEAK_BUILTIN_PLUGIN -DDISABLE_SECURITY
+
 AM_CFLAGS = -O2
 
 LDADD = -les++

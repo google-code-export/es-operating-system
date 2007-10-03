@@ -18,6 +18,8 @@
 #include <es/uuid.h>
 #include <es/clsid.h>
 
+using namespace es;
+
 int main()
 {
     Hashtable<Guid, int> h(100);

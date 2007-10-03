@@ -63,11 +63,14 @@
 #include <es/list.h>
 #include <es/ref.h>
 #include <es/base/IClassStore.h>
+#include <es/base/IFile.h>
 #include <es/base/IInterfaceStore.h>
 #include <es/base/IProcess.h>
 #include <es/base/IStream.h>
 #include <es/util/ICanvasRenderingContext2D.h>
 #include <cairo.h>
+
+using namespace es;
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,6 +81,157 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+ICurrentProcess* System();
+
+class CanvasPattern : public ICanvasPattern
+{
+    Ref ref;
+    IMonitor* monitor;
+    cairo_pattern_t* pattern;
+    u8* imageData;
+
+public:
+    CanvasPattern(cairo_pattern_t* pattern, u8* imageData) :
+        pattern(pattern), imageData(imageData)
+    {
+        monitor = System()->createMonitor();
+    }
+
+    ~CanvasPattern()
+    {
+        if (pattern)
+        {
+            cairo_pattern_destroy(pattern);
+        }
+        if (imageData)
+        {
+            delete [] imageData;
+        }
+        if (monitor)
+        {
+            monitor->release();
+        }
+    }
+
+    void apply(const void* context)
+    {
+        Synchronized<IMonitor*> method(monitor);
+
+        ASSERT(context);
+        cairo_t* cr = static_cast<cairo_t*>(const_cast<void*>(context)); // [check]
+        cairo_set_source(cr, pattern);
+    }
+
+    void* queryInterface(const Guid& riid)
+    {
+        void* objectPtr;
+        if (riid == ICanvasPattern::iid())
+        {
+            objectPtr = static_cast<ICanvasPattern*>(this);
+        }
+        else if (riid == IInterface::iid())
+        {
+            objectPtr = static_cast<ICanvasPattern*>(this);
+        }
+        else
+        {
+            return NULL;
+        }
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
+    }
+
+    unsigned int addRef(void)
+    {
+        int count = ref.addRef();
+        return count;
+    }
+
+    unsigned int release(void)
+    {
+        unsigned int count = ref.release();
+        if (count == 0)
+        {
+            delete this;
+            return 0;
+        }
+        return count;
+    }
+};
+
+class CanvasGradient : public ICanvasGradient
+{
+    Ref ref;
+    IMonitor* monitor;
+    cairo_pattern_t* pattern;
+
+public:
+    CanvasGradient(cairo_pattern_t* gradpat) : pattern(gradpat)
+    {
+        monitor = System()->createMonitor();
+    }
+
+    ~CanvasGradient()
+    {
+        if (pattern)
+        {
+            cairo_pattern_destroy(pattern);
+        }
+
+        if (monitor)
+        {
+            monitor->release();
+        }
+    }
+
+    void apply(const void* context)
+    {
+        Synchronized<IMonitor*> method(monitor);
+
+        ASSERT(context);
+        cairo_t* cr = static_cast<cairo_t*>(const_cast<void*>(context)); // [check]
+        cairo_set_source(cr, pattern);
+    }
+
+    void addColorStop(float offset, const char* color);
+
+    void* queryInterface(const Guid& riid)
+    {
+        void* objectPtr;
+        if (riid == ICanvasGradient::iid())
+        {
+            objectPtr = static_cast<ICanvasGradient*>(this);
+        }
+        else if (riid == IInterface::iid())
+        {
+            objectPtr = static_cast<ICanvasGradient*>(this);
+        }
+        else
+        {
+            return NULL;
+        }
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
+    }
+
+    unsigned int addRef(void)
+    {
+        int count = ref.addRef();
+        return count;
+    }
+
+    unsigned int release(void)
+    {
+        unsigned int count = ref.release();
+        if (count == 0)
+        {
+            delete this;
+            return 0;
+        }
+        return count;
+    }
+};
 
 class Canvas : public ICanvasRenderingContext2D
 {
@@ -109,6 +263,12 @@ class Canvas : public ICanvasRenderingContext2D
     public:
         ContextState() : globalAlpha(1.0)
         {
+            for (int i = 0; i < STYLE_MAX; i++)
+            {
+                colorStyles[i] = 0; // [check] default?
+                gradientStyles[i] = NULL;
+                patternStyles[i] = NULL;
+            }
         }
 
         ContextState(const ContextState* other)
@@ -117,17 +277,36 @@ class Canvas : public ICanvasRenderingContext2D
             for (int i = 0; i < STYLE_MAX; i++)
             {
                 colorStyles[i] = other->colorStyles[i];
+                gradientStyles[i] = other->gradientStyles[i];
+                patternStyles[i] = other->patternStyles[i];
             }
         }
 
         inline void setColorStyle(int whichStyle, u32 color)
         {
             colorStyles[whichStyle] = color;
+            gradientStyles[whichStyle] = NULL;
+            patternStyles[whichStyle] = NULL;
+        }
+
+        inline void setPatternStyle(int whichStyle, ICanvasPattern* pat)
+        {
+            gradientStyles[whichStyle] = NULL;
+            patternStyles[whichStyle] = pat;
+        }
+
+        inline void setGradientStyle(int whichStyle, ICanvasGradient* grad)
+        {
+            gradientStyles[whichStyle] = grad;
+            patternStyles[whichStyle] = NULL;
         }
 
         float globalAlpha;
         u32 colorStyles[STYLE_MAX];
         Link<ContextState>   link;
+        ICanvasGradient* gradientStyles[STYLE_MAX];
+        ICanvasPattern* patternStyles[STYLE_MAX];
+
     };
 
     typedef List<ContextState, &ContextState::link> StyleStack;
@@ -137,53 +316,57 @@ class Canvas : public ICanvasRenderingContext2D
     u32 lastStyle;
     bool dirtyStyle[STYLE_MAX];
 
+    u8* allocateBitmapData(IFile* image, u32* imageWidth, u32* imageHeight);
     void applyStyle(u32 aWhichStyle);
     void dirtyAllStyles();
     int getStyle(u32 aWhichStyle, char* color, unsigned int len);
     void setCairoColor(u32 color);
     void setStyle(u32 aWhichStyle, const char* color);
+    void setStyle(u32 aWhichStyle, ICanvasGradient* grad);
+    void setStyle(u32 aWhichStyle, ICanvasPattern* pat);
 
     inline ContextState* currentState()
     {
         return styleStack.getLast();
     }
 
-    inline u32 NS_RGB(u8 r, u8 g, u8 b)
+    static inline u32 NS_RGB(u8 r, u8 g, u8 b)
     {
         return ((255 << 24) | ((b)<<16) | ((g)<<8) | r);
     }
 
-    inline u32 NS_RGB(u8 r, u8 g, u8 b, u8 a)
+    static inline u32 NS_RGB(u8 r, u8 g, u8 b, u8 a)
     {
         return (((a) << 24) | ((b)<<16) | ((g)<<8) | r);
     }
 
-    inline u8 NS_GET_R(u32 rgba)
+    static inline u8 NS_GET_R(u32 rgba)
     {
         return (u8) (rgba & 0xff);
     }
 
-    inline u8 NS_GET_G(u32 rgba)
+    static inline u8 NS_GET_G(u32 rgba)
     {
         return (u8) ((rgba >> 8) & 0xff);
     }
 
-    inline u8 NS_GET_B(u32 rgba)
+    static inline u8 NS_GET_B(u32 rgba)
     {
         return (u8) ((rgba >> 16) & 0xff);
     }
 
-    inline u8 NS_GET_A(u32 rgba)
+    static inline u8 NS_GET_A(u32 rgba)
     {
         return (u8) ((rgba >> 24) & 0xff);
     }
+
+    static u32 parser(const char* color);
 
 public:
     Canvas(cairo_surface_t* surface, int screenWidth, int screenHeight);
     ~Canvas();
 
     u8* getData();
-    u32 parser(const char* color);
 
     //
     // ICanvasRenderingContext2D
@@ -195,15 +378,22 @@ public:
     void clearRect(float x, float y, float width, float height);
     void closePath();
     void clip();
+    ICanvasGradient* createLinearGradient(float x0, float y0, float x1, float y1);
+    ICanvasGradient* createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1);
+    ICanvasPattern* createPattern(IFile* image, const char* repeat);
+    void drawImage(IFile* image, float dx, float dy, float dw, float dh);
     void fill();
     void fillRect(float x, float y, float width, float height);
-    int getFillStyle(char* color, unsigned int len);
+    ICanvasGradient* getFillGradient();
+    ICanvasPattern* getFillPattern();
+    int getFillStyle(char* color, int len);
     float getGlobalAlpha();
+    int getGlobalCompositeOperation(char* operation, int len);
     float getMiterLimit();
-    int getLineCap(char* capStyle, unsigned int len);
-    int getLineJoin(char* joinStyle, unsigned int len);
+    int getLineCap(char* capStyle, int len);
+    int getLineJoin(char* joinStyle, int len);
     float getLineWidth();
-    int getStrokeStyle(char* color, unsigned int len);
+    int getStrokeStyle(char* color, int len);
     void lineTo(float x, float y);
     void moveTo(float x, float y);
     void quadraticCurveTo(float cpx, float cpy, float x, float y);
@@ -212,34 +402,72 @@ public:
     void rotate(float angle);
     void save();
     void scale(float scaleW, float scaleH);
-    void setFillStyle(const char* color);
+    int setFillStyle(const char* color, int len);
+    void setFillGradient(ICanvasGradient* gradient);
+    void setFillPattern(ICanvasPattern* pattern);
     void setGlobalAlpha(float alpha);
+    int setGlobalCompositeOperation(const char* operation, int len);
     void setMiterLimit(float limit);
     void setLineWidth(float width);
-    void setLineCap(const char* capStyle);
-    void setLineJoin(const char* joinStyle);
-    void setStrokeStyle(const char* color);
+    int setLineCap(const char* capStyle, int len);
+    int setLineJoin(const char* joinStyle, int len);
+    int setStrokeStyle(const char* color, int len);
     void stroke();
     void strokeRect(float x, float y, float width, float height);
     void translate(float tx, float ty);
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    // unsupported.
+    void setShadowBlur(float blur)
     {
-        if (riid == IID_ICanvasRenderingContext2D)
+    }
+    int setShadowColor(const char* color, int len)
+    {
+        return -1;
+    }
+    void setShadowOffsetX(float x)
+    {
+    }
+    void setShadowOffsetY(float y)
+    {
+    }
+    float getShadowBlur()
+    {
+        return 0.0;
+    }
+    int getShadowColor(char* color, int len)
+    {
+        if (0 < len && !color)
         {
-            *objectPtr = static_cast<ICanvasRenderingContext2D*>(this);
+            *color = 0;
         }
-        else if (riid == IID_IInterface)
+        return 0;
+    }
+    float getShadowOffsetX()
+    {
+        return 0.0;
+    }
+    float getShadowOffsetY()
+    {
+        return 0.0;
+    }
+
+    void* queryInterface(const Guid& riid)
+    {
+        void* objectPtr;
+        if (riid == ICanvasRenderingContext2D::iid())
         {
-            *objectPtr = static_cast<ICanvasRenderingContext2D*>(this);
+            objectPtr = static_cast<ICanvasRenderingContext2D*>(this);
+        }
+        else if (riid == IInterface::iid())
+        {
+            objectPtr = static_cast<ICanvasRenderingContext2D*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef(void)
@@ -258,6 +486,8 @@ public:
         }
         return count;
     }
+
+    friend class CanvasGradient;
 };
 
 #endif // NINTENDO_ES_LIBCANVAS_CANVAS_H_INCLUDED

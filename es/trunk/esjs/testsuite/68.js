@@ -3,5 +3,5 @@ function f(a, b)
     ;
 }
 f.length;
-// stdout = System.getOut();
+// stdout = System.output;
 // stdout.write.length;

@@ -44,7 +44,7 @@ Inet6Address::
 
 // IInternetAddress
 int Inet6Address::
-getAddress(void* address, unsigned int len)
+getAddress(void* address, int len)
 {
     if (sizeof(addr) <= len)
     {
@@ -61,17 +61,17 @@ getAddressFamily()
 }
 
 int Inet6Address::
-getCanonicalHostName(char* hostName, unsigned int len)
+getCanonicalHostName(char* hostName, int len)
 {
 }
 
 int Inet6Address::
-getHostAddress(char* hostAddress, unsigned int len)
+getHostAddress(char* hostAddress, int len)
 {
 }
 
 int Inet6Address::
-getHostName(char* hostName, unsigned int len)
+getHostName(char* hostName, int len)
 {
 }
 
@@ -119,8 +119,8 @@ socket(int type, int protocol)
 }
 
 // IInterface
-bool Inet6Address::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Inet6Address::
+queryInterface(const Guid& riid)
 {
 }
 

@@ -4,9 +4,7 @@ SUFFIXES = .img
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
-
-% :: %.elf
-	$(srcdir)/makeScript "`pwd`" $@
+	$(srcdir)/makeScript "`pwd`" $(*F)
 
 AM_CPPFLAGS = \
 	-I $(srcdir)/../include \
@@ -25,6 +23,8 @@ LDADD += -lpthread -lrt
 endif POSIX
 
 if ES
+
+TESTS_ENVIRONMENT = $(srcdir)/testLoader
 
 TESTS = config dhcp
 
@@ -67,4 +67,4 @@ dns_SOURCES = dns.cpp
 
 unreach_SOURCES = unreach.cpp
 
-EXTRA_DIST = makeScript
+EXTRA_DIST = makeScript testLoader

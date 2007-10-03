@@ -44,7 +44,7 @@ class Keyboard : public ICallback
         int write(const void* src, int count, long long offset);
         void flush();
 
-        bool queryInterface(const Guid& riid, void** objectPtr);
+        void* queryInterface(const Guid& riid);
         unsigned int addRef(void);
         unsigned int release(void);
     };
@@ -141,7 +141,7 @@ public:
     int invoke(int param);
 
     // IInterface
-    bool queryInterface(const Guid& riid, void** objectPtr);
+    void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
 };

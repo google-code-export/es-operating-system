@@ -28,6 +28,8 @@
 #include <es/base/IProcess.h>
 #include <es/base/IRuntime.h>
 
+using namespace es;
+
 static __thread void* stopCfa;
 static __thread jmp_buf stopBuf;
 static __thread struct _Unwind_Exception exc;
@@ -66,10 +68,10 @@ class System : public ICurrentProcess
             release();
         }
 
-        void exit(void* val)
+        void exit(const void* val)
         {
             // Call destructors before terminating the current thread.
-            rval = val;
+            rval = const_cast<void*>(val);
             exc.exception_class = 0;
             exc.exception_cleanup = System::cleanup;
             _Unwind_ForcedUnwind(&exc, System::stop, stopBuf);
@@ -95,9 +97,9 @@ class System : public ICurrentProcess
             currentThread->testCancel();
         }
 
-        bool queryInterface(const Guid& riid, void** objectPtr)
+        void* queryInterface(const Guid& riid)
         {
-            return currentThread->queryInterface(riid, objectPtr);
+            return currentThread->queryInterface(riid);
         }
 
         unsigned int addRef(void)
@@ -120,11 +122,11 @@ public:
         current(currentProcess->currentThread())
     {
         IRuntime* runtime;
-        currentProcess->queryInterface(IID_IRuntime, (void**) &runtime);
+        runtime = reinterpret_cast<IRuntime*>(currentProcess->queryInterface(IRuntime::iid()));
         if (runtime)
         {
-            runtime->setStartup(start);
-            runtime->setFocus(focus);
+            runtime->setStartup(reinterpret_cast<void*>(start)); // [check] cast.
+            runtime->setFocus(reinterpret_cast<void*>(focus)); // [check] cast.
             runtime->release();
         }
     }
@@ -150,7 +152,8 @@ public:
         return &current;
     }
 
-    IThread* createThread(void* (*start)(void* param), void* param)
+    // IThread* createThread(void* (*start)(void* param), void* param) // [check] function pointer.
+    IThread* createThread(const void* start, const void* param)
     {
         return currentProcess->createThread(start, param);
     }
@@ -170,14 +173,14 @@ public:
         return currentProcess->getRoot();
     }
 
-    IStream* getIn()
+    IStream* getInput()
     {
-        return currentProcess->getIn();
+        return currentProcess->getInput();
     }
 
-    IStream* getOut()
+    IStream* getOutput()
     {
-        return currentProcess->getOut();
+        return currentProcess->getOutput();
     }
 
     IStream* getError()
@@ -210,9 +213,9 @@ public:
         return currentProcess->getCurrent();
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        return currentProcess->queryInterface(riid, objectPtr);
+        return currentProcess->queryInterface(riid);
     }
 
     unsigned int addRef(void)

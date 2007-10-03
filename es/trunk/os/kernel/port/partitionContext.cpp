@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <es.h>
+#include <es/exception.h>
 #include <es/handle.h>
 #include "partition.h"
 
@@ -215,11 +216,7 @@ createPartition(const char* name, u8 type)
         break;
     }
 
-    if (stream->setLayout(&partition) < 0)
-    {
-        return 0;
-    }
-
+    stream->setLayout(&partition);
     return stream;
 }
 
@@ -312,7 +309,11 @@ createLogicalPartition(const char* name)
     partition.hiddenSectors = 0;
     partition.bootIndicator = 0;
 
-    if (stream->setLayout(&partition) < 0)
+    try
+    {
+        stream->setLayout(&partition);
+    }
+    catch (Exception& error)
     {
         partitionList.remove(stream);
         stream->release();
@@ -333,7 +334,14 @@ getGeometry(IDiskManagement::Geometry* geometry)
     Handle<IDiskManagement> dm(disk, true);
     if (dm)
     {
-        return dm->getGeometry(geometry);
+        try
+        {
+            dm->getGeometry(geometry);
+            return 0;
+        }
+        catch (Exception& error)
+        {
+        }
     }
     return -1;
 }
@@ -465,7 +473,11 @@ clearBootRecord(PartitionStream* stream)
     partition.partitionType = 0;
     partition.bootIndicator = 0;
 
-    if (stream->setLayout(&partition) < 0)
+    try
+    {
+        stream->setLayout(&partition);
+    }
+    catch (Exception& error)
     {
         return -1;
     }
@@ -948,28 +960,28 @@ list(const char* name)
 // PartitionContext : IInterface
 //
 
-bool PartitionContext::
-queryInterface(const Guid& riid, void** objectPtr)
+void* PartitionContext::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IContext)
+    void* objectPtr;
+    if (riid == IContext::iid())
     {
-        *objectPtr = static_cast<IContext*>(this);
+        objectPtr = static_cast<IContext*>(this);
     }
-    else if (riid == IID_IPartition)
+    else if (riid == IPartition::iid())
     {
-        *objectPtr = static_cast<IPartition*>(this);
+        objectPtr = static_cast<IPartition*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IContext*>(this);
+        objectPtr = static_cast<IContext*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int PartitionContext::

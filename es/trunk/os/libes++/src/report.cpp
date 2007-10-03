@@ -22,6 +22,8 @@
 #include <es/base/IClassStore.h>
 #include <es/base/IProcess.h>
 
+using namespace es;
+
 extern ICurrentProcess* System();
 
 extern "C"
@@ -31,7 +33,7 @@ extern "C"
     void esPanic(const char* file, int line, const char* msg, ...) __attribute__((weak));
 }
 
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr) __attribute__((weak));
+void* esCreateInstance(const Guid& rclsid, const Guid& riid) __attribute__((weak));
 
 int esReport(const char* spec, ...)
 {
@@ -46,7 +48,7 @@ int esReport(const char* spec, ...)
 
 int esReportv(const char* spec, va_list list)
 {
-    IStream* output(System()->getOut());
+    IStream* output(System()->getOutput());
     Formatter textOutput(output);
     int count = textOutput.format(spec, list);
     output->release();
@@ -65,7 +67,7 @@ void esPanic(const char* file, int line, const char* msg, ...)
     System()->exit(1);
 }
 
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
+void* esCreateInstance(const Guid& rclsid, const Guid& riid)
 {
     static Handle<IClassStore> classStore;
 
@@ -74,7 +76,7 @@ bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
         Handle<IContext> root = System()->getRoot();
         classStore = root->lookup("class");
     }
-    return classStore->createInstance(rclsid, riid, objectPtr);
+    return classStore->createInstance(rclsid, riid);
 }
 
 DateTime DateTime::getNow()

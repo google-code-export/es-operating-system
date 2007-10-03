@@ -290,10 +290,11 @@ setSize(long long newSize)
     }
 }
 
-void Cache::
-getSectorSize(int& size)
+int Cache::
+getSectorSize()
 {
     size = this->sectorSize;
+    return size;
 }
 
 void Cache::
@@ -440,28 +441,28 @@ getPageCount()
     return pageCount;
 }
 
-bool Cache::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Cache::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_ICache)
+    void* objectPtr;
+    if (riid == ICache::iid())
     {
-        *objectPtr = static_cast<ICache*>(this);
+        objectPtr = static_cast<ICache*>(this);
     }
-    else if (riid == IID_IPageable)
+    else if (riid == IPageable::iid())
     {
-        *objectPtr = static_cast<IPageable*>(this);
+        objectPtr = static_cast<IPageable*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<ICache*>(this);
+        objectPtr = static_cast<ICache*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Cache::

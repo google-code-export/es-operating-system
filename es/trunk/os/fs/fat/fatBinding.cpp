@@ -25,10 +25,13 @@
 //
 
 #include <ctype.h>
+#include <errno.h>
 #include <string.h>
 #include <es.h>
 #include <es/handle.h>
 #include "fatStream.h"
+
+using namespace es;
 
 IInterface* FatStream::
 getObject()
@@ -37,14 +40,14 @@ getObject()
     return static_cast<IContext*>(this);
 }
 
-int FatStream::
+void FatStream::
 setObject(IInterface* object)
 {
-    return -1;
+    esThrow(EACCES); // [check]
 }
 
 int FatStream::
-getName(char* name, unsigned int len)
+getName(char* name, int len)
 {
     Synchronized<IMonitor*> method(monitor);
 

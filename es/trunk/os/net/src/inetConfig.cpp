@@ -151,24 +151,24 @@ removeNameServer(IInternetAddress* address)
     nameServers.removeAddress(address);
 }
 
-bool InternetConfig::
-queryInterface(const Guid& riid, void** objectPtr)
+void* InternetConfig::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IInternetConfig)
+    void* objectPtr;
+    if (riid == IInternetConfig::iid())
     {
-        *objectPtr = static_cast<IInternetConfig*>(this);
+        objectPtr = static_cast<IInternetConfig*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IInternetConfig*>(this);
+        objectPtr = static_cast<IInternetConfig*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int InternetConfig::

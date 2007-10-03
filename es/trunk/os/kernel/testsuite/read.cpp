@@ -148,9 +148,8 @@ int main()
     esReport("Check read() and write().\n");
 
     ICacheFactory* cacheFactory = 0;
-    esCreateInstance(CLSID_CacheFactory,
-                     IID_ICacheFactory,
-                     reinterpret_cast<void**>(&cacheFactory));
+    cacheFactory = reinterpret_cast<ICacheFactory*>(
+        esCreateInstance(CLSID_CacheFactory, ICacheFactory::iid()));
 
     long offset = 0;
     long size = PAGE_SIZE;

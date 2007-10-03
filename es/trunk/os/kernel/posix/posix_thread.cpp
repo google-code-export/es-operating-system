@@ -205,24 +205,24 @@ cancel()
     }
 }
 
-bool Thread::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Thread::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IThread)
+    void* objectPtr;
+    if (riid == IThread::iid())
     {
-        *objectPtr = static_cast<IThread*>(this);
+        objectPtr = static_cast<IThread*>(this);
     }
-    else if (riid == IID_IInterface)
+    else if (riid == IInterface::iid())
     {
-        *objectPtr = static_cast<IThread*>(this);
+        objectPtr = static_cast<IThread*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Thread::

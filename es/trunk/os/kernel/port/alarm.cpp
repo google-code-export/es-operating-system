@@ -115,10 +115,10 @@ setEnabled(bool enabled)
     }
 }
 
-void Alarm::
-getInterval(long long& interval)
+long long Alarm::
+getInterval()
 {
-    interval = this->interval;
+    return this->interval;
 }
 
 void Alarm::
@@ -134,10 +134,10 @@ setInterval(long long interval)
     }
 }
 
-void Alarm::
-getStartTime(long long& time)
+long long Alarm::
+getStartTime()
 {
-    time = this->start;
+    return this->start;
 }
 
 void Alarm::
@@ -161,20 +161,20 @@ cancel()
     nextTick = 0;
 }
 
-bool Alarm::
-queryInterface(const Guid& riid, void** objectPtr)
+void* Alarm::
+queryInterface(const Guid& riid)
 {
-    if (riid == IID_IAlarm)
+    void* objectPtr;
+    if (riid == IAlarm::iid())
     {
-        *objectPtr = static_cast<IAlarm*>(this);
+        objectPtr = static_cast<IAlarm*>(this);
     }
     else
     {
-        *objectPtr = NULL;
-        return false;
+        return NULL;
     }
-    static_cast<IInterface*>(*objectPtr)->addRef();
-    return true;
+    static_cast<IInterface*>(objectPtr)->addRef();
+    return objectPtr;
 }
 
 unsigned int Alarm::
@@ -200,7 +200,7 @@ set(Alarm* alarm)
 {
     long long start;
 
-    alarm->getStartTime(start);
+    start = alarm->getStartTime();
     if (0 < start)
     {
         queues[0].add(alarm);

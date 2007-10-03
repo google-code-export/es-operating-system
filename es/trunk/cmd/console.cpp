@@ -29,6 +29,8 @@
 #include "IEventQueue.h"
 #include "canvas.h"
 
+using namespace es;
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -496,27 +498,27 @@ public:
         return true;
     }
 
-    bool queryInterface(const Guid& riid, void** objectPtr)
+    void* queryInterface(const Guid& riid)
     {
-        if (riid == IID_IStream)
+        void* objectPtr;
+        if (riid == IStream::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
-        else if (riid == IID_IService)
+        else if (riid == IService::iid())
         {
-            *objectPtr = static_cast<IService*>(this);
+            objectPtr = static_cast<IService*>(this);
         }
-        else if (riid == IID_IInterface)
+        else if (riid == IInterface::iid())
         {
-            *objectPtr = static_cast<IStream*>(this);
+            objectPtr = static_cast<IStream*>(this);
         }
         else
         {
-            *objectPtr = NULL;
-            return false;
+            return NULL;
         }
-        static_cast<IInterface*>(*objectPtr)->addRef();
-        return true;
+        static_cast<IInterface*>(objectPtr)->addRef();
+        return objectPtr;
     }
 
     unsigned int addRef(void)

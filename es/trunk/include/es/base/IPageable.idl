@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -11,33 +11,37 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-import "es/base/IInterface.idl";
+#ifndef NINTENDO_ES_BASE_IPAGEABLE_IDL_INCLUDED
+#define NINTENDO_ES_BASE_IPAGEABLE_IDL_INCLUDED
 
-/**
- * This interface provides methods for managing pageable objects.
- */
-[object, uuid(0327e274-25db-11db-9c02-0009bf000001)]
-interface IPageable : IInterface
+#include "es/base/IInterface.idl"
+
+module es
 {
-    /** Gets the physical page address at the specified offset of this pageable object.
-     * @param offset the offset of this pageable object.
-     * @return      Physical page address.
+    /**
+     * This interface provides methods for managing pageable objects.
      */
-    unsigned long get(long offset);
+    interface IPageable : IInterface
+    {
+        #pragma ID IPageable = "DCE:0327e274-25db-11db-9c02-0009bf000001";
+        /** Gets the physical page address at the specified offset of this pageable object.
+         * @param offset the offset of this pageable object.
+         * @return      Physical page address.
+         */
+        unsigned long long get(in long long offset);
 
-    /** Releases the page at the specified offset of this pageable object.
-     * @param offset the offset of this pageable object.
-     * @param pte the page table entry.
-     */
-    void put(long offset, unsigned long pte);
+        /** Releases the page at the specified offset of this pageable object.
+         * @param offset the offset of this pageable object.
+         * @param pte the page table entry.
+         */
+        void put(in long long offset, in unsigned long long pte);
 
-    /** Gets the size of this pageable object.
-     * @return the size of this pageable object.
-     */
-    long getSize();
+        /** The size of this pageable object.
+         * @return the size of this pageable object.
+         */
+        attribute long long size;
+    };
+};
 
-    /** Resizes this pageable object.
-     * @param size the new size of this pageable object.
-     */
-    void setSize(long size);
-}
+#endif // NINTENDO_ES_BASE_IPAGEABLE_IDL_INCLUDED
+

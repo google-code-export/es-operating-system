@@ -48,6 +48,8 @@
 #include <es/naming/IContext.h>
 #include "../IEventQueue.h"
 
+using namespace es;
+
 #ifndef _DEBUG
 #define FPRINTF(...)    (__VA_ARGS__)
 #else
@@ -433,7 +435,7 @@ sqImageFile sqImageFileOpen(char *fileName, char *mode)
 {
     FPRINTF("%s(\"%s\", \"%s\");\n", __func__, fileName, mode);
     IInterface* interface = gRoot->lookup(fileName);
-    interface->queryInterface(IID_IFile, (void**) &imageFile);
+    imageFile = reinterpret_cast<IFile*>(interface->queryInterface(IFile::iid()));
     interface->release();
     IStream* stream = imageFile->getStream();
     return (sqImageFile) stream;
@@ -532,15 +534,15 @@ int main()
 
     initInputProcess();
 
-    IThread* audioThread = System()->createThread(audioProcess, 0);
+    IThread* audioThread = System()->createThread(reinterpret_cast<void*>(audioProcess), 0);
     audioThread->setPriority(IThread::Normal + 1);
     audioThread->start();
 
-    IThread* recordThread = System()->createThread(recordProcess, 0);
+    IThread* recordThread = System()->createThread(reinterpret_cast<void*>(recordProcess), 0);
     recordThread->setPriority(IThread::Normal + 1);
     recordThread->start();
 
-    IThread* networkThread = System()->createThread(networkProcess, 0);
+    IThread* networkThread = System()->createThread(reinterpret_cast<void*>(networkProcess), 0);
     networkThread->setPriority(IThread::Normal + 2);
     networkThread->start();
 

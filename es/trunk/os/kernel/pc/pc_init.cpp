@@ -402,9 +402,9 @@ int esInit(IInterface** nameSpace)
     return 0;
 }
 
-bool esCreateInstance(const Guid& rclsid, const Guid& riid, void** objectPtr)
+void* esCreateInstance(const Guid& rclsid, const Guid& riid)
 {
-    return classStore->createInstance(rclsid, riid, objectPtr);
+    return classStore->createInstance(rclsid, riid);
 }
 
 void esSleep(s64 timeout)
@@ -523,6 +523,8 @@ extern "C"
 {
     int _close(int file);
     void _exit(int i);
+    int _write(int file, const char *ptr, size_t len);
+    int _read(int file, char *ptr, size_t len);
 }
 
 int _close(int file)
@@ -545,4 +547,14 @@ void _exit(int i)
     {
         __asm__ __volatile__ ("hlt");
     }
+}
+
+int _write(int file, const char *ptr, size_t len)
+{
+    return -1;
+}
+
+int _read(int file, char *ptr, size_t len)
+{
+    return -1;
 }
