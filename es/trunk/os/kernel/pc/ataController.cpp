@@ -329,8 +329,8 @@ issue(AtaDevice* device, u8* packet, int packetSize,
         return -1;
     }
 
-    outpb(ctlPort + DEVICE_CONTROL, 0);
     wait();
+
     outpb(ctlPort + DEVICE_CONTROL, NIEN);
     return count;
 }
@@ -459,6 +459,7 @@ invoke(int param)
             break;
         case PACKET:
             int len;
+            outpb(ctlPort + DEVICE_CONTROL, 0);
             switch (inpb(cmdPort + INTERRUPT_REASON) & (/*Rel|*/ IO | CD))
             {
               case CD:      // transfer the packet

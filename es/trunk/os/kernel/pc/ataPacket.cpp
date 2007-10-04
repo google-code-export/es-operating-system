@@ -295,6 +295,9 @@ detect()
         return true;
     }
 
+#ifdef VERBOSE
+    esReport("AtaPacketDevice::detect()\n");
+#endif
     u8 status = testUnitReady();
 #ifdef VERBOSE
     esReport("status: %02x\n", status);

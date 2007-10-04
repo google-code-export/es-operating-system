@@ -59,7 +59,7 @@ int main()
     }
 
     Handle<IStream> disk(root->lookup("device/ata/channel1/device0"));
-    TEST(disk);
+    TEST(disk.get());
 
     IDiskManagement::Geometry geo;
     Handle<IDiskManagement> dm(disk);
