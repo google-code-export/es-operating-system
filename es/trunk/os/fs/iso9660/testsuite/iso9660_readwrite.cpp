@@ -101,7 +101,7 @@ void test(Handle<IContext> root)
     TEST(dir);
 
     Handle<IFile>       file = dir->lookup("image");
-    TEST(dir);
+        TEST(file);
 
     size = file->getSize();
     u8* buf = new u8[size];
