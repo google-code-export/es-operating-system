@@ -220,7 +220,7 @@ reset()
 int Dp8390d::
 writeLocked(const void* src, int count)
 {
-    count = writeToNicMemory(txPageStart * PAGE_SIZE, (u8*) src, count);
+    writeToNicMemory(txPageStart * PAGE_SIZE, (u8*) src, count);
 
     sendDone = false;
     outpb(base + TBCR0, count & 0xff);
