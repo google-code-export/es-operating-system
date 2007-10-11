@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -34,7 +34,7 @@ void copy(Handle<IContext> root, char* filename)
     FILE* f = fopen(filename, "rb");
     if (f == 0)
     {
-        esReport("Could not open %s\n", filename);
+        fprintf(stderr, "Could not open %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
