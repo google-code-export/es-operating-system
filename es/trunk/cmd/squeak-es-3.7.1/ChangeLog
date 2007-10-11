@@ -1,3 +1,13 @@
+2007-10-03 04:14  okasaka
+
+	* ChangeLog, Makefile.am, Makefile.in, configure, configure.ac,
+	  es/vm/intplugins/FilePlugin/sqEsDirectory.cpp,
+	  es/vm/intplugins/FilePlugin/sqEsFile.cpp,
+	  es/vm/intplugins/SocketPlugin/sqEsSocket.cpp,
+	  es/vm/intplugins/SoundPlugin/sqEsSound.cpp, es/vm/selector.h,
+	  es/vm/sqEs.cpp, es/vm/sqEsInput.cpp: (esidl) : Switch to OMG IDL
+	  syntax.
+
 2007-07-26 09:31  okasaka
 
 	* ChangeLog: es 0.0.12 released.
