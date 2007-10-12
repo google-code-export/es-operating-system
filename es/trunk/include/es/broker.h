@@ -670,7 +670,6 @@ class Broker
         return rc;
     }
 
-
 public:
 
     /**
@@ -691,6 +690,19 @@ public:
             }
         }
         return reinterpret_cast<void**>(ptbl);
+    }
+
+    static int getInterfaceNo(void* interfacePointer)
+    {
+        Method** p = reinterpret_cast<Method**>(interfacePointer);
+        if (ptbl <= p && p < ptbl + maxInterface)
+        {
+            return p - ptbl;
+        }
+        else
+        {
+            return -1;  // Not a member
+        }
     }
 };
 

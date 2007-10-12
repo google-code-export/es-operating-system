@@ -646,10 +646,23 @@ copyIn(UpcallRecord* record)
             {
                 if (void** ip = *reinterpret_cast<void***>(paramp))
                 {
+                    int n;
+
+                    n = broker.getInterfaceNo(reinterpret_cast<void*>(ip));
+                    if (0 <= n)
+                    {
+                        UpcallProxy* proxy = &upcallTable[n];
+                        if (proxy->process == this)
+                        {
+                            *paramp = 0;
+                            *argp++ = (int) proxy->object;
+                            break;
+                        }
+                    }
 
                     // Set up a new system call proxy.
                     IInterface* object(reinterpret_cast<IInterface*>(ip));
-                    int n = set(syscallTable, object, iid);
+                    n = set(syscallTable, object, iid);
                     if (0 <= n)
                     {
                         // Set ip to proxy ip
