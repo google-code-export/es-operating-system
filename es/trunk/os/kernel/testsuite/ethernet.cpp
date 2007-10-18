@@ -70,17 +70,26 @@ int main()
     probe.arp.tpa = addr;
 
     // Send probes
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 10; ++i)
     {
+        esReport("link: %d\n", nic->getLinkState());
         int len = stream->write(&probe, sizeof probe);
         TEST(len == sizeof probe);
         esReport("Sent %d bytes.\n", len);
+
+        esSleep(10000000);
     }
+
+    INetworkInterface::Statistics stat;
+    nic->getStatistics(&stat);
+    esReport("outOctets: %llu\n", stat.outOctets);
+    esReport("outUcastPkts: %u\n", stat.outUcastPkts);
+    esReport("outNUcastPkts: %u\n", stat.outNUcastPkts);
 
     esReport("done.\n");
 
     // Receive packets
-    for (;;)
+    for (int i = 0; i < 4; ++i)
     {
         int len = stream->read(buf, sizeof(buf));
         if (0 < len)
@@ -89,6 +98,12 @@ int main()
             esDump(buf, len);
         }
     }
+
+    nic->getStatistics(&stat);
+    esReport("inOctets: %llu\n", stat.inOctets);
+    esReport("inUcastPkts: %u\n", stat.inUcastPkts);
+    esReport("inNUcastPkts: %u\n", stat.inNUcastPkts);
+    esReport("inErrors: %u\n", stat.inErrors);
 
     nic->stop();
 
