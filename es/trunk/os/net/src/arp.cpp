@@ -427,7 +427,14 @@ input(InetMessenger* m, Conduit* c)
     {
         addr->setMacAddress(arphdr->sha);
         addr->cancel();
-        addr->setState(Inet4Address::stateReachable);
+        if (addr->isPreferred())
+        {
+            addr->setState(Inet4Address::stateDeprecated);
+        }
+        else
+        {
+            addr->setState(Inet4Address::stateReachable);
+        }
         addr->start();  // To send waiting packets.
     }
 

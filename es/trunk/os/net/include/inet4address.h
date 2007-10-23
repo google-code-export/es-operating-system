@@ -44,6 +44,10 @@ class Inet4Address :
         {
             return false;
         }
+        virtual bool isDeprecated()
+        {
+            return false;
+        }
 
         virtual void start(Inet4Address* a)
         {
@@ -137,6 +141,10 @@ class Inet4Address :
     {
     public:
         bool isLocalAddress()
+        {
+            return true;
+        }
+        bool isDeprecated()
         {
             return true;
         }
@@ -242,11 +250,7 @@ public:
         return state;
     }
 
-    void setState(State& state)
-    {
-        timeoutCount = 0;   // Reset timeout count
-        this->state = &state;
-    }
+    void setState(State& state);
 
     s32 sumUp()
     {
@@ -364,6 +368,10 @@ public:
     bool isPreferred()
     {
         return state->isPreferred();
+    }
+    bool isDeprecated()
+    {
+        return state->isDeprecated();
     }
 
     int getPathMTU()

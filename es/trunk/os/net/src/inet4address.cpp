@@ -27,6 +27,13 @@ Inet4Address::StateIdleMember       Inet4Address::stateIdleMember;
 Inet4Address::StateDestination      Inet4Address::stateDestination;
 Inet4Address::StatePrefix           Inet4Address::statePrefix;
 
+void Inet4Address::
+setState(State& state)
+{
+    timeoutCount = 0;   // Reset timeout count
+    this->state = &state;
+}
+
 Address* Inet4Address::
 getNextHop()
 {

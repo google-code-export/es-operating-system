@@ -506,7 +506,7 @@ input(InetMessenger* m, Conduit* c)
 bool InReceiver::
 output(InetMessenger* m, Conduit* c)
 {
-    Handle<Address> addr;
+    Handle<Inet4Address> addr;
 
     long len = m->getLength();
     len += sizeof(IPHdr);
@@ -532,6 +532,11 @@ output(InetMessenger* m, Conduit* c)
     addr = m->getLocal();
     addr->getAddress(&iphdr->src, sizeof(InAddr));
     m->setScopeID(addr->getScopeID());
+    if (addr->isDeprecated())
+    {
+        // XXX Notify an error
+        return false;
+    }
 
     addr = m->getRemote();
     addr->getAddress(&iphdr->dst, sizeof(InAddr));
