@@ -97,7 +97,6 @@ public:
                 m.setLocal(address);
                 Uninstaller uninstaller(&m);
                 adapter->accept(&uninstaller);
-                address->release();
             }
         }
     }

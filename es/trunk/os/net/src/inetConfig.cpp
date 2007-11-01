@@ -51,10 +51,11 @@ removeAddress(IInternetAddress* address)
     {
     case AF_INET:
         Inet4Address* host = dynamic_cast<Inet4Address*>(address);
-        if (host)
+        if (host && host->isLocalAddress())
         {
-            InFamily* inFamily = dynamic_cast<InFamily*>(Socket::getAddressFamily(AF_INET));
-            inFamily->removeAddress(host);
+            host->cancel();
+            host->setState(Inet4Address::stateDeprecated);
+            host->start();
         }
         break;
     }
@@ -165,7 +166,7 @@ queryInterface(const Guid& riid)
     }
     else
     {
-        return NULL;
+        return 0;
     }
     static_cast<IInterface*>(objectPtr)->addRef();
     return objectPtr;
