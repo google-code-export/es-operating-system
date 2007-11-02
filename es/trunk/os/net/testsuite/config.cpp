@@ -103,7 +103,10 @@ int main()
     }
 
     esSleep(10000000);
+
+    config->removeRouter(router);
     config->removeAddress(host);
+
     nic->stop();
 
     esReport("done.\n");

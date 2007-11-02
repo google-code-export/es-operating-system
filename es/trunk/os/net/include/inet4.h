@@ -254,19 +254,9 @@ public:
     void addAddress(Inet4Address* address);
     void removeAddress(Inet4Address* address);
 
-    void addRouter(Inet4Address* addr)
-    {
-        Handle<Inet4Address> local;
-        local = onLink(addr->getAddress(), addr->getScopeID());
-        if (local)
-        {
-            routerList.addAddress(addr);
-        }
-    }
-    void removeRouter(Inet4Address* addr)
-    {
-        routerList.removeAddress(addr);
-    }
+    Inet4Address* getRouter();
+    void addRouter(Inet4Address* addr);
+    void removeRouter(Inet4Address* addr);
 
     void joinGroup(Inet4Address* addr);
     void leaveGroup(Inet4Address* addr);

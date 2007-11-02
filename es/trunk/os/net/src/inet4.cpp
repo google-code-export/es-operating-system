@@ -169,7 +169,6 @@ void InFamily::addAddress(Inet4Address* address)
 {
     int scopeID = address->getScopeID();
     addressTable[scopeID].add(address->getAddress(), address);
-    address->addRef();
     address->inFamily = this;
 }
 
@@ -178,7 +177,26 @@ void InFamily::removeAddress(Inet4Address* address)
     int scopeID = address->getScopeID();
     addressTable[scopeID].remove(address->getAddress());
     address->inFamily = 0;
-    address->release();
+}
+
+Inet4Address* InFamily::getRouter()
+{
+    return routerList.getAddress();
+}
+
+void InFamily::addRouter(Inet4Address* addr)
+{
+    Handle<Inet4Address> local;
+    local = onLink(addr->getAddress(), addr->getScopeID());
+    if (local)
+    {
+        routerList.addAddress(addr);
+    }
+}
+
+void InFamily::removeRouter(Inet4Address* addr)
+{
+    routerList.removeAddress(addr);
 }
 
 Inet4Address* InFamily::getHostAddress(int scopeID)
@@ -554,13 +572,15 @@ output(InetMessenger* m, Conduit* c)
         }
 
         // Fragmentation Procedure [RFC 791]
-        fragment(m, mtu, m->getRemote()->getNextHop());
+        addr = addr->getNextHop();
+        fragment(m, mtu, addr);
         return false;
     }
 
     // Set the remote address to the next hop router address
     // if necessary.
-    m->setRemote(m->getRemote()->getNextHop());
+    addr = addr->getNextHop();
+    m->setRemote(addr);
 
     return true;
 }

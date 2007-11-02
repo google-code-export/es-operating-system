@@ -68,11 +68,11 @@ addRouter(IInternetAddress* router)
     switch (af)
     {
     case AF_INET:
-        Inet4Address* host = dynamic_cast<Inet4Address*>(router);
-        if (host)
+        Inet4Address* node = dynamic_cast<Inet4Address*>(router);
+        if (node)
         {
             InFamily* inFamily = dynamic_cast<InFamily*>(Socket::getAddressFamily(AF_INET));
-            inFamily->addRouter(host);
+            inFamily->addRouter(node);
         }
         break;
     }
@@ -80,7 +80,8 @@ addRouter(IInternetAddress* router)
 
 IInternetAddress* InternetConfig::getRouter()
 {
-    return 0;   // XXX
+    InFamily* inFamily = dynamic_cast<InFamily*>(Socket::getAddressFamily(AF_INET));
+    return inFamily->getRouter();
 }
 
 void InternetConfig::
@@ -90,11 +91,11 @@ removeRouter(IInternetAddress* router)
     switch (af)
     {
     case AF_INET:
-        Inet4Address* host = dynamic_cast<Inet4Address*>(router);
-        if (host)
+        Inet4Address* node = dynamic_cast<Inet4Address*>(router);
+        if (node)
         {
             InFamily* inFamily = dynamic_cast<InFamily*>(Socket::getAddressFamily(AF_INET));
-            inFamily->removeRouter(host);
+            inFamily->removeRouter(node);
         }
         break;
     }
