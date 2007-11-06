@@ -4176,7 +4176,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile libes++/Makefile libes++/testsuite/Makefile bootsect/Makefile net/Makefile net/testsuite/Makefile fs/Makefile fs/fat/Makefile fs/fat/testsuite/Makefile fs/iso9660/Makefile fs/iso9660/testsuite/Makefile kernel/Makefile kernel/testsuite/Makefile"
+ac_config_files="$ac_config_files Makefile libes++/Makefile libes++/testsuite/Makefile bootsect/Makefile net/Makefile net/testsuite/Makefile net/posix/Makefile fs/Makefile fs/fat/Makefile fs/fat/testsuite/Makefile fs/iso9660/Makefile fs/iso9660/testsuite/Makefile kernel/Makefile kernel/testsuite/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -4827,6 +4827,7 @@ do
     "bootsect/Makefile") CONFIG_FILES="$CONFIG_FILES bootsect/Makefile" ;;
     "net/Makefile") CONFIG_FILES="$CONFIG_FILES net/Makefile" ;;
     "net/testsuite/Makefile") CONFIG_FILES="$CONFIG_FILES net/testsuite/Makefile" ;;
+    "net/posix/Makefile") CONFIG_FILES="$CONFIG_FILES net/posix/Makefile" ;;
     "fs/Makefile") CONFIG_FILES="$CONFIG_FILES fs/Makefile" ;;
     "fs/fat/Makefile") CONFIG_FILES="$CONFIG_FILES fs/fat/Makefile" ;;
     "fs/fat/testsuite/Makefile") CONFIG_FILES="$CONFIG_FILES fs/fat/testsuite/Makefile" ;;
