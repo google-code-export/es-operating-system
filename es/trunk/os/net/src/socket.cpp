@@ -114,13 +114,12 @@ addInterface(INetworkInterface* networkInterface)
 void Socket::
 removeInterface(INetworkInterface* networkInterface)
 {
-    int n;
-    for (n = 1; n < Socket::INTERFACE_MAX; ++n)
+    for (int n = 1; n < Socket::INTERFACE_MAX; ++n)
     {
         Interface* i = interfaces[n];
         if (i && i->networkInterface == networkInterface)
         {
-            interfaces[0] = 0;
+            interfaces[n] = 0;
             delete i;
             break;
         }
