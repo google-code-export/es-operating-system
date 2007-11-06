@@ -47,7 +47,8 @@ Tap::Tap(const char* interfaceName) :
     memset(&statistics, 0, sizeof(statistics));
 
     ASSERT(interfaceName);
-    strncpy(this->interfaceName, interfaceName, IFNAMSIZ);
+    strncpy(this->interfaceName, interfaceName, IFNAMSIZ - 1);
+    this->interfaceName[IFNAMSIZ - 1] = '\0';
 
     int s = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (s == -1)
@@ -57,7 +58,7 @@ Tap::Tap(const char* interfaceName) :
 
     // Get interface index number
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     if (ioctl(s, SIOCGIFINDEX, &ifr) == -1)
     {
         perror("SIOCGIFINDEX");
@@ -68,7 +69,7 @@ Tap::Tap(const char* interfaceName) :
 
     // Get hardware address
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     if (ioctl(s, SIOCGIFHWADDR, &ifr) == -1)
     {
         perror("SIOCGIFINDEX");
@@ -228,7 +229,7 @@ isPromiscuousMode()
 
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     ioctl(sd, SIOCGIFFLAGS, &ifr);
     return (ifr.ifr_flags & IFF_PROMISC) ? true : false;
 }
@@ -245,7 +246,7 @@ setPromiscuousMode(bool on)
 
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     ioctl(sd, SIOCGIFFLAGS, &ifr);
     if (on)
     {
@@ -270,7 +271,7 @@ addMulticastAddress(const unsigned char macaddr[6])
 
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
     memmove(ifr.ifr_hwaddr.sa_data, macaddr, 6);
     return ioctl(sd, SIOCADDMULTI, &ifr);
@@ -288,7 +289,7 @@ removeMulticastAddress(const unsigned char macaddr[6])
 
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
     memmove(ifr.ifr_hwaddr.sa_data, macaddr, 6);
     return ioctl(sd, SIOCDELMULTI, &ifr);
@@ -312,7 +313,7 @@ getLinkState()
 
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+    strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ - 1);
     ioctl(sd, SIOCGIFFLAGS, &ifr);
     return (ifr.ifr_flags & IFF_RUNNING) ? true : false;
 }
