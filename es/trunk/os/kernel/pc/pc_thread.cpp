@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -131,7 +131,7 @@ setArguments(char* arguments)
     char** argv = (char**) frame;
     char* a = (char*) frame;
     *--a = '\0';
-    argv[n] = a;
+    argv[n] = 0;
     --p;
     while (*p)
     {
