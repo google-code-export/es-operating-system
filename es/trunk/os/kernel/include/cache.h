@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2007
  * Nintendo Co., Ltd.
  *
  * Permission to use, copy, modify, distribute and sell this software
@@ -20,6 +20,7 @@
 #include <es/dateTime.h>
 #include <es/base/ICache.h>
 #include <es/base/IClassFactory.h>
+#include <es/base/IFile.h>
 #include <es/base/IPageable.h>
 #include <es/base/IPageSet.h>
 #include <es/base/IStream.h>
@@ -344,6 +345,7 @@ class Cache : public ICache, public IPageable
     CacheFactory*       cacheFactory;
     Link<Cache>         link;
     IStream*            backingStore;
+    IFile*              file;
     PageSet*            pageSet;
     long long           size;
     PageList            changedList;
@@ -500,7 +502,7 @@ public:
     friend class Stream;
 };
 
-class Stream : public IStream
+class Stream : public IStream, public IFile
 {
     Ref         ref;
     Cache*      cache;
@@ -520,6 +522,24 @@ public:
     int write(const void* src, int count);
     int write(const void* src, int count, long long offset);
     void flush();
+
+    unsigned int getAttributes();
+    void setAttributes(unsigned int attributes);
+    long long getCreationTime();
+    void setCreationTime(long long creationTime);
+    long long getLastAccessTime();
+    void setLastAccessTime(long long lastAccessTime);
+    long long getLastWriteTime();
+    void setLastWriteTime(long long lastWriteTime);
+    bool canRead();
+    bool canWrite();
+    bool isDirectory();
+    bool isFile();
+    bool isHidden();
+    int getName(char* name, int nameLength);
+    IPageable* getPageable();
+    IStream* getStream();
+
     void* queryInterface(const Guid& riid);
     unsigned int addRef(void);
     unsigned int release(void);
