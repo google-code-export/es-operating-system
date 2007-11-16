@@ -402,16 +402,16 @@ public:
     void rotate(float angle);
     void save();
     void scale(float scaleW, float scaleH);
-    int setFillStyle(const char* color, int len);
+    int setFillStyle(const char* color);
     void setFillGradient(ICanvasGradient* gradient);
     void setFillPattern(ICanvasPattern* pattern);
     void setGlobalAlpha(float alpha);
-    int setGlobalCompositeOperation(const char* operation, int len);
+    int setGlobalCompositeOperation(const char* operation);
     void setMiterLimit(float limit);
     void setLineWidth(float width);
-    int setLineCap(const char* capStyle, int len);
-    int setLineJoin(const char* joinStyle, int len);
-    int setStrokeStyle(const char* color, int len);
+    int setLineCap(const char* capStyle);
+    int setLineJoin(const char* joinStyle);
+    int setStrokeStyle(const char* color);
     void stroke();
     void strokeRect(float x, float y, float width, float height);
     void translate(float tx, float ty);
@@ -420,7 +420,7 @@ public:
     void setShadowBlur(float blur)
     {
     }
-    int setShadowColor(const char* color, int len)
+    int setShadowColor(const char* color)
     {
         return -1;
     }
@@ -450,6 +450,14 @@ public:
     {
         return 0.0;
     }
+
+    // drawString enhancement
+    int getTextStyle(char* textStyle, int textStyleLength);
+    int setTextStyle(const char* textStyle);
+    void drawText(const char* textToDraw);
+    float measureText(const char* textToMeasure);
+    void pathText(const char* textToPath);
+    void textAlongPath(const char* textToDraw, bool stroke);
 
     void* queryInterface(const Guid& riid)
     {

@@ -814,7 +814,7 @@ scale(float scaleW, float scaleH)
 }
 
 int Canvas::
-setFillStyle(const char* color, int len)
+setFillStyle(const char* color)
 {
     setStyle(STYLE_FILL, color);
     return 0;
@@ -842,7 +842,7 @@ setGlobalAlpha(float alpha)
 }
 
 int Canvas::
-setGlobalCompositeOperation(const char* operation, int len)
+setGlobalCompositeOperation(const char* operation)
 {
     Synchronized<IMonitor*> method(monitor);
 
@@ -878,7 +878,7 @@ setGlobalCompositeOperation(const char* operation, int len)
 }
 
 int Canvas::
-setStrokeStyle(const char* color, int len)
+setStrokeStyle(const char* color)
 {
     setStyle(STYLE_STROKE, color);
     return 0;
@@ -899,7 +899,7 @@ setLineWidth(float width)
 }
 
 int Canvas::
-setLineCap(const char* capStyle, int len)
+setLineCap(const char* capStyle)
 {
     Synchronized<IMonitor*> method(monitor);
     cairo_line_cap_t cap;
@@ -917,7 +917,7 @@ setLineCap(const char* capStyle, int len)
 }
 
 int Canvas::
-setLineJoin(const char* joinStyle, int len)
+setLineJoin(const char* joinStyle)
 {
     Synchronized<IMonitor*> method(monitor);
     cairo_line_join_t j;
@@ -963,6 +963,50 @@ translate(float tx, float ty)
     cairo_translate(cr, tx, ty);
 }
 
+int Canvas::
+getTextStyle(char* textStyle, int textStyleLength)
+{
+    return -1;
+}
+
+int Canvas::
+setTextStyle(const char* textStyle)
+{
+    return -1;
+}
+
+void Canvas::
+drawText(const char* textToDraw)
+{
+    Synchronized<IMonitor*> method(monitor);
+
+    applyStyle(STYLE_FILL);
+    cairo_show_text(cr, textToDraw);
+}
+
+float Canvas::
+measureText(const char* textToMeasure)
+{
+    Synchronized<IMonitor*> method(monitor);
+
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, textToMeasure, &te);
+    return te.width;
+}
+
+void Canvas::
+pathText(const char* textToPath)
+{
+    Synchronized<IMonitor*> method(monitor);
+
+    cairo_text_path(cr, textToPath);
+}
+
+void Canvas::
+textAlongPath(const char* textToDraw, bool stroke)
+{
+}
+
 
 //
 // CanvasGradient
@@ -994,4 +1038,3 @@ addColorStop(float offset, const char* color)
                                        Canvas::NS_GET_B(rgba) / 255.0,
                                        Canvas::NS_GET_A(rgba) / 255.0);
 }
-
