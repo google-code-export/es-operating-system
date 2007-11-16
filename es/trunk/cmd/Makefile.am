@@ -16,7 +16,8 @@ SUFFIXES = .h .idl .ent
 	echo "Info;" >> $@;
 
 noinst_PROGRAMS = main hello cairo expat server client binder binderClient location locationClient \
-                  eventManager eventManagerClient console consoleClient upcallTest upcallTestClient
+                  eventManager eventManagerClient console consoleClient upcallTest upcallTestClient \
+                  fontconfig
 
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref -L$(prefix)/lib
 AM_CPPFLAGS = -I- \
@@ -67,6 +68,8 @@ consoleClient_SOURCES = consoleClient.cpp
 upcallTest_SOURCES = upcallTest.cpp
 
 upcallTestClient_SOURCES = upcallTestClient.cpp
+
+fontconfig_SOURCES = fontconfig.cpp
 
 clean-local:
 	-rm -f $(BUILT_SOURCES)

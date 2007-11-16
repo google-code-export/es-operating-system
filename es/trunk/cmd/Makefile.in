@@ -39,7 +39,7 @@ noinst_PROGRAMS = main$(EXEEXT) hello$(EXEEXT) cairo$(EXEEXT) \
 	locationClient$(EXEEXT) eventManager$(EXEEXT) \
 	eventManagerClient$(EXEEXT) console$(EXEEXT) \
 	consoleClient$(EXEEXT) upcallTest$(EXEEXT) \
-	upcallTestClient$(EXEEXT)
+	upcallTestClient$(EXEEXT) fontconfig$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure config.guess \
@@ -91,6 +91,10 @@ am_expat_OBJECTS = expat.$(OBJEXT)
 expat_OBJECTS = $(am_expat_OBJECTS)
 expat_LDADD = $(LDADD)
 expat_DEPENDENCIES = ../os/libes++/libes++.a
+am_fontconfig_OBJECTS = fontconfig.$(OBJEXT)
+fontconfig_OBJECTS = $(am_fontconfig_OBJECTS)
+fontconfig_LDADD = $(LDADD)
+fontconfig_DEPENDENCIES = ../os/libes++/libes++.a
 am_hello_OBJECTS = hello.$(OBJEXT)
 hello_OBJECTS = $(am_hello_OBJECTS)
 hello_LDADD = $(LDADD)
@@ -136,7 +140,7 @@ SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) $(cairo_SOURCES) \
 	$(client_SOURCES) $(console_SOURCES) $(consoleClient_SOURCES) \
 	$(eventManager_SOURCES) $(nodist_eventManager_SOURCES) \
 	$(eventManagerClient_SOURCES) $(expat_SOURCES) \
-	$(hello_SOURCES) $(location_SOURCES) \
+	$(fontconfig_SOURCES) $(hello_SOURCES) $(location_SOURCES) \
 	$(nodist_location_SOURCES) $(locationClient_SOURCES) \
 	$(main_SOURCES) $(server_SOURCES) $(upcallTest_SOURCES) \
 	$(upcallTestClient_SOURCES)
@@ -144,9 +148,9 @@ DIST_SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) \
 	$(cairo_SOURCES) $(client_SOURCES) $(console_SOURCES) \
 	$(consoleClient_SOURCES) $(eventManager_SOURCES) \
 	$(eventManagerClient_SOURCES) $(expat_SOURCES) \
-	$(hello_SOURCES) $(location_SOURCES) $(locationClient_SOURCES) \
-	$(main_SOURCES) $(server_SOURCES) $(upcallTest_SOURCES) \
-	$(upcallTestClient_SOURCES)
+	$(fontconfig_SOURCES) $(hello_SOURCES) $(location_SOURCES) \
+	$(locationClient_SOURCES) $(main_SOURCES) $(server_SOURCES) \
+	$(upcallTest_SOURCES) $(upcallTestClient_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -302,6 +306,7 @@ console_SOURCES = console.cpp canvas.cpp canvas.h
 consoleClient_SOURCES = consoleClient.cpp
 upcallTest_SOURCES = upcallTest.cpp
 upcallTestClient_SOURCES = upcallTestClient.cpp
+fontconfig_SOURCES = fontconfig.cpp
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -370,6 +375,9 @@ eventManagerClient$(EXEEXT): $(eventManagerClient_OBJECTS) $(eventManagerClient_
 expat$(EXEEXT): $(expat_OBJECTS) $(expat_DEPENDENCIES) 
 	@rm -f expat$(EXEEXT)
 	$(CXXLINK) $(expat_OBJECTS) $(expat_LDADD) $(LIBS)
+fontconfig$(EXEEXT): $(fontconfig_OBJECTS) $(fontconfig_DEPENDENCIES) 
+	@rm -f fontconfig$(EXEEXT)
+	$(CXXLINK) $(fontconfig_OBJECTS) $(fontconfig_LDADD) $(LIBS)
 hello$(EXEEXT): $(hello_OBJECTS) $(hello_DEPENDENCIES) 
 	@rm -f hello$(EXEEXT)
 	$(CXXLINK) $(hello_OBJECTS) $(hello_LDADD) $(LIBS)
@@ -410,6 +418,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eventManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eventManagerClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fontconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hello.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/location.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/locationClient.Po@am__quote@
