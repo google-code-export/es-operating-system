@@ -662,7 +662,7 @@ createThread(const unsigned stackSize)
         return 0;
     }
 
-    u8* stack = new u8[8192];
+    u8* stack = new u8[16*1024];
     if (!stack)
     {
         unmap(userStack, stackSize - Page::SIZE);
@@ -680,7 +680,7 @@ createThread(const unsigned stackSize)
                                 ureg,               // argument to thread function
                                 IThread::Normal,    // priority
                                 stack,              // stack
-                                8192);              // stack size
+                                16*1024);           // stack size
     if (!thread)
     {
         unmap(userStack, stackSize - Page::SIZE);
