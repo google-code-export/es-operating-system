@@ -58,6 +58,7 @@ void startProcess(Handle<IContext> root, Handle<IProcess> process, Handle<IFile>
     esReport("size: %lld\n", size);
 
     process->setRoot(root);
+    process->setCurrent(root);
     process->setInput(esReportStream());
     process->setOutput(esReportStream());
     process->setError(esReportStream());
@@ -92,6 +93,7 @@ void init(Handle<IContext> root)
         esCreateInstance(CLSID_Process, IProcess::iid()));
     ASSERT(process);
     process->setRoot(root);
+    process->setCurrent(root);
     process->setInput(console);
     process->setOutput(console);
     process->setError(console);
