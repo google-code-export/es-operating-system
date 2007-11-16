@@ -1,6 +1,6 @@
 diff -bcrN fontconfig-2.4.2.org/config.sub fontconfig-2.4.2/config.sub
 *** fontconfig-2.4.2.org/config.sub	2006-10-12 21:52:19.000000000 +0900
---- fontconfig-2.4.2/config.sub	2007-08-09 13:59:48.000000000 +0900
+--- fontconfig-2.4.2/config.sub	2007-11-16 15:36:39.000000000 +0900
 ***************
 *** 1210,1216 ****
   	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
@@ -18,3 +18,23 @@ diff -bcrN fontconfig-2.4.2.org/config.sub fontconfig-2.4.2/config.sub
   	      | -mingw32* | -linux-gnu* | -linux-newlib* | -linux-uclibc* \
   	      | -uxpv* | -beos* | -mpeix* | -udk* \
   	      | -interix* | -uwin* | -mks* | -rhapsody* | -darwin* | -opened* \
+diff -bcrN fontconfig-2.4.2.org/src/fcatomic.c fontconfig-2.4.2/src/fcatomic.c
+*** fontconfig-2.4.2.org/src/fcatomic.c	2006-09-05 17:56:47.000000000 +0900
+--- fontconfig-2.4.2/src/fcatomic.c	2007-11-15 16:45:43.000000000 +0900
+***************
+*** 177,183 ****
+  FcBool
+  FcAtomicReplaceOrig (FcAtomic *atomic)
+  {
+! #ifdef _WIN32
+      unlink (atomic->file);
+  #endif
+      if (rename ((char *) atomic->new, (char *) atomic->file) < 0)
+--- 177,183 ----
+  FcBool
+  FcAtomicReplaceOrig (FcAtomic *atomic)
+  {
+! #if defined(_WIN32) || defined(__es__)
+      unlink (atomic->file);
+  #endif
+      if (rename ((char *) atomic->new, (char *) atomic->file) < 0)
