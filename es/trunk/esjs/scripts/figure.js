@@ -85,3 +85,6 @@ c.arc(cx, cy, r, Math.PI * s, Math.PI * e, 0);
 c.lineTo(cx, cy);
 c.closePath();
 c.fill();
+
+c.fillStyle = "rgba(0, 255, 0, 1)";
+c.drawText("Hello, world.");
