@@ -26,7 +26,15 @@ echo 'vcopy '$DIR'/fat32.img '$SRC'/../esjs/scripts/gradient.js > /dev/null' >> 
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/hello.elf > /dev/null' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/eventManager.elf > /dev/null' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/console.elf > /dev/null' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$DIR'/../cmd/fontconfig.elf > /dev/null' >> $SCRIPT
 echo 'vcopy '$DIR'/fat32.img /usr/share/fonts/japanese/TrueType/sazanami-mincho.ttf > /dev/null' >> $SCRIPT
+
+echo 'vcopy '$DIR'/fat32.img '$SRC'/fonts.conf > /dev/null' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$SRC'/fonts.dtd > /dev/null' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img '$SRC'/40-generic.conf conf.d/ > /dev/null' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img /usr/share/fonts/liberation/LiberationMono-Regular.ttf fonts/ > /dev/null' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img /usr/share/fonts/liberation/LiberationSans-Regular.ttf fonts/ > /dev/null' >> $SCRIPT
+echo 'vcopy '$DIR'/fat32.img /usr/share/fonts/liberation/LiberationSerif-Regular.ttf fonts/ > /dev/null' >> $SCRIPT
 
 echo '' >> $SCRIPT
 echo 'echo usage: qemu -hda '$DIR'/fat32.img -serial stdio -soundhw sb16 -net nic,vlan=0 -net tap,vlan=0,ifname=tap0,script=/etc/qemu-ifup' >> $SCRIPT
