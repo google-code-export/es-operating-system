@@ -57,38 +57,45 @@ int main(int argc, char* argv[])
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 120, 120);
+    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 320, 320);
     cr = cairo_create (surface);
 
     cairo_translate (cr, 10, 10);
     cairo_scale (cr, 100, 100);
 
-    cairo_rectangle (cr, 0, 0, 0.5, 0.5);
-    cairo_set_source_rgba (cr, 1, 0, 0, 0.80);
-    cairo_fill (cr);
-
-    cairo_rectangle (cr, 0, 0.5, 0.5, 0.5);
-    cairo_set_source_rgba (cr, 0, 1, 0, 0.60);
-    cairo_fill (cr);
-
-    cairo_rectangle (cr, 0.5, 0, 0.5, 0.5);
-    cairo_set_source_rgba (cr, 0, 0, 1, 0.40);
+    cairo_rectangle (cr, 0.0, 0.0, 3.0, 3.0);
+    cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
     cairo_fill (cr);
 
     cairo_text_extents_t te;
-    cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-    cairo_select_font_face (cr, "serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size (cr, 1.2);
-    cairo_text_extents (cr, "a", &te);
-    cairo_move_to (cr, 0.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
-    cairo_show_text (cr, "a");
+
+    cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+    cairo_select_font_face (cr, "Liberation Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size (cr, 1.0);
+    cairo_text_extents (cr, "Hello", &te);
+    cairo_move_to (cr, 1.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
+    cairo_show_text (cr, "Hello");
+
+    cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
+    cairo_select_font_face (cr, "Liberation Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size (cr, 1.0);
+    cairo_text_extents (cr, "Hello", &te);
+    cairo_move_to (cr, 1.5 - te.width / 2 - te.x_bearing, 1.5 - te.height / 2 - te.y_bearing);
+    cairo_show_text (cr, "Hello");
+
+    cairo_set_source_rgb (cr, 0.0, 0.0, 1.0);
+    cairo_select_font_face (cr, "Liberation Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size (cr, 1.0);
+    cairo_text_extents (cr, "Hello", &te);
+    cairo_move_to (cr, 1.5 - te.width / 2 - te.x_bearing, 2.5 - te.height / 2 - te.y_bearing);
+    cairo_show_text (cr, "Hello");
 
     esReport("--- cairo_image_surface_get_data ---\n");
     u8* data = cairo_image_surface_get_data (surface);
-    for (int y = 0; y < 120; ++y)
+    for (int y = 0; y < 320; ++y)
     {
         memmove(framebufferPtr + 4 * WIDTH * y,
-                data + 4 * 120 * y,
-                4 * 120);
+                data + 4 * 320 * y,
+                4 * 320);
     }
 }
