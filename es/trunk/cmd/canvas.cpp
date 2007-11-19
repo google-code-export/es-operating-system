@@ -59,8 +59,29 @@
 #include <algorithm>
 #include <math.h>
 #include <string>
-
 #include "canvas.h"
+
+namespace
+{
+    const char* skipSpace(const char* text)
+    {
+        while (*text && isspace(*text))
+        {
+            ++text;
+        }
+        return text;
+    }
+
+    const char* getWord(const char* text, char* word)
+    {
+        while (*text && !isspace(*text))
+        {
+            *word++ = *text++;
+        }
+        *word = '\0';
+        return text;
+    }
+}
 
 Canvas::Canvas(cairo_surface_t* surface, int screenWidth, int screenHeight) :
     surface(surface), screenWidth(screenWidth), screenHeight(screenHeight),
@@ -83,7 +104,7 @@ Canvas::Canvas(cairo_surface_t* surface, int screenWidth, int screenHeight) :
 
     for (int i = 0; i < STYLE_MAX; i++)
     {
-        state->colorStyles[i] = NS_RGB(0,0,0);
+        state->colorStyles[i] = Rgb(0,0,0);
     }
     lastStyle = -1;
     dirtyAllStyles();
@@ -129,18 +150,17 @@ getData()
     return cairo_image_surface_get_data (surface);
 }
 
-u32 Canvas::
-parser(const char* color)
+Rgb Canvas::
+parseColor(const char* color)
 {
-    std::string s(color);
     int   r;
     int   g;
     int   b;
     float a;
     int ret;
-    if (s.find("rgba(") == 0)
+    if (strnicmp(color, "rgba(", 5) == 0)
     {
-        ret = sscanf(s.substr(4).c_str(), "(%d,%d,%d,%f)", &r, &g, &b, &a);
+        ret = sscanf(color + 4, "(%d,%d,%d,%f)", &r, &g, &b, &a);
         if (ret == 4 &&
             0 <= r < 256 &&
             0 <= g < 256 &&
@@ -156,33 +176,33 @@ parser(const char* color)
             {
                 alpha = 255.0;
             }
-            return NS_RGB(r, g, b, alpha);
+            return Rgb(r, g, b, alpha);
         }
     }
-    else if (s.find("rgb(") == 0)
+    else if (strnicmp(color, "rgb(", 4) == 0)
     {
-        ret = sscanf(s.substr(3).c_str(), "(%d,%d,%d)", &r, &g, &b);
+        ret = sscanf(color + 3, "(%d,%d,%d)", &r, &g, &b);
         if (ret == 3 &&
             0 <= r < 256 &&
             0 <= g < 256 &&
             0 <= b < 256)
         {
-            return NS_RGB(r, g, b);
+            return Rgb(r, g, b);
         }
     }
-    else if (s.find("#") == 0 && 7 <= s.length())
+    else if (strnicmp(color, "#", 1) == 0 && strlen(color) == 7)
     {
-        ret = sscanf(s.c_str(), "#%2x%2x%2x", &r, &g, &b);
+        ret = sscanf(color, "#%2x%2x%2x", &r, &g, &b);
         if (ret == 3 &&
             0 <= r < 256 &&
             0 <= g < 256 &&
             0 <= b < 256)
         {
-            return NS_RGB(r, g, b);
+            return Rgb(r, g, b);
         }
     }
 
-    esThrow(EBUSY); // [check] busy??
+    esThrow(EINVAL);
     return 0;
 }
 
@@ -234,16 +254,16 @@ getStyle(u32 aWhichStyle, char* color, unsigned int len)
         return 0;
     }
 
-    u32 value = currentState()->colorStyles[aWhichStyle];
-    if (NS_GET_A(value) == 255)
+    Rgb value = currentState()->colorStyles[aWhichStyle];
+    if (value.getA() == 255)
     {
-        sprintf(color, "#%02x%02x%02x", NS_GET_R(value), NS_GET_G(value), NS_GET_B(value));
+        sprintf(color, "#%02x%02x%02x", value.getR(), value.getG(), value.getB());
     }
     else
     {
         char buf[22];
         sprintf(buf, "rgba(%d,%d,%d,%1.2f)",
-            NS_GET_R(value), NS_GET_G(value), NS_GET_B(value), static_cast<float>(NS_GET_A(value)) / 255.0);
+            value.getR(), value.getG(), value.getB(), static_cast<float>(value.getA()) / 255.0);
 
         if (len < strlen(buf))
         {
@@ -256,12 +276,12 @@ getStyle(u32 aWhichStyle, char* color, unsigned int len)
 }
 
 void Canvas::
-setCairoColor(u32 color)
+setCairoColor(Rgb color)
 {
-    double r = static_cast<double>(NS_GET_R(color)) / 255.0;
-    double g = static_cast<double>(NS_GET_G(color)) / 255.0;
-    double b = static_cast<double>(NS_GET_B(color)) / 255.0;
-    double a = static_cast<double>(NS_GET_A(color)) / 255.0 * currentState()->globalAlpha;
+    double r = static_cast<double>(color.getR()) / 255.0;
+    double g = static_cast<double>(color.getG()) / 255.0;
+    double b = static_cast<double>(color.getB()) / 255.0;
+    double a = static_cast<double>(color.getA()) / 255.0 * currentState()->globalAlpha;
 
     cairo_set_source_rgba (cr, r, g, b, a);
 }
@@ -270,10 +290,11 @@ void Canvas::
 setStyle(u32 aWhichStyle, const char* color)
 {
     Synchronized<IMonitor*> method(monitor);
-    u32 rgba;
+
+    Rgb rgba;
     try
     {
-        rgba = parser(color);
+        rgba = parseColor(color);
     }
     catch (...)
     {
@@ -972,7 +993,51 @@ getTextStyle(char* textStyle, int textStyleLength)
 int Canvas::
 setTextStyle(const char* textStyle)
 {
-    return -1;
+    Synchronized<IMonitor*> method(monitor);
+
+    const char* family;
+    char word[256];
+    double size = 20.0;
+
+    cairo_font_slant_t slant = CAIRO_FONT_SLANT_NORMAL;
+    cairo_font_weight_t weight = CAIRO_FONT_WEIGHT_NORMAL;
+
+    do
+    {
+        family = textStyle = skipSpace(textStyle);
+        textStyle = getWord(textStyle, word);
+        if (isdigit(*word))
+        {
+            char* unit;
+            size = strtod(word, &unit);
+            // XXX Check unit
+        }
+        else if (strcasecmp(word, "italic") == 0)
+        {
+            slant = CAIRO_FONT_SLANT_ITALIC;
+        }
+        else if (strcasecmp(word, "oblique") == 0)
+        {
+            slant = CAIRO_FONT_SLANT_OBLIQUE;
+        }
+        else if (strcasecmp(word, "bold") == 0)
+        {
+            weight = CAIRO_FONT_WEIGHT_BOLD;
+        }
+        else if (strcasecmp(word, "normal") == 0)
+        {
+            slant = CAIRO_FONT_SLANT_NORMAL;
+            weight = CAIRO_FONT_WEIGHT_NORMAL;
+        }
+        else
+        {
+            break;
+        }
+    } while (*textStyle);
+
+    cairo_select_font_face (cr, family, slant, weight);
+    cairo_set_font_size (cr, size);
+    return 0;
 }
 
 void Canvas::
@@ -982,6 +1047,8 @@ drawText(const char* textToDraw)
 
     applyStyle(STYLE_FILL);
     cairo_show_text(cr, textToDraw);
+
+    updated = true;
 }
 
 float Canvas::
@@ -1022,19 +1089,19 @@ addColorStop(float offset, const char* color)
         return; // [check] should report the error.
     }
 
-    u32 rgba;
+    Rgb rgba;
     try
     {
-        rgba = Canvas::parser(color);
+        rgba = Canvas::parseColor(color);
     }
     catch (...)
     {
         return; // [check] should report the error.
     }
 
-    cairo_pattern_add_color_stop_rgba (pattern, (double) offset,
-                                       Canvas::NS_GET_R(rgba) / 255.0,
-                                       Canvas::NS_GET_G(rgba) / 255.0,
-                                       Canvas::NS_GET_B(rgba) / 255.0,
-                                       Canvas::NS_GET_A(rgba) / 255.0);
+    cairo_pattern_add_color_stop_rgba(pattern, (double) offset,
+                                      rgba.getR() / 255.0,
+                                      rgba.getG() / 255.0,
+                                      rgba.getB() / 255.0,
+                                      rgba.getA() / 255.0);
 }

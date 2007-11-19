@@ -68,7 +68,6 @@
 #include <es/base/IProcess.h>
 #include <es/base/IStream.h>
 #include <es/util/ICanvasRenderingContext2D.h>
-#include <cairo.h>
 
 using namespace es;
 
@@ -83,6 +82,47 @@ extern "C" {
 #endif
 
 ICurrentProcess* System();
+
+class Rgb
+{
+    u32 rgba;
+
+public:
+    Rgb(u32 rgba = 0)
+    {
+        this->rgba = rgba;
+    }
+
+    Rgb(u8 r, u8 g, u8 b, u8 a = 255)
+    {
+        rgba = (a << 24) | (b << 16) | (g << 8) | r;
+    }
+
+    u8 getR()
+    {
+        return (u8) (rgba & 0xff);
+    }
+
+    u8 getG() const
+    {
+        return (u8) ((rgba >> 8) & 0xff);
+    }
+
+    u8 getB() const
+    {
+        return (u8) ((rgba >> 16) & 0xff);
+    }
+
+    u8 getA() const
+    {
+        return (u8) ((rgba >> 24) & 0xff);
+    }
+
+    operator u32() const
+    {
+        return rgba;
+    }
+};
 
 class CanvasPattern : public ICanvasPattern
 {
@@ -320,7 +360,7 @@ class Canvas : public ICanvasRenderingContext2D
     void applyStyle(u32 aWhichStyle);
     void dirtyAllStyles();
     int getStyle(u32 aWhichStyle, char* color, unsigned int len);
-    void setCairoColor(u32 color);
+    void setCairoColor(Rgb color);
     void setStyle(u32 aWhichStyle, const char* color);
     void setStyle(u32 aWhichStyle, ICanvasGradient* grad);
     void setStyle(u32 aWhichStyle, ICanvasPattern* pat);
@@ -330,37 +370,7 @@ class Canvas : public ICanvasRenderingContext2D
         return styleStack.getLast();
     }
 
-    static inline u32 NS_RGB(u8 r, u8 g, u8 b)
-    {
-        return ((255 << 24) | ((b)<<16) | ((g)<<8) | r);
-    }
-
-    static inline u32 NS_RGB(u8 r, u8 g, u8 b, u8 a)
-    {
-        return (((a) << 24) | ((b)<<16) | ((g)<<8) | r);
-    }
-
-    static inline u8 NS_GET_R(u32 rgba)
-    {
-        return (u8) (rgba & 0xff);
-    }
-
-    static inline u8 NS_GET_G(u32 rgba)
-    {
-        return (u8) ((rgba >> 8) & 0xff);
-    }
-
-    static inline u8 NS_GET_B(u32 rgba)
-    {
-        return (u8) ((rgba >> 16) & 0xff);
-    }
-
-    static inline u8 NS_GET_A(u32 rgba)
-    {
-        return (u8) ((rgba >> 24) & 0xff);
-    }
-
-    static u32 parser(const char* color);
+    static Rgb parseColor(const char* color);
 
 public:
     Canvas(cairo_surface_t* surface, int screenWidth, int screenHeight);

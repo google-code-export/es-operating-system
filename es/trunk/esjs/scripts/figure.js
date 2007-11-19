@@ -86,5 +86,17 @@ c.lineTo(cx, cy);
 c.closePath();
 c.fill();
 
+c.fillStyle = "rgba(255, 0, 0, 1)";
+c.moveTo(512, 200);
+c.textStyle = "36pt Italic Liberation Serif";
+c.drawText("Hello, world.");
+
 c.fillStyle = "rgba(0, 255, 0, 1)";
+c.moveTo(512, 250);
+c.textStyle = "40pt Bold Liberation Sans";
+c.drawText("Hello, world.");
+
+c.fillStyle = "rgba(0, 0, 255, 1)";
+c.moveTo(512, 300);
+c.textStyle = "48pt Liberation Mono";
 c.drawText("Hello, world.");
