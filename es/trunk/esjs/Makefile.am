@@ -110,10 +110,13 @@ dist-hook:
 EXTRA_DIST = \
 	scripts/cat.js		\
 	scripts/cd.js		\
+	scripts/clear.js	\
+	scripts/date.js		\
 	scripts/echo.js		\
 	scripts/edit.js		\
+	scripts/figure.js	\
+	scripts/gradient.js	\
+	scripts/kanji.js	\
 	scripts/ls.js		\
-	scripts/shell.js	\
-	scripts/date.js		\
-	scripts/clear.js	\
-	scripts/figure.js
+	scripts/rm.js		\
+	scripts/shell.js
