@@ -100,3 +100,13 @@ c.fillStyle = "rgba(0, 0, 255, 1)";
 c.moveTo(512, 300);
 c.textStyle = "48pt Liberation Mono";
 c.drawText("Hello, world.");
+
+c.fillStyle = "rgba(128, 0, 128, 1)";
+c.moveTo(512, 350);
+c.textStyle = "48pt Sazanami Gothic";
+c.drawText("こんにちは、世界。");
+
+c.fillStyle = "rgba(0, 128, 128, 1)";
+c.moveTo(512, 400);
+c.textStyle = "48pt Sazanami Mincho";
+c.drawText("こんにちは、世界。");
