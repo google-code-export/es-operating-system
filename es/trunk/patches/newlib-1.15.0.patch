@@ -12877,10 +12877,10 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/open.c newlib-1.15.0/libgloss/i386
 + }
 diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i386-es/pthread.c
 *** newlib-1.15.0.org/libgloss/i386-es/pthread.c	1970-01-01 09:00:00.000000000 +0900
---- newlib-1.15.0/libgloss/i386-es/pthread.c	2007-11-08 11:31:36.000000000 +0900
+--- newlib-1.15.0/libgloss/i386-es/pthread.c	2007-11-22 15:35:29.000000000 +0900
 ***************
 *** 0 ****
---- 1,277 ----
+--- 1,382 ----
 + /*
 +  * Copyright (c) 2007
 +  * Nintendo Co., Ltd.
@@ -12899,25 +12899,8 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 + #include <errno.h>
 + #include <pthread.h>
 + #include <stdarg.h>
++ #include <time.h>
 + #include <unistd.h>
-+ 
-+ // The followings are the mininum set of functions to support gthread
-+ #pragma weak pthread_once
-+ 
-+ // #pragma weak pthread_key_create
-+ // #pragma weak pthread_key_delete
-+ // #pragma weak pthread_getspecific
-+ // #pragma weak pthread_setspecific
-+ 
-+ #pragma weak pthread_mutex_lock
-+ #pragma weak pthread_mutex_trylock
-+ #pragma weak pthread_mutex_unlock
-+ #pragma weak pthread_mutexattr_init
-+ #pragma weak pthread_mutexattr_settype
-+ #pragma weak pthread_mutexattr_destroy
-+ 
-+ #pragma weak pthread_mutex_init
-+ #pragma weak pthread_mutex_destroy
 + 
 + #ifndef PTHREAD_KEYS_MAX
 + #define PTHREAD_KEYS_MAX    64
@@ -12941,7 +12924,8 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 + static unsigned int     hint;
 + static __thread KeyData specific[PTHREAD_KEYS_MAX];
 + 
-+ int pthread_once(pthread_once_t* once, void (*func) (void))
++ int __attribute__((weak))
++ pthread_once(pthread_once_t* once, void (*func) (void))
 + {
 +     if (!once->init_executed)
 +     {
@@ -12964,7 +12948,9 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 +         {
 +             while (!once->init_executed)
 +             {
-+                 _es_syscall(0, 0, YIELD, 0);   // XXX should sleep for a while
++                 static struct timespec req = { 0, 100000000LL };
++ 
++                 nanosleep(&req, 0);
 +             }
 +         }
 +     }
@@ -12980,7 +12966,8 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 + {
 + }
 + 
-+ int pthread_key_create(pthread_key_t* key, void (*dtor)(void*))
++ int __attribute__((weak))
++ pthread_key_create(pthread_key_t* key, void (*dtor)(void*))
 + {
 +     pthread_key_t i;
 + 
@@ -13010,7 +12997,8 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 +     return 0;
 + }
 + 
-+ int pthread_key_delete(pthread_key_t key)
++ int __attribute__((weak))
++ pthread_key_delete(pthread_key_t key)
 + {
 +     if (PTHREAD_KEYS_MAX <= key)
 +     {
@@ -13027,7 +13015,8 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 +     return 0;
 + }
 + 
-+ void* pthread_getspecific(pthread_key_t key)
++ void* __attribute__((weak))
++ pthread_getspecific(pthread_key_t key)
 + {
 +     if (PTHREAD_KEYS_MAX <= key)
 +     {
@@ -13036,7 +13025,8 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 +     return specific[key].data;
 + }
 + 
-+ int pthread_setspecific(pthread_key_t key, const void* ptr)
++ int __attribute__((weak))
++ pthread_setspecific(pthread_key_t key, const void* ptr)
 + {
 +     int seq;
 + 
@@ -13075,88 +13065,203 @@ diff -bcrN newlib-1.15.0.org/libgloss/i386-es/pthread.c newlib-1.15.0/libgloss/i
 +     }
 + }
 + 
-+ static void* getMonitor(pthread_mutex_t* mutex)
++ static void* mutex_get_monitor(pthread_mutex_t* mutex)
 + {
-+     if (*mutex == PTHREAD_MUTEX_INITIALIZER)
++     if (mutex->monitor == 0)
 +     {
 +         pthread_once(&once, initMonitor);
 +         pthread_mutex_lock(&monitor);
-+         if (*mutex == PTHREAD_MUTEX_INITIALIZER)
++         if (mutex->monitor == 0)
 +         {
 +             pthread_mutex_init(mutex, 0);
 +         }
 +         pthread_mutex_unlock(&monitor);
 +     }
-+     return (void*) *mutex;
++     return mutex->monitor;
 + }
 + 
-+ int pthread_mutex_lock(pthread_mutex_t* mutex)
++ static int mutex_inc(pthread_mutex_t* mutex)
 + {
-+     void* monitor = getMonitor(mutex);
-+     if (monitor)
-+     {
-+         _es_syscall(monitor, 0, LOCK, 0);
-+     }
-+     return 0;
++     register int eax = 1;
++ 
++     __asm__ __volatile__(
++         "lock\n"
++         "xaddl  %0, %1\n"
++         "incl   %0\n"
++         : "=a" (eax), "=m" (mutex->busy)
++         : "0" (eax), "m" (mutex->busy));
++ 
++     return eax;
 + }
 + 
-+ int pthread_mutex_trylock(pthread_mutex_t* mutex)
++ static int mutex_dec(pthread_mutex_t* mutex)
 + {
-+     void* monitor = getMonitor(mutex);
-+     if (!monitor)
++     register int eax = -1;
++ 
++     __asm__ __volatile__(
++         "lock\n"
++         "xaddl  %0, %1\n"
++         "decl   %0\n"
++         : "=a" (eax), "=m" (mutex->busy)
++         : "0" (eax), "m" (mutex->busy));
++ 
++     return eax;
++ }
++ 
++ static int mutex_tas(pthread_mutex_t* mutex)
++ {
++     register int value = 1;
++     register int comparand = 0;
++ 
++     __asm__ __volatile__ (
++         "lock\n"
++         "cmpxchgl   %2, %1\n"
++         : "=a" (value), "=m" (mutex->lock)
++         : "r" (value), "0" (comparand), "m" (mutex->lock));
++ 
++     return value;
++ }
++ 
++ int __attribute__((weak))
++ pthread_mutex_trylock(pthread_mutex_t* mutex)
++ {
++     int lock;
++ 
++     if (mutex->owner == pthread_self())
 +     {
++         ++mutex->count;
 +         return 0;
 +     }
 + 
-+     if ((int) _es_syscall(monitor, 0, TRY_LOCK, 0))
++     lock = mutex_tas(mutex);
++     if (lock == 0)
++     {
++         mutex->owner = pthread_self();
++         mutex->count = 1;
++         return 0;
++     }
++     return EBUSY;
++ }
++ 
++ int __attribute__((weak))
++ pthread_mutex_lock(pthread_mutex_t* mutex)
++ {
++     int lock;
++     void* monitor;
++ 
++     for (;;)
++     {
++         mutex_inc(mutex);
++ 
++         if (pthread_mutex_trylock(mutex) == 0)
++         {
++             mutex_dec(mutex);
++             return 0;
++         }
++ 
++         monitor = mutex_get_monitor(mutex);
++         if (monitor)
++         {
++             _es_syscall(monitor, 0, LOCK, 0);
++             ++mutex->wait;
++             while (0 < mutex->wait)
++             {
++                 _es_syscall(monitor, 0, WAIT, 0);
++             }
++             _es_syscall(monitor, 0, UNLOCK, 0);
++         }
++ 
++         mutex_dec(mutex);
++     }
++ }
++ 
++ int __attribute__((weak))
++ pthread_mutex_unlock(pthread_mutex_t* mutex)
++ {
++     int lock;
++     void* monitor;
++ 
++     if (0 < --mutex->count)
 +     {
 +         return 0;
 +     }
-+     else
++     mutex->owner = 0;
++     mutex->lock = 0;
++ 
++     if (mutex->busy)
 +     {
-+         return EBUSY;
++         monitor = mutex_get_monitor(mutex);
++         if (monitor)
++         {
++             _es_syscall(monitor, 0, LOCK, 0);
++             if (0 < mutex->wait)
++             {
++                 _es_syscall(monitor, 0, NOTIFY_ALL, 0);
++                 mutex->wait = 0;
++             }
++             else
++             {
++                 mutex->wait = -1;
++             }
++             _es_syscall(monitor, 0, UNLOCK, 0);
++         }
 +     }
-+ }
 + 
-+ int pthread_mutex_unlock(pthread_mutex_t* mutex)
-+ {
-+     void* monitor = getMonitor(mutex);
-+     if (monitor)
-+     {
-+         _es_syscall(monitor, 0, UNLOCK, 0);
-+     }
 +     return 0;
 + }
 + 
-+ int pthread_mutexattr_init(pthread_mutexattr_t* attr)
++ int __attribute__((weak))
++ pthread_mutexattr_init(pthread_mutexattr_t* attr)
 + {
 +     return 0;
 + }
 + 
-+ int pthread_mutexattr_settype(pthread_mutexattr_t* attr, int type)
++ int __attribute__((weak))
++ pthread_mutexattr_settype(pthread_mutexattr_t* attr, int type)
 + {
 +     return 0;
 + }
 + 
-+ int pthread_mutexattr_destroy(pthread_mutexattr_t* attr)
++ int __attribute__((weak))
++ pthread_mutexattr_destroy(pthread_mutexattr_t* attr)
 + {
 +     return 0;
 + }
 + 
-+ int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t* attr)
++ int __attribute__((weak))
++ pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t* attr)
 + {
-+     *mutex = (pthread_mutex_t*) _es_syscall(0, 0, CREATE_MONITOR, 0);
++     mutex->monitor = (void*) _es_syscall(0, 0, CREATE_MONITOR, 0);
++     mutex->owner = 0;
++     mutex->busy = 0;
++     mutex->lock = 0;
++     mutex->wait = 0;
++     mutex->count = 0;
 +     return 0;
 + }
 + 
-+ int pthread_mutex_destroy(pthread_mutex_t* mutex)
++ int __attribute__((weak))
++ pthread_mutex_destroy(pthread_mutex_t* mutex)
 + {
-+     void* monitor = getMonitor(mutex);
++     void* monitor = mutex_get_monitor(mutex);
 +     if (monitor)
 +     {
 +         _es_syscall(monitor, 0, RELEASE, 0);
++         mutex->monitor = 0;
 +     }
 +     return 0;
++ }
++ 
++ pthread_t __attribute__((weak))
++ pthread_self(void)
++ {
++     register int eax;
++ 
++     __asm__ __volatile__(
++         "mov    %%gs:0x0, %0\n" // Use TLS base as self for now
++         : "=a" (eax));
++ 
++     return eax;
 + }
 diff -bcrN newlib-1.15.0.org/libgloss/i386-es/read.c newlib-1.15.0/libgloss/i386-es/read.c
 *** newlib-1.15.0.org/libgloss/i386-es/read.c	1970-01-01 09:00:00.000000000 +0900
@@ -23933,7 +24038,7 @@ diff -bcrN newlib-1.15.0.org/newlib/libc/include/machine/setjmp.h newlib-1.15.0/
   #include "setjmp-dj.h"
 diff -bcrN newlib-1.15.0.org/newlib/libc/include/pthread.h newlib-1.15.0/newlib/libc/include/pthread.h
 *** newlib-1.15.0.org/newlib/libc/include/pthread.h	2006-09-14 07:09:27.000000000 +0900
---- newlib-1.15.0/newlib/libc/include/pthread.h	2007-08-02 17:13:41.000000000 +0900
+--- newlib-1.15.0/newlib/libc/include/pthread.h	2007-11-22 16:06:38.000000000 +0900
 ***************
 *** 44,50 ****
     
@@ -23954,8 +24059,8 @@ diff -bcrN newlib-1.15.0.org/newlib/libc/include/pthread.h newlib-1.15.0/newlib/
 ***************
 *** 57,62 ****
 --- 57,75 ----
-  int _EXFUN(pthread_mutexattr_setpshared,
-          (pthread_mutexattr_t *__attr, int __pshared));
+  int	_EXFUN(pthread_mutexattr_setpshared,
+  		(pthread_mutexattr_t *__attr, int __pshared));
   
 + enum
 + {
@@ -23972,7 +24077,21 @@ diff -bcrN newlib-1.15.0.org/newlib/libc/include/pthread.h newlib-1.15.0/newlib/
 + 
   /* Initializing and Destroying a Mutex, P1003.1c/Draft 10, p. 87 */
   
-  int _EXFUN(pthread_mutex_init,
+  int	_EXFUN(pthread_mutex_init,
+***************
+*** 68,74 ****
+--- 81,91 ----
+      pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+   */
+  
++ #ifdef __es__
++ #define PTHREAD_MUTEX_INITIALIZER  { 0, 0, 0, 0, 0, 0 }
++ #else
+  #define PTHREAD_MUTEX_INITIALIZER  ((pthread_mutex_t) 0xFFFFFFFF)
++ #endif
+  
+  /*  Locking and Unlocking a Mutex, P1003.1c/Draft 10, p. 93
+      NOTE: P1003.4b/D8 adds pthread_mutex_timedlock(), p. 29 */
 diff -bcrN newlib-1.15.0.org/newlib/libc/include/sys/config.h newlib-1.15.0/newlib/libc/include/sys/config.h
 *** newlib-1.15.0.org/newlib/libc/include/sys/config.h	2006-08-30 06:00:59.000000000 +0900
 --- newlib-1.15.0/newlib/libc/include/sys/config.h	2007-07-31 09:23:53.000000000 +0900
@@ -24021,6 +24140,31 @@ diff -bcrN newlib-1.15.0.org/newlib/libc/include/sys/features.h newlib-1.15.0/ne
   #ifdef __cplusplus
   }
   #endif
+diff -bcrN newlib-1.15.0.org/newlib/libc/include/sys/types.h newlib-1.15.0/newlib/libc/include/sys/types.h
+*** newlib-1.15.0.org/newlib/libc/include/sys/types.h	2006-09-14 07:09:27.000000000 +0900
+--- newlib-1.15.0/newlib/libc/include/sys/types.h	2007-11-22 16:06:34.000000000 +0900
+***************
+*** 332,338 ****
+--- 332,350 ----
+  #define PTHREAD_PRIO_PROTECT 2
+  #endif
+  
++ #ifdef __es__
++ typedef struct
++ {
++     void* 	  monitor;
++     pthread_t owner;
++     int		  busy;
++ 	int   	  lock;
++     int		  wait;
++     int   	  count;
++ } pthread_mutex_t;
++ #else
+  typedef __uint32_t pthread_mutex_t;      /* identify a mutex */
++ #endif
+  
+  typedef struct {
+    int   is_initialized;
 diff -bcrN newlib-1.15.0.org/newlib/libc/stdlib/__atexit.c newlib-1.15.0/newlib/libc/stdlib/__atexit.c
 *** newlib-1.15.0.org/newlib/libc/stdlib/__atexit.c	2006-03-21 09:57:34.000000000 +0900
 --- newlib-1.15.0/newlib/libc/stdlib/__atexit.c	2007-07-30 17:22:19.000000000 +0900
@@ -39978,10 +40122,10 @@ diff -bcrN newlib-1.15.0.org/newlib/libc/sys/es/sys/dirent.h newlib-1.15.0/newli
 + #endif
 diff -bcrN newlib-1.15.0.org/newlib/libc/sys/es/sys/lock.h newlib-1.15.0/newlib/libc/sys/es/sys/lock.h
 *** newlib-1.15.0.org/newlib/libc/sys/es/sys/lock.h	1970-01-01 09:00:00.000000000 +0900
---- newlib-1.15.0/newlib/libc/sys/es/sys/lock.h	2007-08-01 16:06:11.000000000 +0900
+--- newlib-1.15.0/newlib/libc/sys/es/sys/lock.h	2007-11-22 14:59:02.000000000 +0900
 ***************
 *** 0 ****
---- 1,36 ----
+--- 1,44 ----
 + #ifndef __SYS_LOCK_H__
 + #define __SYS_LOCK_H__
 + 
@@ -39989,8 +40133,16 @@ diff -bcrN newlib-1.15.0.org/newlib/libc/sys/es/sys/lock.h newlib-1.15.0/newlib/
 + extern "C" {
 + #endif // __cplusplus
 + 
-+ typedef unsigned int    _LOCK_T;                // XXX Shuold be pthread_mutex_t
-+ typedef unsigned int    _LOCK_RECURSIVE_T;      // XXX Shuold be pthread_mutex_t
++ // pthread_mutex_t
++ typedef struct
++ {
++     void*        monitor;
++     unsigned int owner;
++     int          busy;
++     int          lock;
++     int          wait;
++     int          count;
++ } _LOCK_T, _LOCK_RECURSIVE_T;
 + 
 + #define __LOCK_INIT(class,lock) \
 +     class _LOCK_T lock; \
