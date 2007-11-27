@@ -1458,7 +1458,7 @@ class RegularExpressionLiteral : public Expression
     std::string value;
 
 public:
-    RegularExpressionLiteral(char* s) :
+    RegularExpressionLiteral(std::string s) :
         value(s)
     {
     }

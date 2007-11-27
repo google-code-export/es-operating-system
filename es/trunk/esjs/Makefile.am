@@ -118,5 +118,6 @@ EXTRA_DIST = \
 	scripts/gradient.js	\
 	scripts/kanji.js	\
 	scripts/ls.js		\
+	scripts/pi.js		\
 	scripts/rm.js		\
 	scripts/shell.js

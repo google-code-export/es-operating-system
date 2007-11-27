@@ -38,6 +38,8 @@ extern "C" int yywrap()
     return 1;
 }
 
+extern const char* enter_regex;
+
 %}
 
 %pure-parser
@@ -244,7 +246,14 @@ Literal :
         }
     | NUMERIC_LITERAL
     | STRING_LITERAL
-    | REGULAR_EXPRESSION_LITERAL
+    | '/' { enter_regex = "/"; } REGULAR_EXPRESSION_LITERAL
+        {
+            $$ = $3;
+        }
+    | OP_DIVA { enter_regex = "/="; } REGULAR_EXPRESSION_LITERAL
+        {
+            $$ = $3;
+        }
 
 /*
  * A.3 Expressions

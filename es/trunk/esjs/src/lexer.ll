@@ -55,6 +55,8 @@ void yyerror(const char* str);
 
 extern "C" int yywrap();
 
+const char* enter_regex;
+
 %}
 
 /* regular definitions */
@@ -95,6 +97,8 @@ Identifier              {IdentifierStart}{IdentifierPart}*
 MultiLineComment        \/\*(([^*])|(\*[^/]))*\*\/
 SingleLineComment       \/\/
 
+%x regex
+
 RegularExpressionFirstChar  ([^\*\\\/\n\r]|\\[^\n\r])
 RegularExpressionChars      ([^\\\/\n\r]|\\[^\n\r])
 RegularExpressionBody       {RegularExpressionFirstChar}{RegularExpressionChars}*
@@ -102,6 +106,11 @@ RegularExpressionFlags      {IdentifierPart}*
 RegularExpressionLiteral    \/{RegularExpressionBody}\/{RegularExpressionFlags}
 
 %%
+
+    if (enter_regex)
+    {
+        BEGIN(regex);
+    }
 
 {WhiteSpace}        { /* No action, and no return */ }
 {LineTerminator}    { /* No action, and no return */ }
@@ -239,9 +248,10 @@ volatile            { return RESERVED; }
                         } while (c != '\n' && c != '\r' && c != EOF);
                     }
 
-{RegularExpressionLiteral} {
-                        PRINTF("%s\n", yytext);
-                        yylval->expression = new RegularExpressionLiteral(yytext);
+<regex>{RegularExpressionBody}\/{RegularExpressionFlags} {
+                        yylval->expression = new RegularExpressionLiteral(std::string(enter_regex) + yytext);
+                        enter_regex = 0;
+                        BEGIN(INITIAL);
                         return REGULAR_EXPRESSION_LITERAL;
                     }
 
