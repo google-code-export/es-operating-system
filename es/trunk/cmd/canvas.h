@@ -57,8 +57,9 @@
 
 #include <string.h>
 #include <es.h>
-#include <es/handle.h>
+#include <es/color.h>
 #include <es/classFactory.h>
+#include <es/handle.h>
 #include <es/interlocked.h>
 #include <es/list.h>
 #include <es/ref.h>
@@ -82,47 +83,6 @@ extern "C" {
 #endif
 
 ICurrentProcess* System();
-
-class Rgb
-{
-    u32 rgba;
-
-public:
-    Rgb(u32 rgba = 0)
-    {
-        this->rgba = rgba;
-    }
-
-    Rgb(u8 r, u8 g, u8 b, u8 a = 255)
-    {
-        rgba = (a << 24) | (b << 16) | (g << 8) | r;
-    }
-
-    u8 getR()
-    {
-        return (u8) (rgba & 0xff);
-    }
-
-    u8 getG() const
-    {
-        return (u8) ((rgba >> 8) & 0xff);
-    }
-
-    u8 getB() const
-    {
-        return (u8) ((rgba >> 16) & 0xff);
-    }
-
-    u8 getA() const
-    {
-        return (u8) ((rgba >> 24) & 0xff);
-    }
-
-    operator u32() const
-    {
-        return rgba;
-    }
-};
 
 class CanvasPattern : public ICanvasPattern
 {
@@ -305,7 +265,7 @@ class Canvas : public ICanvasRenderingContext2D
         {
             for (int i = 0; i < STYLE_MAX; i++)
             {
-                colorStyles[i] = 0; // [check] default?
+                colorStyles[i] = 0xff000000;
                 gradientStyles[i] = NULL;
                 patternStyles[i] = NULL;
             }
@@ -369,8 +329,6 @@ class Canvas : public ICanvasRenderingContext2D
     {
         return styleStack.getLast();
     }
-
-    static Rgb parseColor(const char* color);
 
 public:
     Canvas(cairo_surface_t* surface, int screenWidth, int screenHeight);

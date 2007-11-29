@@ -150,62 +150,6 @@ getData()
     return cairo_image_surface_get_data (surface);
 }
 
-Rgb Canvas::
-parseColor(const char* color)
-{
-    int   r;
-    int   g;
-    int   b;
-    float a;
-    int ret;
-    if (strnicmp(color, "rgba(", 5) == 0)
-    {
-        ret = sscanf(color + 4, "(%d,%d,%d,%f)", &r, &g, &b, &a);
-        if (ret == 4 &&
-            0 <= r < 256 &&
-            0 <= g < 256 &&
-            0 <= b < 256 &&
-            0.0 <= a <= 1.0)
-        {
-            float alpha = round(255.0 * a);
-            if (alpha < 0)
-            {
-                alpha = 0.0;
-            }
-            else if (255.0 < alpha)
-            {
-                alpha = 255.0;
-            }
-            return Rgb(r, g, b, alpha);
-        }
-    }
-    else if (strnicmp(color, "rgb(", 4) == 0)
-    {
-        ret = sscanf(color + 3, "(%d,%d,%d)", &r, &g, &b);
-        if (ret == 3 &&
-            0 <= r < 256 &&
-            0 <= g < 256 &&
-            0 <= b < 256)
-        {
-            return Rgb(r, g, b);
-        }
-    }
-    else if (strnicmp(color, "#", 1) == 0 && strlen(color) == 7)
-    {
-        ret = sscanf(color, "#%2x%2x%2x", &r, &g, &b);
-        if (ret == 3 &&
-            0 <= r < 256 &&
-            0 <= g < 256 &&
-            0 <= b < 256)
-        {
-            return Rgb(r, g, b);
-        }
-    }
-
-    esThrow(EINVAL);
-    return 0;
-}
-
 void Canvas::
 applyStyle(u32 aWhichStyle)
 {
@@ -294,7 +238,7 @@ setStyle(u32 aWhichStyle, const char* color)
     Rgb rgba;
     try
     {
-        rgba = parseColor(color);
+        rgba = Rgb(color);
     }
     catch (...)
     {
@@ -1092,7 +1036,7 @@ addColorStop(float offset, const char* color)
     Rgb rgba;
     try
     {
-        rgba = Canvas::parseColor(color);
+        rgba = Rgb(color);
     }
     catch (...)
     {
