@@ -929,15 +929,23 @@ translate(float tx, float ty)
 }
 
 int Canvas::
-getTextStyle(char* textStyle, int textStyleLength)
+getTextStyle(char* style, int len)
 {
-    return -1;
+    if (textStyle.size() < len)
+    {
+        len = textStyle.size() + 1;
+    }
+    strncpy(style, textStyle.c_str(), len);
+    style[len - 1] = '\0';
+    return len;
 }
 
 int Canvas::
-setTextStyle(const char* textStyle)
+setTextStyle(const char* style)
 {
     Synchronized<IMonitor*> method(monitor);
+
+    textStyle = style;
 
     const char* family;
     char word[256];
@@ -948,8 +956,8 @@ setTextStyle(const char* textStyle)
 
     do
     {
-        family = textStyle = skipSpace(textStyle);
-        textStyle = getWord(textStyle, word);
+        family = style = skipSpace(style);
+        style = getWord(style, word);
         if (isdigit(*word))
         {
             char* unit;
@@ -977,7 +985,7 @@ setTextStyle(const char* textStyle)
         {
             break;
         }
-    } while (*textStyle);
+    } while (*style);
 
     cairo_select_font_face (cr, family, slant, weight);
     cairo_set_font_size (cr, size);

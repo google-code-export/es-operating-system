@@ -312,6 +312,8 @@ class Canvas : public ICanvasRenderingContext2D
     typedef List<ContextState, &ContextState::link> StyleStack;
     StyleStack styleStack;
 
+    std::string textStyle;
+
     // style handling
     u32 lastStyle;
     bool dirtyStyle[STYLE_MAX];
