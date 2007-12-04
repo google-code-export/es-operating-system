@@ -688,11 +688,12 @@ createThread(const unsigned stackSize)
         return 0;
     }
 
-    // Add this thread to this process and memorize the user stack address.
+    // Add this thread to this process.
     ++threadCount;
     thread->process = this;
     thread->userStack = userStack;
     threadList.addLast(thread);
+    addRef();
     return thread;
 }
 
@@ -711,6 +712,8 @@ detach(Thread* thread)
     threadList.remove(thread);
     --threadCount;
     waitPoint.wakeup();
+
+    release();
 }
 
 IThread* Process::
@@ -908,17 +911,7 @@ exit(int status)
 
     exitValue = status;
 
-    for (SyscallProxy* proxy(syscallTable);
-         proxy < &syscallTable[INTERFACE_POINTER_MAX];
-         ++proxy)
-    {
-        proxy->addRef();
-        while (0 < proxy->release())
-            ;
-    }
-
-    // Cancel all the threads. Note do not release threads here as they are
-    // stored in syscallTable.
+    // Cancel all the threads.
     Thread* thread;
     List<Thread, &Thread::linkProcess>::Iterator iter = threadList.begin();
     while ((thread = iter.next()))
@@ -948,7 +941,7 @@ kill()
         // NOT REACHED HERE
     }
 
-    // Cancel all the threads
+    // Cancel all the threads.
     Monitor::Synchronized method(monitor);
     Thread* thread;
     List<Thread, &Thread::linkProcess>::Iterator iter = threadList.begin();
@@ -956,9 +949,8 @@ kill()
     {
         ASSERT(thread != Thread::getCurrentThread());
         thread->setCancelState(ICurrentThread::CANCEL_ENABLE);
-        thread->setCancelType(ICurrentThread::CANCEL_ASYNCHRONOUS);
+        thread->setCancelType(ICurrentThread::CANCEL_DEFERRED);
         thread->cancel();
-        thread->release();
     }
 }
 

@@ -178,9 +178,7 @@ int main(int argc, char* argv[])
         esCreateInstance(CLSID_FatFileSystem, IFileSystem::iid()));
     fatFileSystem->mount(disk);
     {
-        Handle<IContext> root;
-
-        root = fatFileSystem->getRoot();
+        Handle<IContext> root = fatFileSystem->getRoot();
 
         nameSpace->bind("file", root);
 
@@ -205,12 +203,14 @@ int main(int argc, char* argv[])
         consoleProcess->kill();
         eventProcess->kill();
 
-        freeSpace = fatFileSystem->getFreeSpace();
-        totalSpace = fatFileSystem->getTotalSpace();
-        esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
+        esSleep(10000000);
     }
+
+    freeSpace = fatFileSystem->getFreeSpace();
+    totalSpace = fatFileSystem->getTotalSpace();
+    esReport("Free space %lld, Total space %lld\n", freeSpace, totalSpace);
+
     fatFileSystem->dismount();
     fatFileSystem = 0;
-
     esSleep(10000000);
 }
