@@ -39,7 +39,7 @@ noinst_PROGRAMS = main$(EXEEXT) hello$(EXEEXT) cairo$(EXEEXT) \
 	locationClient$(EXEEXT) eventManager$(EXEEXT) \
 	eventManagerClient$(EXEEXT) console$(EXEEXT) \
 	consoleClient$(EXEEXT) upcallTest$(EXEEXT) \
-	upcallTestClient$(EXEEXT) fontconfig$(EXEEXT)
+	upcallTestClient$(EXEEXT) fontconfig$(EXEEXT) newlib$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure config.guess \
@@ -112,6 +112,10 @@ am_main_OBJECTS = main.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 main_DEPENDENCIES = ../os/libes++/libes++.a
+am_newlib_OBJECTS = newlib.$(OBJEXT)
+newlib_OBJECTS = $(am_newlib_OBJECTS)
+newlib_LDADD = $(LDADD)
+newlib_DEPENDENCIES = ../os/libes++/libes++.a
 am_server_OBJECTS = server.$(OBJEXT)
 server_OBJECTS = $(am_server_OBJECTS)
 server_LDADD = $(LDADD)
@@ -142,15 +146,16 @@ SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) $(cairo_SOURCES) \
 	$(eventManagerClient_SOURCES) $(expat_SOURCES) \
 	$(fontconfig_SOURCES) $(hello_SOURCES) $(location_SOURCES) \
 	$(nodist_location_SOURCES) $(locationClient_SOURCES) \
-	$(main_SOURCES) $(server_SOURCES) $(upcallTest_SOURCES) \
-	$(upcallTestClient_SOURCES)
+	$(main_SOURCES) $(newlib_SOURCES) $(server_SOURCES) \
+	$(upcallTest_SOURCES) $(upcallTestClient_SOURCES)
 DIST_SOURCES = $(binder_SOURCES) $(binderClient_SOURCES) \
 	$(cairo_SOURCES) $(client_SOURCES) $(console_SOURCES) \
 	$(consoleClient_SOURCES) $(eventManager_SOURCES) \
 	$(eventManagerClient_SOURCES) $(expat_SOURCES) \
 	$(fontconfig_SOURCES) $(hello_SOURCES) $(location_SOURCES) \
-	$(locationClient_SOURCES) $(main_SOURCES) $(server_SOURCES) \
-	$(upcallTest_SOURCES) $(upcallTestClient_SOURCES)
+	$(locationClient_SOURCES) $(main_SOURCES) $(newlib_SOURCES) \
+	$(server_SOURCES) $(upcallTest_SOURCES) \
+	$(upcallTestClient_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -307,6 +312,8 @@ consoleClient_SOURCES = consoleClient.cpp
 upcallTest_SOURCES = upcallTest.cpp
 upcallTestClient_SOURCES = upcallTestClient.cpp
 fontconfig_SOURCES = fontconfig.cpp
+newlib_SOURCES = newlib.cpp
+CLEANFILES = $(BUILT_SOURCES) $(nodist_location_SOURCES) $(nodist_eventManager_SOURCES)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -390,6 +397,9 @@ locationClient$(EXEEXT): $(locationClient_OBJECTS) $(locationClient_DEPENDENCIES
 main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES) 
 	@rm -f main$(EXEEXT)
 	$(CXXLINK) $(main_OBJECTS) $(main_LDADD) $(LIBS)
+newlib$(EXEEXT): $(newlib_OBJECTS) $(newlib_DEPENDENCIES) 
+	@rm -f newlib$(EXEEXT)
+	$(CXXLINK) $(newlib_OBJECTS) $(newlib_LDADD) $(LIBS)
 server$(EXEEXT): $(server_OBJECTS) $(server_DEPENDENCIES) 
 	@rm -f server$(EXEEXT)
 	$(CXXLINK) $(server_OBJECTS) $(server_LDADD) $(LIBS)
@@ -423,6 +433,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/location.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/locationClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upcallTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upcallTestClient.Po@am__quote@
@@ -752,6 +763,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -855,7 +867,7 @@ uninstall-am:
 	echo "Info;" >> $@;
 
 clean-local:
-	-rm -f $(BUILT_SOURCES)
+	-rm -f  *.map
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

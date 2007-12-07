@@ -4,15 +4,17 @@ SUFFIXES = .img .gz
 
 %.img : %.elf
 	$(host_alias)-objcopy -O binary $< $@
-	$(srcdir)/makeScript "`pwd`" $(*F)
+
+% :: %.elf
+	$(srcdir)/makeScript "`pwd`" $(srcdir) $@
 
 TESTS_ENVIRONMENT = $(srcdir)/testLoader
 
-TESTS = main start binder location eventManager console upcallTest
-
-noinst_SCRIPTS = $(TESTS)
+noinst_SCRIPTS = main start binder location eventManager console upcallTest newlib
 
 noinst_PROGRAMS = $(noinst_SCRIPTS)
+
+TESTS = $(noinst_SCRIPTS)
 
 noinst_DATA = disk.img \
 	main.img \
@@ -21,12 +23,13 @@ noinst_DATA = disk.img \
 	location.img \
 	eventManager.img \
 	console.img \
-	upcallTest.img
+	upcallTest.img \
+	newlib.img
 
 CLEANFILES = $(noinst_DATA) $(noinst_SCRIPTS)
 
 clean-local:
-	-rm -f *.map *.log
+	-rm -f *.map
 
 AM_LDFLAGS = -Wl,--section-start,".init"=0x81000000,-static,--omagic,--cref,-Map,$@.map -L$(prefix)/lib
 
@@ -43,6 +46,8 @@ eventManager_SOURCES = eventManager.cpp
 console_SOURCES = console.cpp
 
 upcallTest_SOURCES = upcallTest.cpp
+
+newlib_SOURCES = newlib.cpp
 
 disk.img: disk.img.gz
 	gunzip -c $< > $@

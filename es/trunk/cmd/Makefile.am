@@ -15,9 +15,13 @@ SUFFIXES = .h .idl .ent
 	echo -n "InfoSize = sizeof" $(*F) >> $@;
 	echo "Info;" >> $@;
 
-noinst_PROGRAMS = main hello cairo expat server client binder binderClient location locationClient \
-                  eventManager eventManagerClient console consoleClient upcallTest upcallTestClient \
-                  fontconfig
+noinst_PROGRAMS = \
+	main hello cairo expat server client binder binderClient \
+	location locationClient \
+	eventManager eventManagerClient \
+	console consoleClient \
+	upcallTest upcallTestClient \
+	fontconfig newlib
 
 AM_LDFLAGS = -v -static -Wl,--no-omagic,-Map,$@.map,--cref -L$(prefix)/lib
 AM_CPPFLAGS = -I- \
@@ -71,5 +75,9 @@ upcallTestClient_SOURCES = upcallTestClient.cpp
 
 fontconfig_SOURCES = fontconfig.cpp
 
+newlib_SOURCES = newlib.cpp
+
+CLEANFILES = $(BUILT_SOURCES) $(nodist_location_SOURCES) $(nodist_eventManager_SOURCES)
+
 clean-local:
-	-rm -f $(BUILT_SOURCES)
+	-rm -f  *.map
