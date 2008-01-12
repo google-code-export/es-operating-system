@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+/**
+ * This interface provides methods for managing a DMA controller.
+ */
+[object, uuid(83a550e8-25dc-11db-9c02-0009bf000001)]
+interface IDmac : IInterface
+{
+    /**
+     * DMA transfer mode.
+     */
+    enum Mode
+    {
+        READ = 0x04,
+        WRITE = 0x08,
+        AUTO_INITIALIZE = 0x10
+    };
+
+    /**
+     * Sets up this DMA controller.
+     * @param addr the address of the memory accessed by this DMA controller.
+     * @param count the DMA transfer counter.
+     * @param mode <code>READ</code>, <code>WRITE</code> or <code>AUTO_INITIALIZE</code>.
+     */
+    void setup([in, out, size_is(count)] void* addr, int count, unsigned byte mode);
+    /**
+     * Starts the DMA transfer.
+     */
+    void start();
+    /**
+     * Terminates the DMA transfer.
+     */
+    void stop();
+    /**
+     * Tests whether the DMA transfer is complete.
+     * @return true if the DMA transfer is complete. Otherwise, false.
+     */
+    boolean isDone();
+    /**
+     * Reads the current DMA transfer counter of this DMA controller.
+     */
+    int getCount();
+}

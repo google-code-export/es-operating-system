@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+/**
+ * This interface represents properties of sound.
+ */
+[object, uuid(839febda-25dc-11db-9c02-0009bf000001)]
+interface IAudioFormat : IInterface
+{
+    /**
+     * Gets the number of bits in a sample of a sound in this audio format.
+     * @return the number of bits in a sample.
+     */
+    unsigned byte getBitsPerSample();
+    /**
+     * Gets the number of audio channels in this audio format.
+     * @return the number of channels.
+     */
+    unsigned byte getChannels();
+    /**
+     * Gets the sampling rate in this audio format.
+     * @return the sampling rate.
+     */
+    unsigned short getSamplingRate();
+    /**
+     * Changes the number of bits in a sample of a sound in this audio format.
+     * @param bits the number of bits in a sample.
+     */
+    void setBitsPerSample(unsigned byte bits);
+    /**
+     * Changes the number of audio channels in this audio format.
+     * @param channels the number of channels.
+     */
+    void setChannels(unsigned byte channels);
+    /**
+     * Changes the sampling rate in this audio format.
+     * @param rate the sampling rate.
+     */
+    void setSamplingRate(unsigned short rate);
+}
