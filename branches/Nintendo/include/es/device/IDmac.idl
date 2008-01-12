@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2006
+ * Nintendo Co., Ltd.
+ *  
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Nintendo makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ */
+
+import "es/base/IInterface.idl";
+
+[object, uuid(83a550e8-25dc-11db-9c02-0009bf000001)]
+interface IDmac : IInterface
+{
+    enum Mode
+    {
+        READ = 0x04,
+        WRITE = 0x08,
+        AUTO_INITIALIZE = 0x10
+    };
+
+    void setup([in, out, size_is(count)] void* addr, int count, unsigned byte mode);
+    void start();
+    void stop();
+    boolean isDone();
+    int getCount();
+}
