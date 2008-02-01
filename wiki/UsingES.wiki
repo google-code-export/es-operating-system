@@ -107,7 +107,7 @@ ls.js
 
 You can draw graphics on the screen: type `figure` in the command line and hit enter:
 
-
+http://nes.sourceforge.jp/figure.png
 
 `figure` is another ECMAScript program that invokes the canvas service. You might want to read the program by typing
 
