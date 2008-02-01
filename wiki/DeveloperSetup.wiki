@@ -5,10 +5,11 @@
 
 == Prerequisites ==
 
- * autoconf 2.61
- * automake 1.10
- * bison 2.1
- * flex 2.5
+ * autoconf 2.61>
+ * automake 1.10>
+ * bison 2.1>
+ * flex 2.5>
+ * gcc 4.0>
 
 _Older versions might cause problems._
 
