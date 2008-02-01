@@ -78,6 +78,7 @@ Note in the above configure command, the following three options specify the pat
 || --with-cache-dir || /file || Use /file to store cache files ||
 || --with-confdir || /file || Use /file to store configuration files ||
 
+
 = Cairo =
 
 Cairo is used for the 2D graphics.
