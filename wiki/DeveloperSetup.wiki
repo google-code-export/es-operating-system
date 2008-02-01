@@ -1,4 +1,6 @@
+#summary How to set up the development environment.
 #labels Build-Environment
+
 = Setting Up the Development Environment =
 
 == Prerequisites ==
