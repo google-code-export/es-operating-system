@@ -13,7 +13,7 @@ yypase() ok.
 
 Once the ES operating system kernel gets executing, it will start the event manger (eventManager.elf) and the canvas service (console.elf) in userland. The event manager is a user process that records the inputs from the keyboard and from the mouse as events so that the other processes can get the events. The canvas service repeatedly reads the events from the event manager converting the keyboard input events into a stream of characters; The canvas service also accepts the requests from the yet other processes to draw graphics and texts in the screen.
 
-http://es-operating-system.googlecode.com/svn/html/blockDiagram.png
+http://nes.sourceforge.jp/blockDiagram.png
 
 The kernel then starts the ECMAScript interpreter (esjs.elf), which execute the command line shell program written in ECMAScript (shell.js). The command line shell provides the interactive environment to the user using the canvas service.
 
