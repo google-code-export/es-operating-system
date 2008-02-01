@@ -1,5 +1,5 @@
+#summary How to build the ES operating system for x86 PC.
 #labels Build-ES
-#How to build the ES operating system for x86 PC.
 
 = Building the ES operating system for x86 PC =
 
