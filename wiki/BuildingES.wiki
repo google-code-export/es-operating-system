@@ -1,0 +1,27 @@
+#How to build the ES operating system for x86 PC.
+
+= Building the ES operating system for x86 PC =
+
+One your develop environment and support libraries are set up correctly, you can build the ES operating system for x86 PC.
+
+{{{
+$ mkdir pc
+$ cd pc
+$ CFLAGS=-g CXXFLAGS=-g ../es-operaing-system/configure --prefix=../es --host=i386-pc-es --target=i386-pc-es
+$ make
+}}}
+
+To generate a disk image that can be used with qemu, execute the script named `es` in the `pc/init` directory.
+
+{{{
+$ cd pc/init
+$ ./es
+}}}
+
+The resulting file, named `fat32.img`, is a bootable ES operating system disk image. To boot the ES operating system on qemu:
+
+{{{
+$ qemu -hda fat32.img -serial stdio -soundhw sb16
+}}}
+
+_Depends on the operating systems and/or the qemu versions, you may need to specify dummy CD ROM image by specifying `-cdrom dummy.iso` option to qemu._
