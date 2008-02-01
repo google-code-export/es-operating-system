@@ -97,6 +97,6 @@ $ make install
 
 = Fonts =
 
-Currently, ES uses the Sazanami fonts (http://sourceforge.jp/projects/efont/) and the liberation fonts ( https://www.redhat.com/promo/fonts/). If these fonts are not installed in your host operating system, please install them, too (with yum, or apt-get, etc.)
+Currently, ES uses the Sazanami fonts (http://sourceforge.jp/projects/efont/) and the liberation fonts (https://www.redhat.com/promo/fonts/). If these fonts are not installed in your host operating system, please install them, too (with yum, or apt-get, etc.)
 
 Your support libraries now set up!
