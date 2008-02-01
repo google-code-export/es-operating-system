@@ -1,14 +1,94 @@
-# How to setup the ES development environment.
-
 = Setting Up the Development Environment =
 
-== Prerequists ==
-Add your content here.
+== Prerequisites ==
 
+ * autoconf 2.61
+ * automake 1.10
+ * bison 2.1
+ * flex 2.5
 
-= Details =
+_Older versions might cause problems._
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== Getting the source code ==
+
+{{{
+$ svn checkout http://es-operating-system.googlecode.com/svn/trunk/ es-operating-system
+}}}
+
+== Building development tools ==
+
+First, you need to build development tools including the esidl IDL compiler.
+
+{{{
+$ mkdir tools
+$ cd tools
+$ CFLAGS=-g CXXFLAGS=-g ../es-operating-system/configure
+$ make
+$ make install
+}}}
+
+By default, tools like esidl, vcopy, vformat, and vlist are copied to `/usr/local/bin`.
+
+== Building the cross tool chain ==
+
+Second, you need to build the cross tool chain building from GNU Binutils, GNU Compiler Collection (GCC), and Newlib.
+
+_If you install cross tools in the non-default location using the `--prefix=pathname` option to the configure scripts, please make sure the path to the cross tool chain is included in the PATH environment variable, _
+
+=== Binutils ===
+
+{{{
+$ cd ..
+$ mkdir src
+$ cd src
+$ wget ftp://ftp.gnu.org/gnu/binutils/binutils-2.17.tar.bz2
+$ tar -jxvf binutils-2.17.tar.bz2
+$ patch -p0 -d . < ../es-operating-system/patches/binutils-2.17.patch
+$ cd ..
+$ mkdir binutils
+$ cd binutils
+$ ../src/binutils-2.17/configure --target=i386-pc-es
+$ make
+$ make install
+$ i386-pc-es-as -V
+GNU assembler version 2.17 (i386-pc-es) using BFD version 2.17
+}}}
+
+=== GCC and Newlib ===
+
+{{{
+$ cd ..
+$ cd src
+$ wget ftp://ftp.gnu.org/gnu/gcc/gcc-4.2.1/gcc-4.2.1.tar.bz2
+$ tar -jxvf gcc-4.2.1.tar.bz2
+$ patch -p0 -d . < ../es-operating-system/patches/gcc-4.2.1.patch
+$ wget ftp://sources.redhat.com/pub/newlib/newlib-1.15.0.tar.gz
+$ tar -zxvf newlib-1.15.0.tar.gz
+$ patch -p0 -d . < ../es-operating-system/patches/newlib-1.15.0.patch
+$ cd gcc-4.2.1
+$ ln -s ../newlib-1.15.0/newlib ../newlib-1.15.0/libgloss .
+$ cd ../..
+$ mkdir gcc
+$ cd gcc
+$ ../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib
+$ make
+$ make install
+$ i386-pc-es-gcc -v
+Using built-in specs.
+Target: i386-pc-es
+Configured with: ../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib
+Thread model: es
+gcc version 4.2.1
+}}}
+
+== Add 'es' to the operating system list in Automake `config.sub` ==
+
+Finally, please add 'es' to the operating system list in Automake `config.sub` as below:
+
+{{{
+# Decode manufacturer-specific aliases for certain operating systems.
+     :
+     :
+     :
+| -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* | -es* \
+}}}
