@@ -98,6 +98,3 @@ Finally, please add 'es' to the operating system list in Automake `config.sub` a
 }}}
 
 Your development environment is now set up!
-
-
-http://code.google.com/images/code_sm.png
