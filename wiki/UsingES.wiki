@@ -22,17 +22,17 @@ The kernel then starts the ECMAScript interpreter (esjs.elf), which execute the 
 From the command line shell, you can use the programs like below. Most of the commands are written in ECMAScript:
 
 || Command Name || Description ||
-|| cat [file ...] || Prints the contents of files to the screen ||
-|| cd [dir] || Sets the current directory to [dir] ||
-|| clear || Clears the canvas for drawing graphics ||
-|| date [-u] || Displays the current date and time. ||
-|| echo [arg ...] || Prints the arguments to the screen ||
-|| edit [file]  || Edits text files ||
-|| exit || Exits the command line shell ||
-|| figure || Draws chars using the CanvasRenderingContext2D interface (A demo script) ||
-|| ls [dir ...] || Lists names of objects in the directory ||
-|| rm [file ...] || Removes the files ||
-|| squeak || Squeak - a Smalltalk programming environment ||
+|| `cat [file ...]` || Prints the contents of files to the screen ||
+|| `cd [dir]` || Sets the current directory to [dir] ||
+|| `clear` || Clears the canvas for drawing graphics ||
+|| `date [-u]` || Displays the current date and time. ||
+|| `echo [arg ...]` || Prints the arguments to the screen ||
+|| `edit [file]`  || Edits text files ||
+|| `exit` || Exits the command line shell ||
+|| `figure` || Draws chars using the CanvasRenderingContext2D interface (A demo script) ||
+|| `ls [dir ...]` || Lists names of objects in the directory ||
+|| `rm [file ...]` || Removes the files ||
+|| `squeak` || Squeak - a Smalltalk programming environment ||
 
 == Namespace ==
 
