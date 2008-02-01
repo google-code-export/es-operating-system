@@ -92,3 +92,5 @@ Finally, please add 'es' to the operating system list in Automake `config.sub` a
      :
 | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* | -es* \
 }}}
+
+Your development environment is now set up!
