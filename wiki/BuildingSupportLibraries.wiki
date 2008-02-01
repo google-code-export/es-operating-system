@@ -21,9 +21,9 @@ $ make
 $ make install
 }}}
 
-= FreeType 2 =
+= !FreeType 2 =
 
-FreeType 2 is used as a software font engine. Please download `freetype-2.3.5.tar.bz2` from http://sourceforge.net/project/showfiles.php?group_id=3157 into your `src` directory to install.
+!FreeType 2 is used as a software font engine. Please download `freetype-2.3.5.tar.bz2` from http://sourceforge.net/project/showfiles.php?group_id=3157 into your `src` directory to install.
 
 {{{
 $ cd src
@@ -77,7 +77,6 @@ Note in the above configure command, the following three options specify the pat
 || --with-default-fonts || /file/fonts || Use fonts from /file when config is busted ||
 || --with-cache-dir || /file || Use /file to store cache files ||
 || --with-confdir || /file || Use /file to store configuration files ||
-
 
 = Cairo =
 
