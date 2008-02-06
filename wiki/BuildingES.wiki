@@ -3,7 +3,7 @@
 
 = Building the ES operating system for x86 PC =
 
-One your [DeveloperSetup develop environment] and [BuildingSupportLibraries support libraries] are set up correctly, you can build the ES operating system for x86 PC.
+Once your [DeveloperSetup development environment] and [BuildingSupportLibraries support libraries] are set up correctly, you can build the ES operating system for x86 PC.
 
 {{{
 $ mkdir pc
