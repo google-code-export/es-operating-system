@@ -23,7 +23,7 @@ From the command line shell, you can use the programs like below. Most of the co
 
 || Command Name || Description ||
 || `cat [file ...]` || Prints the contents of files to the screen ||
-|| `cd [dir]` || Sets the current directory to [dir] ||
+|| `cd [dir]` || Sets the current directory to `dir` ||
 || `clear` || Clears the canvas for drawing graphics ||
 || `date [-u]` || Displays the current date and time. ||
 || `echo [arg ...]` || Prints the arguments to the screen ||
