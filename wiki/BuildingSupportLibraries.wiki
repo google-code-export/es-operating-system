@@ -55,6 +55,16 @@ $ make
 $ make install
 }}}
 
+*Note:* If you encounter an error during 'make install', please correct the generated Makefile as below:
+
+{{{
+install: xmlwf/xmlwf installlib
+        $(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(man1dir)
+        $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) xmlwf/xmlwf.elf $(DESTDIR)$(bindir)/xmlwf
+        $(INSTALL_DATA) $(MANFILE) $(DESTDIR)$(man1dir)
+
+}}}
+
 = Fontconfig =
 
 Fontconfig is used for font customization and configuration for cairo, which is installed next.
