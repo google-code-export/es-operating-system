@@ -13,7 +13,7 @@
 
 For development tools, the following libraries are required:
 
- * glibc 2.0 or newer, glibc 2.4 or newer recommended: several features don't work with glibc 2.3 or lower.
+ * glibc 2.2 or newer, glibc 2.4 or newer recommended: several features don't work with glibc 2.3 or lower.
  * pcrc 7.2 or newer configured with the `--enable-utf8` and `--enable-unicode-properties` options.
 
 _Older versions might cause problems._
