@@ -46,7 +46,7 @@ By default, tools like esidl, vcopy, vformat, and vlist are copied to `/usr/loca
 
 Second, you need to build the cross tool chain building from GNU Binutils, GNU Compiler Collection (GCC), and Newlib.
 
-_If you install cross tools in the non-default location using the `--prefix=pathname` option to the configure scripts, please make sure the path to the cross tool chain is included in the PATH environment variable, _
+_In the following steps, we will set up the ES cross tools in '/opt/es'. If you need to set up them in the other place, please modify you --prefix and other options accordingly. Also please make sure the path to the cross tool chain is included in the PATH environment variable._
 
 === Binutils ===
 
@@ -60,7 +60,7 @@ $ patch -p0 -d . < ../es-operating-system/patches/binutils-2.17.patch
 $ cd ..
 $ mkdir binutils
 $ cd binutils
-$ ../src/binutils-2.17/configure --target=i386-pc-es
+$ ../src/binutils-2.17/configure --target=i386-pc-es --prefix=/opt/es
 $ make
 $ make install
 $ i386-pc-es-as -V
@@ -83,7 +83,7 @@ $ ln -s ../newlib-1.15.0/newlib ../newlib-1.15.0/libgloss .
 $ cd ../..
 $ mkdir gcc
 $ cd gcc
-$ ../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib
+$ ../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib --prefix=/opt/es
 $ make
 $ make install
 $ i386-pc-es-gcc -v
