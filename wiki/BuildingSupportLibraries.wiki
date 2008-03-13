@@ -5,6 +5,8 @@
 
 The ES operating system uses many open source libraries for 2D graphics, regular expression support, etc. You need to build these libraries in the following order before building the ES operating system itself.
 
+In the following steps, we will set up the ES cross libraries in '/opt/es'. If you need to set up them in the other place, please modify your `--prefix` and other options accordingly.
+
 = PCRE =
 
 The Perl Compatible Regular Expressions (PCRE) library is used for the regular expression support.
@@ -17,7 +19,7 @@ $ patch -p0 -d . < ../es-operating-system/patches/pcre-7.2.patch
 $ cd ..
 $ mkdir pcre
 $ cd pcre
-$ ../src/pcre-7.2/configure --disable-shared --enable-utf8 --enable-unicode-properties --prefix=.. --host=i386-pc-es --target=i386-pc-es
+$ ../src/pcre-7.2/configure --prefix=/opt/es --disable-shared --enable-utf8 --enable-unicode-properties --host=i386-pc-es --target=i386-pc-es
 $ make
 $ make install
 }}}
@@ -33,7 +35,7 @@ $ patch -p0 -d . < ../es-operating-system/patches/freetype-2.3.5.patch
 $ cd ..
 $ mkdir freetype
 $ cd freetype
-$ ../src/freetype-2.3.5/configure --prefix=.. --host=i386-pc-es --target=i386-pc-es
+$ ../src/freetype-2.3.5/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es
 $ make FTSYS_SRC=../src/freetype-2.3.5/builds/unix/ftsystem.c
 $ make install
 }}}
@@ -50,7 +52,7 @@ $ patch -p0 -d . < ../es-operating-system/patches/expat-2.0.1.patch
 $ cd ..
 $ mkdir expat
 $ cd expat
-$ ../src/expat-2.0.1/configure --prefix=.. --host=i386-pc-es --target=i386-pc-es
+$ ../src/expat-2.0.1/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es
 $ make
 $ make install
 }}}
@@ -77,7 +79,7 @@ $ patch -p0 -d . < ../es-operating-system/patches/fontconfig-2.4.2.patch
 $ cd ..
 $ mkdir fontconfig
 $ cd fontconfig
-$ ../src/fontconfig-2.4.2/configure --prefix=.. --host=i386-pc-es --target=i386-pc-es --with-arch=i386-pc-es --with-expat-includes=../include --with-expat-lib=../lib --with-freetype-config=../bin/freetype-config --with-default-fonts=/file/fonts --with-cache-dir=/file --with-confdir=/file
+$ ../src/fontconfig-2.4.2/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es --with-arch=i386-pc-es --with-expat-includes=/opt/es/include --with-expat-lib=/opt/es/lib --with-freetype-config=/opt/es/bin/freetype-config --with-default-fonts=/file/fonts --with-cache-dir=/file --with-confdir=/file
 $ make
 $ make install
 }}}
@@ -101,7 +103,7 @@ $ patch -p0 -d . < ../es-operating-system/patches/cairo-1.4.10.patch
 $ cd ..
 $ mkdir cairo
 $ cd cairo
-$ ../src/cairo-1.4.10/configure --prefix=.. --host=i386-pc-es --target=i386-pc-es --disable-png --disable-xlib --disable-ps --disable-svg FREETYPE_CFLAGS="-I../include -I../include/freetype2" --enable-freetype=yes
+$ ../src/cairo-1.4.10/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es --disable-png --disable-xlib --disable-ps --disable-svg FREETYPE_CFLAGS='-I/opt/es/include/freetype2 -I/opt/es/include' FREETYPE_LIBS='-L/opt/es/lib -lfreetype' FONTCONFIG_CFLAGS=-I/opt/es/include FONTCONFIG_LIBS='-L/opt/es/lib -lfontconfig'
 $ make
 $ make install
 }}}
