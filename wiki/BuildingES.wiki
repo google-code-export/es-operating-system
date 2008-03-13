@@ -5,10 +5,12 @@
 
 Once your [DeveloperSetup development environment] and [BuildingSupportLibraries support libraries] are set up correctly, you can build the ES operating system for x86 PC.
 
+In the following steps, we will use the ES cross libraries in '/opt/es'. If you have set up them in the other place, please modify you --prefix and other options accordingly.
+
 {{{
 $ mkdir pc
 $ cd pc
-$ CFLAGS=-g CXXFLAGS=-g ../es-operaing-system/configure --prefix=../es --host=i386-pc-es --target=i386-pc-es
+$ CFLAGS=-g CXXFLAGS=-g ../es-operaing-system/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es
 $ make
 }}}
 
