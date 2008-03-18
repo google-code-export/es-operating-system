@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="640"
+   height="320"
+   id="svg2283"
+   sodipodi:version="0.32"
+   inkscape:version="0.43"
+   sodipodi:docbase="/home/shiki/www/XV_Semana_Infomatica"
+   sodipodi:docname="mono.svg"
+   version="1.0">
+  <defs
+     id="defs2285" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="373.33473"
+     inkscape:cy="106.2642"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="px"
+     inkscape:window-width="892"
+     inkscape:window-height="1097"
+     inkscape:window-x="807"
+     inkscape:window-y="314" />
+  <metadata
+     id="metadata2288">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <rect
+       style="fill:#004f9f;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect2311"
+       width="167.41122"
+       height="52.290096"
+       x="412.24841"
+       y="193.82672" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="473.99014"
+       y="226.52402"
+       id="text2313"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2315"
+         x="473.99014"
+         y="226.52402">OS C</tspan></text>
+    <rect
+       style="fill:#389ced;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect2343"
+       width="168.41121"
+       height="52.290096"
+       x="411.74841"
+       y="136.38861" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="449.71036"
+       y="167.49948"
+       id="text2345"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2347"
+         x="449.71036"
+         y="167.49948">Apps for C</tspan></text>
+    <rect
+       style="fill:#004f9f;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1501"
+       width="167.41122"
+       height="52.290096"
+       x="234.29437"
+       y="193.57401" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="296.03613"
+       y="226.2713"
+       id="text1503"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1505"
+         x="296.03613"
+         y="226.2713">OS B</tspan></text>
+    <rect
+       style="fill:#389ced;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1507"
+       width="168.41121"
+       height="52.290096"
+       x="233.79437"
+       y="136.13589" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="271.75635"
+       y="167.24677"
+       id="text1509"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1511"
+         x="271.75635"
+         y="167.24677">Apps for B</tspan></text>
+    <rect
+       style="fill:#004f9f;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1513"
+       width="167.41122"
+       height="52.290096"
+       x="55.294403"
+       y="193.57401" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="117.03613"
+       y="226.2713"
+       id="text1515"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1517"
+         x="117.03613"
+         y="226.2713">OS A</tspan></text>
+    <rect
+       style="fill:#389ced;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1519"
+       width="168.41121"
+       height="52.290096"
+       x="54.794403"
+       y="136.13589" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="92.756348"
+       y="167.24677"
+       id="text1521"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1523"
+         x="92.756348"
+         y="167.24677">Apps for A</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="640"
+   height="320"
+   id="svg2283"
+   sodipodi:version="0.32"
+   inkscape:version="0.43"
+   sodipodi:docbase="/home/shiki/www/XV_Semana_Infomatica"
+   sodipodi:docname="es-design.svg"
+   version="1.0">
+  <defs
+     id="defs2285" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="341.04727"
+     inkscape:cy="106.2642"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="px"
+     inkscape:window-width="892"
+     inkscape:window-height="1097"
+     inkscape:window-x="695"
+     inkscape:window-y="314" />
+  <metadata
+     id="metadata2288">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <path
+       style="fill:#78c2f4;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 58.79438,76.85495 L 227.20562,76.85495 L 227.20562,129.14505 L 58.79438,129.14505 L 58.79438,76.85495 z "
+       id="path1543" />
+    <path
+       style="fill:#78c2f4;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 237.79438,76.85495 L 406.20562,76.85495 L 406.20562,129.14505 L 237.79438,129.14505 L 237.79438,76.85495 z "
+       id="path1751" />
+    <path
+       style="fill:#78c2f4;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 415.79438,76.85495 L 584.20562,76.85495 L 584.20562,129.14505 L 415.79438,129.14505 L 415.79438,76.85495 z "
+       id="path1753" />
+    <rect
+       style="fill:#389ced;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect2343"
+       width="168.41121"
+       height="52.290096"
+       x="415.74841"
+       y="137.38861" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="428.71036"
+       y="157.49948"
+       id="text2345"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="428.71036"
+         y="157.49948"
+         id="tspan1636">Other</tspan><tspan
+         sodipodi:role="line"
+         x="428.71036"
+         y="179.99948"
+         id="tspan1654">Components</tspan></text>
+    <rect
+       style="fill:#389ced;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1507"
+       width="168.41121"
+       height="52.290096"
+       x="237.79437"
+       y="137.13589" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="251.75635"
+       y="158.24677"
+       id="text1509"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="251.75635"
+         y="158.24677"
+         id="tspan1634">ECMAScript</tspan><tspan
+         sodipodi:role="line"
+         x="251.75635"
+         y="180.74677"
+         id="tspan1650">Interpreter</tspan></text>
+    <rect
+       style="fill:#004f9f;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1513"
+       width="523.41119"
+       height="52.290096"
+       x="59.294403"
+       y="194.57401" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="193.03613"
+       y="227.2713"
+       id="text1515"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1517"
+         x="193.03613"
+         y="227.2713">Component Operating System</tspan></text>
+    <rect
+       style="fill:#389ced;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.64296138px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect1519"
+       width="168.41121"
+       height="52.290096"
+       x="58.794403"
+       y="137.13589" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="72.756348"
+       y="159.24677"
+       id="text1521"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="72.756348"
+         y="159.24677"
+         id="tspan1632">HTML Rendering</tspan><tspan
+         sodipodi:role="line"
+         x="72.756348"
+         y="181.74677"
+         id="tspan1646">Engine</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="94.097656"
+       y="108.70161"
+       id="text2393"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2395"
+         x="94.097656"
+         y="108.70161"
+         style="fill:#000000;fill-opacity:1">Local Apps</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="273.17236"
+       y="107.96582"
+       id="text1628"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1630"
+         x="273.17236"
+         y="107.96582"
+         style="fill:#000000;fill-opacity:1">Web Pages</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="455.39111"
+       y="106.96582"
+       id="text1640"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan1642"
+         x="455.39111"
+         y="106.96582"
+         style="fill:#000000;fill-opacity:1">Web Apps</tspan></text>
+  </g>
+</svg>
