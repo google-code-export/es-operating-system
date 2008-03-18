@@ -2,9 +2,10 @@
 
 = Ideas List for Google Summer of Code 2008 =
 
-We are applying for [http://code.google.com/soc/2008/ Google Summer of Code 2008] as a mentoring organization. Here is the list of ideas for the ES project. If ES project is accepted in GSoC 2008, we welcome your application for GSoC 2008 with any of the ideas listed here or with your ideas related to the ES operating system.
+ES operating system has been accepted in to the [http://code.google.com/soc/2008/ Google Summer of Code™ 2008] as a mentoring organization. Here is the list of ideas for the ES project. We welcome your application for GSoC 2008 with any of the ideas listed here or with your ideas related to the ES operating system.
 
 == A pure component operating system kernel design and development ==
+  * Improve the quality of code.
   * Support x64 as now Newlib has an x64 support.
 
 === Recommended readings ===
@@ -13,6 +14,8 @@ We are applying for [http://code.google.com/soc/2008/ Google Summer of Code 2008
   * Stanley B. Lippman, [http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545/ Inside the C++ Object Model]. 
 
 Comer's book gives you the good understanding how to implement the abstract concepts in the operating systems as real pieces of program code. Bach's book describes the design of the traditional Unix kernel in pseudo code with reasonable details. You will learn many useful examples on concurrent programming from this book. As the ES kernel is written in C++, you must be familiar with the C++ programming in general. Even though Lipman's book is based on a bit older C++ implementations, it describes the runtime data structures and mechanisms behind C++, which you need to know for writing an operating system kernel in C++.
+
+In this area, we still need to do a lot more work to improve the quality of the kernel to the production level. And now that Newlib has an x64 support, supporting x64 in addition to x86 will be an interesting kernel project, too. Many ES software components are already 64-bit ready since we've tested them on x64 linux. Therefore, adding a new virtual memory management subsystem will be most major work for x64 support.
 
 == A component object binding runtime implementation for ECMAScript ==
   * Support function/attribute overloading, structures that are used in IDL definitions.
@@ -28,7 +31,7 @@ We often read the formal standard specification documents when designing and imp
 Note that the implementation of our ECMAScript interpreter esjs is not for the optimal performance. We are rather concentrating in the object binding runtime implementation between ESCMAScript and the other native software components. So if you have more strong interests in the fast ECMAScript VM implementation, the ES project might not be for you since there are other important open source activities designing and developing the super fast ECMAScript VM implementations.
 
 == An HTML5 rendering engine integration ==
-  * Looking for an engine that uses Cairo and FreeType.
+  * Looking for an engine that uses Cairo and !FreeType.
   * Just incorprating the portions really necessary to run the Lively Kernel can be a good starting point.
 
 === Recommended readings ===
@@ -36,7 +39,7 @@ Note that the implementation of our ECMAScript interpreter esjs is not for the o
   * [http://research.sun.com/projects/lively/ Sun Labs Lively Kernel]
   * [http://www.youtube.com/watch?v=gGw09RZjQf8 The Lively Kernel (video)]
 
-The interfaces defined in the HTML 5 specification will be the standard interfaces for the ES operating system, and we will work on an HTML5 rendering engine integration. We have just implemented CanvasRenderingContext2D interface using Cairo and FreeType, and there are a lot more works need to be done. As a whole picture, running the Lively Kernel on top of the ES operating system is a very close image of the future operating system we are thinking about. Therefore, incorporating only the portions of the HTML engines that are really necessary to run the Lively Kernel can be a good starting point for you.
+The interfaces defined in the HTML 5 specification will be the standard interfaces for the ES operating system, and we will work on an HTML5 rendering engine integration. We have just implemented CanvasRenderingContext2D interface using Cairo and !FreeType, and there are a lot more works need to be done. As a whole picture, running the Lively Kernel on top of the ES operating system is a very close image of the future operating system we are thinking about. Therefore, incorporating only the portions of the HTML engines that are really necessary to run the Lively Kernel can be a good starting point for you.
 
 == A TCP/IP stack implementation based on design pattern ==
   * Finalize the interface definitions for socket, etc.
