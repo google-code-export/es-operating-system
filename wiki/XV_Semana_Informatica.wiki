@@ -35,7 +35,7 @@ Today, there are many operating systems, and many application programs for each 
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/mono.png
 
-In the today's desktop PC market, we have Windows, Mac, and Linux. In the game console market, we have Wii, XBox, and PlayStation. It's maybe just a coincidence, but it seems these consumer market is not big enough to have a large fourth party. Remaining spot is so small. We need to do something different, something new to remain or to enter the market. 
+In the today's desktop PC market, we have Windows, Mac, and Linux. In the game console market, we have Wii, XBox, and !PlayStation. It's maybe just a coincidence, but it seems these consumer market is not big enough to have a large fourth party. Remaining spot is so small. We need to do something different, something new to remain or to enter the market. 
 
 So because of the market competition, these operating systems tend to become bigger and bigger to support more attractive features for customers. One big issue is how rapidly we can extend the operating system features. But ironically, the other big issue is as the system becomes bigger, it becomes much harder to add more features.
 
