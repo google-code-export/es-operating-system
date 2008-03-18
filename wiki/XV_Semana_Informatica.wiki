@@ -1,4 +1,4 @@
-#summary Summary of presentation for the [http://sinfo.ist.utl.pt/en/ XV Semana Informática] do Instituto Superior Técnico of Lisbon on March 12, 2008.
+#summary Summary of presentation for the XV Semana Informática do Instituto Superior Técnico of Lisbon on March 12, 2008.
 
 = ES operating system from Google Code =
 
