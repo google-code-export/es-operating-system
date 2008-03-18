@@ -6,7 +6,7 @@
 
 In 2004, I started a new operating system project in Nintendo largely affected by Rob Pike's "Systems Software Research is Irrelevant" talk in 2000. It took about two year before we released the first ES operating system from !SourceForge.jp, which is the Japanese version of !SourceForge.net.
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/stats_graph.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/stats-graph.png
 
 This is the chart of the download numbers and page view counts of the our former project website at !SourceForge.jp from August 2006 to February 2008. The red line is for the page views and the blue line is for downloads.
 
@@ -33,7 +33,7 @@ Probably this is also the question you might have. So I'd like to explain the ba
 
 Today, there are many operating systems, and many application programs for each operating system.
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/mono.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/mono.png
 
 In the today's desktop PC market, we have Windows, Mac, and Linux. In the game console market, we have Wii, XBox, and PlayStation. It's maybe just a coincidence, but it seems these consumer market is not big enough to have a large fourth party. Remaining spot is so small. We need to do something different, something new to remain or to enter the market. 
 
@@ -45,7 +45,7 @@ How did the operating system researchers handle these issues?
 
 The microkernel architecture is one of the possible solution. Theoretically, you can extend the OS features by just adding server softwares in userland.
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/microkernel.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/microkernel.png
 
 However, a lot of researches addressed something different:
 
@@ -81,7 +81,7 @@ And what's really hot today is !JavaScript applications running in the browsers.
 
 It's just amazing how rapidly people can now create a new web desk top environment within a web browser. I'm totally sure more application programs will be written in !JavaScript, !ActionScript or ECMAScript, whatever it's called today.
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/browser.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/browser.png
 
 But if you look at this diagram carefully, don't you think this is too complicated? Microkernels were designed to support various server pieces to extend the operating system features. The web browsers are doing the same thing: supporting various plug-ins to extend its features, but using their own component management scheme. Most of the features of the operating system's windowing system is also duplicated in today's web browsers. 
 
@@ -96,7 +96,7 @@ Eleven years ago, Mr. Noah Mendelsohn were questioning us if we can construct a 
   Noah Mendelsohn,
   Lotus Development Corporation, 1997
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/components.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/components.png
 
 I think Microsoft's COM architecture is a pretty close answer to his question. One unfortunate part for COM was, I think, it was introduced in the middle of the evolution of the C++ programing language. Even though COM uses a very similar runtime object model to C++, the C++ didn't have a standard language specification nor standard application binary interface when COM was introduced.
 
@@ -139,7 +139,7 @@ So we know there is a component architecture that works well, and we know it is 
 
 == Top-down design for the ES operating system ==
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/es-design.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/es-design.png
 
 This is the current design goals of the ES operating system. It is not a goal building a simplified, decoupled UNIX implementation on top of the microkernel in the ES operating system. The primary goal has been making it possible for developers to easily create rich applications, like 3D games, using ECMAScript. 
 
@@ -220,7 +220,7 @@ In ECMAScript, the attributes defined in IDL can be accessed as ordinary propert
 
 The ES kernel joins all the software components seamlessly together, like glue, to make up a unified computing system.
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/es-kernel.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/es-kernel.png
 
 The ES kernel only handles object APIs defined in IDL, and it allows exchanging object interface pointers among user processes. Each interface pointer acts like a capability associated with a specific object interface. 
 
@@ -235,11 +235,11 @@ The extensibility of the ES kernel is assured by allowing the dynamic loading of
 
 == esjs - An ECMAScript interpreter ==
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/esjs.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/esjs.png
 
 We have our own ECMAScript interpreter implementation, esjs, based on the 3rd edition of the ECMAScript specification, which is really simple enough to implement just by a single person in a few months or so. This interpreter is not for the optimal performance, but rather we wanted to study how simply we could implement an ECMAScript to native C++ object binding runtime. By having our own implementation, we have a lot of flexibility to explore the various ways to do that.
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/prototype.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/prototype.png
 
 Currently, the interpreter creates a prototype object for each interface on the fly from the interface metadata, and uses reflection to convert ECMAScript function calls and attribute accesses into C++ virtual function calls. This approach works pretty well. Once we have completed the implementation of the meta-level code, we can simply use all the defined object APIs without doing any specific tweaks for each interface.
 
@@ -254,7 +254,7 @@ So occasionally people talk about the lack of libraries in !JavaScript in other 
 
 I think the "top-down design, bottom-up build" philosophy is one of the most important philosophy I learned when I was a graduate student. 
 
-http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/es-0-1-1.svg
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/es-0-1-1.png
 
 Here's how we've proceeded with our development of the ES operating system.
 
@@ -361,4 +361,4 @@ It's people deciding and shaping future computing systems, and I really hope som
 
 Thank you very much. Obrigado!
 
-*Note ES operating system has been accepted in to the Google Summer of Code™ 2008. So If you are a student as of April 14, 2008, we really welcome your application for Google Summer of Code™ 2008 in ES operating system!* - March 17, 2008
+*Note ES operating system has been accepted in to the Google Summer of Code™ 2008. So If you are a student as of April 14, 2008, we really welcome your application for Google Summer of Code™ 2008 in ES operating system.* - March 17, 2008
