@@ -361,4 +361,4 @@ It's people deciding and shaping future computing systems, and I really hope som
 
 Thank you very much. Obrigado!
 
-*Note ES operating system has been accepted in to the Google Summer of Code™ 2008. So If you are a student as of April 14, 2008, we really welcome your application for Google Summer of Code™ 2008 in ES operating system!*
+*Note ES operating system has been accepted in to the Google Summer of Code™ 2008. So If you are a student as of April 14, 2008, we really welcome your application for Google Summer of Code™ 2008 in ES operating system!* - March 17, 2008
