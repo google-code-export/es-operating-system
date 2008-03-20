@@ -107,7 +107,7 @@ Evolution of C++:
   * GCC 4.0, 2005
   * C++ TR1, 2005
 
-This is the timeline of the recent evolution of C++. And COM was introduce in 1990's. Without the standard ABI, it's just impossible to write a portable operating system kernel in C++. And even application programmers occasionally had to write COM components in C those days, which was a pain and unproductive.
+This is the time line of the recent evolution of C++. And COM was introduce in 1990's. Without the standard ABI, it's just impossible to write a portable operating system kernel in C++. And even application programmers occasionally had to write COM components in C those days, which was a pain and unproductive.
 
 But today we can clearly see that in the future we will use !JavaScript for writing much more applications which will be more universally accessible. And today, we have the standard C++ language specification and the standard C++ ABI. We have even free C++ compilers that follow these standards. What if we design a component operating system all over again, using the latest C++, and integrating !JavaScript virtual machine from the very beginning?
 
@@ -276,7 +276,7 @@ Now you can build ES on both x86 and x64 versions of Linux including Fedora and 
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/screen-shot.png
 
-And I want to mention that although these charts and colorful texts were drawn by using the CanvasRenderingContext2D interface from a script written in ECMAScript, the actual rendering was done by Cairo and !FreeType. Those are one of the open source libraries we are using to construct the ES operating system. We are also using other open source libraries including Newlib, PCRE, Expat, and Fontconfig. And we are also using free !TrueType fonts from Redhat and others. Of cource we are using binutils, GCC and other tools from GNU for building everything. 
+And I want to mention that although these charts and colorful texts were drawn by using the CanvasRenderingContext2D interface from a script written in ECMAScript, the actual rendering was done by Cairo and !FreeType. Those are one of the open source libraries we are using to construct the ES operating system. We are also using other open source libraries including Newlib, PCRE, Expat, and Fontconfig. And we are also using free !TrueType fonts from Redhat and others. Of course we are using binutils, GCC and other tools from GNU for building everything. 
 
 Today the open source community has a really rich set of software libraries and tools which allow us to design and develop the more operating system specific area much more easily, if we look back ten years ago.
 
@@ -304,7 +304,7 @@ So if you have any of those machines, please try making ES on your computer.
 
 And if you only have a Windows machine, at this point, we do not have any useful information for you. Actually, we have used to use cygwin for building ES, but it turned out it's fairly slower than linux running on the exact same machine. And as we moved to the newer tools like GCC 4, we were unable to use cygwin to build ES any more. If you have any ideas using Windows to build ES, please let me know. Virtual PC had no problems running ES.
 
-You can also use actual PCs like listed below for running ES. In any of these configurations, ES runs much much faster than running on QENU:
+You can also use actual PCs like listed below for running ES. In any of these configurations, ES runs much much faster than running on QEMU:
 
   * Pentium III/440BX + SB16 + RTL8029AS
   * Pentium 4/865G+ICH5 + ES1370 + RTL8029AS
@@ -330,7 +330,7 @@ Also as we move to the 4th edition of ECMAScript standard, we will probably inco
 
 === An HTML5 rendering engine integration ===
 
-This will be the most complicated part for us over the next few months or so because either which open source implementation of the HTML redering engines we will use, we will still need to do some modifications to that to make it fit into the ES environment. We will need very careful planning on this.
+This will be the most complicated part for us over the next few months or so because either which open source implementation of the HTML rendering engines we will use, we will still need to do some modifications to that to make it fit into the ES environment. We will need very careful planning on this.
 
 Dan Ingalls at Sun Labs taught me we wouldn't need every piece of HTML rendering features for running the Lively Kernel. So probably just incorporating the portions that are really necessary to run the Lively Kernel can be a good starting point for this.
 
