@@ -10,7 +10,7 @@ ES operating system has been accepted in to the [http://code.google.com/soc/2008
 
 === Recommended readings ===
   * Douglas E. Comer, [http://www.amazon.com/Operating-System-Design-Approach-Prentice-Hall/dp/0136381804/ Operating System Design: The XINU Approach, Volume 1, PC Edition].
-  * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Maurice J. Bach  Design of the UNIX Operating System].
+  * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Design of the UNIX Operating System].
   * Stanley B. Lippman, [http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545/ Inside the C++ Object Model]. 
 
 Comer's book gives you the good understanding how to implement the abstract concepts in the operating systems as real pieces of program code. Bach's book describes the design of the traditional Unix kernel in pseudo code with reasonable details. You will learn many useful examples on concurrent programming from this book. As the ES kernel is written in C++, you must be familiar with the C++ programming in general. Even though Lipman's book is based on a bit older C++ implementations, it describes the runtime data structures and mechanisms behind C++, which you need to know for writing an operating system kernel in C++.
