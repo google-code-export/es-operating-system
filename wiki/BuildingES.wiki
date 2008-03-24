@@ -10,7 +10,7 @@ In the following steps, we will use the ES cross libraries in '/opt/es'. If you 
 {{{
 $ mkdir pc
 $ cd pc
-$ CFLAGS=-g CXXFLAGS=-g ../es-operaing-system/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es
+$ CFLAGS=-g CXXFLAGS=-g ../es-operating-system/configure --prefix=/opt/es --host=i386-pc-es --target=i386-pc-es
 $ make
 }}}
 
