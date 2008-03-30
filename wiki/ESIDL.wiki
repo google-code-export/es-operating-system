@@ -140,7 +140,7 @@ void setPosition(in long x, in long y);
 }}}
 ==== C++ header file ====
 {{{
-virtual void getPosition(int`*` x, int`*` y) = 0;
+virtual void getPosition(int* x, int* y) = 0;
 virtual void setPosition(int x, int y) = 0;
 }}}
 
@@ -155,8 +155,8 @@ ICache create(in IStream backingStore);
 }}}
 ==== C++ header file ====
 {{{
-virtual void mount(IStream`*` disk) = 0;
-virtual ICache`*` create(IStream`*` backingStore) = 0;
+virtual void mount(IStream* disk) = 0;
+virtual ICache* create(IStream* backingStore) = 0;
 }}}
 
 === Arrays ===
@@ -165,12 +165,12 @@ An array is a data type where the number of elements is static. The type name is
 
 ==== ES IDL ====
 {{{
-typedef octet Mac`[`6`]`;
+typedef octet Mac[6];
 long addMulticastAddress(in Mac mac);
 }}}
 ====  C++ header file ====
 {{{
-typedef unsigned char Mac`[`6`]`;
+typedef unsigned char Mac[6];
 virtual int addMulticastAddress(const Mac mac) = 0;
 }}}
 
@@ -186,7 +186,7 @@ long setName(in Name name);
 }}}
 ==== C++ header file ====
 {{{
-typedef unsigned short`*` Name;
+typedef unsigned short* Name;
 virtual int getName(Name name, int nameLength) = 0;
 virtual int setName(const Name name, int nameLength) = 0;
 }}}
@@ -209,8 +209,8 @@ interface IStream
 class IStream
 {
 public:
-    virtual int read(void`*` buf, int bufLength) = 0;
-    virtual int write(const void`*` src, int srcLength) = 0;
+    virtual int read(void* buf, int bufLength) = 0;
+    virtual int write(const void* src, int srcLength) = 0;
 };
 }}}
 
@@ -224,7 +224,7 @@ void exit(in any val);
 }}}
 ==== C++ header file ====
 {{{
-virtual void exit(const void`*` val) = 0;
+virtual void exit(const void* val) = 0;
 }}}
 
 === Object ===
@@ -239,7 +239,7 @@ Object queryInterface(in uuid riid);
 }}}
 ==== C++ header file ====
 {{{
-virtual void`*` queryInterface(const Guid& riid) = 0;
+virtual void* queryInterface(const Guid& riid) = 0;
 }}}
 
 === Attributes ===
