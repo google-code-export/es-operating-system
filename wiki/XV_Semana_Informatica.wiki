@@ -98,7 +98,7 @@ Eleven years ago, Mr. Noah Mendelsohn were questioning us if we can construct a 
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/components.png
 
-I think Microsoft's COM architecture is a pretty close answer to his question. One unfortunate part for COM was, I think, it was introduced in the middle of the evolution of the C++ programing language. Even though COM uses a very similar runtime object model to C++, the C++ didn't have a standard language specification nor standard application binary interface when COM was introduced.
+I think Microsoft's COM architecture is a pretty close answer to his question. One unfortunate part for COM was, I think, it was introduced in the middle of the evolution of the C++ programming language. Even though COM uses a very similar runtime object model to C++, the C++ didn't have a standard language specification nor standard application binary interface when COM was introduced.
 
 Evolution of C++:
   * Itanium C++ ABI, 2001
