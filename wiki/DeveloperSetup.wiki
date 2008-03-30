@@ -30,7 +30,7 @@ $ svn checkout http://es-operating-system.googlecode.com/svn/trunk/ es-operating
 
 == Building development tools ==
 
-First, you need to build development tools including the esidl IDL compiler.
+First, you need to build development tools including the [esidl] IDL compiler.
 
 {{{
 $ mkdir tools
@@ -40,7 +40,7 @@ $ make
 $ make install
 }}}
 
-By default, tools like esidl, vcopy, vformat, and vlist are copied to `/usr/local/bin`.
+By default, tools like [esidl], vcopy, vformat, and vlist are copied to `/usr/local/bin`.
 
 == Building the cross tool chain ==
 
