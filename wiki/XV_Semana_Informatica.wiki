@@ -272,7 +272,7 @@ I believe some people attending here today must have really great ideas. But per
 
 == Current Status ==
 
-Now you can build ES on both x86 and x64 versions of Linux including Fedora and Ubuntu using the current source code in ES subversion trunk in Google Code. And actually you can now build ES on Mac OS X Tiger with XCode.
+Now you can build ES on both x86 and x64 versions of Linux including Fedora and Ubuntu using the current source code in ES subversion trunk in Google Code. And actually you can now build ES on Mac OS X Leopard with XCode.
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/screen-shot.png
 
