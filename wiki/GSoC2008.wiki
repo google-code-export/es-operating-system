@@ -19,14 +19,14 @@ In this area, we still need to do a lot more work to improve the quality of the 
 
 == A component object binding runtime implementation for ECMAScript ==
   * Support function/attribute overloading, structures that are used in IDL definitions.
-  * Enhance the isidl IDL compiler to support overloading, etc.
+  * Enhance the [esidl] IDL compiler to support overloading, etc.
 
 === Recommended readings ===
   * [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript Language Specification]
   * [http://www.omg.org/cgi-bin/doc?formal/02-06-07 OMG IDL Syntax and Semantics]
   * [http://www.whatwg.org/specs/web-apps/current-work/ HTML 5]
 
-We often read the formal standard specification documents when designing and implementing operating systems. Sometimes standard documents are written in a very difficult way to read through, but ECMAScript Language Specification is written in an easy way for interpreter implementors. Since both esjs and esidl are relatively small programs, reading these specifications comparing the current implementations would be a good starting point to understand the issues where we need to enhance the current implementations.
+We often read the formal standard specification documents when designing and implementing operating systems. Sometimes standard documents are written in a very difficult way to read through, but ECMAScript Language Specification is written in an easy way for interpreter implementors. Since both esjs and [esidl] are relatively small programs, reading these specifications comparing the current implementations would be a good starting point to understand the issues where we need to enhance the current implementations.
 
 Note that the implementation of our ECMAScript interpreter esjs is not for the optimal performance. We are rather concentrating in the object binding runtime implementation between ESCMAScript and the other native software components. So if you have more strong interests in the fast ECMAScript VM implementation, the ES project might not be for you since there are other important open source activities designing and developing the super fast ECMAScript VM implementations.
 
