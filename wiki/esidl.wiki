@@ -81,7 +81,7 @@ class IFoo
 };
 }}}
 
-*N.B.*: Since Mar. 30, 2008, esidl automatically adds the "I" prefix to each interface class names in the generated C++ header files.
+*N.B.*: Since Mar. 30, 2008, esidl automatically adds the "I" prefix to each interface class name in the generated C++ header files.
 
 === Interface ID ===
 
