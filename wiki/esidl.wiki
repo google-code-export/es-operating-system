@@ -27,8 +27,8 @@ Also, esidl can write interface and method descriptions in [http://java.sun.com/
 
 ==== ES IDL ====
 {{{
-#ifndef NINTENDO_ES_BASE_IFILE_IDL_INCLUDED
-#define NINTENDO_ES_BASE_IFILE_IDL_INCLUDED
+#ifndef GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
+#define GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
 
 #include "es/base/IStream.idl"
 
@@ -36,7 +36,7 @@ module es
 {
 };
 
-#endif // NINTENDO_ES_BASE_IFILE_IDL_INCLUDED
+#endif // GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
 }}}
 
 == Option ==
@@ -70,16 +70,18 @@ The interface creates a C++ abstract class.
 
 ==== ES IDL ====
 {{{
-interface X
+interface Foo
 {
 };
 }}}
 ==== C++ header file ====
 {{{
-class X
+class IFoo
 {
 };
 }}}
+
+*N.B.*: Since Mar. 30, 2008, esidl automatically adds the "I" prefix to each interface class names in the generated C++ header files.
 
 === Interface ID ===
 
@@ -87,9 +89,9 @@ In ES interface definitions, interface IDs must be specified in DCE's UUID forma
 
 ==== ES IDL ====
 {{{
-interface IStream
+interface Stream
 {
-    #pragma ID IStream = "DCE:032c16c8-25db-11db-9c02-0009bf000001";
+    #pragma ID Stream = "DCE:032c16c8-25db-11db-9c02-0009bf000001";
 };
 }}}
 ==== C++ header file ====
@@ -150,8 +152,8 @@ If you specify an interface name as a method argument or return value, it will b
 
 ==== ES IDL ====
 {{{
-void mount(in IStream disk);
-ICache create(in IStream backingStore);
+void mount(in Stream disk);
+Cache create(in Stream backingStore);
 }}}
 ==== C++ header file ====
 {{{
@@ -197,7 +199,7 @@ sequence<octet> is changed to void`*` and not unsigned char`*` in the header fil
 
 ==== ES IDL ====
 {{{
-interface IStream
+interface Stream
 {
     typedef sequence<octet> Buf;
     Buf read();
