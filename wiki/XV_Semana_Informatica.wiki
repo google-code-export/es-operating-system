@@ -12,7 +12,7 @@ This is the chart of the download numbers and page view counts of the our former
 
 Initially, we just released the ES kernel and a Squeak port for ES. It took about three months before somehow we got noticed by a media. The first peak was raised just after the news post to Slashdot Japan. 
 
-But then the access numbers went back to pretty low level again. Even though we had been releasing new features regularly like SMP support, TCP/IP stack, ECMAScript interpreter and so on, it didn't affect to the page views and downloads very much. 
+But then the access numbers went back to pretty low level again. Even though we had been releasing new features regularly like SMP support, [Conduit TCP/IP stack], ECMAScript interpreter and so on, it didn't affect to the page views and downloads very much. 
 
 Moving a new open source project forward is not that easy, particularly in its early stages because it is irrelevant to the majority of people except those who have strong interests in the source code of the ES operating system.
 
