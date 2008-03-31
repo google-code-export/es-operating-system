@@ -18,7 +18,7 @@ For development tools, the following libraries are required:
 
 _Older versions might cause problems._
 
-_If you are using the latest Linux distribution like [http://fedoraproject.org/ Fedora], you will just need to install the missing packages, if any, from the official repositories. You can test the ES operating system with [http://fabrice.bellard.free.fr/qemu/ QEMU], and you can also test the ES kernel components including the TCP/IP stack or the esjs ECMAScript interpreter as ordinary Linux application programs._
+_If you are using the latest Linux distribution like [http://fedoraproject.org/ Fedora], you will just need to install the missing packages, if any, from the official repositories. You can test the ES operating system with [http://fabrice.bellard.free.fr/qemu/ QEMU], and you can also test the ES kernel components including the [Conduit TCP/IP stack] or the esjs ECMAScript interpreter as ordinary Linux application programs._
 
 _If you are using the Mac OS X Leopard with XCode, you will be able to build the minimal ES cross-build tools. You can test the ES operating system with [http://www.kju-app.org/kju/ Q]._
 
