@@ -5,25 +5,34 @@
 
 == Introduction ==
 
-The IDL compiler, esidl, is a program that creates C++ header files and interface reflection data that is needed for implementing interfaces defined in IDL. In esidl, the syntax is that of [http://www.omg.org/gettingstarted/omg_idl.htm OMG IDL] which is also recommended by the [http://www.w3.org/ W3C].
+The IDL compiler, esidl, is a program that generates C++ header files and interface reflection data files from the interface definitions written in IDL (interface definition language).
+In esidl, the syntax is that of [http://www.omg#summary esidl, the IDL compiler
 
-*N.B.*: esidl uses OMG IDL syntax but things like C++ mappings are done simply in a way unique to ES. Apart from the IDL syntax, there is no relation to CORBA.
+= esidl =
 
-*N.B.*: In ES 0.0.x versions the IDL syntax was based on DCE but since versions 0.1.x of ES, esidl is not able to process DCE-based syntax.
+== Introduction ==
+
+The IDL compiler, esidl, is a program that generates C++ header files and interface reflection data files from the interface definitions written in IDL (interface definition language).
+In esidl, the syntax is that of [http://www.omg.org/gettingstarted/omg_idl.htm OMG IDL] which is also used in the HTML and other specifications from [http://www.w3.org/ W3C].
+
+*Note*: esidl uses OMG IDL syntax but things like C++ mappings are done simply in a way unique to ES. Apart from the IDL grammar, there is no relation to CORBA.
 
 == Syntax ==
 
 esidl `[`option`]` filename ...
 
-== Documentation ==
+== Description ==
 
-esidl creates C++ header files (.h) and binary format reflection data (.ent) from IDL source files (.idl). Like other IDL compilers, esidl does not create stub code for interface method calls. This is because in many argument marshalling processes the ES operating system's kernel automatically returns reflection data.
+esidl creates C++ header files (.h) and binary format reflection data (.ent) from IDL source files (.idl).
+Unlike other IDL compilers, esidl does not generate stub code for procedure calls.
+This is because the ES operating system's kernel processes parameter passing, like marshaling process, at the meta-level using reflection.
 
-Also, esidl can write interface and method descriptions in [http://java.sun.com/j2se/javadoc/ Javadoc] format in IDL files. The esidl compiler writes out the Javadoc comments in the IDL files to the C++ header files.
+In the IDL files, interface and method descriptions can be written in [http://java.sun.com/j2se/javadoc/ Javadoc] format.
+The esidl compiler writes out the Javadoc comments in the IDL files to the C++ header files.
 
 === Preprocessing ===
 
-.idl files can use directives such as `#`ifdef, `#`include, etc. (esidl currently calls Cpp internally).
+In the IDL files, directives such as `#`ifdef, `#`include, etc. can be used (esidl currently calls `cpp` internally).
 
 ==== ES IDL ====
 {{{
@@ -41,7 +50,9 @@ module es
 
 == Option ==
 
--l directory:: Adds directory to the header file search path. Header files and reflection data are created retaining their hierarchical structure below directory.
+-l directory
+  Adds directory to the header file search path.
+  Header files and reflection data are created retaining their hierarchical structure below `directory`.
 
 == C++ mapping ==
 
@@ -81,11 +92,12 @@ class IFoo
 };
 }}}
 
-*N.B.*: Since Mar. 30, 2008, esidl automatically adds the "I" prefix to each interface class name in the generated C++ header files.
+*Note*: Since Mar. 30, 2008, esidl automatically adds the "I" prefix to each interface class name in the generated C++ header files.
 
 === Interface ID ===
 
-In ES interface definitions, interface IDs must be specified in DCE's UUID format (at least for the time being).
+In ES interface definitions, interface IDs must be specified in DCE's UUID format for each interface
+(at least for the time being).
 
 ==== ES IDL ====
 {{{
@@ -112,7 +124,7 @@ public:
 
 === Primitive types ===
 
-IDL and C++ primitive types are handled as follows:
+Primitive types are handled as follows:
 
 || ES IDL || C++ header file || Comments ||
 || octet || unsigned char ||
@@ -131,9 +143,10 @@ IDL and C++ primitive types are handled as follows:
 
 === Parameter attributes ===
 
-We'll now explain the use of arguments. in is for input only, out is for output only and inout is used for both input and output.
+Parameter attributes specify the use of arguments:
+`in` is for input only, `out` is for output only, and `inout` is for both input and output.
 
-*N.B.*: To define functions that can be called by the ECMAScript interpreter, in must be specified in the parameter attributes.
+*Note*: To define functions that can be called by the ECMAScript interpreter, only `in` must be used as parameter attributes.
 
 ==== ES IDL ====
 {{{
@@ -148,7 +161,7 @@ virtual void setPosition(int x, int y) = 0;
 
 === Interface names ===
 
-If you specify an interface name as a method argument or return value, it will be treated as an interface pointer in the header file.
+An interface name used as a method argument or return value will be treated as an interface pointer in the header file.
 
 ==== ES IDL ====
 {{{
@@ -163,7 +176,8 @@ virtual ICache* create(IStream* backingStore) = 0;
 
 === Arrays ===
 
-An array is a data type where the number of elements is static. The type name is defined in typedef.
+An array is a data type where the number of elements is predetermined.
+An array must be defined as a type using `typedef`.
 
 ==== ES IDL ====
 {{{
@@ -178,7 +192,9 @@ virtual int addMulticastAddress(const Mac mac) = 0;
 
 === Sequences ===
 
-Sequences are data structures where the size specified at runtime can be changed. Like arrays, the type name is defined in typedef. Unlike arrays, arguments specifying the length of a sequence are created automatically.
+A sequence is a data structure where the number of elements are specified at runtime.
+Like arrays, a sequence must be defined as a type using `typedef`.
+In the header files, an argument specifying the length of the sequence is added automatically.
 
 ==== ES IDL ====
 {{{
@@ -193,9 +209,9 @@ virtual int getName(Name name, int nameLength) = 0;
 virtual int setName(const Name name, int nameLength) = 0;
 }}}
 
-=== Object sequences ===
+=== Octet sequences ===
 
-sequence<octet> is changed to void`*` and not unsigned char`*` in the header file.
+sequence<octet> is converted to void`*` and not unsigned char`*` in the header file.
 
 ==== ES IDL ====
 {{{
@@ -218,7 +234,7 @@ public:
 
 === any ===
 
-This is changed to any void`*`.
+`any` is converted to void`*`.
 
 ==== ES IDL ====
 {{{
@@ -231,9 +247,9 @@ virtual void exit(const void* val) = 0;
 
 === Object ===
 
-Objects also create void`*`. However, unlike void`*` created with any, it is implicitly assumed that the interface pointer is indicated.
+`Object` is converted to void`*`. However, unlike void`*` converted from any, it is implicitly assumed that the pointer is an interface pointer.
 
-*N.B.*: With esidl, you can specify an Object's interface ID with a UUID type argument. For the return value, the ID specified as the method's *final* UUID type argument will be the returned Object ID. For arguments, the ID of a UUID type argument appearing just before an Object type argument will be the Object ID.
+*Note*: With esidl, you can specify the object's interface ID with a UUID type argument. For the return value, the ID specified as the method's *final* UUID type argument will be the returned object's ID. For arguments, the ID of a UUID type argument appearing just before an Object type argument will be the object's ID.
 
 ==== ES IDL ====
 {{{
@@ -246,7 +262,9 @@ virtual void* queryInterface(const Guid& riid) = 0;
 
 === Attributes ===
 
-When attributes are defined in IDL, setter and getter are created automatically (only getter is created for readonly attributes). Boolean getter attributes are named in the style "is + attribute name".
+When attributes are defined in IDL, setter and getter methods are generated automatically
+(only getter is created for readonly attributes). 
+A getter for a `boolean` attribute is named in the style "is + attribute name".
 
 ==== ES IDL ====
 {{{
@@ -265,7 +283,8 @@ virtual void setOn(bool on) = 0;
 
 === Constants ===
 
-Constants are defined using const (enum is syntactically possible but is not used as a rule). Upper case is used for TRUE and FALSE in IDL.
+Constants are defined using `const` (enum is grammatically correct but is not used in ES).
+Upper case is used for TRUE and FALSE in IDL.
 
 ==== ES IDL ====
 {{{
@@ -280,7 +299,7 @@ static const int ReadOnly = 0x01;
 
 === exception ===
 
-Exceptions are changed to struct in header files.
+`exception` is converted to `struct` in header files.
 
 ==== ES IDL ====
 {{{
@@ -299,7 +318,7 @@ struct E
 
 === struct ===
 
-struct is kept as struct in the header file.
+`struct` is kept as `struct` in the header file.
 
 ==== ES IDL ====
 {{{
@@ -324,4 +343,4 @@ struct Geometry
 };
 }}}
 
-*N.B.*: struct is not supported in the ECMAScript interpreter, esjs, in ES version 0.1.1. We plan to remove this limitation in future versions.
+*Note*: `struct` is not supported in the ECMAScript interpreter, esjs, in ES version 0.1.1. We plan to remove this limitation in future versions.
