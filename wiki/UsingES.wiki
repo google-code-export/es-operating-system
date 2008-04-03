@@ -34,7 +34,7 @@ From the command line shell, you can use the programs like below. Most of the co
 || `rm [file ...]` || Removes the files ||
 || `squeak` || Squeak - a Smalltalk programming environment ||
 
-== Namespace ==
+== [Namespace] ==
 
 You can list the objects in the current directory by executing the `ls` command without specifying any arguments:
 
