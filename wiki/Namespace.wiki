@@ -1,0 +1,53 @@
+#summary The ES operating system namespace
+#labels namespace
+
+= The ES operating system namespace =
+
+Processes running in the ES operating system have their own individual hierarchical namespaces. The Context interface pointer, which allows access to the namespace, can be obtained using the CurrentProcess interface's getRoot() method. Because the System() function returns the CurrentProcess interface pointer, the root namespace's Context interface pointer can be obtained from programs that link ES's runtime library (libes++).
+
+|| `Context* root = System()->getRoot();` ||
+
+All interface pointers are hierarchically registered in the ES namespace such as interface pointers to access files and directories in the filesystem, to access the system's device drivers and to access software component information.
+
+The namespace contained in init, the first process to run when the ES operating system starts, is described below:
+
+|| Name || Supporting interface || Contents ||
+|| `class` || `ClassStore` || Stores the interface pointers of software components that support the `ClassFactory` interface. ||
+|| ` 3979e8b4-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_Process Used when a new process is created.` ||
+|| ` 397a9b6a-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_CacheFactory Used when a new memory object is created.` ||
+|| ` 397b45f6-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_Monitor Used when a new monitor is created.` ||
+|| ` 397be8bc-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_PageSet Used when a new page set is created.` ||
+|| ` 397c8ccc-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_Alarm Used when a new timer is created.` ||
+|| ` 397d44f0-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_Partition Used when a new partition is created.` ||
+|| ` 397dec0c-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_FatFileSystem Used when a new FAT file system is created.` ||
+|| ` 397e8e00-2e86-11db-9c02-0009bf000001` || `ClassFactory` || `CLSID_IsoFileSystem Used when a new ISO 9660 file system is created.` ||
+|| `device` || `Context` || Stores each device driver's interface pointer. ||
+|| ` rtc` || `Rtc` || Stores the date/time interface pointer. ||
+|| ` cga` || `Stream` || Stores the interface pointer for accessing the CGA text screen. ||
+|| ` beep` || `Beep` || Stores the interface pointer for accessing the beep tone. ||
+|| ` framebuffer` || `Pageable, Stream` || Stores the video framebuffer interface pointer. ||
+|| ` cursor` || `Cursor` || Stores the interface pointer for the mouse cursor. ||
+|| ` ethernet` || `Stream, NetworkInterface` || Stores the interface pointer for accessing the ethernet network adapter. ||
+|| ` keyboard` || `Stream` || Stores the keyboard interface pointer. ||
+|| ` loopback` || `Stream, NetworkInterface` || Stores the interface pointer for accessing the loopback interface. ||
+|| ` mouse` || `Stream` || Stores the mouse interface pointer. ||
+|| ` floppy` || `Stream` || Stores the interface pointer for accessing floppy disk drives. ||
+|| ` ata` || `Context` || Stores the interface pointer for accessing ATA devices. ||
+|| ` channel0` || `Context` || Stores the interface pointer for accessing ATA channel 0 devices. ||
+|| ` device0` || `DiskManagement, Partition, RemovableMedia, Stream` || Stores the interface pointer for accessing ATA channel 0 primary devices. ||
+|| ` device1` || `DiskManagement, Partition, RemovableMedia, Stream` || Stores the interface pointer for accessing ATA channel 0 secondary devices. ||
+|| ` channel1` || `Context` || Stores the interface pointer for accessing ATA channel 1 devices. ||
+|| ` device0` || `DiskManagement, Partition, RemovableMedia, Stream` || Stores the interface pointer for accessing ATA channel 1 primary devices. ||
+|| ` device1` || `DiskManagement, Partition, RemovableMedia, Stream` || Stores the interface pointer for accessing ATA channel 1 secondary devices. ||
+|| ` soundInput` || `AudioFormat, Stream` || Stores the interface pointer for accessing PCM audio input devices. ||
+|| ` soundOutput` || `AudioFormat, Stream` || Stores the interface pointer for accessing PCM audio output devices. ||
+|| `file` || `Context, ...` || Stores the interface pointer for accessing files in the filesystem. ||
+|| `network` || `Context` || Stores all network-related interface pointers. ||
+|| ` config` || `InternetConfig` || Stores the interface pointer for configuring TCP/IP network connection. ||
+|| ` resolver` || `Resolver` || Stores the interface pointer for TCP/IP network host name resolution. ||
+|| ` interface` || `Context` || Stores interface pointers for TCP/IP network interfaces. ||
+|| ` 1` || `Context` || Stores interface pointers for loopback interfaces. ||
+|| ` interface` || `Stream, NetworkInterface` || Stores the interface pointer for accessing the loopback interface. ||
+|| ` 2` || `Context` || Stores interface pointers for secondary network interfaces. ||
+|| ` interface` || `Stream, NetworkInterface` || Stores interface pointers for accessing secondary network interfaces. ||
+|| ` dhcp` || `Service` || Stores the DHCP client service interface pointer. ||
