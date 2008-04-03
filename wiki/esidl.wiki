@@ -53,7 +53,7 @@ The mapping from IDL source files (.idl) to C++ header files (.h) is as follows:
 
 === Modules ===
 
-Modules create a C++ namespace.
+Modules create a C++ [Namespace namespace].
 
 ==== ES IDL ====
 {{{
