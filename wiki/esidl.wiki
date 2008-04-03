@@ -18,7 +18,7 @@ esidl `[`option`]` filename ...
 
 esidl creates C++ header files (.h) and binary format reflection data (.ent) from IDL source files (.idl).
 Unlike other IDL compilers, esidl does not generate stub code for procedure calls.
-This is because the ES operating system's kernel processes parameter passing, like marshaling process, at the meta-level using reflection.
+This is because the ES operating system's kernel processes parameter passing, like the marshalling process, at the meta-level using reflection.
 
 In the IDL files, interface and method descriptions can be written in [http://java.sun.com/j2se/javadoc/ Javadoc] format.
 The esidl compiler writes out the Javadoc comments in the IDL files to the C++ header files.
@@ -240,7 +240,7 @@ virtual void exit(const void* val) = 0;
 
 === Object ===
 
-`Object` is converted to void`*`. However, unlike void`*` converted from any, it is implicitly assumed that the pointer is an interface pointer.
+`Object` is converted to void`*`. However, unlike void`*` converted from `any`, it is implicitly assumed that the pointer is an interface pointer.
 
 *Note*: With esidl, you can specify the object's interface ID with a UUID type argument. For the return value, the ID specified as the method's *final* UUID type argument will be the returned object's ID. For arguments, the ID of a UUID type argument appearing just before an Object type argument will be the object's ID.
 
