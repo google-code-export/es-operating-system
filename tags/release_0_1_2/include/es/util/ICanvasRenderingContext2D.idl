@@ -1,0 +1,119 @@
+/*
+ * Copyright 2008 Google Inc.
+ * Copyright 2006, 2007 Nintendo Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef NINTENDO_ES_UTIL_ICANVASRENDERINGCONTEXT2D_IDL_INCLUDED
+#define NINTENDO_ES_UTIL_ICANVASRENDERINGCONTEXT2D_IDL_INCLUDED
+
+#include "es/base/IInterface.idl"
+#include "es/base/IFile.idl"
+
+module es
+{
+    /**
+     */
+    interface CanvasPattern : Interface
+    {
+        #pragma ID CanvasPattern = "DCE:02c5e50b-d29f-4e4b-bd6c-4b74597b9776";
+        void apply(in any cr); // [check] how to pass the context?
+    };
+
+    /**
+     */
+    interface CanvasGradient : Interface
+    {
+        #pragma ID CanvasGradient = "DCE:fdcbb39f-de6b-4812-9c33-7d1856bea6ec";
+        void addColorStop(in float offset, in string color);
+        void apply(in any cr); // [check] how to pass the context?
+    };
+
+    /**
+     * This interface provides methods for handling
+     * a script rendering bitmap images.
+     */
+    interface CanvasRenderingContext2D : Interface
+    {
+        #pragma ID CanvasRenderingContext2D = "DCE:8661833f-25d8-4d4c-999c-ede0fcbbbf32";
+
+        // state
+        void restore();
+        void save();
+
+        // transformation
+        void scale(in float scaleW, in float scaleH);
+        void rotate(in float angle);
+        void translate(in float tx, in float ty);
+
+        // rects
+        void clearRect(in float x, in float y, in float width, in float height);
+        void fillRect(in float x, in float y, in float width, in float height);
+        void strokeRect(in float x, in float y, in float width, in float height);
+
+        // path API
+        void beginPath();
+        void closePath();
+        void moveTo(in float x, in float y);
+        void lineTo(in float x, in float y);
+        void quadraticCurveTo(in float cpx, in float cpy, in float x, in float y);
+        void bezierCurveTo(in float cp1x, in float cp1y, in float cp2x, in float cp2y, in float x, in float y);
+        void arcTo(in float x1, in float y1, in float x2, in float y2, in float radius); // [check]
+        void rect(in float x, in float y, in float width, in float height);
+        void arc(in float x, in float y, in float radius, in float startAngle, in float endAngle, in boolean anticlockwise);
+        void fill();
+        void stroke();
+        void clip();
+
+        // drawing images
+        void drawImage(in File image, in float dx, in float dy, in float dw, in float dh);
+
+        // creating gradient and pattern styles
+        CanvasGradient createLinearGradient(in float x0, in float y0, in float x1, in float y1);
+        CanvasGradient createRadialGradient(in float x0, in float y0, in float r0, in float x1, in float y1, in float r1);
+        CanvasPattern createPattern(in File image, in string repeat);
+
+        // compositing
+        attribute float globalAlpha;
+        attribute string globalCompositeOperation;
+
+        // colors and styles
+        attribute string strokeStyle;
+        attribute string fillStyle;
+        attribute CanvasGradient fillGradient;
+        attribute CanvasPattern fillPattern;
+
+        // line caps/joins
+        attribute float lineWidth;
+        attribute string lineCap;
+        attribute string lineJoin;
+        attribute float miterLimit;
+
+        // Shadow
+        attribute float shadowOffsetX;
+        attribute float shadowOffsetY;
+        attribute float shadowBlur;
+        attribute string shadowColor;
+
+        // Text (drawString enhancement as in mozilla1.9 M7)
+        attribute string textStyle;
+        void drawText(in string textToDraw);
+        float measureText(in string textToMeasure);
+        void pathText(in string textToPath);
+        void textAlongPath(in string textToDraw, in boolean stroke);
+    };
+};
+
+#endif // NINTENDO_ES_UTIL_ICANVASRENDERINGCONTEXT2D_IDL_INCLUDED
+

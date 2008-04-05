@@ -1,0 +1,122 @@
+/*
+ * Copyright 2008 Google Inc.
+ * Copyright 2006, 2007 Nintendo Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef NINTENDO_ES_BASE_ITHREAD_IDL_INCLUDED
+#define NINTENDO_ES_BASE_ITHREAD_IDL_INCLUDED
+
+#include "es/base/IInterface.idl"
+
+module es
+{
+    /** A thread of execution in a program.
+     */
+    interface Thread : Interface
+    {
+        #pragma ID Thread = "DCE:032d1118-25db-11db-9c02-0009bf000001";
+        enum State
+        {
+            NEW,
+            RUNNABLE,
+            RUNNING,
+            BLOCKED,
+            WAITING,
+            TIMED_WAITING,
+            TERMINATED
+        };
+
+        /** The minimum priority that a thread can have.
+         */
+        const long Lowest = 1;
+
+        /** The default priority that is assigned to a thread.
+         */
+        const long Normal = 16;
+
+        /** The maximum priority that a thread can have.
+         */
+        const long Highest = 31;
+
+        /** Starts the execution of this thread.
+         */
+        void start();
+
+        /** Waits for this thread to die.
+         */
+        boolean join(out any rval);
+
+        /** Cancels this thread.
+         */
+        void cancel();
+
+        /** This thread's priority.
+         */
+        attribute long priority;
+
+        /** The state of this thread.
+         */
+        readonly attribute long state;
+    };
+
+    interface CurrentThread : Interface
+    {
+        #pragma ID CurrentThread = "DCE:beb0489e-4492-11db-9c02-0009bf000001";
+
+        /** Cancellation requests are held pending until a cancellation point
+         * is reached
+         */
+        const long CANCEL_DEFERRED = 0x00;
+
+        /** New or pending cancellation requests are acted upon at any time.
+         */
+        const long CANCEL_ASYNCHRONOUS = 0x01;
+
+        /** Cancellation requests against the target thread are held pending.
+         */
+        const long CANCEL_DISABLE = 0x00;
+
+        /** Cancellation requests are acted upon at any time.
+         */
+        const long CANCEL_ENABLE = 0x02;
+
+        const long CANCEL_REQUESTED = 0X04;
+
+        /** Terminates the currently executing thread.
+         */
+        void exit(in any val);
+
+        /** Causes the currently executing thread to sleep.
+         */
+        void sleep(in long long timeout);
+
+        /** Sets the currently executing thread's cancelability state.
+         * @param state <code>CANCEL_ENABLE</code> or <code>CANCEL_DISABLE</code>.
+         */
+        long setCancelState(in long state);
+
+        /** Sets the currently executing thread's cancelability type.
+         * @param state <code>CANCEL_DEFERRED</code> or <code>CANCEL_ASYNCHRONOUS</code>.
+         */
+        long setCancelType(in long type);
+
+        /** Tests whether the current thread has been canceled.
+         */
+        void testCancel();
+    };
+};
+
+#endif // NINTENDO_ES_BASE_ITHREAD_IDL_INCLUDED
+
