@@ -34,7 +34,7 @@ There are many modern Ethernet controllers that can handle processes on the cont
   * Getting the link status (whether the LAN cable is connected to a switch or hub).
   * Enabling/disabling promiscuous mode (unfiltered reception mode).
 
-In the ES operating system, these tasks are defined as the [http://code.google.com/p/es-operating-system/source/browse/trunk/include/es/device/INetworkInterface.idl NetworkInterface] interface. To use Ethernet controller chips other than RTL8029AS, you will implement the NetworkInterface interface.
+In the ES operating system, these tasks are defined as the [http://code.google.com/p/es-operating-system/source/browse/trunk/include/es/device/INetworkInterface.idl NetworkInterface] interface. To use Ethernet controller chips other than RTL8029AS, you will need to implement the !NetworkInterface interface for them.
 
 See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/kernel/pc/dp8390d.cpp dp8390d.cpp]
 
@@ -50,11 +50,11 @@ http://es-operating-system.googlecode.com/svn/html/Conduit/arp.png
 
 At the Ethernet level, packets are transmitted to the specified MAC address in their Ethernet packet headers. The role of the ARP protocol is to resolve the mappings between IP addresses used in TCP/IP and Ethernet MAC addresses. The very basic mechanism of ARP is to broadcast an inquiry to see whether there is a node that has been assigned the IP address trying to communicate. If there is the recipient of the inquiry who has been assigned the requested IP address then it sends its own MAC address to the original sender. Since is is not very efficient to request a MAC address with ARP every time sending an IP packet, ARP temporarily caches mappings between MAC addresses and IP addresses that it has enquired about.
 
-Another feature of ARP is that it obtains link-local IP addresses. Link-local IP addresses are addresses that are assigned dynamically on a LAN without a DHCP server and can handle TCP/IP communication between information appliances on a home LAN not connected to a router without special configuration. In obtaining link-local IP addresses, an appliance on the LAN broadcasts an enquiry as to whether the link-local IP address it wants to use is already in use or not (i.e. not responding) and if no reply is received, the IP address is assigned to that appliance.
+Another feature of ARP is to obtain link-local IP addresses. Link-local IP addresses are addresses that can be assigned dynamically to the appliances on a LAN without using DHCP; so information appliances on a home LAN can communicate each other using TCP/IP without any special network configuration. In obtaining link-local IP addresses, an appliance on the LAN broadcasts an enquiry as to whether the link-local IP address it wants to use is already in use or not (i.e. not responding) and if no reply is received, the IP address is assigned to that appliance.
 
-=== Status of onlink's Inet4Address object ===
+=== Status of onlink's !Inet4Address object ===
 
-ArpProtocol looks for the source protocol address of the ARP packet received and, if the Inet4Address object for that address is already cached, changes its status to reachable. ArpMux sends received ARP packets corresponding to their target protocol addresses to ArpAdapter. ArpAdapter receivers run status-related processes with the Inet4Address object.
+!ArpProtocol looks for the source protocol address of the ARP packet received and, if the !Inet4Address object for that address is already created, changes its status to reachable. !ArpMux moves received ARP packets to !ArpAdapter inspecting their target protocol addresses. !ArpAdapter receivers are the !Inet4Address objects, and they process received ARP packets based on their status.
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/arp_std.png
 
@@ -67,7 +67,7 @@ http://es-operating-system.googlecode.com/svn/html/Conduit/arp_std.png
 || Preferred || A local address can be used. || 3927 ||
 || Deprecated || A local address that is due to be discontinued. || 3927 ||
 
-N.B. In the Inet4Address object there are other states relating to multicast addresses and destination addresses which we will cover later.
+N.B. In the !Inet4Address object there are other states relating to multicast addresses and destination addresses which we will cover later.
 
 Please refer to arp.cpp, RFC 826 and RFC 3927.
 
@@ -79,7 +79,7 @@ InProtocol looks for the protocol number of received IP packets and sends the pa
 
 InMux gets the protocol number of the received IP packet and sends it to the higher conduit with UDP, TCP, etc.
 
-InScopeMux gets the scope ID of the packet to be sent and divides the packet between the even lower loopback interface and ethernet interface.
+InScopeMux gets the scope ID of the packet to be sent and divides the packet between the even lower loopback interface and Ethernet interface.
 
 Please refer to inet4.cpp and RFC 791.
 
@@ -91,9 +91,9 @@ The ICMP conduit handles ICMP error mesages and ICMP echo messages.
 
 IcmpMux looks at the TYPE field of received ICMP messages and sends the messages to conduits based on their TYPE.
 
-EchoRequestMux processes received ICMP echo requests (8). The EchoRequestAdapter forked by EchoRequestMux is installed in each local address when the Inet4Address object's status is Preferred. The EchoRequestAdapter returns ICMP echo replies.
+EchoRequestMux processes received ICMP echo requests (8). The EchoRequestAdapter forked by EchoRequestMux is installed in each local address when the !Inet4Address object's status is Preferred. The EchoRequestAdapter returns ICMP echo replies.
 
-EchoReplyMux processes received ICMP echo replies (0). The EchoReplyAdapter forked from EchoReplyMux is installed when the Inet4Address object's isReachable method is called. When the EchoReplyAdapter receives the ICMP echo reply, the isReachable method finishes.
+EchoReplyMux processes received ICMP echo replies (0). The EchoReplyAdapter forked from EchoReplyMux is installed when the !Inet4Address object's isReachable method is called. When the EchoReplyAdapter receives the ICMP echo reply, the isReachable method finishes.
 
 UnreachProtocol, TimeExceededProtocol, etc. handle ICMP error messages. When ICMP error messages are received, a copy of the header of the IP packet that caused the problem contained in the error message is used as the base of the message re-sent as an error message to InProtocol if necessary. This time, the error message is sent to the conduit that originally sent the packet (TCP, etc.) and not the ICMP conduit.
 
@@ -129,11 +129,11 @@ Please refer to stream.cpp, tcp.cpp and RFC 768.
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/igmp.png
 
-=== Inet4Address object multicast address status ===
+=== !Inet4Address object multicast address status ===
 
-When you make an address object specifying a multicast address using the IResolver interface, an Inet4Address object with NonMember status is created. To join a multicast group, the IMulticastSocket interface's joinGroup method is called with the multicast address's Inet4Address object as an argument. In doing this, a new igmpAdapter is installed in the IGMP conduit and the Inet4Address object sends an IGMP REPORT message and then changes status to DelayingMember. Usually an Inet4Address object with DelayingMember status stops with a timeout, sends another IGMP REPORT message and changes to IdleMember status. To leave a multicast group, the IMulticastSocket interface's leaveGroup method is called. In doing this, the Inet4Address object sends an IGMP LEAVE message, changes status to IdleMember and then igmpAdapter is uninstalled from the IGMP conduit.
+When you make an address object specifying a multicast address using the IResolver interface, an !Inet4Address object with NonMember status is created. To join a multicast group, the IMulticastSocket interface's joinGroup method is called with the multicast address's !Inet4Address object as an argument. In doing this, a new igmpAdapter is installed in the IGMP conduit and the !Inet4Address object sends an IGMP REPORT message and then changes status to DelayingMember. Usually an !Inet4Address object with DelayingMember status stops with a timeout, sends another IGMP REPORT message and changes to IdleMember status. To leave a multicast group, the IMulticastSocket interface's leaveGroup method is called. In doing this, the !Inet4Address object sends an IGMP LEAVE message, changes status to IdleMember and then igmpAdapter is uninstalled from the IGMP conduit.
 
-There are cases when a multicast router will send an IGMP QUERY message to check whether there is a node that has joined a multicast group in the LAN. When the QUERY is received, the Inet4Address object's status changes to DelayingMember. Basically, QUERY needs to be replied to with REPORT but the router only needs to know whether there is a single node that has joined a group in the LAN so it is a waste of traffic if all nodes reply to QUERY. Because of this, in RFC 2236 a node belonging to a group that receives QUERY does not send REPORT immediately, but rather goes on standby for a certain length of time and if another node sends REPORT in that time, it then changes status to IdleMember without sending anything itself. Alternatively, if it can't confirm that REPORT has been sent while on standby, it will send REPORT itself and then change status to IdleMember. Standby time is decided randomly per node so in most cases any single node will send REPORT in response to QUERY.
+There are cases when a multicast router will send an IGMP QUERY message to check whether there is a node that has joined a multicast group in the LAN. When the QUERY is received, the !Inet4Address object's status changes to DelayingMember. Basically, QUERY needs to be replied to with REPORT but the router only needs to know whether there is a single node that has joined a group in the LAN so it is a waste of traffic if all nodes reply to QUERY. Because of this, in RFC 2236 a node belonging to a group that receives QUERY does not send REPORT immediately, but rather goes on standby for a certain length of time and if another node sends REPORT in that time, it then changes status to IdleMember without sending anything itself. Alternatively, if it can't confirm that REPORT has been sent while on standby, it will send REPORT itself and then change status to IdleMember. Standby time is decided randomly per node so in most cases any single node will send REPORT in response to QUERY.
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/igmp_std.png
 
@@ -146,9 +146,9 @@ N.B. There are several versions of IGMP and if a QUERY version that is older tha
 
 Please refer to igmp.cpp and RFC 2236.
 
-== Inet4Address object ==
+== !Inet4Address object ==
 
-An Inet4Address object is one that keeps information attached to an IP address. A new Inet4Address object can be created by calling the IResolver interface's getHostByAddress and getHostByName methods.
+An !Inet4Address object is one that keeps information attached to an IP address. A new !Inet4Address object can be created by calling the IResolver interface's getHostByAddress and getHostByName methods.
 
 ----
 
