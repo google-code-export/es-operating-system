@@ -1,5 +1,5 @@
+#summary Developing ES on a physical machine
 #labels PC-Howto
-#Summary Developing ES on a physical machine
 
 = Developing ES on a physical machine =
 
