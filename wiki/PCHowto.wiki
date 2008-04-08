@@ -37,7 +37,7 @@ If you are using an ISA SoundBlaster 16 card, please check that the jumpers are 
 
 As ES is being cross-developed on Fedora, we have to copy the pre-built bootable binary files on to the PC's hard disk or floppy disk. It's inefficient and time-consuming to switch a hard disk between the Fedora PC and the test PC or to copy the files one by one to a floppy disk. Hence the use of a CF-IDE adapter. This enables a CF card to be used as a IDE hard disk so if we copy the binary files we built on Fedora on to the CF card and insert it into the CF-IDE adapter, ES should start when we boot the test PC.
 
-http://es-operating-system.googlecode.com/svn/html/PCHowto/cf_ide.png
+http://es-operating-system.googlecode.com/svn/html/PCHowto/cf_ide.jpg
 
 The CF-IDE is connected to the test PC's motherboard with an IDE cable. If your motherboard has more than one IDE connector, please use the primary IDE connector.
 
