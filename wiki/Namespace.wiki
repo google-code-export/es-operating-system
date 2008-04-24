@@ -3,7 +3,7 @@
 
 = The ES operating system namespace =
 
-Processes running in the ES operating system have their own individual hierarchical namespaces. The Context interface pointer, which allows access to the namespace, can be obtained using the CurrentProcess interface's getRoot() method. Because the System() function returns the CurrentProcess interface pointer, the root namespace's Context interface pointer can be obtained from programs that link ES's runtime library (libes++).
+Processes running in the ES operating system have their own individual hierarchical namespaces. The Context interface pointer, which allows access to the namespace, can be obtained using the !CurrentProcess interface's getRoot() method. Because the System() function returns the !CurrentProcess interface pointer, the root namespace's Context interface pointer can be obtained from programs that link ES's runtime library (libes++).
 
 || `Context* root = System()->getRoot();` ||
 
