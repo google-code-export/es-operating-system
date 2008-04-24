@@ -1,7 +1,7 @@
-#summary The ES operating system namespace
+#summary The ES operating system's namespace
 #labels namespace
 
-= The ES operating system namespace =
+= The ES operating system's namespace =
 
 Processes running in the ES operating system have their own individual hierarchical namespaces. 
 The Context interface pointer, which allows access to the namespace, can be obtained using the getRoot() method of the !CurrentProcess interface. 
