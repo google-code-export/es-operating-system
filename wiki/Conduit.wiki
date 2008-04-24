@@ -44,21 +44,21 @@ http://es-operating-system.googlecode.com/svn/html/Conduit/dix.png
 
 Depending on the received packet type in the Ethernet packet (frame) headers, dixTypeMux moves received packets to dixInProtocol (IPv4) or dixArpProtocol (ARP). dixInProtocol and dixArpProtocol add the appropriate Ethernet packet headers to the packets being transmitted to the local network.
 
-== ARP conduit ==
+== ARP conduits ==
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/arp.png
 
-At the Ethernet level, packets are transmitted to the MAC address specified in their Ethernet packet headers. The role of the ARP protocol is to resolve the mappings between IP addresses used in TCP/IP and Ethernet MAC addresses. The very basic mechanism of ARP is to broadcast an inquiry to see whether there is a node that has been assigned the IP address trying to communicate. If there is the recipient of the inquiry who has been assigned the requested IP address then it sends its own MAC address to the original sender. Since is is not very efficient to request a MAC address with ARP every time sending an IP packet, ARP temporarily caches mappings between MAC addresses and IP addresses that it has enquired about.
+At the Ethernet level, packets are transmitted to the MAC address specified in their Ethernet packet headers. The role of the ARP protocol is to resolve the mappings between IP addresses and Ethernet MAC addresses. The very basic mechanism of ARP is to broadcast an inquiry to see whether there is a node that has been assigned the IP address trying to communicate. If there is the recipient of the inquiry who has been assigned the requested IP address then it reports its own MAC address to the original sender. Since is is not very efficient to request a MAC address with an ARP request broadcast every time sending an IP packet, ARP caches mappings between MAC addresses and IP addresses that it has inquired about.
 
-Another feature of ARP is to obtain link-local IP addresses. Link-local IP addresses are addresses that can be assigned dynamically to the appliances on a LAN without using DHCP; so information appliances on a home LAN can communicate each other using TCP/IP without any special network configuration. In obtaining link-local IP addresses, an appliance on the LAN broadcasts an enquiry as to whether the link-local IP address it wants to use is already in use or not (i.e. not responding) and if no reply is received, the IP address is assigned to that appliance.
+Another feature of ARP is to obtain link-local IP addresses. Link-local IP addresses are addresses that can be assigned dynamically to the appliances on a LAN without using DHCP; so information appliances on a home LAN can communicate each other using TCP/IP without any manual network configuration. In obtaining link-local IP addresses, an appliance broadcasts an inquiry to see whether the link-local IP address it wants to use is already in use or not, and if no reply is received (i.e. not used), the IP address is assigned to that appliance.
 
-=== Status of onlink's !Inet4Address object ===
+=== States of onlink's !Inet4Address object ===
 
-!ArpProtocol looks for the source protocol address of the ARP packet received and, if the !Inet4Address object for that address is already created, changes its status to reachable. !ArpMux moves received ARP packets to !ArpAdapter inspecting their target protocol addresses. !ArpAdapter receivers are the !Inet4Address objects, and they process received ARP packets based on their status.
+!ArpProtocol conduit looks for the source protocol address of the received ARP packet and, if the !Inet4Address object for that address is already created, changes its state to Reachable. !ArpMux moves received ARP packets to !ArpAdapter inspecting their target protocol addresses. !ArpAdapter receivers are the !Inet4Address objects, and they process received ARP packets based on their state.
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/arp_std.png
 
-|| Status || Description || RFC ||
+|| State || Description || RFC ||
 || Init || The MAC address corresponding to the IP address is not yet known. || 826 ||
 || Incomplete || The MAC address corresponding to the IP address is being requested. || 826 ||
 || Reachable || The MAC address corresponding to the IP address is known. || 826 ||
@@ -67,101 +67,98 @@ http://es-operating-system.googlecode.com/svn/html/Conduit/arp_std.png
 || Preferred || A local address can be used. || 3927 ||
 || Deprecated || A local address that is due to be discontinued. || 3927 ||
 
-N.B. In the !Inet4Address object there are other states relating to multicast addresses and destination addresses which we will cover later.
+*Note*: In the !Inet4Address object there are other states relating to multicast addresses and destination addresses which we will cover later.
 
-Please refer to arp.cpp, RFC 826 and RFC 3927.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/arp.cpp arp.cpp], RFC 826 and RFC 3927. 
 
-== IP conduit ==
+== IP conduits ==
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/ip.png
 
-InProtocol looks for the protocol number of received IP packets and sends the packets to InMux. If the received IP packets are fragmented packets, IPPROTO_FRAGMENT is configured as a pseudo-protocol number so that they can be processed by the higher fragment reassembly conduit. (IPPROTO_FRAGMENT is originally a protocol number for IPv6.) In the case that the destination of IP packets being sent by InProtocol is not the loopback address or the on-link IP address, the messenger is configured to send messages to the router. It also gets the packet length and if it is larger than the path MTU, fragments it and sends it on to the lower InScopeMux.
+!InProtocol conduit looks for the protocol number of received IP packets and sends the packets to !InMux. If the received IP packets are fragmented packets, it sets IPPROTO_FRAGMENT as a pseudo-protocol number to the packets so that they can be processed by the higher fragment reassembly conduits. (IPPROTO_FRAGMENT is originally a protocol number for IPv6.) In the case that the destination address of an IP packet being sent is not the loopback address or the on-link IP address, !InProtocol conduit configures the messenger to send the packet to a router. It also inspects the packet length and if it is larger than the path MTU, fragments it before sending it on to the lower !InScopeMux.
 
-InMux gets the protocol number of the received IP packet and sends it to the higher conduit with UDP, TCP, etc.
+!InMux inspects the protocol number of the received IP packet and sends it to the higher conduits like UDP, TCP, etc.
 
-InScopeMux gets the scope ID of the packet to be sent and divides the packet between the even lower loopback interface and Ethernet interface.
+!InScopeMux inspects the scope ID of the packet to be sent and moves the packet to the loopback interface or Ethernet interface.
 
-Please refer to inet4.cpp and RFC 791.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/inet4.cpp inet4.cpp], RFC 791.
 
-== ICMP conduit ==
+== ICMP conduits ==
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/icmp.png
 
-The ICMP conduit handles ICMP error mesages and ICMP echo messages.
+The ICMP conduits handle ICMP error messages and ICMP echo messages.
 
-IcmpMux looks at the TYPE field of received ICMP messages and sends the messages to conduits based on their TYPE.
+!IcmpMux looks at the TYPE field of received ICMP messages and sends the messages to a conduit corresponding to the TYPE.
 
-EchoRequestMux processes received ICMP echo requests (8). The EchoRequestAdapter forked by EchoRequestMux is installed in each local address when the !Inet4Address object's status is Preferred. The EchoRequestAdapter returns ICMP echo replies.
+!EchoRequestMux processes received ICMP echo requests (8). !EchoRequestAdapter conduits forked from !EchoRequestMux are installed when the !Inet4Address object's state is changed to Preferred for each local address. The !EchoRequestAdapter returns ICMP echo replies.
 
-EchoReplyMux processes received ICMP echo replies (0). The EchoReplyAdapter forked from EchoReplyMux is installed when the !Inet4Address object's isReachable method is called. When the EchoReplyAdapter receives the ICMP echo reply, the isReachable method finishes.
+!EchoReplyMux processes received ICMP echo replies (0). !EchoReplyAdapter conduits forked from !EchoReplyMux are installed when the !Inet4Address object's isReachable method is called. When the !EchoReplyAdapter receives an ICMP echo reply, the isReachable method completes and returns true.
 
-UnreachProtocol, TimeExceededProtocol, etc. handle ICMP error messages. When ICMP error messages are received, a copy of the header of the IP packet that caused the problem contained in the error message is used as the base of the message re-sent as an error message to InProtocol if necessary. This time, the error message is sent to the conduit that originally sent the packet (TCP, etc.) and not the ICMP conduit.
+!UnreachProtocol, !TimeExceededProtocol, etc. handle ICMP error messages. When ICMP error messages are received, it is re-sent as an error message to !InProtocol conduit, if necessary, based on the copy of the problematic IP header stored in the ICMP error message. This time, the error message is sent to the conduit that originally sent the packet (TCP, UDP, etc.) and not the ICMP conduit.
 
-Please refer to icmp4.cpp and RFC 792.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/icmp4.cpp icmp4.cpp], RFC 792.
 
-== Fragment reassembly conduit ==
+== Fragment reassembly conduits ==
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/reass.png
 
-Fragmented packets are all sent to the fragment reassembly conduit from InMux. ReassAdapter is installed when the fragments of new IP packet numbers arrive at the node. When the fragment reassembly by ReassAdapter is complete, the reassembled packets are sent from InProtocol to the higher conduit. ReassAdapter is uninstalled either when fragment reassembly is complete or when reassembly fails due to a timeout.
+Fragmented packets are all sent to the fragment reassembly conduit from !InMux. A !ReassAdapter is installed when an IP fragment with new IP packet numbers arrives. When the fragment reassembly by !ReassAdapter is complete, the reassembled packet is sent from !InProtocol conduit to the higher conduits. A !ReassAdapter is uninstalled either when fragment reassembly is completed or when reassembly fails due to a timeout.
 
-N.B.: In the IPv4 RFC, fragment reassembly is done at the IP layer but it was easier to implement this at a higher layer similar to IPv6 where it is regarded as a single, independent protocol process. This point was pointed out by professor Clark, but is also a result of IPv6 protocol configuration itself becoming more refined.
+*Note*: In the IPv4 RFC, fragment reassembly is documented at the IP layer but it was easier to implement this at a higher layer similar to IPv6 where it is regarded as a single, independent protocol process. So we violated the suggested layering here as pointed out by Prof. Clark. But it is also interesting to see IPv6 protocol has refined those details.
 
-Please refer to inet4reass.cpp and RFC 815.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/inet4reass.cpp inet4reass.cpp], RFC 815.
 
-== UDP conduit ==
+== UDP conduits ==
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/udp.png
 
-The UDP conduit processes UDP datagrams. UDP-related processes peculiar to IPv4 are handled in the lower UdpProtocol. Meanwhile, UDP-related processes common to IPv4 and IPv6 are handled in the upper DatagramProtocol.
+The UDP conduits process UDP datagrams. UDP-related processes peculiar to IPv4 are handled in the lower !UdpProtocol. Meanwhile, UDP-related processes common to IPv4 and IPv6 are handled in the upper !DatagramProtocol.
 
-Please refer to datagram.cpp, udp.cpp and RFC 793.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/datagram.cpp datagram.cpp], 
+[http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/udp.cpp udp.cpp], RFC 768.
 
-== TCP conduit ==
+== TCP conduits ==
 
-http://es-operating-system.googlecode.com/svn/html/Conduit/XV_Semana_Informatica/tcp.png
+http://es-operating-system.googlecode.com/svn/html/Conduit/tcp.png
 
-TCP processes are handled by the TCP conduit. TCP-related processes peculiar to IPv4 are handled in the lower TcpProtocol. Meanwhile, TCP-related processes common to IPv4 and IPv6 are handled in the upper StreamProtocol. StreamProtocol deals with TCP processes using the State pattern.
+The TCP conduits process TCP segments. TCP-related processes peculiar to IPv4 are handled in the lower !TcpProtocol. Meanwhile, TCP-related processes common to IPv4 and IPv6 are handled in the upper !StreamProtocol. !StreamProtocol deals with TCP using the State pattern.
 
-Please refer to stream.cpp, tcp.cpp and RFC 768.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/stream.cpp stream.cpp], 
+[http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/tcp.cpp tcp.cpp], RFC 793.
 
-== IGMP conduit ==
+== IGMP conduits ==
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/igmp.png
 
-=== !Inet4Address object multicast address status ===
+=== !Inet4Address object states for multicast addresses ===
 
-When you make an address object specifying a multicast address using the IResolver interface, an !Inet4Address object with NonMember status is created. To join a multicast group, the IMulticastSocket interface's joinGroup method is called with the multicast address's !Inet4Address object as an argument. In doing this, a new igmpAdapter is installed in the IGMP conduit and the !Inet4Address object sends an IGMP REPORT message and then changes status to DelayingMember. Usually an !Inet4Address object with DelayingMember status stops with a timeout, sends another IGMP REPORT message and changes to IdleMember status. To leave a multicast group, the IMulticastSocket interface's leaveGroup method is called. In doing this, the !Inet4Address object sends an IGMP LEAVE message, changes status to IdleMember and then igmpAdapter is uninstalled from the IGMP conduit.
+When you create an address object specifying a multicast address using the IResolver interface, an !Inet4Address object with !NonMember state is created. To join a multicast group, the IMulticastSocket interface's joinGroup method is called with the multicast address's !Inet4Address object as an argument. In doing this, a new igmpAdapter is installed in the IGMP conduits and the !Inet4Address object sends an IGMP REPORT message and then changes its state to !DelayingMember. Usually an !Inet4Address object with !DelayingMember state timeouts once to send another IGMP REPORT message and changes its state to !IdleMember. To leave a multicast group, the IMulticastSocket interface's leaveGroup method is called. In doing this, the !Inet4Address object sends an IGMP LEAVE message, changes its state to IdleMember and then igmpAdapter is uninstalled from the IGMP conduits.
 
-There are cases when a multicast router will send an IGMP QUERY message to check whether there is a node that has joined a multicast group in the LAN. When the QUERY is received, the !Inet4Address object's status changes to DelayingMember. Basically, QUERY needs to be replied to with REPORT but the router only needs to know whether there is a single node that has joined a group in the LAN so it is a waste of traffic if all nodes reply to QUERY. Because of this, in RFC 2236 a node belonging to a group that receives QUERY does not send REPORT immediately, but rather goes on standby for a certain length of time and if another node sends REPORT in that time, it then changes status to IdleMember without sending anything itself. Alternatively, if it can't confirm that REPORT has been sent while on standby, it will send REPORT itself and then change status to IdleMember. Standby time is decided randomly per node so in most cases any single node will send REPORT in response to QUERY.
+There are cases when a multicast router will send an IGMP QUERY message to check whether there is a node that has joined a multicast group in the LAN. When the QUERY is received, the !Inet4Address object changes its state to !DelayingMember. Basically, QUERY needs to be replied to with REPORT but the router only needs to know whether there is at least a single node that has joined a group in the LAN so it is a waste of traffic if all nodes reply to QUERY. Because of this, in RFC 2236 a node belonging to a group that receives QUERY does not send REPORT immediately, but rather goes on standby for a certain length of time and if another node sends REPORT in that time, it then changes its state to !IdleMember without sending REPORT. If it can't confirm that REPORT has been sent while on standby, it will send REPORT itself and then change its state to !IdleMember. Since standby time is decided randomly per node, in most cases only a single node will send REPORT in response to QUERY.
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/igmp_std.png
 
-|| Status || Description ||
+|| State || Description ||
 || NonMember || Not belonging to the group. ||
 || DelayingMember || Checking whether it belongs to the group or not. ||
 || IdleMember || Belonging to the group. ||
 
-N.B. There are several versions of IGMP and if a QUERY version that is older than the default node version is received from the router, the version of IGMP that uses the node needs to be dynamically lowered, however in ES only IGMPv2 is currently implemented.
+*Note*: There are several versions of IGMP and if a node receives an older version of a QUERY from the router, it must dynamically lower the the version of IGMP it uses, however in ES only IGMPv2 is currently implemented.
 
-Please refer to igmp.cpp and RFC 2236.
+See also: [http://code.google.com/p/es-operating-system/source/browse/trunk/os/net/src/igmp.cpp igmp.cpp], RFC 2236.
 
 == !Inet4Address object ==
 
-An !Inet4Address object is one that keeps information attached to an IP address. A new !Inet4Address object can be created by calling the IResolver interface's getHostByAddress and getHostByName methods.
+An !Inet4Address object is one that keeps information related to an IP address. A new !Inet4Address object can be created by calling the IResolver interface's getHostByAddress and getHostByName methods.
 
 ----
 
 == References ==
 
 `[`Comer 87`]` D. Comer, "Operating System Design - Volume II: Internetworking with Xinu," Prentice-Hall, 1986.
-
 `[`Hüni 95`]` H. Hüni, R. E. Johnson, R. Engel, "A Framework for Network Protocol Software," In ''Proc. OOPSLA '95, SIGPLAN Notices'', pp. 358-369, Oct. 1995.
-
 `[`Nikander 98`]` P. Nikander, et al., "Java Conduits Beans (Jacob) project," http://www.tml.tkk.fi/Research/TeSSA/Old_pages/Jacob/jacob3.html.
-
 `[`Pike 84`]` R. Pike, "The Blit: A Multiplexed Graphics Terminal," AT&T Bell Laboratories Technical Journal, Vol 63, No. 8, Part 2, pp. 1607-1632, Oct. 1984.
-
 `[`Ritchie 84`]` D. M. Ritchie, "A Stream Input Output System," AT&T Bell Laboratories Technical Journal, Vol 63, No. 8, Part 2, pp. 1897-1910, Oct. 1984.
-
 `[`Wright 95`]` G. R. Wright, W. R. Stevens, "TCP/IP Illustrated, Volume 2:The Implementation", Addison-Wesley, 1995.
