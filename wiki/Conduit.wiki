@@ -133,16 +133,16 @@ http://es-operating-system.googlecode.com/svn/html/Conduit/igmp.png
 
 === !Inet4Address object states for multicast addresses ===
 
-When you create an address object specifying a multicast address using the IResolver interface, an !Inet4Address object with !NonMember state is created. To join a multicast group, the IMulticastSocket interface's joinGroup method is called with the multicast address's !Inet4Address object as an argument. In doing this, a new igmpAdapter is installed in the IGMP conduits and the !Inet4Address object sends an IGMP REPORT message and then changes its state to !DelayingMember. Usually an !Inet4Address object with !DelayingMember state timeouts once to send another IGMP REPORT message and changes its state to !IdleMember. To leave a multicast group, the IMulticastSocket interface's leaveGroup method is called. In doing this, the !Inet4Address object sends an IGMP LEAVE message, changes its state to IdleMember and then igmpAdapter is uninstalled from the IGMP conduits.
+When you create an address object specifying a multicast address using the IResolver interface, an !Inet4Address object with !NonMember state is created. To join a multicast group, the IMulticastSocket interface's joinGroup method is called with the multicast address's !Inet4Address object as an argument. In doing this, a new igmpAdapter is installed in the IGMP conduits and the !Inet4Address object sends an IGMP REPORT message and then changes its state to !DelayingMember. Usually an !Inet4Address object with !DelayingMember state timeouts once to send another IGMP REPORT message and changes its state to !IdleMember. To leave a multicast group, the IMulticastSocket interface's leaveGroup method is called. In doing this, the !Inet4Address object sends an IGMP LEAVE message, changes its state to !IdleMember and then igmpAdapter is uninstalled from the IGMP conduits.
 
 There are cases when a multicast router will send an IGMP QUERY message to check whether there is a node that has joined a multicast group in the LAN. When the QUERY is received, the !Inet4Address object changes its state to !DelayingMember. Basically, QUERY needs to be replied to with REPORT but the router only needs to know whether there is at least a single node that has joined a group in the LAN so it is a waste of traffic if all nodes reply to QUERY. Because of this, in RFC 2236 a node belonging to a group that receives QUERY does not send REPORT immediately, but rather goes on standby for a certain length of time and if another node sends REPORT in that time, it then changes its state to !IdleMember without sending REPORT. If it can't confirm that REPORT has been sent while on standby, it will send REPORT itself and then change its state to !IdleMember. Since standby time is decided randomly per node, in most cases only a single node will send REPORT in response to QUERY.
 
 http://es-operating-system.googlecode.com/svn/html/Conduit/igmp_std.png
 
 || State || Description ||
-|| NonMember || Not belonging to the group. ||
-|| DelayingMember || Checking whether it belongs to the group or not. ||
-|| IdleMember || Belonging to the group. ||
+|| !NonMember || Not belonging to the group. ||
+|| !DelayingMember || Checking whether it belongs to the group or not. ||
+|| !IdleMember || Belonging to the group. ||
 
 *Note*: There are several versions of IGMP and if a node receives an older version of a QUERY from the router, it must dynamically lower the the version of IGMP it uses, however in ES only IGMPv2 is currently implemented.
 
@@ -157,8 +157,13 @@ An !Inet4Address object is one that keeps information related to an IP address. 
 == References ==
 
 `[`Comer 87`]` D. Comer, "Operating System Design - Volume II: Internetworking with Xinu," Prentice-Hall, 1986.
+
 `[`Hüni 95`]` H. Hüni, R. E. Johnson, R. Engel, "A Framework for Network Protocol Software," In ''Proc. OOPSLA '95, SIGPLAN Notices'', pp. 358-369, Oct. 1995.
+
 `[`Nikander 98`]` P. Nikander, et al., "Java Conduits Beans (Jacob) project," http://www.tml.tkk.fi/Research/TeSSA/Old_pages/Jacob/jacob3.html.
+
 `[`Pike 84`]` R. Pike, "The Blit: A Multiplexed Graphics Terminal," AT&T Bell Laboratories Technical Journal, Vol 63, No. 8, Part 2, pp. 1607-1632, Oct. 1984.
+
 `[`Ritchie 84`]` D. M. Ritchie, "A Stream Input Output System," AT&T Bell Laboratories Technical Journal, Vol 63, No. 8, Part 2, pp. 1897-1910, Oct. 1984.
+
 `[`Wright 95`]` G. R. Wright, W. R. Stevens, "TCP/IP Illustrated, Volume 2:The Implementation", Addison-Wesley, 1995.
