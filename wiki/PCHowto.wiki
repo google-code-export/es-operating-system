@@ -5,7 +5,7 @@
 
 == Introduction ==
 
-Since version 0.0.9, the ES operating system is able to run not just in QEMU but also on a physical machine. We will now explain how to run ES on a PC using a CompactFlash (CF) card.
+Since version 0.0.9, the ES operating system is able to run not just in QEMU but also on a physical machine. We will now explain how to run ES on a PC using a !CompactFlash (CF) card.
 
 == Preparing the test machine ==
 
@@ -29,9 +29,9 @@ Please use a PS/2 type keyboard and mouse. USB keyboards and mice are not suppor
 
 === Sound and networking ===
 
-At the moment, only the SoundBlaster 16 and NE2000-compatible RTL8029AS hardware that QEMU is emulating are supported. We are planning to add support for the latest sound and network chips and as these would be useful when moving directly from QEMU to the physical test environment, we'll try to get hold of them when we have the opportunity.
+At the moment, only the !SoundBlaster 16 and NE2000-compatible RTL8029AS hardware that QEMU is emulating are supported. We are planning to add support for the latest sound and network chips and as these would be useful when moving directly from QEMU to the physical test environment, we'll try to get hold of them when we have the opportunity.
 
-If you are using an ISA SoundBlaster 16 card, please check that the jumpers are set as follows: Base I/O Address = 0x220, Interrupt Channel = 5, 8-bit DMA channel = 1, 16-bit DMA channel = 5, MIDI Port Base I/O Address = 0x330.
+If you are using an ISA !SoundBlaster 16 card, please check that the jumpers are set as follows: Base I/O Address = 0x220, Interrupt Channel = 5, 8-bit DMA channel = 1, 16-bit DMA channel = 5, MIDI Port Base I/O Address = 0x330.
 
 === CF-IDE adapter ===
 
@@ -144,7 +144,7 @@ The CF card has now been formatted as FAT with an ES boot sector.
 
 Note: ES does not currently work with partition tables that use the so-called super-floppy format. Please be careful as CF cards that have been formatted as super-floppy can not be mounted in digital cameras, Fedora, etc.
 
-Next, in order to use es.ldr, es.img and Squeak, copy the Squeak-related files (squeak.elf, Squeak3.7-5989-full.image, Squeak3.7-5989-full.changes, SqueakV3.sources) to the CF card. For this, we use the vcopy command from the ES cross-development tools.
+Next, in order to use es.ldr, es.img and Squeak, copy the Squeak-related files (squeak.elf, Squeak3.7-5989-full.image, Squeak3.7-5989-full.changes, !SqueakV3.sources) to the CF card. For this, we use the vcopy command from the ES cross-development tools.
 
 {{{
 $ vcopy /dev/sdb os/bootsect/es.ldr
