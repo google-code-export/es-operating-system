@@ -231,3 +231,5 @@ $ kdbg -r /dev/ttyS1 es.elf
 By default, the ES kernel is automatically interrupted in esInit and control is passed to GDB.
 
 When you have finished the BIOS setting, save it and reboot the PC. If everything goes well, ES should boot and the command prompt should appear.
+
+http://es-operating-system.googlecode.com/svn/html/PCHowto/espc.jpg
