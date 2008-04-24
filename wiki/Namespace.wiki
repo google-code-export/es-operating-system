@@ -3,13 +3,22 @@
 
 = The ES operating system namespace =
 
-Processes running in the ES operating system have their own individual hierarchical namespaces. The Context interface pointer, which allows access to the namespace, can be obtained using the !CurrentProcess interface's getRoot() method. Because the System() function returns the !CurrentProcess interface pointer, the root namespace's Context interface pointer can be obtained from programs that link ES's runtime library (libes++).
+Processes running in the ES operating system have their own individual hierarchical namespaces. 
+The Context interface pointer, which allows access to the namespace, can be obtained using the getRoot() method of the !CurrentProcess interface. 
+
+For C++ programs linked with ES's runtime library libes++.a, the root namespace's Context interface pointer can be obtained by calling the System() function:
 
 {{{
 Context* root = System()->getRoot();
 }}}
 
-All interface pointers are hierarchically registered in the ES namespace such as interface pointers to access files and directories in the filesystem, to access the system's device drivers and to access software component information.
+For ECMAScript scripts for esjs, the root namespace's Context object can be obtained through the global System object.
+
+{{{
+root = System.root;
+}}}
+
+Interface pointers are hierarchically registered in a namespace such as interface pointers to access files and directories in the filesystem, to access the system's device drivers and to access software component information.
 
 The namespace contained in init, the first process to run when the ES operating system starts, is described below:
 
