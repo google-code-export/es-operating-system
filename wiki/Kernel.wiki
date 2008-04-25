@@ -1,0 +1,42 @@
+#summary The design of the ES pure component kernel
+
+= The design of the ES pure component kernel =
+
+== ES Architecture ==
+
+* esidl IDL compiler that generates interface meta data dynamically loaded into the kernel
+* A pure component kernel processing object API using reflection
+* Software components controllable using ECMAScript (ECMAScript interpreter, Rendering engines, etc.)
+
+http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/esjs.png
+
+== Inside the kernel ==
+
+== System call ==
+
+In userland, Interface pointers associated with a system object point to a single entry in the global vptr table to trap the virtual function calls into the kernel space.
+
+http://es-operating-system.googlecode.com/svn/html/Kernel/syscall.png
+
+=== Upcall ===
+
+Inside the kernel, interface pointers associated with a user object point to a single entry in the vptr table to make upcalls to the target user process.
+
+http://es-operating-system.googlecode.com/svn/html/Kernel/upcall.png
+
+=== Local RPC ===
+
+Local RPC = System call + Upcall
+
+http://es-operating-system.googlecode.com/svn/html/Kernel/lrpc.png
+
+== ECMAScript interpreter - esjs ==
+
+Converts function calls and attribute accesses into system calls, and upcalls into event dispatches.
+
+{{{
+canvas = new CanvasRenderingContext2D(unknown);
+canvas.lineWidth = 3;
+}}}
+
+http://es-operating-system.googlecode.com/svn/html/Kernel/prototype.png
