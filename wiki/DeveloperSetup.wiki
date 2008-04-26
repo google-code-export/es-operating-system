@@ -27,7 +27,7 @@ _If you are using the Mac OS X Leopard with XCode, you will be able to build the
 
 Currently, ES uses the Sazanami fonts (http://sourceforge.jp/projects/efont/) and the liberation fonts (https://www.redhat.com/promo/fonts/) for graphics. If these fonts are not installed in your host operating system, please install them, too (with yum, or apt-get, etc.)
 
-== `config.sub` ==
+== config.sub ==
 
 Please add 'es' to the operating system list in Automake's `config.sub` as below:
 
@@ -113,4 +113,5 @@ Thread model: es
 gcc version 4.2.1
 }}}
 
-Your development environment is now set up!
+=== Your development environment is now set up! ===
+
