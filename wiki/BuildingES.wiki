@@ -27,4 +27,15 @@ The resulting file, named `fat32.img`, is a bootable ES operating system disk im
 $ qemu -hda fat32.img -serial stdio -soundhw sb16
 }}}
 
-_Depends on the operating systems and/or the qemu versions, you may need to specify dummy CD ROM image by specifying `-cdrom dummy.iso` option to qemu._
+----
+
+*Note*: Depends on the operating systems and/or the qemu versions, you may need to specify dummy CD ROM image by specifying `-cdrom dummy.iso` option to qemu.
+
+*Note*: If you are using Ubuntu 7.10, please add the `-net none` option to run ES on QEMU as below:
+
+{{{
+$ qemu -hda fat32.img -serial stdio -soundhw sb16 -net none
+}}}
+
+QEMU 0.9.0 comes with Ubuntu 7.10 seems to have a problem with the RTL8029AS Ethernet controller emulation.
+
