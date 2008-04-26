@@ -16,7 +16,7 @@
 Start each file with the following copyright notice. ES operating system is distributed under the [http://www.apache.org/licenses/ Apache License 2.0]:
 
 {{{
-   Copyright `[`2008`]` `[`Google Inc.`]`
+   Copyright [2008] [Google Inc.]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
