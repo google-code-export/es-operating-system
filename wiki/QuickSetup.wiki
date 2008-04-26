@@ -8,7 +8,7 @@ If you have problems with building ES from the source code manually, please use 
 
 Before running this script, please install the prerequisites listed in the DeveloperSetup page. You should also add 'es' to the operating system list in Automake's config.sub file as described in this page.
 
-The TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora, you are most likely to do this step manually.
+The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora, you are most likely to do this step manually.
 
 If you are using Mac OS X, please also install PCRE and wget in addition to XCode.
 
@@ -33,7 +33,7 @@ your home directory:
 
 {{{
 ~/es/
-+---local/                 # ES build directory for local tools
++---local/                  # ES build directory for local tools
 +---opt/                    # cross-tool build directory
     +---binutils/
     +---cairo/
@@ -54,6 +54,8 @@ your home directory:
     +---pcre-7.2/
 +---trunk/                  # ES source directory
 }}}
+
+----
 
 *Note*: If you are using Ubuntu 7.10, please specify the `-net none` option to run ES on QEMU as below:
 
