@@ -22,6 +22,10 @@ _If you are using the latest Linux distribution like [http://fedoraproject.org/ 
 
 _If you are using the Mac OS X Leopard with XCode, you will be able to build the minimal ES cross-build tools. You can test the ES operating system with [http://www.kju-app.org/kju/ Q]._
 
+== Fonts ==
+
+Currently, ES uses the Sazanami fonts (http://sourceforge.jp/projects/efont/) and the liberation fonts (https://www.redhat.com/promo/fonts/) for graphics. If these fonts are not installed in your host operating system, please install them, too (with yum, or apt-get, etc.)
+
 == Getting the source code ==
 
 {{{
