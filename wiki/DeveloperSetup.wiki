@@ -27,6 +27,20 @@ _If you are using the Mac OS X Leopard with XCode, you will be able to build the
 
 Currently, ES uses the Sazanami fonts (http://sourceforge.jp/projects/efont/) and the liberation fonts (https://www.redhat.com/promo/fonts/) for graphics. If these fonts are not installed in your host operating system, please install them, too (with yum, or apt-get, etc.)
 
+== `config.sub` ==
+
+Please add 'es' to the operating system list in Automake's `config.sub` as below:
+
+{{{
+# Decode manufacturer-specific aliases for certain operating systems.
+     :
+     :
+     :
+              | -skyos* | -haiku* | -rdos* | -toppers* | -es*)
+}}}
+
+Or you may reinstall automake 1.10 from the source code applying the [http://code.google.com/p/es-operating-system/source/browse/trunk/patches/automake-1.10.patch patch].
+
 == Getting the source code ==
 
 {{{
@@ -97,18 +111,6 @@ Target: i386-pc-es
 Configured with: ../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib
 Thread model: es
 gcc version 4.2.1
-}}}
-
-== Add 'es' to the operating system list in Automake `config.sub` ==
-
-Finally, please add 'es' to the operating system list in Automake `config.sub` as below:
-
-{{{
-# Decode manufacturer-specific aliases for certain operating systems.
-     :
-     :
-     :
-| -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* | -es* \
 }}}
 
 Your development environment is now set up!
