@@ -1,0 +1,65 @@
+#summary Setting up the ES development environment using the setup script
+
+= Setting up the ES development environment using the setup script =
+
+If you have problems with building ES from the source code manually, please use the following setup shell script which tries to build ES semi-automatically:
+
+  http://code.google.com/p/es-operating-system/source/browse/trunk/setup
+
+Before running this script, please install the prerequisites listed in the DeveloperSetup page. You should also add 'es' to the operating system list in Automake's config.sub file as described in this page.
+
+The TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora, you are most likely to do this step manually.
+
+If you are using Mac OS X, please also install PCRE and wget in addition to XCode.
+
+  cf. ftp://ftp.gnu.org/pub/gnu/wget/
+
+The setup script tries to install ES into the following directory:
+
+{{{
+  /opt/es
+}}}
+
+Please make sure to create this directory with the appropriate permission. If you prefer to install ES to the other directory, please edit the setup script accordingly.
+
+Then run the setup script:
+
+{{{
+% bash -v setup
+}}}
+
+It will download the required files from the Internet, build tools, libraries, and ES operating system in sequence, and run ES on QEMU. After the setup, the following directory structures will be created in
+your home directory:
+
+{{{
+~/es/
++---local/                 # ES build directory for local tools
++---opt/                    # cross-tool build directory
+    +---binutils/
+    +---cairo/
+    +---expat/
+    +---fontconfig/
+    +---freetype/
+    +---gcc/
+    +---pcre/
++---pc/                     # ES build directory for target (pc)
++---src/                    # open source program source dirctory
+    +---binutils-2.17/
+    +---cairo-1.4.10/
+    +---expat-2.0.1/
+    +---fontconfig-2.4.2/
+    +---freetype-2.3.5/
+    +---gcc-4.2.1/
+    +---newlib-1.15.0/
+    +---pcre-7.2/
++---trunk/                  # ES source directory
+}}}
+
+*Note*: If you are using Ubuntu 7.10, please specify the `-net none` option to run ES on QEMU as below:
+
+{{{
+$ qemu -hda fat32.img -serial stdio -soundhw sb16 -net none
+}}}
+
+QEMU 0.9.0 comes with Ubuntu 7.10 seems to have a problem with the RTL8029AS Ethernet controller emulation.
+
