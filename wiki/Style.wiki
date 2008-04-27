@@ -44,7 +44,7 @@ Use spaces, not tabs. Indent 4 spaces at a time.
 == Names ==
 
   * Use !CamelCase: 
-    * Capitalize the first letter of a class, struct, or namespace name; 
+    * Capitalize the first letter of a class or struct name; 
     * Lower-case the first letter of a struct or class member;
     * Fully capitalize acronyms.
   * Use very short names for local variables in conventional ways.
