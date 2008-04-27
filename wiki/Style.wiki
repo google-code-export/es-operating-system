@@ -54,7 +54,9 @@ Use spaces, not tabs. Indent 4 spaces at a time.
     struct Queue;
     size_t numPending;
     class HTMLDocument;
+}}}
 
+{{{
 ?   struct queue;
 ?   size_t num_pending;
 ?   class HtmlDocument;
@@ -83,7 +85,9 @@ Place each curly brace on its own line.
    {
        foo = bar;
    }
+}}}
 
+{{{
 ?  if (cond) {
        foo = bar;
    }
@@ -93,7 +97,9 @@ Curly braces are required around the one-line blocks.
 
 {{{
 ?  if (cond) foo = bar;
+}}}
 
+{{{
 ?  if (cond)
 ?      foo = bar;
 }}}
@@ -112,7 +118,9 @@ Prefer less than (`<`) and less than or equal to (`<=`) to greater than (`>`) an
 
 {{{
    if (x < y)
+}}}
 
+{{{
 ?  if (y > x)
 }}}
 
@@ -123,7 +131,9 @@ Both pointer types and reference types should be written with no space between t
 {{{
    char* p;
    const string& s;
+}}}
 
+{{{
 ?  char *p;
 ?  const string &s;
 ?  char* p, *q;
