@@ -27,7 +27,7 @@ For example, the way to write into a stream should be as simple as like this:
     size = stream.write(buffer, len);    // in ECMAScript
 }}}
     
-The `stream` variable appears to be an ordinary interface pointer to an instance object, but it is actually a communication port associated with a particular system object and with a specific set of object methods like read, write, seek, etc. It is also used as a capability object and can be copied to the other processes or modules as a return value or an argument for a cross doming method call; if a module does not have any interface pointer to directories or files, the module simply cannot access any directories or files. The legacy "C" calling conventions should not be used for defining the base interfaces to eliminate the need for programming language implementers to write separate bridge program for every such interface:
+The `stream` variable appears to be an ordinary interface pointer to an instance object, but it is actually a communication port associated with a particular system object and with a specific set of object methods like read, write, seek, etc. It is also used as a capability object and can be copied to the other processes or modules as a return value or an argument for a cross doming method call; if a module does not have any interface pointer to directories or files, the module simply cannot access any directories or files. The legacy "C" calling conventions should not be used for defining the system interfaces; otherwise, separate bridge runtime programs need to be manually written for each system interface in other programming languages:
     
 {{{
 ?   size = write(stream, buffer, len);   // in C (NG)
