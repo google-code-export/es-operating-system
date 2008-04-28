@@ -88,13 +88,15 @@ See also:
 [http://code.google.com/p/es-operating-system/source/browse/trunk/os/kernel/port/upcall.cpp upcall.cpp],
 [http://code.google.com/p/es-operating-system/source/browse/trunk/os/libes++/src/system.cpp system.cpp].
 
-=== Local RPC  `=` System call `+` Upcall ===
+=== Local RPC  ===
 
 By combining the system call path and the upcall path, ES realizes a lightweight remote procedure call path `[`Bershad`]`. 
 
 http://es-operating-system.googlecode.com/svn/html/Kernel/lrpc.png
 
-For local RPC, interface pointers associated with a remote object point to a single entry in the global vptr table of the process, which simply points to entries in the vptr table for upcall.
+*Local RPC = System call + Upcall*
+
+For local RPC, interface pointers associated with a remote object point to a single entry in the global vptr table of the process, which associated with an entry in the kernel object table that just points to entries in the vptr table for upcall.
 
 == ECMAScript interpreter - esjs ==
 
