@@ -2,11 +2,11 @@
 
 = The design of the ES pure component kernel =
 
-ES operating system has a pure component operating system kernel, which meta-processes system calls and upcalls defined in OMG IDL interface to join software components running in userland including our own ECMAScript interpreter esjs. In many microkernel researches, they tends to try to build a simplified, decoupled UNIX implementation on top of them, which is not a goal in the ES operating system. Even though many principal posix functions can be used from ES user processes, they are just for importing the highly portable, existing open source libraries like Cairo, FreeType, etc. The primary goal has been making it possible that developers can easily create rich applications, like 3D games, using ECMAScript. So we've been designing and developing new, simple interface definitions for file I/O, socket, threads, name spaces, etc. using IDL in a way that can be used from ECMAScript.
+ES operating system has a pure component operating system kernel, which meta-processes system calls and upcalls defined in OMG IDL interface to join software components running in userland including our own ECMAScript interpreter esjs. In many microkernel researches, they tends to try to build a simplified, decoupled UNIX implementation on top of them, which is not a goal in the ES operating system. Even though many principal posix functions can be used from ES user processes, they are just for importing the highly portable, existing open source libraries like Cairo, !FreeType, etc. The primary goal has been making it possible that developers can easily create rich applications, like 3D games, using ECMAScript. So we've been designing and developing new, simple interface definitions for file I/O, socket, threads, name spaces, etc. using IDL in a way that can be used from ECMAScript.
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/esjs.png
 
-_See the [XV_Semana_Informatica summary] of the guest talk at the XV Semana Informática do Instituto Superior Técnico for the concept behind the ES operating system design._
+*Note*: _Please See the [XV_Semana_Informatica summary] of the guest talk at the XV Semana Informática do Instituto Superior Técnico for the concept behind the ES operating system design._
 
 == Introduction ==
 
@@ -33,7 +33,7 @@ The `stream` variable appears to be an ordinary interface pointer to an instance
 ?   size = write(stream, buffer, len);   // in C (NG)
 }}}
 
-We've demonstrated that we can implement the traditional posix APIs on top of the object APIs well suited for ECMAScript, etc., rather than implementing the object APIs on top of the posix APIs. ES's patch for newlib has many fundamental posix functions, including several pthread functions, under the newlib-1.15.0/libgloss/i386-es directory, that sufficiently support very useful libraries including the standard C library in Newlib, libstdc++-v3 in GCC, Cairo, and FreeType 2, etc.
+We've demonstrated that we can implement the traditional posix APIs on top of the object APIs well suited for ECMAScript, etc., rather than implementing the object APIs on top of the posix APIs. ES's patch for newlib has many fundamental posix functions, including several pthread functions, under the newlib-1.15.0/libgloss/i386-es directory, that sufficiently support very useful libraries including the standard C library in Newlib, libstdc++-v3 in GCC, Cairo, and !FreeType 2, etc.
 
 == Inside the kernel ==
 
@@ -88,9 +88,9 @@ See also:
 [http://code.google.com/p/es-operating-system/source/browse/trunk/os/kernel/port/upcall.cpp upcall.cpp],
 [http://code.google.com/p/es-operating-system/source/browse/trunk/os/libes++/src/system.cpp system.cpp].
 
-=== Local RPC  = System call + Upcall ===
+=== Local RPC  `=` System call `+` Upcall ===
 
-By combining the system call path and the upcall path, ES realizes a lightweight remote procedure call path `[`Draves`]`. 
+By combining the system call path and the upcall path, ES realizes a lightweight remote procedure call path `[`Bershad`]`. 
 
 http://es-operating-system.googlecode.com/svn/html/Kernel/lrpc.png
 
@@ -113,5 +113,7 @@ See also:
 == References ==
 
 `[`Bershad`]` Brian N. Bershad, Thomas E. Anderson, Edward D. Lazowska, and Henry M. Levy. Lightweight Remote Procedure Call. ACM Trans. on Computer Systems 8(1), February 1990, pp.37-55.
+
 `[`Draves`]` R. Draves and S. Cutshall. Unifying the user and kernel environments. Technical Report MSR-TR-97-10, Microsoft Research, March 1997.
+
 `[`Hamilton`]` The Spring Nucleus: A Microkernel for Objects. Graham Hamilton. Panos Kougiouris. SMLI TR-93-14. April 1993
