@@ -53,6 +53,34 @@ your home directory:
     +---newlib-1.15.0/
     +---pcre-7.2/
 +---trunk/                  # ES source directory
+    +---cmd                 # application programs
+    +---esidl               # esidl IDL compiler
+    +---esjs                # esjs ECMAScript interpreter
+    +---include
+        +---es              # ES class libraries and template libraries
+            +---base        # the common ES interface definitions
+            +---device      # the device driver interface definitions
+            +---naming      # the namespace interface definitions
+            +---util        # miscellaneous interface definitions
+    +---init                # the ES kernel image is created here
+    +---os
+        +---bootsect        # ES boot sectors and kernel loader
+        +---fs              # file subsystems
+            +---fat         # FAT file subsystem
+            +---iso9660     # ISO 9660 file subsystem
+        +---kernel          # ES kernel modules
+            +---include
+            +---pc          # PC specific portion
+            +---port        # portable portion
+            +---posix       # POSIX specific portion for the ES kernel emulation
+            +---testsuite
+        +---libes++         # ES class libraries and template libraries
+        +---net             # TCP/IP protocol stack
+            +---include
+            +---src
+            +---testsuite
+    +---patches             # patch files applied to the cross-development tools and libraries needed by ES
+    +---tools               # command line tools for cross development
 }}}
 
 ----
