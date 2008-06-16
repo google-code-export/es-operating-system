@@ -11,6 +11,8 @@
  * bison 2.1 or newer
  * flex 2.5 or newer
  * gcc 4.0 or newer
+ * libX11 development libraries
+ * cairo development libraries and header files.
 
 For development tools, the following libraries are required:
 
@@ -20,6 +22,8 @@ For development tools, the following libraries are required:
 _Older versions might cause problems._
 
 *Note*: If you are using the latest Linux distribution like [http://fedoraproject.org/ Fedora], you will just need to install the missing packages, if any, from the official repositories. You can test the ES operating system with [http://fabrice.bellard.free.fr/qemu/ QEMU], and you can also test the ES kernel components including the [Conduit TCP/IP stack] or the esjs ECMAScript interpreter as ordinary Linux application programs.
+
+*Note*: If you are using Ubuntu 8.04, the following packages will be enough to set up the development environment: subversion autoconf automake patch bison flex gcc libc6-dev g++ libpcre3-dev qemu libcairo2-dev libX11-dev ttf-liberation ttf-sazanami-mincho ttf-sazanami-gothic.
 
 *Note*: If you are using the Mac OS X Leopard with XCode, you will be able to build the minimal ES cross-build tools. You can test the ES operating system with [http://www.kju-app.org/kju/ Q].
 
