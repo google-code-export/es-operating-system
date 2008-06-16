@@ -13,6 +13,7 @@
  * gcc 4.0 or newer
  * libX11 development libraries
  * cairo development libraries and header files.
+ * freeglut-devel
 
 For development tools, the following libraries are required:
 
