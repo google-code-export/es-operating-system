@@ -1,5 +1,5 @@
 #summary esidl, the IDL compiler
-#labels esidl,IDL,compiler
+#labels esidl,IDL
 
 = esidl =
 
@@ -9,6 +9,8 @@ The IDL compiler, esidl, is a program that generates C++ header files and interf
 In esidl, the syntax is that of [http://www.omg.org/gettingstarted/omg_idl.htm OMG IDL] which is also used in the HTML and other specifications from [http://www.w3.org/ W3C].
 
 *Note*: esidl uses OMG IDL syntax but things like C++ mappings are done simply in a way unique to ES. Apart from the IDL grammar, there is no relation to CORBA.
+
+*Note*: The future version of esidl will support [http://dev.w3.org/2006/webapi/Binding4DOM/ Web IDL].
 
 == Syntax ==
 
