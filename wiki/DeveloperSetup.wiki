@@ -6,7 +6,7 @@
 == Prerequisites ==
 
  * autoconf 2.61 or newer
- * automake 1.10 or newer
+ * automake 1.10.1 or newer
  * patch
  * bison 2.1 or newer
  * flex 2.5 or newer
