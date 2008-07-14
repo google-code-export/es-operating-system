@@ -95,19 +95,19 @@ Third, you need to build the cross tool chain building from GNU Binutils, GNU Co
 $ cd ..
 $ mkdir src
 $ cd src
-$ wget ftp://ftp.gnu.org/gnu/binutils/binutils-2.17.tar.bz2
-$ tar -jxvf binutils-2.17.tar.bz2
-$ patch -p0 -d . < ../trunk/patches/binutils-2.17.patch
+$ wget ftp://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2
+$ tar -jxvf binutils-2.18.tar.bz2
+$ patch -p0 -d . < ../trunk/patches/binutils-2.18.patch
 $ cd ..
 $ mkdir opt
 $ cd opt
 $ mkdir binutils
 $ cd binutils
-$ ../../src/binutils-2.17/configure --target=i386-pc-es --prefix=/opt/es
+$ ../../src/binutils-2.18/configure --target=i386-pc-es --prefix=/opt/es
 $ make
 $ make install
 $ i386-pc-es-as -V
-GNU assembler version 2.17 (i386-pc-es) using BFD version 2.17
+GNU assembler version 2.18 (i386-pc-es) using BFD version (GNU Binutils) 2.18
 }}}
 
 === GCC and Newlib ===
