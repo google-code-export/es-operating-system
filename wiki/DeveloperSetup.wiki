@@ -5,15 +5,17 @@
 
 == Prerequisites ==
 
- * autoconf 2.61 or newer
- * automake 1.10.1 or newer
+ * autoconf 2.61 (or later)
+ * automake 1.10.1 (or later)
  * patch
- * bison 2.1 or newer
- * flex 2.5 or newer
- * gcc 4.0 or newer
- * libX11 development libraries
- * cairo development libraries and header files.
+ * bison 2.1 (or later)
+ * flex 2.5 (or later)
+ * gcc 4.3 (or later)
+ * libX11-devel, libXmu-devel, and libXi-devel
+ * cairo-devel
  * freeglut-devel
+ * gmp-devel 4.1 (or later. necessary to build gcc 4.3)
+ * mpfr-devel 2.3.0 (or later. necessary to build gcc 4.3)
 
 For development tools, the following libraries are required:
 
@@ -114,27 +116,27 @@ GNU assembler version 2.18 (i386-pc-es) using BFD version (GNU Binutils) 2.18
 
 {{{
 $ cd ../../src/
-$ wget ftp://ftp.gnu.org/gnu/gcc/gcc-4.2.1/gcc-4.2.1.tar.bz2
-$ tar -jxvf gcc-4.2.1.tar.bz2
-$ patch -p0 -d . < ../trunk/patches/gcc-4.2.1.patch
-$ wget ftp://sources.redhat.com/pub/newlib/newlib-1.15.0.tar.gz
-$ tar -zxvf newlib-1.15.0.tar.gz
-$ patch -p0 -d . < ../trunk/patches/newlib-1.15.0.patch
-$ cd gcc-4.2.1
-$ ln -s ../newlib-1.15.0/newlib .
-$ ln -s ../newlib-1.15.0/libgloss .
+$ wget ftp://ftp.gnu.org/gnu/gcc/gcc-4.3.1/gcc-4.3.1.tar.bz2
+$ tar -jxvf gcc-4.3.1.tar.bz2
+$ patch -p0 -d . < ../trunk/patches/gcc-4.3.1.patch
+$ wget ftp://sources.redhat.com/pub/newlib/newlib-1.16.0.tar.gz
+$ tar -zxvf newlib-1.16.0.tar.gz
+$ patch -p0 -d . < ../trunk/patches/newlib-1.16.0.patch
+$ cd gcc-4.3.1
+$ ln -s ../newlib-1.16.0/newlib .
+$ ln -s ../newlib-1.16.0/libgloss .
 $ cd ../../opt
 $ mkdir gcc
 $ cd gcc
-$ ../../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib --prefix=/opt/es
+$ ../../src/gcc-4.3.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib --with-gmp=/usr --with-mpfr=/usr --disable-shared --prefix=/opt/es
 $ make
 $ make install
 $ i386-pc-es-gcc -v
 Using built-in specs.
 Target: i386-pc-es
-Configured with: ../../src/gcc-4.2.1/configure --target=i386-pc-es --enable-threads --enable-languages=c,c++ --with-gnu-as --with-gnu-ld --with-newlib --prefix=/opt/es
+Configured with: ../../src/gcc-4.3.1/configure es
 Thread model: es
-gcc version 4.2.1
+gcc version 4.3.1 (GCC) 
 cd ../..
 }}}
 
@@ -155,72 +157,76 @@ binutils-2.18/ld/configure.tgt
 }}}
 
 {{{
-gcc-4.2.1/config.sub
-gcc-4.2.1/configure.in
-gcc-4.2.1/gcc/config/es.h
-gcc-4.2.1/gcc/config/gthr-es.c
-gcc-4.2.1/gcc/config/i386/es-elf.h
-gcc-4.2.1/gcc/config/i386/t-es-i386
-gcc-4.2.1/gcc/config/t-es
-gcc-4.2.1/gcc/config.gcc
-gcc-4.2.1/gcc/configure.ac
-gcc-4.2.1/gcc/gthr-es.h
+gcc-4.3.1/config.sub
+gcc-4.3.1/configure.ac
+gcc-4.3.1/gcc/config/es.h
+gcc-4.3.1/gcc/config/gthr-es.c
+gcc-4.3.1/gcc/config/i386/es-elf.h
+gcc-4.3.1/gcc/config/i386/t-es-i386
+gcc-4.3.1/gcc/config/t-es
+gcc-4.3.1/gcc/config.gcc
+gcc-4.3.1/gcc/configure.ac
+gcc-4.3.1/gcc/gthr-es.h
+gcc-4.3.1/libgcc/config.host
+gcc-4.3.1/libstdc++-v3/configure.ac
 }}}
 
 {{{
-newlib-1.15.0/config.sub
-newlib-1.15.0/configure.in
-newlib-1.15.0/libgloss/configure.in
-newlib-1.15.0/libgloss/i386-es/Makefile.in
-newlib-1.15.0/libgloss/i386-es/access.c
-newlib-1.15.0/libgloss/i386-es/aclocal.m4
-newlib-1.15.0/libgloss/i386-es/close.c
-newlib-1.15.0/libgloss/i386-es/configure
-newlib-1.15.0/libgloss/i386-es/configure.in
-newlib-1.15.0/libgloss/i386-es/crt0.S
-newlib-1.15.0/libgloss/i386-es/es-syscall.h
-newlib-1.15.0/libgloss/i386-es/es.c
-newlib-1.15.0/libgloss/i386-es/es.ld
-newlib-1.15.0/libgloss/i386-es/exit.c
-newlib-1.15.0/libgloss/i386-es/fstat.c
-newlib-1.15.0/libgloss/i386-es/getcwd.c
-newlib-1.15.0/libgloss/i386-es/getdents.c
-newlib-1.15.0/libgloss/i386-es/getpid.c
-newlib-1.15.0/libgloss/i386-es/gettimeofday.c
-newlib-1.15.0/libgloss/i386-es/kill.c
-newlib-1.15.0/libgloss/i386-es/link.c
-newlib-1.15.0/libgloss/i386-es/lseek.c
-newlib-1.15.0/libgloss/i386-es/mkdir.c
-newlib-1.15.0/libgloss/i386-es/mmap.c
-newlib-1.15.0/libgloss/i386-es/nanosleep.c
-newlib-1.15.0/libgloss/i386-es/open.c
-newlib-1.15.0/libgloss/i386-es/pthread.c
-newlib-1.15.0/libgloss/i386-es/read.c
-newlib-1.15.0/libgloss/i386-es/rename.c
-newlib-1.15.0/libgloss/i386-es/rmdir.c
-newlib-1.15.0/libgloss/i386-es/sbrk.c
-newlib-1.15.0/libgloss/i386-es/stat.c
-newlib-1.15.0/libgloss/i386-es/times.c
-newlib-1.15.0/libgloss/i386-es/unlink.c
-newlib-1.15.0/libgloss/i386-es/write.c
-newlib-1.15.0/newlib/configure.host
-newlib-1.15.0/newlib/libc/include/machine/setjmp.h
-newlib-1.15.0/newlib/libc/include/pthread.h
-newlib-1.15.0/newlib/libc/include/sys/config.h
-newlib-1.15.0/newlib/libc/include/sys/features.h
-newlib-1.15.0/newlib/libc/include/sys/types.h
-newlib-1.15.0/newlib/libc/stdlib/__atexit.c
-newlib-1.15.0/newlib/libc/stdlib/malloc.c
-newlib-1.15.0/newlib/libc/stdlib/mallocr.c
-newlib-1.15.0/newlib/libc/sys/configure.in
-newlib-1.15.0/newlib/libc/sys/es/Makefile.am
-newlib-1.15.0/newlib/libc/sys/es/configure.in
-newlib-1.15.0/newlib/libc/sys/es/getreent.c
-newlib-1.15.0/newlib/libc/sys/es/linkr.c
-newlib-1.15.0/newlib/libc/sys/es/sys/dirent.h
-newlib-1.15.0/newlib/libc/sys/es/sys/lock.h
-newlib-1.15.0/newlib/libc/sys/es/sys/mman.h
-newlib-1.15.0/newlib/libc/sys/es/syslink.c
-newlib-1.15.0/newlib/libc/syscalls/syslink.c
-newlib-1.15.0/newlib/libc/syscalls/sysunlink.c
+newlib-1.16.0/config.sub
+newlib-1.16.0/configure.ac
+newlib-1.16.0/libgloss/configure.in
+newlib-1.16.0/libgloss/i386-es/Makefile.in
+newlib-1.16.0/libgloss/i386-es/access.c
+newlib-1.16.0/libgloss/i386-es/close.c
+newlib-1.16.0/libgloss/i386-es/configure.in
+newlib-1.16.0/libgloss/i386-es/crt0.S
+newlib-1.16.0/libgloss/i386-es/es.c
+newlib-1.16.0/libgloss/i386-es/es.ld
+newlib-1.16.0/libgloss/i386-es/es-syscall.h
+newlib-1.16.0/libgloss/i386-es/exit.c
+newlib-1.16.0/libgloss/i386-es/fstat.c
+newlib-1.16.0/libgloss/i386-es/getcwd.c
+newlib-1.16.0/libgloss/i386-es/getdents.c
+newlib-1.16.0/libgloss/i386-es/getpid.c
+newlib-1.16.0/libgloss/i386-es/gettimeofday.c
+newlib-1.16.0/libgloss/i386-es/kill.c
+newlib-1.16.0/libgloss/i386-es/link.c
+newlib-1.16.0/libgloss/i386-es/lseek.c
+newlib-1.16.0/libgloss/i386-es/mkdir.c
+newlib-1.16.0/libgloss/i386-es/mmap.c
+newlib-1.16.0/libgloss/i386-es/nanosleep.c
+newlib-1.16.0/libgloss/i386-es/open.c
+newlib-1.16.0/libgloss/i386-es/pthread.c
+newlib-1.16.0/libgloss/i386-es/read.c
+newlib-1.16.0/libgloss/i386-es/rename.c
+newlib-1.16.0/libgloss/i386-es/rmdir.c
+newlib-1.16.0/libgloss/i386-es/sbrk.c
+newlib-1.16.0/libgloss/i386-es/stat.c
+newlib-1.16.0/libgloss/i386-es/times.c
+newlib-1.16.0/libgloss/i386-es/unlink.c
+newlib-1.16.0/libgloss/i386-es/write.c
+newlib-1.16.0/newlib/configure.host
+newlib-1.16.0/newlib/libc/include/machine/setjmp.h
+newlib-1.16.0/newlib/libc/include/machine/types.h
+newlib-1.16.0/newlib/libc/include/pthread.h
+newlib-1.16.0/newlib/libc/include/sys/config.h
+newlib-1.16.0/newlib/libc/include/sys/features.h
+newlib-1.16.0/newlib/libc/include/sys/reent.h
+newlib-1.16.0/newlib/libc/include/sys/time.h
+newlib-1.16.0/newlib/libc/include/sys/types.h
+newlib-1.16.0/newlib/libc/stdlib/__atexit.c
+newlib-1.16.0/newlib/libc/stdlib/malloc.c
+newlib-1.16.0/newlib/libc/stdlib/mallocr.c
+newlib-1.16.0/newlib/libc/string/Makefile.am
+newlib-1.16.0/newlib/libc/sys/configure.in
+newlib-1.16.0/newlib/libc/sys/es/Makefile.am
+newlib-1.16.0/newlib/libc/sys/es/configure.in
+newlib-1.16.0/newlib/libc/sys/es/getreent.c
+newlib-1.16.0/newlib/libc/sys/es/linkr.c
+newlib-1.16.0/newlib/libc/sys/es/sys/dirent.h
+newlib-1.16.0/newlib/libc/sys/es/sys/lock.h
+newlib-1.16.0/newlib/libc/sys/es/sys/mman.h
+newlib-1.16.0/newlib/libc/sys/es/syslink.c
+newlib-1.16.0/newlib/libc/syscalls/syslink.c
+newlib-1.16.0/newlib/libc/syscalls/sysunlink.c
 }}}
