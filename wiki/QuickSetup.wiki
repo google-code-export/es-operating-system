@@ -44,14 +44,14 @@ your home directory:
     +---pcre/
 +---pc/                     # ES build directory for target (pc)
 +---src/                    # open source program source dirctory
-    +---binutils-2.17/
+    +---binutils-2.18/
     +---cairo-1.4.10/
     +---expat-2.0.1/
     +---fontconfig-2.4.2/
     +---freetype-2.3.5/
-    +---gcc-4.2.1/
-    +---newlib-1.15.0/
-    +---pcre-7.2/
+    +---gcc-4.3.1/
+    +---newlib-1.16.0/
+    +---pcre-7.8/
 +---trunk/                  # ES source directory
     +---cmd                 # application programs
     +---esidl               # esidl IDL compiler
@@ -92,4 +92,3 @@ $ qemu -hda fat32.img -serial stdio -soundhw sb16 -net none
 }}}
 
 QEMU 0.9.0 comes with Ubuntu 7.10 seems to have a problem with the RTL8029AS Ethernet controller emulation.
-
