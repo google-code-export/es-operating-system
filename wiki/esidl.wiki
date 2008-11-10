@@ -6,11 +6,9 @@
 == Introduction ==
 
 The IDL compiler, esidl, is a program that generates C++ header files and interface reflection data files from the interface definitions written in IDL (interface definition language).
-In esidl, the syntax is that of [http://www.omg.org/gettingstarted/omg_idl.htm OMG IDL] which is also used in the HTML and other specifications from [http://www.w3.org/ W3C].
+In esidl, the syntax is that of [http://www.w3.org/TR/WebIDL/ Web IDL] which is used in the HTML and other specifications published from [http://www.w3.org/ W3C]. esidl also supports a few syntaxes defined in [http://www.omg.org/gettingstarted/omg_idl.htm OMG IDL] from which Web IDL has been developed.
 
-*Note*: esidl uses OMG IDL syntax but things like C++ mappings are done simply in a way unique to ES. Apart from the IDL grammar, there is no relation to CORBA.
-
-*Note*: The future version of esidl will support [http://dev.w3.org/2006/webapi/Binding4DOM/ Web IDL].
+*Note*: Although esidl uses OMG IDL syntax, C++ bindings are defined in a way unique to ES as described below. Apart from the IDL grammar, there is no relation to CORBA with esidl.
 
 == Syntax ==
 
@@ -141,7 +139,9 @@ Primitive types are handled as follows:
 Parameter attributes specify the use of arguments:
 `in` is for input only, `out` is for output only, and `inout` is for both input and output.
 
-*Note*: To define functions that can be called by the ECMAScript interpreter, only `in` must be used as parameter attributes.
+*Note*: To define functions that can be called by the ECMAScript interpreter, only `in` must be used as parameter attributes. 
+
+*Note*: Both `out` and `inout` attributes are deprecated in Web IDL.
 
 ==== ES IDL ====
 {{{
@@ -229,20 +229,21 @@ public:
 
 === any ===
 
-`any` is converted to void`*`.
+`any` is converted to `Variant`.
 
 ==== ES IDL ====
 {{{
-void exit(in any val);
+attribute any strokeStyle;
 }}}
 ==== C++ header file ====
 {{{
-virtual void exit(const void* val) = 0;
+virtual Variant getStrokeStyle(void* strokeStyle, int strokeStyleLength) = 0;
+virtual void setStrokeStyle(const Variant strokeStyle) = 0;
 }}}
 
 === Object ===
 
-`Object` is converted to void`*`. However, unlike void`*` converted from `any`, it is implicitly assumed that the pointer is an interface pointer.
+`Object` is converted to void`*` and is implicitly assumed that the pointer is an interface pointer.
 
 *Note*: With esidl, you can specify the object's interface ID with a UUID type argument. For the return value, the ID specified as the method's *final* UUID type argument will be the returned object's ID. For arguments, the ID of a UUID type argument appearing just before an Object type argument will be the object's ID.
 
@@ -338,4 +339,20 @@ struct Geometry
 };
 }}}
 
-*Note*: `struct` is not supported in the ECMAScript interpreter, esjs, in ES version 0.1.1. We plan to remove this limitation in future versions.
+*Note*: `struct` is not supported in the ECMAScript interpreter, esjs, in the current ES implementation. We plan to remove this limitation in future versions.
+
+
+=== native ===
+
+`native void_pointer` is converted to `void*`.
+
+==== ES IDL ====
+{{{
+native void_pointer;
+
+void exit(in void_pointer val);
+}}}
+==== C++ header file ====
+{{{
+virtual void exit(void* val); = 0;
+}}}
