@@ -41,11 +41,17 @@ module es
 #endif // GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
 }}}
 
-== Option ==
+== Options ==
 
 -l directory
   Adds directory to the header file search path.
   Header files and reflection data are created retaining their hierarchical structure below `directory`.
+
+-include file
+  Processes `file` as if it is included from the source file.
+
+-object base_object_name
+  If the defined interface does not extend any interface, `esidl` implicitly assumes the defined interface is derived from the interface specified by `base_object_name`.
 
 == C++ mapping ==
 
@@ -144,6 +150,7 @@ Parameter attributes specify the use of arguments:
 *Note*: Both `out` and `inout` attributes are deprecated in Web IDL.
 
 ==== ES IDL ====
+
 {{{
 void getPosition(out long x, out long y);
 void setPosition(in long x, in long y);
