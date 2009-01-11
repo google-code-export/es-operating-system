@@ -156,14 +156,6 @@ unknown = iter.next();
 file = IFile(unknown);        // get IFile interface for unknown.
 }}}
 
-The second line can also be written as below:
-
-{{{
-file = new IFile(unknown);
-// or
-file = unknown.queryInterface("0325f4e6-25db-11db-9c02-0009bf000001");
-}}}
-
 If you want to edit a tiny script program, you may use the `edit` command:
 
 {{{
