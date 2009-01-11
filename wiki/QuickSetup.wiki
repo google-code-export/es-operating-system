@@ -25,7 +25,7 @@ $ export PATH=`pwd`/sdk/bin:$PATH
 }}}
 
 When your setup is completed, it shows how to start ES from QEMU. To build your own ES binaries later, please add the path to the ES SDK binaries as illustrated above.
-You should also add 'es' to the operating system list in Automake's config.sub file as described later in this page.
+You should also add 'es' to the operating system list in Automake's config.sub file as described in the DeveloperSetup page.
 
 The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora or Ubuntu 8.04 or later, you are most likely to do this step manually.
 
