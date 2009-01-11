@@ -2,34 +2,34 @@
 
 = Setting up the ES development environment using the setup script =
 
-If you have problems with building ES from the source code manually, please use the following setup shell script which tries to build ES semi-automatically:
+If you have problems with building ES from the source tarballs manually, please use the following setup shell script:
 
-  http://code.google.com/p/es-operating-system/source/browse/trunk/setup
+  http://es-operating-system.googlecode.com/svn/trunk/setup
 
-Before running this script, please install the prerequisites listed in the DeveloperSetup page. You should also add 'es' to the operating system list in Automake's config.sub file as described in this page.
+It will download the required files from the Internet, and generate build tools, libraries, and ES operating system in sequence.
+Note once the setup script is started, it tries to install the prerequisites listed in the DeveloperSetup page, which requires you to execute the sudo command.
 
-The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora, you are most likely to do this step manually.
-
-If you are using Mac OS X, please also install PCRE and wget in addition to XCode.
-
-  cf. ftp://ftp.gnu.org/pub/gnu/wget/
-
-The setup script tries to install ES into the following directory:
+The following steps set up the ES SDK under ~/es/sdk:
 
 {{{
-  /opt/es
+$ cd
+$ mkdir es
+$ cd es
+$ wget http://es-operating-system.googlecode.com/svn/trunk/setup
+$ chmod +x setup
+$ ./setup
+// snip
+usage: qemu -hda pc/init/fat32.img -serial stdio
+$ qemu -hda pc/init/fat32.img -serial stdio
+$ export PATH=`pwd`/sdk/bin:$PATH
 }}}
 
-Please make sure to create this directory with the appropriate permission. If you prefer to install ES to the other directory, please edit the setup script accordingly.
+When your setup is completed, it shows how to start ES from QEMU. To build your own ES binaries later, please add the path to the ES SDK binaries as illustrated above.
+You should also add 'es' to the operating system list in Automake's config.sub file as described later in this page.
 
-Then run the setup script:
+The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora or Ubuntu 8.04 or later, you are most likely to do this step manually.
 
-{{{
-% bash -v setup
-}}}
-
-It will download the required files from the Internet, build tools, libraries, and ES operating system in sequence, and run ES on QEMU. After the setup, the following directory structures will be created in
-your home directory:
+Once your setup is completed, the following directory structures will be created in your home directory:
 
 {{{
 ~/es/
@@ -43,8 +43,13 @@ your home directory:
     +---gcc/
     +---pcre/
 +---pc/                     # ES build directory for target (pc)
++---sdk/                    # ES SDK
+    +---bin/
+    +---i386-pc-es/
+    +---include/
+    +---lib
 +---src/                    # open source program source dirctory
-    +---binutils-2.18/
+    +---binutils-2.19/
     +---cairo-1.4.10/
     +---expat-2.0.1/
     +---fontconfig-2.4.2/
