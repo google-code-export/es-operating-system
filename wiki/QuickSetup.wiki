@@ -20,7 +20,6 @@ $ chmod +x setup
 $ ./setup
 // snip
 usage: qemu -hda pc/init/fat32.img -serial stdio
-$ qemu -hda pc/init/fat32.img -serial stdio
 $ export PATH=`pwd`/sdk/bin:$PATH
 }}}
 
