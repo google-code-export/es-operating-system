@@ -80,7 +80,8 @@ The interface creates a C++ abstract class. A static class method to retrieve th
 
 ==== ES IDL ====
 {{{
-module es {
+module es
+{
   interface Stream
   {
   };
@@ -95,7 +96,7 @@ namespace es
   public:
     static const char* iid()
     {
-        return "::es::Stream";
+      return "::es::Stream";
     }
   };
 }
