@@ -120,7 +120,6 @@ Primitive types are handled as follows:
 || float || float ||
 || double || double ||
 || long double || long double ||
-|| uuid || Guid || Extending ES's capabilities ||
 
 === Parameter attributes ===
 
