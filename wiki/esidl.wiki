@@ -97,7 +97,7 @@ namespace es
     {
         return "::es::Stream";
     }
-};
+  };
 }
 
 }}}
