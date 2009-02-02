@@ -326,7 +326,7 @@ We are also thinking about supporting x64 architecture in addition to x86 since 
 
 In our ECMAScript interpreter, there are several uncompleted tasks like supporting function overloading, attribute overloading, etc. Actually the attribute overloading is one of the difficult notion to smartly represent in C++ because it results in overloading by the return value types, if applying a simple IDL-C++ mapping, which is supported very limitedly in C++. So we need to think about a good way to handle this. 
 
-Also as we move to the 4th edition of ECMAScript standard, we will probably incorporate the other open source ECMAScript implementation as writing very fast virtual machine requires very different skills from writing the operating system. So we will probably concentrate on designing and developing the object binding runtime for ECMAScript.
+Also as we move to the newer edition of ECMAScript standard, we will probably incorporate the other open source ECMAScript implementation as writing very fast virtual machine requires very different skills from writing the operating system. So we will probably concentrate on designing and developing the object binding runtime for ECMAScript.
 
 === An HTML5 rendering engine integration ===
 
