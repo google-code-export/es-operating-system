@@ -29,8 +29,8 @@ In the IDL files, directives such as `#`ifdef, `#`include, etc. can be used (esi
 
 ==== ES IDL ====
 {{{
-#ifndef GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
-#define GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
+#ifndef ES_BASE_IFILE_IDL_INCLUDED
+#define ES_BASE_IFILE_IDL_INCLUDED
 
 #include "es/base/IStream.idl"
 
@@ -38,17 +38,24 @@ module es
 {
 };
 
-#endif // GOOGLE_ES_BASE_IFILE_IDL_INCLUDED
+#endif // ES_BASE_IFILE_IDL_INCLUDED
 }}}
 
 == Options ==
 
--l directory
-  Adds directory to the header file search path.
+-C
+  Do not discard comments in JavaDoc format.
+
+-I directory
+  Adds directory to the IDL file search path.
   Header files and reflection data are created retaining their hierarchical structure below `directory`.
 
 -include file
   Processes `file` as if it is included from the source file.
+
+-isystem directory
+  Adds directory to the system IDL file search path.
+  Header files and reflection data are created retaining their hierarchical structure below `directory`.
 
 -object base_object_name
   If the defined interface does not extend any interface, `esidl` implicitly assumes the defined interface is derived from the interface specified by `base_object_name`.
@@ -91,7 +98,7 @@ module es
 {{{
 namespace es
 {
-  class IStream
+  class Stream
   {
   public:
     static const char* iid()
@@ -153,8 +160,8 @@ Cache create(in Stream backingStore);
 }}}
 ==== C++ header file ====
 {{{
-virtual void mount(IStream* disk) = 0;
-virtual ICache* create(IStream* backingStore) = 0;
+virtual void mount(es::Stream* disk) = 0;
+virtual es::Cache* create(es::Stream* backingStore) = 0;
 }}}
 
 === Arrays ===
@@ -217,7 +224,7 @@ public:
 
 === any ===
 
-`any` is converted to `Variant`.
+`any` is converted to `Any`.
 
 ==== ES IDL ====
 {{{
@@ -225,8 +232,8 @@ attribute any strokeStyle;
 }}}
 ==== C++ header file ====
 {{{
-virtual Variant getStrokeStyle(void* strokeStyle, int strokeStyleLength) = 0;
-virtual void setStrokeStyle(const Variant strokeStyle) = 0;
+virtual Any getStrokeStyle(void* strokeStyle, int strokeStyleLength) = 0;
+virtual void setStrokeStyle(const Any strokeStyle) = 0;
 }}}
 
 === Object ===
