@@ -24,15 +24,15 @@ The namespace contained in init, the first process to run when the ES operating 
 
 {{{
 Name                                     Supported Interface        Description
-class                                    ClassStore                 Stores the interface pointers of software components that support the ClassFactory interface.    
-    3979e8b4-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_Process Used when a new process is created.    
-    397a9b6a-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_CacheFactory Used when a new memory object is created.    
-    397b45f6-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_Monitor Used when a new monitor is created.    
-    397be8bc-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_PageSet Used when a new page set is created.    
-    397c8ccc-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_Alarm Used when a new timer is created.    
-    397d44f0-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_Partition Used when a new partition is created.    
-    397dec0c-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_FatFileSystem Used when a new FAT file system is created.    
-    397e8e00-2e86-11db-9c02-0009bf000001 ClassFactory               CLSID_IsoFileSystem Used when a new ISO 9660 file system is created.    
+class                                    Context                    Stores the interface pointers of software components that support the ClassFactory interface.    
+    ::es::Monitor                        Monitor::Constructor       Used when a new monitor is created.
+    ::es::Process                        Process::Constructor       Used when a new process is created.
+    ::es::Cache                          Cache::Constructor         Used when a new memory object is created.
+    ::es::PageSet                        PageSet::Constructor       Used when a new page set is created.
+    ::es::Alarm                          Alarm::Constructor         Used when a new timer is created. 
+    ::es::Partition                      Partition::Constructor     Used when a new partition is created.
+    ::es::FatFileSystem                  FatFileSystem::Constructor Used when a new FAT file system is created.    
+    ::es::IsoFileSystem                  IsoFileSystem::Constructor Used when a new ISO 9660 file system is created.    
 device                                   Context                    Stores each device driver's interface pointer.    
     rtc                                  Rtc                        Stores the date/time interface pointer.    
     cga                                  Stream                     Stores the interface pointer for accessing the CGA text screen.    
