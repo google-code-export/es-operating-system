@@ -54,3 +54,20 @@ If you are seriously studying the TCP/IP network architecture, this project woul
 As a whole picture, running the Lively Kernel on top of the ES operating system is a very close image of the future operating system we are thinking about.
 To do that, the interfaces defined in the HTML 5 specification need to be the standard interfaces for the ES operating system, and currently we have just implemented CanvasRenderingContext2D interface using Cairo and !FreeType.
 There are really a lot more works need to be done, and we hope you would make a steady progress in this area since this project will continue even after GSoC 2009.
+
+----
+
+*Note*: 
+Since ES operating system is released from Google, to accept your changes, 
+we will ask you to fill out the Google Individual Contributor License Agreement ("CLA") and submit it electronically before you will become a member of this project.
+
+The CLA is the form we ask each external contributor to fill out to make it safe for Google to accept your code.
+Google CLA form is here:
+
+http://code.google.com/legal/individual-cla-v1.0.html
+
+This form is required not because of Google Summer of Code but because ES operating system is released from Google.
+This form does not transfer copyright: the contributor retains his or her ownership in the work. 
+The CLA just grants Google a "perpetual, non-exclusive, royalty-free, etc..." right to use the work, sublicense it, and so on.
+
+If you have any questions, please ask away.
