@@ -1,0 +1,56 @@
+#summary Ideas List for Google Summer of Code 2009
+
+= Ideas List for Google Summer of Code 2009 =
+
+We are applying for [http://socghop.appspot.com/ Google Summer of Code 2009] as a mentoring organization.
+Here is the list of ideas for the ES operating system project.
+If ES project is accepted for GSoC 2009, we welcome your application for GSoC 2009 with any of the ideas listed here or with your ideas related to the ES operating system.
+Note most of the code in ES are written in C++, and you need to have a good understanding of [http://www.research.att.com/~bs/3rd.html the C++ programming language].
+
+== A component object binding runtime implementation for ECMAScript and C++ based on Web IDL ==
+  * Keep up with the on-going Web IDL standardization efforts, and update ECMAScript interpreter and the ES kernel as well.
+  * Enhance esidl Web IDL compiler to provide better warnings, error messages, etc., for the developers.
+
+=== Recommended readings ===
+  * [http://www.w3.org/TR/WebIDL/ Web IDL W3C Working Draft]
+  * [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript Language Specification]
+  * [http://wiki.ecmascript.org/doku.php?id=es3.1:es3.1_proposal_working_draft ECMAScript 3. 1 Language Candidate Specification DRAFT]
+  * Stanley B. Lippman, [http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545/ Inside the C++ Object Model].
+
+Web IDL is a new standard interface definition language used in HTML 5 and other web application APIs for ECMAScript and Java.
+In ES, we are also using Web IDL to define interfaces for C++, and as the result, C++ software components developed for ES can be easily and seamlessly controlled by ECMAScript.
+By this way, we believe we can efficiently expand what we can do with Web applications in the longer term.
+
+Note that the implementation of our ECMAScript interpreter esjs is not for the optimal performance.
+We are rather concentrating in the object binding runtime implementation between ESCMAScript and the other native software components.
+Porting the existing, open source ECMAScript VM implementation like [http://code.google.com/p/v8/ V8] to ES is another interesting project idea if you want to try.
+
+== A TCP/IP stack implementation based on design pattern ==
+  * Finalize the interface definitions for socket, etc.
+  * Complete the IPv4 TCP/IP stack implementation based on design pattern.
+
+=== Recommended readings ===
+
+  * W. Richard Stevens, [http://www.amazon.com/TCP-Illustrated-Protocols-Addison-Wesley-Professional/dp/0201633469/ TCP/IP Illustrated, Volume 1: The Protocols]
+  * W. Richard Stevens, and Gary R. Wright, [http://www.amazon.com/exec/obidos/ISBN=020163354X/ TCP/IP Illustrated, Volume 2: The Implementation]
+  * Hermann Hueni, Ralph Johnson, and Robert Engel, [http://citeseer.ist.psu.edu/23071.html A Framework for Network Protocol Software]
+  * [http://www.w3.org/2008/webapps/wiki/Main_Page W3C Network Communication API]
+  * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Maurice J. Bach  Design of the UNIX Operating System].
+
+Because of the great series of books by Stevens, we can explore the design and implementation of the TCP/IP protocol stack more easily than before, but it is still very very difficult to fully understand TCP/IP.
+We believe reimplementing a TCP/IP stack using the design patterns helps fully understanding TCP/IP, and we are currently using [http://citeseer.ist.psu.edu/23071.html the Conduit+ model].
+There are really many uncompleted tasks in this area, and you will work on supporting the socket interfaces in Web IDL, testing and fixing the current implementation, and a lot more.
+If you are seriously studying the TCP/IP network architecture, this project would be an interesting one for you.
+
+== Lively Kernel on ES ==
+  * Incorporate the portions of the HTML engines to ES that are necessary to run the Lively Kernel.
+
+=== Recommended readings ===
+  * [http://research.sun.com/projects/lively/ Sun Labs Lively Kernel]
+  * [http://www.youtube.com/watch?v=gGw09RZjQf8 The Lively Kernel (video)]
+  * [http://www.w3.org/Graphics/SVG/ Scalable Vector Graphics (SVG)]
+  * [http://www.whatwg.org/specs/web-apps/current-work/ HTML 5 Draft Recommendation]
+
+As a whole picture, running the Lively Kernel on top of the ES operating system is a very close image of the future operating system we are thinking about.
+To do that, the interfaces defined in the HTML 5 specification need to be the standard interfaces for the ES operating system, and currently we have just implemented CanvasRenderingContext2D interface using Cairo and FreeType.
+There are really a lot more works need to be done, and we hope you would make a steady progress in this area since this project will continue even after GSoC 2009.
