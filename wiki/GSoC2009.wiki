@@ -12,7 +12,7 @@ Note most of the code in ES are written in C++, and you need to have a good unde
   * Enhance esidl Web IDL compiler to provide better warnings, error messages, etc., for the developers.
 
 === Recommended readings ===
-  * [http://www.w3.org/TR/WebIDL/ Web IDL W3C Working Draft]
+  * [http://www.w3.org/TR/WebIDL/ Web IDL W3C Working Draft] ([http://dev.w3.org/2006/webapi/WebIDL/ Editor’s Draft])
   * [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript Language Specification]
   * [http://wiki.ecmascript.org/doku.php?id=es3.1:es3.1_proposal_working_draft ECMAScript 3. 1 Language Candidate Specification DRAFT]
   * Stanley B. Lippman, [http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545/ Inside the C++ Object Model].
