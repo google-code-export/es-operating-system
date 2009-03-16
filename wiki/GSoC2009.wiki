@@ -22,7 +22,7 @@ In ES, we are also using Web IDL to define interfaces for C++, and as the result
 By this way, we believe we can efficiently expand what we can do with Web applications in the longer term.
 
 Note that the implementation of our ECMAScript interpreter esjs is not for the optimal performance.
-We are rather concentrating in the object binding runtime implementation between ESCMAScript and the other native software components.
+We are rather concentrating in the object binding runtime implementation between ECMAScript and the other native software components.
 Porting the existing, open source ECMAScript VM implementation like [http://code.google.com/p/v8/ V8] to ES is another interesting project idea if you want to try.
 
 == A TCP/IP stack implementation based on design pattern ==
@@ -67,7 +67,7 @@ Google CLA form is here:
 http://code.google.com/legal/individual-cla-v1.0.html
 
 This form is required not because of Google Summer of Code but because ES operating system is released from Google.
-This form does not transfer copyright: the contributor retains his or her ownership in the work. 
+The CLA does not transfer copyright: the contributor retains his or her ownership in the work. 
 The CLA just grants Google a "perpetual, non-exclusive, royalty-free, etc..." right to use the work, sublicense it, and so on.
 
 If you have any questions, please ask away.
