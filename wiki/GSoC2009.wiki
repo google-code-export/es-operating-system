@@ -2,9 +2,7 @@
 
 = Ideas List for Google Summer of Code 2009 =
 
-We are applying for [http://socghop.appspot.com/ Google Summer of Code 2009] as a mentoring organization.
-Here is the list of ideas for the ES operating system project.
-If ES project is accepted for GSoC 2009, we welcome your application for GSoC 2009 with any of the ideas listed here or with your ideas related to the ES operating system.
+ES operating system has been accepted into the [http://socghop.appspot.com/ Google Summer of Code™ 2009] as a mentoring organization. Here is the list of ideas for the ES project. We welcome your application for GSoC 2009 with any of the ideas listed here or with your ideas related to the ES operating system.
 Note most of the code in ES are written in C++, and you need to have a good understanding of [http://www.research.att.com/~bs/3rd.html the C++ programming language].
 
 == A component object binding runtime implementation for ECMAScript and C++ based on Web IDL ==
