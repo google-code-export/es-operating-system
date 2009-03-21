@@ -119,16 +119,21 @@ Once your setup is completed, the following directory structures will be created
     +---tools               # command line tools for cross development
 }}}
 
+== And please participate in the ES operating system community ==
+
+For the build problems, please send your build log to our discussion group
+[http://groups.google.com/group/es-operating-system es-operating-system@googlegroups.com] so we can investigate.
+
 ----
 
-*Note*: If you are using Ubuntu 7.10, please specify the `-net none` option to run ES on QEMU as below:
+*Note (Ubuntu older than 8.04)*: The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere
+under /usr/share/fonts directory if they are not installed yet. 
+Unless you are using Fedora or Ubuntu 8.04 or later, you are most likely to do this step manually.
+
+*Note (Ubuntu 7.10)*: If you are using Ubuntu 7.10, please specify the `-net none` option to run ES on QEMU as below:
 
 {{{
 $ qemu -hda fat32.img -serial stdio -soundhw sb16 -net none
 }}}
 
 QEMU 0.9.0 comes with Ubuntu 7.10 seems to have a problem with the RTL8029AS Ethernet controller emulation.
-
-*Note*: The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere
-under /usr/share/fonts directory if they are not installed yet. 
-Unless you are using Fedora or Ubuntu 8.04 or later, you are most likely to do this step manually.
