@@ -2,14 +2,40 @@
 
 = Setting up the ES development environment using the setup script =
 
-If you have problems with building ES from the source tarballs manually, please use the following setup shell script:
+To build the ES operating system, a variety of development tools including
+binutils, GCC, Newlib, and other runtime libraries need to be built 
+as a first step. 
+The following steps allow you to set up ES operating system development kit
+using the 'setup' shell script.
+The 'setup' script will download the required files from the Internet, and
+generate build tools, runtime libraries, and ES operating system disk image.
+Note once the 'setup' script is started, it tries to install the prerequisites
+like gcc, bison, etc., using 'yum' or 'apt-get' and you must have privilege
+to execute the 'sudo' command.
 
-  http://es-operating-system.googlecode.com/svn/trunk/setup
+Note: The following Linux distributions are currently used to build ES operating system:
 
-It will download the required files from the Internet, and generate build tools, libraries, and ES operating system in sequence.
-Note once the setup script is started, it tries to install the prerequisites listed in the DeveloperSetup page, which requires you to execute the sudo command.
+ * Fedora 10 (Cambridge)
+ * Ubuntu 8.10 (Intrepid Ibex)
 
-The following steps set up the ES SDK under ~/es/sdk:
+The ES operating system can be built from the ES source tarball, or from the 
+ES subversion trunk. The latter might fail or create an unstable binaries
+because of the on-going changes made to the repository.
+
+== From the source tarball ==
+
+{{{
+$ cd
+$ mkdir es
+$ cd es
+$ wget http://es-operating-system.googlecode.com/files/es-x.y.z.tar.gz
+$ tar -zxvf es-x.y.z.tar.gz
+$ es-x.y.z/setup
+// snip
+usage: qemu -hda pc/init/fat32.img -serial stdio
+}}}
+
+== From the subversion repository ==
 
 {{{
 $ cd
@@ -20,13 +46,19 @@ $ chmod +x setup
 $ ./setup
 // snip
 usage: qemu -hda pc/init/fat32.img -serial stdio
+}}}
+
+When your setup has created an ES disk image successfuly, it shows how to start ES with QEMU.
+
+Both steps should have installed the ES SDK under ~/es/sdk. 
+So that you can use the ES SDK binaries later, please add ~/es/sdk/bin to your PATH:
+
+{{{
 $ export PATH=`pwd`/sdk/bin:$PATH
 }}}
 
-When your setup is completed, it shows how to start ES from QEMU. To build your own ES binaries later, please add the path to the ES SDK binaries as illustrated above.
-You should also add 'es' to the operating system list in Automake's config.sub file as described in the DeveloperSetup page.
-
-The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere under /usr/share/fonts directory if they are not installed yet. Unless you are using Fedora or Ubuntu 8.04 or later, you are most likely to do this step manually.
+You should also add 'es' to the operating system list in Automake's config.sub file
+as described in the DeveloperSetup page.
 
 Once your setup is completed, the following directory structures will be created in your home directory:
 
@@ -96,3 +128,7 @@ $ qemu -hda fat32.img -serial stdio -soundhw sb16 -net none
 }}}
 
 QEMU 0.9.0 comes with Ubuntu 7.10 seems to have a problem with the RTL8029AS Ethernet controller emulation.
+
+*Note*: The !TrueType fonts listed in the DeveloperSetup page must also be installed somewhere
+under /usr/share/fonts directory if they are not installed yet. 
+Unless you are using Fedora or Ubuntu 8.04 or later, you are most likely to do this step manually.
