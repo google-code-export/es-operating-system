@@ -36,6 +36,7 @@ Porting the existing, open source ECMAScript VM implementation like [http://code
   * Hermann Hueni, Ralph Johnson, and Robert Engel, [http://citeseer.ist.psu.edu/23071.html A Framework for Network Protocol Software]
   * [http://www.w3.org/2008/webapps/wiki/Main_Page W3C Network Communication API]
   * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Maurice J. Bach  Design of the UNIX Operating System].
+  * [http://code.google.com/p/es-operating-system/wiki/Conduit The design of the ES operating system's TCP/IP stack]
 
 Because of the great series of books by Stevens, we can explore the design and implementation of the TCP/IP protocol stack more easily than before, but it is still very very difficult to fully understand TCP/IP.
 We believe reimplementing a TCP/IP stack using the design patterns helps fully understanding TCP/IP, and we are currently using [http://citeseer.ist.psu.edu/23071.html the Conduit+ model].
