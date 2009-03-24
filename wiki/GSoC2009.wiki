@@ -33,13 +33,13 @@ Porting the existing, open source ECMAScript VM implementation like [http://code
 
   * W. Richard Stevens, [http://www.amazon.com/TCP-Illustrated-Protocols-Addison-Wesley-Professional/dp/0201633469/ TCP/IP Illustrated, Volume 1: The Protocols]
   * W. Richard Stevens, and Gary R. Wright, [http://www.amazon.com/exec/obidos/ISBN=020163354X/ TCP/IP Illustrated, Volume 2: The Implementation]
-  * Hermann Hueni, Ralph Johnson, and Robert Engel, [http://citeseer.ist.psu.edu/23071.html A Framework for Network Protocol Software]
+  * Hermann Hueni, Ralph Johnson, and Robert Engel, [http://portal.acm.org/citation.cfm?id=217875 A Framework for Network Protocol Software]
   * [http://www.w3.org/2008/webapps/wiki/Main_Page W3C Network Communication API]
   * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Maurice J. Bach  Design of the UNIX Operating System].
   * [http://code.google.com/p/es-operating-system/wiki/Conduit The design of the ES operating system's TCP/IP stack]
 
 Because of the great series of books by Stevens, we can explore the design and implementation of the TCP/IP protocol stack more easily than before, but it is still very very difficult to fully understand TCP/IP.
-We believe reimplementing a TCP/IP stack using the design patterns helps fully understanding TCP/IP, and we are currently using [http://citeseer.ist.psu.edu/23071.html the Conduit+ model].
+We believe reimplementing a TCP/IP stack using the design patterns helps fully understanding TCP/IP, and we are currently using [http://portal.acm.org/citation.cfm?id=217875 the Conduit+ model].
 There are really many uncompleted tasks in this area, and you will work on supporting the socket interfaces in Web IDL, testing and fixing the current implementation, and a lot more.
 If you are seriously studying the TCP/IP network architecture, this project would be an interesting one for you.
 
