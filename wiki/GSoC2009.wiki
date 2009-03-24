@@ -5,6 +5,8 @@
 ES operating system has been accepted into the [http://socghop.appspot.com/ Google Summer of Code™ 2009] as a mentoring organization. Here is the list of ideas for the ES project. We welcome your application for GSoC 2009 with any of the ideas listed here or with your ideas related to the ES operating system.
 Note most of the code in ES are written in C++, and you need to have a good understanding of [http://www.research.att.com/~bs/3rd.html the C++ programming language].
 
+If you are looking at participating in ES through GSoC 2009, please feel free to post your questions to [http://groups.google.com/group/es-operating-system our discussion group], or to send your questions directly to the administrator. Note #esos at freenode may not be not very active because of the different time zones.
+
 == A component object binding runtime implementation for ECMAScript and C++ based on Web IDL ==
   * Keep up with the on-going Web IDL standardization efforts, and update ECMAScript interpreter and the ES kernel as well.
   * Enhance esidl Web IDL compiler to provide better warnings, error messages, etc., for the developers.
