@@ -171,6 +171,25 @@ q
 
 The `edit` program is originally introduced by Kernighan and Plauger `[`1, 2`]`. It was written in Ratfor and then in Pascal at that time. In ES, `edit` is another ECMAScript script. ECMAScript is actually a powerful language with the support for exception, regular expression, and more. In the ES operating system, you can easily write a command line shell program or a text editor in ECMAScript; those programs are usually written in C or in C++ in the other operating systems.
 
+= Running ES software components as Linux applications =
+
+You can run and test ES software components as Linux applications without executing QEMU.
+
+To do this with your computer, change the current directory to
+`~es/local/os/testsuite`, and copy `~/es/trunk/esjs/scripts/*.js` and
+`~/es/local/esjs/esjs` to there (probably you want to use `ln -s` rather
+than `cp`). Then run the following command:
+
+{{{
+$ ./canvas file/esjs shell.js
+}}}
+
+In this configuration, canvas and esjs are running in separate processes.
+Please try to execute other commands like figure there. 
+It runs much faster than on QEMU; it is like you run ES on an actual PC.
+
+*Note*: Currently this configuration is supported only on x86 linux.
+
 == References ==
 
 `[`1`]` B. W. Kernighan and P. J. Plauger, Software Tools, Addison-Wesley, 1976.
