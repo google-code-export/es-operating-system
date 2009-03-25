@@ -16,6 +16,8 @@ If you are looking at participating in ES through GSoC 2009, please feel free to
   * [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript Language Specification]
   * [http://wiki.ecmascript.org/doku.php?id=es3.1:es3.1_proposal_working_draft ECMAScript 3. 1 Language Candidate Specification DRAFT]
   * Stanley B. Lippman, [http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545/ Inside the C++ Object Model].
+  * Mendelsohn, N. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
+  * Szyperski, C., Gruntz, D., Murer, S. Component Software – Beyond Object-Oriented Programming. 2nd ed., Addison-Wesley, 2002.
 
 Web IDL is a new standard interface definition language used in HTML 5 and other web application APIs for ECMAScript and Java.
 In ES, we are also using Web IDL to define interfaces for C++, and as the result, C++ software components developed for ES can be easily and seamlessly controlled by ECMAScript.
