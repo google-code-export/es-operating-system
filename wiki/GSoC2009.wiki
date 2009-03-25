@@ -28,8 +28,9 @@ We are rather concentrating in the object binding runtime implementation between
 Porting the existing, open source ECMAScript VM implementation like [http://code.google.com/p/v8/ V8] to ES is another interesting project idea if you want to try.
 
 == A TCP/IP stack implementation based on design pattern ==
-  * Finalize the interface definitions for socket, etc.
-  * Complete the IPv4 TCP/IP stack implementation based on design pattern.
+ * Refine and test locking mechanisms around conduits.
+ * Simplify the excessive four layers of Muxes for TCP and UDP to a single Mux.
+ * Define socket APIs based on W3C Web Socket and other specifications so that they can be directly used from ECMAScript, and update the stack implementation accordingly.
 
 === Recommended readings ===
 
