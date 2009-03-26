@@ -175,6 +175,8 @@ The `edit` program is originally introduced by Kernighan and Plauger `[`1, 2`]`.
 
 You can run and test ES software components as Linux applications without executing QEMU.
 
+http://es-operating-system.googlecode.com/svn/html/aslinuxapps.png
+
 To do this with your computer, change the current directory to
 `~es/local/os/testsuite`, and copy `~/es/trunk/esjs/scripts/*.js` and
 `~/es/local/esjs/esjs` to there (probably you want to use `ln -s` rather
