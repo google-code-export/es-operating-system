@@ -192,6 +192,27 @@ It runs much faster than on QEMU; it is like you run ES on an actual PC.
 
 *Note*: Currently this configuration is supported only on x86 linux.
 
+= Running the ES networking stack as a Linux application =
+
+The ES networking stack may be tested as a regular application by binding to the appropriate network interface. To do so, you must first register the desired network interface in trunk/os/kernel/posix/posix_init.cpp:
+
+{{{
+try
+    {
+        Tap* tap = new Tap("eth1");
+        device->bind("ethernet",
+        static_cast<es::Stream*>(tap));
+}
+
+}}}
+
+The default network interface is eth1. You may change this to any interface, including wireless interfaces and virtual interfaces (eth0:1). Using a wireless interface may lead to erratic results: you should make sure you are correctly associated to your access point but that your host operating system is not using the interface. Any changes to posix_init.cpp should not be committed.
+
+Once compiled, you may run the applications in local/os/net/testsuite. The respective source code is contained in trunk/os/net/testsuite. To test whether your interface is correctly bound you may run the 'dhcp' application, which simply requests an IP address through the DHCP protocol, resolves 'www.nintendo.com', and attempts to ping the resulting address three times. Using a protocol analyzer such as Wireshark may be useful to view the output of the ES stack on the wire.
+
+Some applications have static host, router and nameserver addresses. Make sure you alter them to reflect your network configuration and re-compile before attempting to run the applications.
+
+
 == References ==
 
 `[`1`]` B. W. Kernighan and P. J. Plauger, Software Tools, Addison-Wesley, 1976.
