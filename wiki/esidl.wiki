@@ -43,9 +43,6 @@ module es
 
 == Options ==
 
--C
-  Do not discard comments in JavaDoc format.
-
 -I directory
   Adds directory to the IDL file search path.
   Header files and reflection data are created retaining their hierarchical structure below `directory`.
@@ -244,21 +241,17 @@ virtual void setStrokeStyle(const Any strokeStyle) = 0;
 
 When attributes are defined in IDL, setter and getter methods are generated automatically
 (only getter is created for readonly attributes). 
-A getter for a `boolean` attribute is named in the style "is + attribute name".
 
 ==== ES IDL ====
 {{{
 readonly attribute double X;
 attribute double Y;
-attribute boolean on;
 }}}
 ==== C++ header file ====
 {{{
 virtual double getX() = 0;
 virtual double getY() = 0;
 virtual void setY(double Y) = 0;
-virtual bool isOn() = 0;
-virtual void setOn(bool on) = 0;
 }}}
 
 === Constants ===
