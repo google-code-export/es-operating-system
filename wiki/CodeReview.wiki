@@ -31,3 +31,5 @@ $ svn merge -r [BRANCHED OUT REVISION #]:[YOUR CHANGE REVISION #] https://es-ope
 $ svn commit
 $ svn delete https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 }}}
+
+Please read [http://code.google.com/p/support/wiki/CodeReviews this page] for further information.
