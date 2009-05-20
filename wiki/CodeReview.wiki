@@ -1,0 +1,34 @@
+#summary Requesting code review
+
+= Requesting Code Review =
+
+To merge your code into the trunk, please follow the following steps:
+
+{{{
+$ cd [YOUR WORKING COPY of the main trunk]
+$ svn update
+}}}
+
+Make your changes. Then create a copy of the main trunk in your personal branch and commit your change there:
+
+{{{
+$ svn copy https://es-operating-system.googlecode.com/svn/trunk
+https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]
+$ svn switch https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
+$ svn commit
+}}}
+
+To request code review, please visit,
+
+ http://code.google.com/p/es-operating-system/source/detail?r=[REVISION # OF THE CHANGE]
+
+and click "Request Code Review" link. Fill in the form and select your mentor(s) in the Owner field. Please also include es-operating-system-dev@googlegroups.com in the Cc list. Then click "Submit issue".
+
+Once your mentor(s) give you positive score(s) for your change, merge your change into the main trunk:
+
+{{{
+$ svn switch https://es-operating-system.googlecode.com/svn/trunk
+$ svn merge -r [BRANCHED OUT REVISION #]:HEAD https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
+$ svn commit
+$ svn delete https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
+}}}
