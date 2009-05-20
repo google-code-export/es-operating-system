@@ -27,7 +27,7 @@ Once your mentor(s) give you positive score(s) for your change, merge your chang
 
 {{{
 $ svn switch https://es-operating-system.googlecode.com/svn/trunk
-$ svn merge -r [BRANCHED OUT REVISION #]:HEAD https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
+$ svn merge -r [BRANCHED OUT REVISION #]:[YOUR CHANGE REVISION #] https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 $ svn commit
 $ svn delete https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 }}}
