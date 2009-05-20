@@ -5,7 +5,7 @@
 To merge your code into the trunk, please follow the following steps:
 
 {{{
-$ cd [YOUR WORKING COPY of the main trunk]
+$ cd [YOUR WORKING COPY OF THE MAIN TRUNK]
 $ svn update
 }}}
 
