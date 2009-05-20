@@ -12,8 +12,7 @@ $ svn update
 Make your changes. Then create a copy of the main trunk in your personal branch and commit your change there:
 
 {{{
-$ svn copy https://es-operating-system.googlecode.com/svn/trunk
-https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]
+$ svn copy https://es-operating-system.googlecode.com/svn/trunk https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]
 $ svn switch https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 $ svn commit
 }}}
