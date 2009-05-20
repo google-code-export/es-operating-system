@@ -21,7 +21,7 @@ To request code review, please visit,
 
  http://code.google.com/p/es-operating-system/source/detail?r=[REVISION # OF THE CHANGE]
 
-and click "Request Code Review" link. Fill in the form and select your mentor(s) in the Owner field. Please also include es-operating-system-dev@googlegroups.com in the Cc list. Then click "Submit issue".
+and click "Request Code Review" link. Fill in the form and select your mentor(s) in the Owner field. Please also include es-operating-system-dev@googlegroups.com in the Cc list. Then click "Submit issue". Please read [http://code.google.com/p/support/wiki/CodeReviews this page] for further information about code review.
 
 Once your mentor(s) give you positive score(s) for your change, merge your change into the main trunk:
 
@@ -30,11 +30,9 @@ $ svn switch https://es-operating-system.googlecode.com/svn/trunk
 $ svn merge -r [BRANCHED OUT REVISION #]:[YOUR CHANGE REVISION #] https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 }}}
 
-Finally you will commit your change to the main trunk. Please write a meaningful log message when you commit since it'll be included in the !ChangeLog file. Please read [http://www.gnu.org/prep/standards/html_node/Change-Logs.html this page] for how to write a change logs:
+Now you can commit your change to the main trunk. Please commit it with a meaningful log message since it will be included in the !ChangeLog file. Please read [http://www.gnu.org/prep/standards/html_node/Change-Logs.html this page] for how to write a change logs:
 
 {{{
 $ svn commit
 $ svn delete https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 }}}
-
-Please read [http://code.google.com/p/support/wiki/CodeReviews this page] for further information.
