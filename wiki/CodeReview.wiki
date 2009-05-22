@@ -17,6 +17,8 @@ $ svn switch https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[Y
 $ svn commit
 }}}
 
+Note: Your local changes will remain when you svn switch your working copy to the branch (see http://svnbook.red-bean.com/en/1.0/ch04s05.html).
+
 To request code review, please visit,
 
  http://code.google.com/p/es-operating-system/source/detail?r=[REVISION # OF THE CHANGE]
