@@ -4,7 +4,7 @@
 
 A virtual LAN, commonly known as a VLAN, is a group of hosts with a common set of requirements that communicate as if they were attached to the Broadcast domain, regardless of their physical location. A VLAN has the same attributes as a physical LAN, but it allows for end stations to be grouped together even if they are not located on the same network switch.
 
-For testing udp, you will have to set up vlan since presently there are some bugs conected with es loopback interface and other address related aspects
+For testing udp, you will have to set up vlan (while testing apps under es/local/testsuite, if loopback interface is used, packets are not forwarded to linux loopback interface, but are simply echoed back. To get a better picture of how packets move in an actual network, It is better to set up vlan)
 
 For setting up vlan on ubuntu, please follow the link http://wilsonyang.com/2008/04/27/vlan-configuration-on-ubuntu/
 A successful set up should show various virtual lan interfaces when 'ifconfig' comand is executed. Default virtual interfaces are 
