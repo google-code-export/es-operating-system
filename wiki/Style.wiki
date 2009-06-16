@@ -141,6 +141,9 @@ Both pointer types and reference types should be written with no space between t
 ?  char* p, *q;
 }}}
 
+== Horizontal Whitespace ==
+Do not leave trailing white space at the ends of lines.
+
 == Third-Party Code ==
 
 When modifying code not originated from ES operating system, follow the conventions within that code for consistency.
