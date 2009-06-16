@@ -41,7 +41,7 @@ Every interface definition in .idl and .h should be commented in [http://java.su
 
 Use spaces, not tabs. Indent 4 spaces at a time.
 
-*Note*: Indent 8 spaces in `.S` (assembly language), `.ac` (autoconf), and `.am` (automake) files.
+*Note*: Indent 8 spaces in `.S` (assembly language), `.ac` (autoconf), and `.am` (automake) files using tabs.
 
 == Names ==
 
