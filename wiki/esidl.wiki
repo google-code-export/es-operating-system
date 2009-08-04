@@ -204,6 +204,55 @@ public:
 };
 }}}
 
+=== Attributes ===
+
+For each attribute defined on the IDL interface, a getter method is declared. For each attribute defined on the IDL interface that is not read only, a corresponding setter method is also declared.
+
+==== ES IDL ====
+{{{
+interface CanvasRenderingContext2D 
+{
+    attribute float globalAlpha;
+};
+}}}
+==== C++ header file ====
+{{{
+class CanvasRenderingContext2D : public Object 
+{
+public:
+    virtual float getGlobalAlpha() = 0;
+    virtual void setGlobalAlpha(float globalAlpha) = 0;
+};
+}}}
+
+=== `[`PutForwards`]` ===
+
+If the `[PutForwards]` extended attribute appears on a read only attribute, a setter method is declared taking the specified attribute type as an argument.
+
+==== ES IDL ====
+{{{
+interface Name
+{
+    attribute DOMString full;
+    attribute DOMString family;
+    attribute DOMString given;
+  };
+
+interface Person 
+{
+    [PutForwards=full] readonly attribute Name name;
+};
+}}}
+==== C++ header file ====
+{{{
+class Person 
+{
+public:
+    virtual Name* getName() = 0;
+    virtual void setName(const char* name) = 0;  // setName() does not take Name* as an argument.
+};
+}}}
+
 === Primitive types ===
 
 Primitive types are handled as follows:
@@ -313,24 +362,7 @@ virtual void setStrokeStyle(const Any strokeStyle) = 0;
 
 `Object` is converted to void`*` and is implicitly assumed that the pointer is an interface pointer.
 
-=== Attributes ===
-
-When attributes are defined in IDL, setter and getter methods are generated automatically
-(only getter is created for readonly attributes). 
-
-==== ES IDL ====
-{{{
-readonly attribute double X;
-attribute double Y;
-}}}
-==== C++ header file ====
-{{{
-virtual double getX() = 0;
-virtual double getY() = 0;
-virtual void setY(double Y) = 0;
-}}}
-
-=== exception ===
+=== Exceptions ===
 
 `exception` is converted to `struct` in header files.
 
@@ -341,6 +373,7 @@ exception E
     long code;
 };
 }}}
+
 ==== C++ header file ====
 {{{
 struct E
@@ -348,36 +381,6 @@ struct E
     int code;
 };
 }}}
-
-=== struct ===
-
-`struct` is kept as `struct` in the header file.
-
-==== ES IDL ====
-{{{
-struct Geometry
-{
-    unsigned long heads;
-    unsigned long cylinders;
-    unsigned long sectorsPerTrack;
-    unsigned long bytesPerSector;
-    long long diskSize;
-};
-}}}
-==== C++ header file ====
-{{{
-struct Geometry
-{
-    unsigned int heads;
-    unsigned int cylinders;
-    unsigned int sectorsPerTrack;
-    unsigned int bytesPerSector;
-    long long diskSize;
-};
-}}}
-
-*Note*: `struct` is not supported in the ECMAScript interpreter, esjs, in the current ES implementation. We plan to remove this limitation in future versions.
-
 
 === native ===
 
