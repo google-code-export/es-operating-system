@@ -331,6 +331,41 @@ struct DOMException
 };
 }}}
 
+=== Implements statements ===
+
+An implements statement declares the all objects implementing an interface A (the first name) MUST also implement interface B (the second name).
+In C++, interface members in B are mixed in the C++ interface class A. If interface B is used only for interface A, a typedef statement is generated to tread B as A.
+
+==== Web IDL ====
+{{{
+interface Node 
+{
+    readonly attribute unsigned short nodeType;
+    // ...
+};
+
+interface EventTarget 
+{
+    void addEventListener(DOMString type, EventListener listener, boolean useCapture);
+    // ...
+};
+
+Node implements EventTarget;
+Document implements HTMLDocument;
+}}}
+
+==== C++ header file ====
+{{{
+class Node : public Object
+{
+    unsigned short getNodeType();
+    void addEventListener(DOMString type, EventListener listener, bool useCapture);
+    // ...
+};
+
+typedef Document HTMLDocument;
+}}}
+
 == C++ mapping - TBD ==
 
 === Sequences ===
