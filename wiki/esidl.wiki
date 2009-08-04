@@ -16,12 +16,13 @@ esidl `[`option`]` filename ...
 
 esidl creates C++ header files (.h) from IDL source files (.idl).
 
-In the IDL files, interface and method descriptions can be written in [http://java.sun.com/j2se/javadoc/ Javadoc] format.
-The esidl compiler writes out the Javadoc comments in the IDL files to the C++ header files.
+Note: To expand mixins specified by the `implements` Web IDL statement, related IDL files MUST be processed at once by specifying the every IDL filename in the argument list.
 
 === Preprocessing ===
 
 In the IDL files, directives such as `#`ifdef, `#`include, etc. can be used (esidl currently calls `cpp` internally).
+
+Note: In the IDL files, interface and method descriptions can be written in [http://java.sun.com/j2se/javadoc/ Javadoc] format, and the esidl compiler copies the Javadoc comments in the IDL files to the C++ header files.
 
 == Options ==
 
@@ -63,19 +64,32 @@ The mapping from IDL source files (.idl) to C++ header files (.h) is as follows:
 
 === Modules ===
 
-Modules create a C++ [Namespace namespace].
+Modules create a C++ namespace if `-namespace` option is not used.
 
 ==== ES IDL ====
 {{{
-module es
+module dom
 {
 };
 }}}
 ==== C++ header file ====
 {{{
-namespace es
+namespace dom
 {
 }
+}}}
+
+If `-namespace` option is used, module names are ignored.
+
+==== ES IDL ====
+{{{
+module dom
+{
+};
+}}}
+==== C++ header file ====
+{{{
+NA
 }}}
 
 === Interface ===
