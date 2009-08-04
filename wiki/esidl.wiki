@@ -34,7 +34,7 @@ Note: In the IDL files, interface and method descriptions can be written in [htt
   Disables exception specifications being generated for `raises`, `getraises`, and `setraises` clauses.
 
 -indent style
-  Generates the C++ header files in the specified coding style. Currently `style` can be either `[http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml google]` or `[http://webkit.org/coding/coding-style.html webkit]`. If -indent option is not specified, the [http://code.google.com/p/es-operating-system/wiki/Style ES coding style] is used.
+  Generates the C++ header files in the specified coding style. Currently `style` can be either [http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml `google`] or [http://webkit.org/coding/coding-style.html `webkit`]. If -indent option is not specified, the [http://code.google.com/p/es-operating-system/wiki/Style ES coding style] is used.
 
 -include file
   Processes `file` as if it is included from the source file.
