@@ -243,6 +243,7 @@ interface Person
     [PutForwards=full] readonly attribute Name name;
 };
 }}}
+
 ==== C++ header file ====
 {{{
 class Person 
@@ -260,16 +261,18 @@ Primitive types are handled as follows:
 || ES IDL || C++ header file || Comments ||
 || octet || unsigned char ||
 || char || char ||
-|| wchar || wchar_t ||
-|| string || char`*` ||
-|| wstring || wchar_t`*` ||
 || short || short ||
 || long || int || 4 bytes ||
 || long long || long long || 8 bytes ||
 || boolean || bool ||
 || float || float ||
 || double || double ||
-|| long double || long double ||
+
+=== DOMString ===
+
+DOMString is converted to `char*` by default. If `-string` option is used, the specified C++ type name is used instead of `char*`.
+
+Note: esidl allows `string` as a string type name in addition to `DOMString`.
 
 === Interface names ===
 
@@ -284,64 +287,6 @@ Cache create(in Stream backingStore);
 {{{
 virtual void mount(es::Stream* disk) = 0;
 virtual es::Cache* create(es::Stream* backingStore) = 0;
-}}}
-
-=== Arrays ===
-
-An array is a data type where the number of elements is predetermined.
-An array must be defined as a type using `typedef`.
-
-==== ES IDL ====
-{{{
-typedef octet Mac[6];
-long addMulticastAddress(in Mac mac);
-}}}
-====  C++ header file ====
-{{{
-typedef unsigned char Mac[6];
-virtual int addMulticastAddress(const Mac mac) = 0;
-}}}
-
-=== Sequences ===
-
-A sequence is a data structure where the number of elements are specified at runtime.
-Like arrays, a sequence must be defined as a type using `typedef`.
-In the header files, an argument specifying the length of the sequence is added automatically.
-
-==== ES IDL ====
-{{{
-typedef sequence<unsigned short> Name;
-Name getName();
-long setName(in Name name);
-}}}
-==== C++ header file ====
-{{{
-typedef unsigned short* Name;
-virtual int getName(Name name, int nameLength) = 0;
-virtual int setName(const Name name, int nameLength) = 0;
-}}}
-
-=== Octet sequences ===
-
-sequence<octet> is converted to void`*` and not unsigned char`*` in the header file.
-
-==== ES IDL ====
-{{{
-interface Stream
-{
-    typedef sequence<octet> Buf;
-    Buf read();
-    long write(in Buf src);
-};
-}}}
-==== C++ header file ====
-{{{
-class IStream
-{
-public:
-    virtual int read(void* buf, int bufLength) = 0;
-    virtual int write(const void* src, int srcLength) = 0;
-};
 }}}
 
 === any ===
@@ -368,19 +313,87 @@ virtual void setStrokeStyle(const Any strokeStyle) = 0;
 
 ==== ES IDL ====
 {{{
-exception E
+exception DOMException 
 {
-    long code;
+    const unsigned short INDEX_SIZE_ERR = 1;
+    const unsigned short DOMSTRING_SIZE_ERR = 2;
+    unsigned short code;
 };
 }}}
 
 ==== C++ header file ====
 {{{
-struct E
+struct DOMException 
 {
-    int code;
+    const unsigned short INDEX_SIZE_ERR = 1;
+    const unsigned short DOMSTRING_SIZE_ERR = 2;
+    unsigned short code;
 };
 }}}
+
+== C++ mapping - TBD ==
+
+=== Sequences ===
+
+Note: Maybe a sequence is represented by an object with the index setter and getter methods.
+
+A sequence is a data structure where the number of elements are specified at runtime.
+In the header files, an argument specifying the length of the sequence is added automatically.
+
+==== ES IDL ====
+{{{
+typedef sequence<unsigned short> Name;
+Name getName();
+long setName(in Name name);
+}}}
+==== C++ header file ====
+{{{
+typedef unsigned short* Name;
+virtual int getName(Name name, int nameLength) = 0;
+virtual int setName(const Name name, int nameLength) = 0;
+}}}
+
+=== Octet sequences ===
+
+sequence`<`octet`>` is converted to void`*` and not unsigned char`*` in the header file.
+
+Note: !ByteArray is under consideration at W3C.
+
+==== ES IDL ====
+{{{
+interface Stream
+{
+    sequence<octet> read();
+    long write(sequence<octet> src);
+};
+}}}
+
+==== C++ header file ====
+{{{
+class IStream
+{
+public:
+    virtual int read(void* sequence, int sequenceLength) = 0;
+    virtual int write(const void* src, int srcLength) = 0;
+};
+}}}
+
+=== Arrays ===
+
+TBD: The grammar for Arrays is not defined yet in the specification.
+
+==== ES IDL ====
+{{{
+typedef octet Mac[6];
+long addMulticastAddress(in Mac mac);
+}}}
+====  C++ header file ====
+{{{
+typedef unsigned char Mac[6];
+virtual int addMulticastAddress(const Mac mac) = 0;
+}}}
+
+== C++ mapping - ES extension ==
 
 === native ===
 
@@ -390,7 +403,7 @@ struct E
 {{{
 native void_pointer;
 
-void exit(in void_pointer val);
+void exit(void_pointer val);
 }}}
 ==== C++ header file ====
 {{{
