@@ -66,7 +66,7 @@ The mapping from IDL source files (.idl) to C++ header files (.h) is as follows:
 
 Modules create C++ namespaces if `-namespace` option is not used.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 module dom
 {
@@ -81,7 +81,7 @@ namespace dom
 
 If `-namespace` option is used, module names are ignored.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 module dom
 {
@@ -96,7 +96,7 @@ NA
 
 The interface creates a C++ abstract class.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface CanvasRenderingContext2D
 {
@@ -115,7 +115,7 @@ A static class method to retrieve the qualified name of the interface, which is 
 
 Constants defined in interfaces and exceptions are defined as static class/struct members.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface MediaError 
 {
@@ -141,7 +141,7 @@ public:
 
 Each operation defined in the IDL interface will be mapped to one or more virtual member functions in the C++ interface class. 
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface CanvasRenderingContext2D 
 {
@@ -161,7 +161,7 @@ class CanvasRenderingContext2D : public Object
 
 If the `optional` keyword appears on an operation argument, it indicates that the operation can be invoked by passing values only for the those arguments appearing before the optional argument in the operation's argument list.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface ColorCreator 
 {
@@ -183,7 +183,7 @@ public:
 
 If the final argument uses the `...` terminal, it indicates that the operation is variadic, and can be passed zero or more arguments after the regular arguments.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface IntegerSet
 {
@@ -208,7 +208,7 @@ public:
 
 For each attribute defined on the IDL interface, a getter method is declared. For each attribute defined on the IDL interface that is not read only, a corresponding setter method is also declared.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface CanvasRenderingContext2D 
 {
@@ -229,7 +229,7 @@ public:
 
 If the `[PutForwards]` extended attribute appears on a read only attribute, a setter method is declared taking the specified attribute type as an argument.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface Name
 {
@@ -258,7 +258,7 @@ public:
 
 Primitive types are handled as follows:
 
-|| ES IDL || C++ header file || Comments ||
+|| Web IDL || C++ header file || Comments ||
 || octet || unsigned char ||
 || char || char ||
 || short || short ||
@@ -278,7 +278,7 @@ Note: esidl allows `string` as a string type name in addition to `DOMString`.
 
 An interface name used as a method argument or return value will be treated as an interface pointer in the header file.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 void mount(in Stream disk);
 Cache create(in Stream backingStore);
@@ -293,7 +293,7 @@ virtual es::Cache* create(es::Stream* backingStore) = 0;
 
 `any` is converted to `Any`.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 attribute any strokeStyle;
 }}}
@@ -311,7 +311,7 @@ virtual void setStrokeStyle(const Any strokeStyle) = 0;
 
 `exception` is converted to `struct` in header files.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 exception DOMException 
 {
@@ -340,7 +340,7 @@ Note: Maybe a sequence is represented by an object with the index setter and get
 A sequence is a data structure where the number of elements are specified at runtime.
 In the header files, an argument specifying the length of the sequence is added automatically.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 typedef sequence<unsigned short> Name;
 Name getName();
@@ -359,7 +359,7 @@ sequence`<`octet`>` is converted to void`*` and not unsigned char`*` in the head
 
 Note: !ByteArray is under consideration at W3C.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 interface Stream
 {
@@ -382,7 +382,7 @@ public:
 
 TBD: The grammar for Arrays is not defined yet in the specification.
 
-==== ES IDL ====
+==== Web IDL ====
 {{{
 typedef octet Mac[6];
 long addMulticastAddress(in Mac mac);
