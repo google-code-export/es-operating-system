@@ -5,10 +5,8 @@
 
 == Introduction ==
 
-The IDL compiler, esidl, is a program that generates C++ header files and interface reflection data files from the interface definitions written in IDL (interface definition language).
-In esidl, the syntax is that of [http://www.w3.org/TR/WebIDL/ Web IDL] which is used in the HTML and other specifications published from [http://www.w3.org/ W3C]. esidl also supports a few syntaxes defined in [http://www.omg.org/gettingstarted/omg_idl.htm OMG IDL] from which Web IDL has been developed.
-
-*Note*: Although esidl uses OMG IDL syntax, C++ bindings are defined in a way unique to ES as described below. Apart from the IDL grammar, there is no relation to CORBA with esidl.
+The IDL compiler, esidl, is a program that generates C++ header files from the interface definitions written in [http://dev.w3.org/2006/webapi/WebIDL/ Web IDL]. 
+Web IDL is an interface definition language being developed at W3C and used in the HTML 5 and other specifications published from [http://www.w3.org/ W3C].
 
 == Syntax ==
 
@@ -16,9 +14,7 @@ esidl `[`option`]` filename ...
 
 == Description ==
 
-esidl creates C++ header files (.h) and binary format reflection data (.ent) from IDL source files (.idl).
-Unlike other IDL compilers, esidl does not generate stub code for procedure calls.
-This is because the ES operating system's kernel processes parameter passing, like the marshalling process, at the meta-level using reflection.
+esidl creates C++ header files (.h) from IDL source files (.idl).
 
 In the IDL files, interface and method descriptions can be written in [http://java.sun.com/j2se/javadoc/ Javadoc] format.
 The esidl compiler writes out the Javadoc comments in the IDL files to the C++ header files.
@@ -27,25 +23,17 @@ The esidl compiler writes out the Javadoc comments in the IDL files to the C++ h
 
 In the IDL files, directives such as `#`ifdef, `#`include, etc. can be used (esidl currently calls `cpp` internally).
 
-==== ES IDL ====
-{{{
-#ifndef ES_BASE_IFILE_IDL_INCLUDED
-#define ES_BASE_IFILE_IDL_INCLUDED
-
-#include "es/base/IStream.idl"
-
-module es
-{
-};
-
-#endif // ES_BASE_IFILE_IDL_INCLUDED
-}}}
-
 == Options ==
 
 -I directory
   Adds directory to the IDL file search path.
-  Header files and reflection data are created retaining their hierarchical structure below `directory`.
+  Header files are created retaining their hierarchical structure below `directory`.
+
+-fno-exceptions
+  Disable exception specifications being generated for `raises`, `getraises`, and `setraises` clauses.
+
+-indent style
+  Generate the C++ header files in the specified coding style. Currently `style` can be either `[http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml google]` or `[http://webkit.org/coding/coding-style.html webkit]`. If -indent option is not specified, the [http://code.google.com/p/es-operating-system/wiki/Style ES coding style] is used.
 
 -include file
   Processes `file` as if it is included from the source file.
@@ -54,8 +42,20 @@ module es
   Adds directory to the system IDL file search path.
   Header files and reflection data are created retaining their hierarchical structure below `directory`.
 
--object base_object_name
-  If the defined interface does not extend any interface, `esidl` implicitly assumes the defined interface is derived from the interface specified by `base_object_name`.
+-namespace name
+  Ignore module names in the IDL files and all the definitions are grouped in a single namespace given by `name`.
+
+-object name
+  If the defined interface does not extend any interface, `esidl` implicitly assumes the defined interface is derived from the interface specified by `name`. The default name is `Object`.
+
+-template
+  Generates a C++ header file for each IDL file that can be used for a bridge implementation between the C++ module and the Web browser like NPAPI bridge for Web IDL.
+
+-skeleton
+  Generates a C++ header file for each IDL interface that can be used as a skeleton for the interface implementation.
+
+-string name
+  Specify the C++ class name that maps Web IDL's DOMString. The default is `char*`.
 
 == C++ mapping ==
 
