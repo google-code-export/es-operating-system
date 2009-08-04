@@ -311,7 +311,31 @@ Primitive types are handled as follows:
 
 === DOMString ===
 
-DOMString is converted to `char*` by default. If `-string` option is used, the specified C++ type name is used instead of `char*`.
+DOMString is converted to `char*` by default. 
+
+==== Web IDL ====
+{{{
+attribute DOMString name;
+}}}
+==== C++ header file ====
+{{{
+virtual char* getName(char* name, int nameLength) = 0;
+virtual void setName(const char* name) = 0;
+}}}
+
+If `-string` option is used, the specified C++ type name is used instead of `char*`. If `-string std::string` is specified, DOMString is mapped as below:
+
+==== Web IDL ====
+{{{
+attribute DOMString name;
+}}}
+==== C++ header file ====
+{{{
+virtual std::string getName() = 0;
+virtual void setName(const std::string name) = 0;
+}}}
+
+Notice the getter method does not take any argument if `-string` option is used.
 
 Note: esidl allows `string` as a string type name in addition to `DOMString`.
 
@@ -343,6 +367,8 @@ attribute any strokeStyle;
 virtual Any getStrokeStyle(void* strokeStyle, int strokeStyleLength) = 0;
 virtual void setStrokeStyle(const Any strokeStyle) = 0;
 }}}
+
+Note: If `-string` option is used, methods that return Any type value do not take any argument.
 
 === Object ===
 
