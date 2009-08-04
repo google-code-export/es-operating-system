@@ -222,27 +222,6 @@ Primitive types are handled as follows:
 || double || double ||
 || long double || long double ||
 
-=== Parameter attributes ===
-
-Parameter attributes specify the use of arguments:
-`in` is for input only, `out` is for output only, and `inout` is for both input and output.
-
-*Note*: To define functions that can be called by the ECMAScript interpreter, only `in` must be used as parameter attributes. 
-
-*Note*: Both `out` and `inout` attributes are deprecated in Web IDL.
-
-==== ES IDL ====
-
-{{{
-void getPosition(out long x, out long y);
-void setPosition(in long x, in long y);
-}}}
-==== C++ header file ====
-{{{
-virtual void getPosition(int* x, int* y) = 0;
-virtual void setPosition(int x, int y) = 0;
-}}}
-
 === Interface names ===
 
 An interface name used as a method argument or return value will be treated as an interface pointer in the header file.
