@@ -137,6 +137,73 @@ public:
 };
 }}}
 
+=== Operations ===
+
+Each operation defined in the IDL interface will be mapped to one or more virtual member functions in the C++ interface class. 
+
+==== ES IDL ====
+{{{
+interface CanvasRenderingContext2D 
+{
+    void fillRect(float x, float y, float w, float h);
+};
+}}}
+==== C++ header file ====
+{{{
+class CanvasRenderingContext2D : public Object
+{
+    public:
+        virtual void fillRect(float x, float y, float w, float h) = 0;
+};
+}}}
+
+=== Optional ===
+
+If the `optional` keyword appears on an operation argument, it indicates that the operation can be invoked by passing values only for the those arguments appearing before the optional argument in the operation's argument list.
+
+==== ES IDL ====
+{{{
+interface ColorCreator 
+{
+    Object createColor(in float v1, optional in float v2, in float v3, optional in float alpha);
+};
+}}}
+==== C++ header file ====
+{{{
+class ColorCreator 
+{
+public:
+    virtual Object* createColor(float v1) = 0;
+    virtual Object* createColor(float v1, float v2, float v3) = 0;
+    virtual Object* createColor(float v1, float v2, float v3, float alpha) = 0;
+};  
+}}}
+
+=== Variadic operation ===
+
+If the final argument uses the `...` terminal, it indicates that the operation is variadic, and can be passed zero or more arguments after the regular arguments.
+
+==== ES IDL ====
+{{{
+interface IntegerSet
+{
+    readonly attribute unsigned long cardinality;
+
+    void union(long... ints);
+    void intersection(long... ints);
+};
+}}}
+==== C++ header file ====
+{{{
+class IntegerSet 
+{
+public:
+    virtual uint32_t getCardinality() = 0;
+    virtual void union(const int* ints = 0, size_t intsLength = 0) = 0;
+    virtual void intersection(const int* ints = 0, size_t intsLength = 0) = 0;
+};
+}}}
+
 === Primitive types ===
 
 Primitive types are handled as follows:
