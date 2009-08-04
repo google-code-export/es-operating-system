@@ -225,7 +225,7 @@ public:
 };
 }}}
 
-=== `[`PutForwards`]` ===
+=== `[`!PutForwards`]` ===
 
 If the `[PutForwards]` extended attribute appears on a read only attribute, a setter method is declared taking the specified attribute type as an argument.
 
