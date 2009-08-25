@@ -1,4 +1,4 @@
-#summary esidl, the IDL compiler
+#summary esidl Web IDL compiler
 #labels esidl,IDL
 
 = esidl =
@@ -47,7 +47,7 @@ Note: In the IDL files, interface and method descriptions can be written in [htt
   Ignores module names in the IDL files and all the definitions are grouped in a single namespace given by `name`.
 
 -object name
-  If the defined interface does not extend any interface, `esidl` implicitly assumes the defined interface is derived from the interface specified by `name`. The default name is `Object`.
+  If the defined interface does not extend any interface, `esidl` implicitly assumes the defined interface is derived from the interface specified by `name`. The default name is `object`.
 
 -template
   Generates a C++ header file for each IDL file that can be used for a bridge implementation between the C++ module and the Web browser like NPAPI bridge for Web IDL.
