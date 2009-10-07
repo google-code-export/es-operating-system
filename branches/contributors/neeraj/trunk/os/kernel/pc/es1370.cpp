@@ -81,8 +81,8 @@ setSamplingRate(u32 rate)
 int Es1370::
 setPlaybackFormat(u8 channels, u8 bits)
 {
-    ASSERT(bits == 8 | bits == 16);
-    ASSERT(channels == 1 | channels == 2);
+    ASSERT( (bits == 8) | (bits == 16));
+    ASSERT( (channels == 1) | (channels == 2));
 
     u32 control = inpl(base + SerialControlRegister);
     control &= ~(SerialP2smb | SerialP2seb);

@@ -30,10 +30,10 @@ Map(Process* proc, const void* start, const void* end, long length,
         start(start),
         end(Page::round(end)),
         length(length),
-        prot(prot),
-        flags(flags),
         pageable(pageable),
-        offset(offset)
+        offset(offset),
+        prot(prot),
+        flags(flags)
 {
 #ifdef VERBOSE
     esReport("Map(%p, %p, %p) %p\n", start, end, length, Page::round(end));

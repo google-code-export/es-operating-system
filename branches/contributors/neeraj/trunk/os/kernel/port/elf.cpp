@@ -46,7 +46,7 @@ Elf(es::File* elf) :
     for (int i(0); i < ehdr.e_shnum; ++i)
     {
         Elf32_Shdr shdr;
-        char name[32];
+        //char name[32];
 
         if (!getShdr(i, &shdr))
         {
@@ -79,7 +79,7 @@ getSectionName(Elf32_Off offset, char* name, size_t count)
 
     offset += sectionNameOffset;
     char* ptr(name);
-    int i;
+    unsigned int i;
     for (i = 0; i < count; ++i, ++offset, ++ptr)
     {
         stream->read(ptr, 1, offset);

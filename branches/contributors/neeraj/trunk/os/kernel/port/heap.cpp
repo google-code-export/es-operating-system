@@ -51,7 +51,7 @@ Heap::Bucket* Heap::
 getBucket(size_t size)
 {
     ASSERT(size <= thresh);
-    int i = ffs(size);
+    unsigned int i = ffs(size);
     if (i == 0)
     {
         return 0;

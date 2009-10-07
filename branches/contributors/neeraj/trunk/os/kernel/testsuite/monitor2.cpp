@@ -68,7 +68,7 @@ void* test2(void* id)
     es::Monitor* monitor[2];
     es::Thread* thread;
 
-    esReport("'%s'\n", id);
+    esReport("'%s'\n", (char*)id);
 
     // check timeout.
     monitor[0] = new Monitor();
