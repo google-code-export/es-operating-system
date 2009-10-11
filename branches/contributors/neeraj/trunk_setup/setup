@@ -46,14 +46,20 @@ echo $PATH | grep -q "$ES_SDK/bin"
 if [ $? != 0 ]
 then
 	export PATH=$PATH:$ES_SDK/bin
-	# Check whether already appended in ~/.bashrc
-	grep -q "#Added by es install" ~/.bashrc
-	if [ $? != 0 ]
-  	then
-		echo "#Added by es install" >> ~/.bashrc
-   		echo "export PATH=\$PATH:$ES_SDK/bin" >> ~/.bashrc
-  	fi
+	echo -n "Add export statement to ~/.bashrc [y|n]? "
+	read input
+	if [ $input == "y" -o $input == "Y" ]
+	then
+		# Check whether already appended in ~/.bashrc
+		grep -q "#Added by es install" ~/.bashrc
+		if [ $? != 0 ]
+  		then
+			echo "#Added by es install" >> ~/.bashrc
+   			echo "export PATH=\$PATH:$ES_SDK/bin" >> ~/.bashrc
+  		fi
+	fi
 fi
+
 
 if [ -e $dist_dir/configure ];
 then
@@ -302,8 +308,8 @@ cd ../..
 cd src
 if [ ! -f libpng-1.2.40.tar.gz ]; 
 then
-	wget http://download.sourceforge.net/libpng/libpng-1.2.40.tar.gz
-	[ $? != 0 ] && manual_input "wget http" "libpng-1.2.40.tar.gz"
+	wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.2.40.tar.gz
+	[ $? != 0 ] && manual_input "wget ftp" "libpng-1.2.40.tar.gz"
 fi
 rm -rf libpng-1.2.40
 tar -zxf libpng-1.2.40.tar.gz
