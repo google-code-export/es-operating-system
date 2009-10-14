@@ -235,7 +235,6 @@ standby(Page* page)
     {
         SpinLock::Synchronized method(spinLock);
 
-        //bool notify = standbyList.isEmpty();
         standbyList.addLast(page);
         ++standbyCount;
     }
@@ -248,7 +247,6 @@ standby(Page* page)
 es::PageSet* PageSet::
 fork()
 {
-    //void* objectPtr = 0;
     PageSet* instance = new PageSet(this);
     if (!instance)
     {
