@@ -36,5 +36,12 @@ Now you can commit your change to the main trunk. Please commit it with a meanin
 
 {{{
 $ svn commit
+}}}
+
+Once you see the status of your code review request is changed to a closed status like "Done", you can remove your trunk copy in your branch.
+
+{{{
 $ svn delete https://es-operating-system.googlecode.com/svn/branches/gsoc2009/[YOUR DIRECTORY]/trunk
 }}}
+
+*Note*: We will probably switch over to Reitveld sometime soon. cf. http://code.google.com/p/rietveld/
