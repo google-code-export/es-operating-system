@@ -46,15 +46,15 @@ echo $PATH | grep -q "$ES_SDK/bin"
 if [ $? != 0 ]
 then
 	export PATH=$PATH:$ES_SDK/bin
-	echo -n "Add export statement to ~/.bashrc [y|n]? "
-	read input
-	if [ $input == "y" -o $input == "Y" ]
-	then
-		# Check whether already appended in ~/.bashrc
-		grep -q "#Added by es install" ~/.bashrc
-		if [ $? != 0 ]
-  		then
-			echo "#Added by es install" >> ~/.bashrc
+	# Check whether already appended in ~/.bashrc
+	grep -q "# Added by es install" ~/.bashrc
+	if [ $? != 0 ]
+  	then
+		echo -n "Add export statement to ~/.bashrc [y|n]? "
+		read input
+		if [ $input == "y" -o $input == "Y" ]
+		then
+			echo "# Added by es install" >> ~/.bashrc
    			echo "export PATH=\$PATH:$ES_SDK/bin" >> ~/.bashrc
   		fi
 	fi
