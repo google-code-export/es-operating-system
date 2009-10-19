@@ -511,3 +511,16 @@ void exit(void_pointer val);
 {{{
 virtual void exit(void* val); = 0;
 }}}
+
+== Getting the source code ==
+
+The source code of the esidl Web IDL compiler can be obtained via Subversion:
+
+{{{
+svn checkout http://es-operating-system.googlecode.com/svn/trunk/esidl esidl
+}}}
+
+Please read the README file for the build instruction. 
+
+*Note:* esidl can be used without ES operating system.
+The above source code contains an example code using Web IDL for NPAPI plug-in development.
