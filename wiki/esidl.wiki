@@ -372,7 +372,9 @@ Note: If `-string` option is used, methods that return Any type value do not tak
 
 === Object ===
 
-`Object` is converted to void`*` and is implicitly assumed that the pointer is an interface pointer.
+`object` is converted to `object`. If it is used for a return type or an argument type, it is converted to `object*`.
+
+Note: If `-object` option is used, the specified name will be used instead of `object`.
 
 === Exceptions ===
 
@@ -401,7 +403,7 @@ struct DOMException
 === Implements statements ===
 
 An implements statement declares the all objects implementing an interface A (the first name) MUST also implement interface B (the second name).
-In C++, interface members in B are mixed in the C++ interface class A. If interface B is used only for interface A, a typedef statement is generated to tread B as A.
+In C++, interface members in B are mixed in the C++ interface class A.
 
 ==== Web IDL ====
 {{{
@@ -418,7 +420,6 @@ interface EventTarget
 };
 
 Node implements EventTarget;
-Document implements HTMLDocument;
 }}}
 
 ==== C++ header file ====
@@ -429,8 +430,6 @@ class Node : public Object
     void addEventListener(DOMString type, EventListener listener, bool useCapture);
     // ...
 };
-
-typedef Document HTMLDocument;
 }}}
 
 == C++ mapping - TBD ==
