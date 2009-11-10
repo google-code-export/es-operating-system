@@ -4,7 +4,7 @@
 
 == Introduction ==
 
-In 2004, I started a new operating system project in Nintendo largely affected by Rob Pike's "Systems Software Research is Irrelevant" talk in 2000. It took about two year before we released the first ES operating system from !SourceForge.jp, which is the Japanese version of !SourceForge.net.
+In 2004, I started a new operating system project in Nintendo largely affected by Rob Pike's "Systems Software Research is Irrelevant" talk in 2000 `[5]`. It took about two year before we released the first ES operating system from !SourceForge.jp, which is the Japanese version of !SourceForge.net.
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/stats-graph.png
 
@@ -25,7 +25,7 @@ And now this project is hosted in Google Code under the copyright of both Google
   "Who needs new operating systems, anyway?"
 
   Rob Pike,
-  Bell Labs, Lucent Technologies, 2000
+  Bell Labs, Lucent Technologies, 2000 `[5]`
 
 Probably this is also the question you might have. So I'd like to explain the background before I started the ES project, and hopefully I can share with you our ideas. And then I'd like to describe the design and development of the current ES operating system.
 
@@ -52,7 +52,7 @@ However, a lot of researches addressed something different:
   "New operating systems today tend to be just ways of reimplementing Unix. How can operating systems research be relevant when the resulting operating systems are all indistinguishable?"
 
   Rob Pike,
-  Bell Labs, Lucent Technologies,  2000
+  Bell Labs, Lucent Technologies, 2000 `[5]`
 
 I think the most important lesson we learned through microkernel research is that with a very thoughtful design you can actually create your own, modern, useful operating system by yourself or by a really small team. If I have never seen the MINIX operating system, maybe I wouldn't even think about starting a new operating system project. And today I think the odds is actually higher than in the 1980's or 90's. We can easily find very useful open source tools and libraries, which we can use for constructing a new operating system.
 
@@ -64,7 +64,7 @@ What's new today? The Internet. Quite obvious. Applications running in web brows
 
   Jim Mitchell,
   Sun Microsystems, Inc.,
-  2001
+  2001 `[4]`
 
 In early 90's, Sun has a microkernel based, research operating system called Spring, but they shifted their engineering resource to Java because their original goal for Spring was to "reimplement UNIX in an object-oriented fashion", not to create a totally new operating system. So I think the more appropriate way to put this quote was:
 
@@ -77,7 +77,7 @@ And what's really hot today is !JavaScript applications running in the browsers.
   "There is no reason for a !JavaScript application to run any slower than a comparable Smalltalk application (Smalltalk is an equally dynamic programming language), or significantly slower than a comparable Java application."
 
   Dan Ingalls, et al.,
-  Sun Microsystems, Inc., 2007
+  Sun Microsystems, Inc., 2007 `[2]`
 
 It's just amazing how rapidly people can now create a new web desk top environment within a web browser. I'm totally sure more application programs will be written in !JavaScript, !ActionScript or ECMAScript, whatever it's called today.
 
@@ -94,7 +94,7 @@ Eleven years ago, Mr. Noah Mendelsohn were questioning us if we can construct a 
   "Components: a revolution in application development. But most operating systems aren't designed to host component based applications."
 
   Noah Mendelsohn,
-  Lotus Development Corporation, 1997
+  Lotus Development Corporation, 1997 `[3]` 
 
 http://es-operating-system.googlecode.com/svn/html/XV_Semana_Informatica/components.png
 
@@ -122,7 +122,7 @@ In early 1980's, Prof. David Clark wrote this in his forward to a text book on T
   "The technique we used was to implement Swift in a high level typesafe language with garbage collection."
 
   David. D. Clark,
-  Massachusetts Institute of Technology, 1985
+  Massachusetts Institute of Technology, 1985 `[1]`
 
 There were network protocol stack implementations that tried to map each network layer to a separate process, like one process for the IP layer, one for UDP, and one for TCP, something like that. You might say it is apparently inefficient by today's perspective. But the TCP/IP stack is a really complicated software and it has been enhanced over years and it's being improved even now.  It's natural that people tried to decouple it into more tiny pieces of manageable components. 
 
@@ -131,7 +131,7 @@ This was written in 1985, well before microkernel researchers were discussing ab
   "There has been much talk about component architectures but only one true success: Unix pipes. It should be possible to build interactive and distributed applications from piece parts."
 
   Rob Pike,
-  Bell Labs, Lucent Technologies, 2000
+  Bell Labs, Lucent Technologies, 2000 `[5]`
 
 We all know Unix pipes are great invention for processing data in sequence by small software tools running in separate processes. 
 
@@ -347,7 +347,7 @@ So we really welcome helpers. If you'd like to contribute to the ES project, ple
   "The ideal project is one where people don't have meetings, they have lunch. The size of the team should be the size of the lunch table."
 
   Bill Joy,
-  cofounder of Sun Microsystems, 2003
+  cofounder of Sun Microsystems, 2003 `[6]`
 
 I really believe this. And you could be the one.
 
@@ -360,5 +360,20 @@ Even if not accepted for Google Summer of Code, there are no stipend payments, b
 It's people deciding and shaping future computing systems, and I really hope some of you here will join us to complete this project.
 
 Thank you very much. Obrigado!
+
+== References ==
+
+`[1]` Comer, D., Operating System Design - Vol. II: Internetworking with Xinu. Prentice-Hall, 1987.
+
+`[2]` Ingalls, D., Mikkonen T., Palacz, K., Taivalsaari, A. Sun Labs Lively Kernel FAQ. 2007. http://www.sunlabs.com/projects/lively/faq.html .
+
+`[3]` Mendelsohn, N. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
+
+`[4]` Mitchell, J. An Overview of the Spring System (In IEEE COMPCOM '94) - Introduction by Jim Mitchell. In Sun Microsystems Laboratories The First Ten Years: 1991-2001, October 2001. http://research.sun.com/features/tenyears/volcd/papers/mitchell.htm .
+
+`[5]` Pike, R. Systems Software Research is Irrelevant. Invited talk, University of Utah, February 2000.
+
+`[6]` Reiss. S. Hope Is a Lousy Defense. WIRED. December 2003. http://www.wired.com/wired/archive/11.12/billjoy.html .
+
 
 *Note ES operating system has been accepted in to the Google Summer of Code™ 2008. So If you are a student as of April 14, 2008, we really welcome your application for Google Summer of Code™ 2008 in ES operating system.* - March 17, 2008
