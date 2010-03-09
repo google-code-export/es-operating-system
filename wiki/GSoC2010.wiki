@@ -1,0 +1,60 @@
+#summary Ideas List for Google Summer of Code 2010
+
+= Ideas List for Google Summer of Code 2010 =
+
+We are applying for [http://socghop.appspot.com/ Google Summer of Code 2010] as a mentoring organization. If ES project is accepted in, we welcome your application for GSoC 2010 with any of the ideas listed here or with your own ideas related to the ES operating system. Note the most part of the code in ES operating system is written in C++, and you will need to have a good understanding of [http://www.research.att.com/~bs/3rd.html the C++ programing language].
+
+Please feel free to post your questions to [http://groups.google.com/group/es-operating-system our discussion group], or to send your questions directly to the administrator. Note #esos at freenode may not be not very active because of the different time zones.
+
+== Component object binding runtime implementations for Web IDL ==
+
+[http://dev.w3.org/2006/webapi/WebIDL/ Web IDL] is a new interface definition language (IDL) used for defining APIs for Web Apps including HTML5, Web GL, etc.
+Over the past several years we really needed a new IDL as JavaScript/Web based applications were becoming very important and useful, and none of the existing IDLs were able to precisely define APIs for JavaScript before Web IDL.
+Web IDL is still in development at W3C, and your involvement is really important by using it and improving it.
+
+In ES operating system, every system API is defined in Web IDL, and new APIs can be dynamically added to the system by adding new software components running at the user level. With a better security model in the operating system, we should be able to bring better extensibility to your computers and devices connected to the Internet. For example, a web browser will be a seamless composition of software components from various companies, communities, and organizations; as the Web is becoming the new platform replacing the existing operating systems, it will be simply impossible to create a monolithic browser that contains everything, and we will need an extensible framework.
+
+The *esidl* Web IDL compiler created in the ES operating system generates language bindings for C++ and Java directly from the Web IDL definitions. Your project will be implementing runtime routines for the generated code. It can be the system call and upcall paths inside the ES operating system kernel, the NPAPI bridge for the browser plugins, the native code binding for the *esjs* JavaScript interpreter, or the generic RPC routines for Linux and maybe Windows and OS X.
+
+=== Recommended readings ===
+  * [http://dev.w3.org/2006/webapi/WebIDL/ Web IDL W3C Editor's Draft]
+  * [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript Language Specification 5th edition]
+  * Mendelsohn, N. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
+  * Szyperski, C., Gruntz, D., Murer, S. [http://www.amazon.com/Component-Software-Beyond-Object-Oriented-Programming/dp/0201745720 Component Software – Beyond Object-Oriented Programming. 2nd ed.], Addison-Wesley, 2002.
+
+Note that the implementation of our JavaScript interpreter esjs is not for the optimal performance.
+We are rather concentrating in the object binding runtime implementation between ECMAScript and the other native software components.
+Porting the existing, open source ECMAScript VM implementation like [http://code.google.com/p/v8/ V8] to ES is another interesting project idea if you want to try.
+
+== A TCP/IP stack implementation based on design pattern ==
+
+Because of the great series of books by Stevens, we can explore the design and implementation of the TCP/IP protocol stack more easily than before, but it is still very very difficult to fully understand TCP/IP.
+We believe reimplementing a TCP/IP stack using the design patterns helps fully understanding TCP/IP, and we are currently exploring [http://portal.acm.org/citation.cfm?id=217875 the Conduit+ model].
+There are many uncompleted tasks in this area, and your project will be testing and fixing the current implementation, and a lot more.
+If you are seriously studying the TCP/IP network architecture, this project would be an interesting one for you.
+
+=== Recommended readings ===
+
+  * W. Richard Stevens, [http://www.amazon.com/TCP-Illustrated-Protocols-Addison-Wesley-Professional/dp/0201633469/ TCP/IP Illustrated, Volume 1: The Protocols]
+  * W. Richard Stevens, and Gary R. Wright, [http://www.amazon.com/exec/obidos/ISBN=020163354X/ TCP/IP Illustrated, Volume 2: The Implementation]
+  * Hermann Hueni, Ralph Johnson, and Robert Engel, [http://portal.acm.org/citation.cfm?id=217875 A Framework for Network Protocol Software]
+  * [http://www.w3.org/2008/webapps/wiki/Main_Page W3C Network Communication API]
+  * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Maurice J. Bach  Design of the UNIX Operating System].
+  * [http://code.google.com/p/es-operating-system/wiki/Conduit The design of the ES operating system's TCP/IP stack]
+
+----
+
+*Note*:
+Since ES operating system is released from Google, to accept your changes,
+we will ask you to fill out the Google Individual Contributor License Agreement ("CLA") and submit it electronically before you will become a member of this project.
+
+The CLA is the form we ask each external contributor to fill out to make it safe for Google to accept your code.
+Google CLA form is here:
+
+http://code.google.com/legal/individual-cla-v1.0.html
+
+This form is required not because of Google Summer of Code but because ES operating system is released from Google.
+The CLA does not transfer copyright: the contributor retains his or her ownership in the work.
+The CLA just grants Google a "perpetual, non-exclusive, royalty-free, etc..." right to use the work, sublicense it, and so on.
+
+If you have any questions, please ask away.
