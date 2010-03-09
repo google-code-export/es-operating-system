@@ -19,7 +19,7 @@ The *esidl* Web IDL compiler created in the ES operating system generates langua
 === Recommended readings ===
   * [http://dev.w3.org/2006/webapi/WebIDL/ Web IDL W3C Editor's Draft]
   * [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript Language Specification 5th edition]
-  * Mendelsohn, N. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
+  * [http://www.arcanedomain.com/ Mendelsohn, N]. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
   * Szyperski, C., Gruntz, D., Murer, S. [http://www.amazon.com/Component-Software-Beyond-Object-Oriented-Programming/dp/0201745720 Component Software – Beyond Object-Oriented Programming. 2nd ed.], Addison-Wesley, 2002.
 
 Note that the implementation of our JavaScript interpreter esjs is not for the optimal performance.
