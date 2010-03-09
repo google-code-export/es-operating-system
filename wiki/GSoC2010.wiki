@@ -22,7 +22,7 @@ The *esidl* Web IDL compiler created in the ES operating system generates langua
   * [http://www.arcanedomain.com/ Mendelsohn, N]. [http://www.arcanedomain.com/publications/HOTOS%20Final%20Version.pdf Operating Systems for Component Software Environments]. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
   * Szyperski, C., Gruntz, D., Murer, S. [http://www.amazon.com/Component-Software-Beyond-Object-Oriented-Programming/dp/0201745720 Component Software – Beyond Object-Oriented Programming. 2nd ed.], Addison-Wesley, 2002.
 
-Note that the implementation of our JavaScript interpreter esjs is not for the optimal performance.
+Note that the implementation of our !JavaScript interpreter esjs is not for the optimal performance.
 We are rather concentrating in the object binding runtime implementation between ECMAScript and the other native software components.
 Porting the existing, open source ECMAScript VM implementation like [http://code.google.com/p/v8/ V8] to ES is another interesting project idea if you want to try.
 
