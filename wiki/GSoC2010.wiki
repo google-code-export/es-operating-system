@@ -42,6 +42,12 @@ If you are seriously studying the TCP/IP network architecture, this project woul
   * Maurice J. Bach, [http://www.amazon.com/Design-Operating-System-Prentice-Software/dp/0132017997/ Maurice J. Bach  Design of the UNIX Operating System].
   * [http://code.google.com/p/es-operating-system/wiki/Conduit The design of the ES operating system's TCP/IP stack]
 
+== Other interesting ideas ==
+
+ * Update esjs from ECMAScript 3 to [http://www.ecma-international.org/publications/standards/Ecma-262.htm ECMAScript 5]
+ * Bring [https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html Web GL] to ES
+ * Create a tiny Web browser for ES
+
 ----
 
 *Note*:
