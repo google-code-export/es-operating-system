@@ -4,7 +4,7 @@
 
 To build the ES operating system, a variety of development tools including
 binutils, GCC, Newlib, and other runtime libraries need to be built 
-as a first step. 
+as the first step. 
 The following steps allow you to set up ES operating system development kit
 using the 'setup' shell script.
 The 'setup' script will download the required files from the Internet, and
@@ -15,7 +15,7 @@ to execute the 'sudo' command.
 
 Note: The following Linux distributions are currently used to build ES operating system:
 
- * Fedora 10 (Cambridge)
+ * Fedora 12 (Constantine)
  * Ubuntu 8.10 (Intrepid Ibex)
  * Ubuntu 9.10 (Karmic Koala)
 
