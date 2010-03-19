@@ -2,7 +2,7 @@
 
 = Ideas List for Google Summer of Code 2010 =
 
-2010-03-19: Unfortunately, ES operating system was not accepted into Google Summer
+2010-03-19: Unfortunately, ES operating system was passed over for Google Summer
 of Code 2010.
 
 We are applying for [http://socghop.appspot.com/ Google Summer of Code 2010] as a mentoring organization. If ES project is accepted in, we welcome your application for GSoC 2010 with any of the ideas listed here or with your own ideas related to the ES operating system. Note the most part of the code in ES operating system is written in C++, and you will need to have a good understanding of [http://www.research.att.com/~bs/3rd.html the C++ programing language].
