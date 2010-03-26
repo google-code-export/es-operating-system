@@ -80,18 +80,31 @@ Once your setup is completed, the following directory structures will be created
     +---i386-pc-es/
     +---include/
     +---lib
-+---src/                    # open source program source dirctory
++---src/                    # open source program source directory
     +---binutils-2.19/
-    +---cairo-1.4.10/
+    +---cairo-1.8.6/
     +---expat-2.0.1/
     +---fontconfig-2.4.2/
     +---freetype-2.3.5/
     +---gcc-4.3.1/
+    +---icu/
+    +---jpeg7/
+    +---libpng-1.2.40/
+    +---libxml2-2.7.3/
     +---newlib-1.16.0/
-    +---pcre-7.8/
+    +---pcre-8.01/
+    +---pixman-0.15.10/
 +---trunk/                  # ES source directory
     +---cmd                 # application programs
-    +---esidl               # esidl IDL compiler
+    +---esidl               # esidl Web IDL compiler
+        +---cplusplus       # additional C++ classes for DOM access
+        +---dom             # Web IDL source files from W3C/WHATWG
+        +---include
+        +---java            # additional Java interfaces for DOM access
+        +---npapi           # DOM access library over NPAPI
+           +---sample       # a sample plugin/application using DOM access library
+        +---src
+        +---testsuite
     +---esjs                # esjs ECMAScript interpreter
     +---include
         +---es              # ES class libraries and template libraries
