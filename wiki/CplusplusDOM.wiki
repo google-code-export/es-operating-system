@@ -112,7 +112,7 @@ http://es-operating-system.googlecode.com/svn/html/CPlusPlusDOM/paint.png
 a very tiny paint application using the canvas element.
 Compare this with [http://es-operating-system.googlecode.com/svn/trunk/esidl/npapi/sample/paint.js.html paint.js.html] to see how !JavaScript code can be converted into C++ code;
 usually it is very straightforward.
-Please refer to Web IDL C++ binding specification `[`1`]` to see how Web IDL interfaces are converted to C++ classes.
+Please refer to Web IDL C++ binding specification `[`[CplusplusBinding 1]`]` to see how Web IDL interfaces are converted to C++ classes.
 
 In C++ code, DOM objects obtained from the browser are automatically reclaimed after each function, 
 e.g., initialize() and event handlers, down(), move(), up(), and select(), 
