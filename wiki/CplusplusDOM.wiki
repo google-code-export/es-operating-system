@@ -3,8 +3,8 @@
 
 = C++ DOM API Introduction =
 
-This document describes how to write your own Web applications in C++ using the C++ DOM API.
 The C++ DOM API is a library for writing rich Internet applications in C++ rather than !JavaScript.
+This document describes how to write your own Web applications in C++ using the C++ DOM API.
 
 In June, 2008, right after the Web IDL draft specification is published from W3C,
 we showed it is technically possible to create Web applications running inside the Web browsers in C++ `[`[http://groups.google.com/group/es-operating-system/browse_thread/thread/037d65a0f614d0d8 4]`]`.
