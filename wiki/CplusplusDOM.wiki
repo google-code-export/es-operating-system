@@ -27,6 +27,7 @@ The following packages are required to set up the C++ DOM API development enviro
   * libtool
   * python
   * subversion
+  * wget
 
 == Setting up ==
 
