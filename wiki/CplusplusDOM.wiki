@@ -63,7 +63,7 @@ cd nacl
 CXXFLAGS='-fno-rtti -fno-exceptions' ../src/configure --prefix=$NACL_SDK/toolchain/linux_x86 --htmldir=$NACL_SDK/../esidl/examples --disable-java --host=nacl --target=nacl
 make
 make install
-fcd ../examples
+cd ../examples
 # start a local HTTP server on port 8000
 python -m CGIHTTPServer &
 # launch Chrome with the --enable-nacl
