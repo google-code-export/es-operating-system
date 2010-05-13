@@ -1,4 +1,6 @@
+#summary Web IDL - C++ binding
 #labels WebIDL,C
+
 = Web IDL - C++ binding =
 
 == _13 May 2010_ ==
