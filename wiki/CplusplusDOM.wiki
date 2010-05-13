@@ -329,7 +329,7 @@ private:
 };
 }}}
 
-=== NPP_Destroy() ===
+==== NPP_Destroy() ====
 
 NPP_Destroy() is where your plugin instance is destroyed.
 A typical NPP_Destroy() would look like this:
