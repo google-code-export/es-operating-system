@@ -183,7 +183,7 @@ The Date type corresponds to a 64 bit unsigned integer value. In C++ DOM API, th
 || IDL || C++ ||
 || Date	|| unsigned long long ||
 
-(`*`) It appears currently Chrome is the only browser that treats the DOMTimeStamp type as the Date object in JavaScript.
+(`*`) It appears currently Chrome is the only browser that treats the DOMTimeStamp type as the Date object in ECMAScript.
 
 === Object ===
 
@@ -518,14 +518,14 @@ Example
 
 Note: There is a proposal from Microsoft to mix mixins into the primary interface:
   cf. http://lists.w3.org/Archives/Public/public-webapps/2009JulSep/0903.html
-This seems to be a more realistic approach for the browser implementation given that JavaScript does not support the multiple inheritance. If this proposal is accepted, interface members in B are mixed into the interface A. Hixie also invented [Supplemental] extended attribute that effectively enforces the proposed behavior without changing the current 'implements' statement behavior, and esidl supports [Supplemental] extended attribute since it is now widely used in W3C/WHATWG specifications.
+This seems to be a more realistic approach for the browser implementation given that ECMAScript does not support the multiple inheritance. If this proposal is accepted, interface members in B are mixed into the interface A. Hixie also invented [Supplemental] extended attribute that effectively enforces the proposed behavior without changing the current 'implements' statement behavior, and esidl supports `[`Supplemental`]` extended attribute since it is now widely used in W3C/WHATWG specifications.
   cf. http://lists.w3.org/Archives/Public/public-webapps/2009JulSep/0528.html
 
 == Extended attributes ==
 
-=== [Constructor], [NamedConstructor] ===
+=== `[`Constructor`]`, `[`!NamedConstructor`]` ===
 
-If the [Constructor] extended attribute appears on an interface, a C++ constructor class is defined.  The class name of a constructor class is the concatenation of the type name of the base interface and the string "`_Constructor`".
+If the `[Constructor]` extended attribute appears on an interface, a C++ constructor class is defined.  The class name of a constructor class is the concatenation of the type name of the base interface and the string "`_Constructor`".
 
 ==== IDL ====
 
@@ -549,11 +549,11 @@ If the [Constructor] extended attribute appears on an interface, a C++ construct
   };
 }}}
 
-Note: If the [NamedConstructor] extended attribute appears on an interface, it indicates the ECMAScript global object will have a property with the specified name whose value is a constructor function that can create objects that implement the interface.
+Note: If the `[`!NamedConstructor`]` extended attribute appears on an interface, it indicates the ECMAScript global object will have a property with the specified name whose value is a constructor function that can create objects that implement the interface.
 
-=== [PutForwards] ===
+=== `[`!PutForwards`]` ===
 
-If the [PutForwards] extended attribute appears on a read only attribute declaration whose type is an object implementing an interface, it indicates that assigning to the attribute will have specific behavior. Namely, the assignment is “forwarded” to the attribute (specified by the extended attribute argument) on the object that is currently referenced by the attribute being assigned to.
+If the `[`!PutForwards`]` extended attribute appears on a read only attribute declaration whose type is an object implementing an interface, it indicates that assigning to the attribute will have specific behavior. Namely, the assignment is “forwarded” to the attribute (specified by the extended attribute argument) on the object that is currently referenced by the attribute being assigned to.
 
 ==== IDL ====
 
@@ -580,11 +580,11 @@ If the [PutForwards] extended attribute appears on a read only attribute declara
   };
 }}}
 
-=== [Prefix] ===
+=== `[`Prefix`]` ===
 
 See Modules.
 
-=== [Supplemental] ===
+=== `[`Supplemental`]` ===
 
 cf. http://lists.w3.org/Archives/Public/public-webapps/2009JulSep/0528.html
 
