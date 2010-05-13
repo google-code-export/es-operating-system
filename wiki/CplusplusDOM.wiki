@@ -361,7 +361,7 @@ To do so, remove --disable-cplusplus --disable-npapi options from the first conf
   ../src/configure --prefix=$NACL_SDK/toolchain/linux_x86 --disable-java
 }}}
 
-Then after make install, .so plugin files are created under ~/nacl/sdk/nacl-sdk/lib. You can copy these .so files into ~/.mozilla/plugins/ for testing.
+Then after make install, .so plugin files are created under $NACL_SDK/toolchain/linux_x86/lib. You can copy these .so files into ~/.mozilla/plugins/ for testing.
 When testing, please use paint.html instead of paint.nacl.html, and so forth.
 You may also find this useful when debugging your C++ DOM application.
 For example, if you like to use kdbg gdb GUI front-end, you can start firefox with gdb by,
