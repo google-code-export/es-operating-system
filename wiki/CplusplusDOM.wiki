@@ -63,6 +63,7 @@ mkdir nacl
 cd nacl
 CXXFLAGS='-fno-rtti -fno-exceptions' ../src/configure --prefix=$NACL_SDK/toolchain/linux_x86 --htmldir=$NACL_SDK/../esidl/examples --disable-java --host=nacl --target=nacl
 make
+# install html and nexe files to $NACL_SDK/../esidl/examples
 make install
 cd ../examples
 # start a local HTTP server on port 8000
