@@ -344,6 +344,8 @@ Please refer to the NPAPI documentation `[`3`]` for more details about NPP and N
 
 == Using C++ DOM API with Firefox ==
 
+http://es-operating-system.googlecode.com/svn/html/CPlusPlusDOM/firefox.png
+
 C++ DOM API can be used with Firefox for the ordinary NPAPI plugin development.
 To do so, remove --disable-cplusplus --disable-npapi options from the first configure line in the Setting up section:
 
