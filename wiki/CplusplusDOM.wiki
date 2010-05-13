@@ -68,7 +68,7 @@ make install
 cd ../examples
 # start a local HTTP server on port 8000
 python -m CGIHTTPServer &
-# launch Chrome with the --enable-nacl
+# launch Chrome with the --enable-nacl flag
 /opt/google/chrome/google-chrome --enable-nacl http://localhost:8000/
 kill %python
 }}}
