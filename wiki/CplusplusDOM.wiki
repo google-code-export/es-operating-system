@@ -91,13 +91,17 @@ It it happens, please go back to http://localhost:8000/.
 
 Hint: it is very easy to use the Native Client SDK with GNU autoconf and automake. Just add the following lines,
 
+{{{
    nacl)
        basic_machine=$basic_machine-unknown
        ;;
+}}}
 
 under the following sections in your config.sub,
 
+{{{
    case $basic_machine in
+}}}
 
 Then add AC_CANONICAL_TARGET in your configure.ac for using !NaCl gcc tool chain with the generated configure script.
 
@@ -359,7 +363,9 @@ When testing, please use paint.html instead of paint.nacl.html, and so forth.
 You may also find this useful when debugging your C++ DOM application.
 For example, if you like to use kdbg gdb GUI front-end, you can start firefox with gdb by,
 
+{{{
 $ firefox -g -d kdbg
+}}}
 
 Please consult firefox and other documentations for how to install the firefox debug information, etc.
 
