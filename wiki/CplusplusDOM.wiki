@@ -5,7 +5,8 @@
 
 == _14 May 2010_ ==
 
-The C++ DOM API is a library for writing Web applications in C++ over NPAPI/Pepper.
+The C++ DOM API is a library for writing Web applications in C++ over NPAPI/Pepper
+using the [CplusplusBinding Web IDL C++ binding] for accessing DOM objects inside the Web browser.
 This document describes how to write your own Web applications in C++ using the C++ DOM API.
 
 In June, 2008, right after the Web IDL draft specification is published from W3C,
