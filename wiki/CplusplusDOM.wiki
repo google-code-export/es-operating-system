@@ -119,8 +119,56 @@ http://es-operating-system.googlecode.com/svn/html/CPlusPlusDOM/paint.png
 [http://es-operating-system.googlecode.com/svn/trunk/esidl/npapi/sample/paint.cc paint.cc]) is
 a very tiny paint application using the canvas element.
 Compare this with [http://es-operating-system.googlecode.com/svn/trunk/esidl/npapi/sample/paint.js.html paint.js.html] to see how !JavaScript code can be converted into C++ code;
-usually it is very straightforward.
-Please refer to Web IDL C++ binding specification `[`[CplusplusBinding 1]`]` to see how Web IDL interfaces are converted to C++ classes.
+usually it is very straightforward as shown below:
+
+*Example*
+
+==== !JavaScript ====
+
+{{{
+function down(event) {
+  var rect = event.target.getBoundingClientRect();
+  var context = event.target.getContext("2d");
+  context.beginPath();
+  context.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+  event.target.addEventListener('mousemove', move, true);
+}
+}}}
+
+==== C++ ====
+
+{{{
+using namespace org::w3c::dom;
+
+void PaintInstance::down(events::Event* event) {
+  events::MouseEvent* mouse = interface_cast<events::MouseEvent*>(event);
+  if (!mouse)
+    return;
+  html::HTMLCanvasElement* canvas =
+    interface_cast<html::HTMLCanvasElement*>(mouse->getTarget());
+  if (!canvas)
+    return;
+  ClientRect* rect = canvas->getBoundingClientRect();
+  if (!rect)
+    return;
+  html::CanvasRenderingContext2D* context =
+    interface_cast<html::CanvasRenderingContext2D*>(canvas->getContext("2d"));
+  if (context) {
+    context->beginPath();
+    float x = mouse->getClientX() - rect->getLeft();
+    float y = mouse->getClientY() - rect->getTop();
+    context->moveTo(x, y);
+  }
+  events::EventTarget* eventTarget =
+    interface_cast<events::EventTarget*>(canvas);
+  if (eventTarget)
+    eventTarget->addEventListener("mousemove", moveHandler, true);
+}
+}}}
+
+Note: interface_cast<> is replaceable with dynamic_cast<> if C++ RTTI is enabled. esidl generates queryInterface() function in each generated C++ class so that interface_cast<> can be used without RTTI.
+
+Please refer to Web IDL C++ binding specification `[`[CplusplusBinding 1]`]` to see how Web IDL interfaces are converted to C++ classes in more details.
 
 In C++ code, DOM objects obtained from the browser are automatically reclaimed after each function, 
 e.g., initialize() and event handlers, down(), move(), up(), and select(), 
