@@ -145,23 +145,20 @@ void PaintInstance::down(events::Event* event) {
   events::MouseEvent* mouse = interface_cast<events::MouseEvent*>(event);
   if (!mouse)
     return;
-  html::HTMLCanvasElement* canvas =
-    interface_cast<html::HTMLCanvasElement*>(mouse->getTarget());
+  html::HTMLCanvasElement* canvas = interface_cast<html::HTMLCanvasElement*>(mouse->getTarget());
   if (!canvas)
     return;
   ClientRect* rect = canvas->getBoundingClientRect();
   if (!rect)
     return;
-  html::CanvasRenderingContext2D* context =
-    interface_cast<html::CanvasRenderingContext2D*>(canvas->getContext("2d"));
+  html::CanvasRenderingContext2D* context = interface_cast<html::CanvasRenderingContext2D*>(canvas->getContext("2d"));
   if (context) {
     context->beginPath();
     float x = mouse->getClientX() - rect->getLeft();
     float y = mouse->getClientY() - rect->getTop();
     context->moveTo(x, y);
   }
-  events::EventTarget* eventTarget =
-    interface_cast<events::EventTarget*>(canvas);
+  events::EventTarget* eventTarget = interface_cast<events::EventTarget*>(canvas);
   if (eventTarget)
     eventTarget->addEventListener("mousemove", moveHandler, true);
 }
