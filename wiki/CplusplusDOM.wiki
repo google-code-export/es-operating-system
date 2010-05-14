@@ -260,7 +260,8 @@ Please refer to W3C Web IDL Editor’s Draft `[`2`]` for how to write Web IDL de
 === Calling arbitrary !JavaScript functions from C++ ===
 
 Occasionally you may want to invoke arbitrary !JavaScript functions from C++.
-In the C++ DOM API, an unknown !JavaScript function is represented as a Function interface defined in HTML5.
+In the C++ DOM API, an unknown !JavaScript function is represented as a
+[http://www.whatwg.org/specs/web-apps/current-work/multipage/webappapis.html#function Function] interface defined in HTML5.
 
 So a !JavaScript function like,
 
