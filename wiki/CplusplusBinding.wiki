@@ -3,58 +3,13 @@
 
 = Web IDL - C++ binding =
 
-== _13 May 2010_ ==
+== _14 May 2010_ ==
 
 This document describes how interfaces described with Web IDL correspond to constructs within C++ by esidl Web IDL compiler (r1672 or later).
 
+An application of this C++ binding for writing Web applications in C++ over [https://wiki.mozilla.org/NPAPI:Pepper NPAPI/Pepper] is described [CplusplusDOM here].
+
 Note: This document is based on the [http://dev.w3.org/2006/webapi/WebIDL/ Web IDL W3C Editor’s Draft 30 September 2009].
-
-== Example ==
-
-==== ECMAScript ====
-
-{{{
-function down(event) {
-  var rect = event.target.getBoundingClientRect();
-  var context = event.target.getContext("2d");
-  context.beginPath();
-  context.moveTo(event.clientX - rect.left, event.clientY - rect.top);
-  event.target.addEventListener('mousemove', move, true);
-}
-}}}
-
-==== C++ ====
-
-{{{
-using namespace org::w3c::dom;
-
-void PaintInstance::down(events::Event* event) {
-  events::MouseEvent* mouse = interface_cast<events::MouseEvent*>(event);
-  if (!mouse)
-    return;
-  html::HTMLCanvasElement* canvas =
-    interface_cast<html::HTMLCanvasElement*>(mouse->getTarget());
-  if (!canvas)
-    return;
-  ClientRect* rect = canvas->getBoundingClientRect();
-  if (!rect)
-    return;
-  html::CanvasRenderingContext2D* context =
-    interface_cast<html::CanvasRenderingContext2D*>(canvas->getContext("2d"));
-  if (context) {
-    context->beginPath();
-    float x = mouse->getClientX() - rect->getLeft();
-    float y = mouse->getClientY() - rect->getTop();
-    context->moveTo(x, y);
-  }
-  events::EventTarget* eventTarget =
-    interface_cast<events::EventTarget*>(canvas);
-  if (eventTarget)
-    eventTarget->addEventListener("mousemove", moveHandler, true);
-}
-}}}
-
-Note: interface_cast<> is replaceable with dynamic_cast<> if C++ RTTI is enabled. esidl generates queryInterface() function in each generated C++ class so that interface_cast<> can be used without RTTI.
 
 === Modules ===
 
