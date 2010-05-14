@@ -1,5 +1,5 @@
 #summary C++ DOM API Introduction
-#labels WebIDL,DOM,C
+#labels WebIDL,DOM,cplusplus
 
 = C++ DOM API Introduction =
 
@@ -257,7 +257,7 @@ It would be a good strategy when creating a real application to use !JavaScript 
 
 Please refer to W3C Web IDL Editor’s Draft `[`2`]` for how to write Web IDL definitions.
 
-=== Calling arbitrary !JavaScript functions ===
+=== Calling arbitrary !JavaScript functions from C++ ===
 
 Occasionally you may want to invoke arbitrary !JavaScript functions from C++.
 In the C++ DOM API, an unknown !JavaScript function is represented as a Function interface defined in HTML5.
