@@ -257,6 +257,33 @@ It would be a good strategy when creating a real application to use !JavaScript 
 
 Please refer to W3C Web IDL Editor’s Draft `[`2`]` for how to write Web IDL definitions.
 
+=== Calling arbitrary !JavaScript functions ===
+
+Occasionally you may want to invoke arbitrary !JavaScript functions from C++.
+In the C++ DOM API, an unknown !JavaScript function is represented as a Function interface defined in HTML5.
+
+So a !JavaScript function like,
+
+{{{
+ function testFunction(a, b) {
+ }
+}}}
+
+can be invoked from C++ by doing this,
+
+{{{
+ html::Function* function =
+   interface_cast<html::Function*>(window->getElement("testFunction"));
+ function->call(Sequence<Any>({ window, "hello, ", "world." }));
+}}}
+
+Note the 1st argument, window, is used as 'this' value in testFunction() in !JavaScript.
+
+[http://es-operating-system.googlecode.com/svn/trunk/esidl/npapi/sample/test.nacl.html test.nacl.html]
+([http://es-operating-system.googlecode.com/svn/trunk/esidl/npapi/sample/test.h test.h] and 
+[http://es-operating-system.googlecode.com/svn/trunk/esidl/npapi/sample/test.cpp test.cpp]) contains
+the actual code of doing this.
+
 === NPP function implementation for C++ DOM API ===
 
 By using C++ DOM API, we can mostly ignore the fact that these are running over NPAPI.
