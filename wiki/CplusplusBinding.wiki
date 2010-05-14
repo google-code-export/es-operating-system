@@ -1,5 +1,5 @@
 #summary Web IDL - C++ binding
-#labels WebIDL,C
+#labels WebIDL,cplusplus
 
 = Web IDL - C++ binding =
 
