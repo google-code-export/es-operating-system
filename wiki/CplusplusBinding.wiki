@@ -475,7 +475,7 @@ Example
 
 Note: There is a proposal from Microsoft to mix mixins into the primary interface:
   cf. http://lists.w3.org/Archives/Public/public-webapps/2009JulSep/0903.html
-This seems to be a more realistic approach for the browser implementation given that ECMAScript does not support the multiple inheritance. If this proposal is accepted, interface members in B are mixed into the interface A. Hixie also invented [Supplemental] extended attribute that effectively enforces the proposed behavior without changing the current 'implements' statement behavior, and esidl supports `[`Supplemental`]` extended attribute since it is now widely used in W3C/WHATWG specifications.
+This seems to be a more realistic approach for the browser implementation given that ECMAScript does not support the multiple inheritance. If this proposal is accepted, interface members in B are mixed into the interface A. Hixie also invented `[`Supplemental`]` extended attribute that effectively enforces the proposed behavior without changing the current 'implements' statement behavior, and esidl supports `[`Supplemental`]` extended attribute since it is now widely used in W3C/WHATWG specifications.
   cf. http://lists.w3.org/Archives/Public/public-webapps/2009JulSep/0528.html
 
 == Extended attributes ==
