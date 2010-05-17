@@ -3,7 +3,7 @@
 
 = C++ DOM API Introduction =
 
-== _14 May 2010_ ==
+== _17 May 2010_ ==
 
 The C++ DOM API is a library for writing Web applications in C++ over NPAPI/Pepper
 using the [CplusplusBinding Web IDL C++ binding] for accessing DOM objects inside the Web browser.
@@ -450,7 +450,6 @@ Please consult firefox and other documentations for how to install the firefox d
 
 As of writing, the following W3C/WHATWG specifications are covered by C++ DOM API:
 
-    * HTML Canvas 2D Context, W3C Working Draft 4 March 2010, http://www.w3.org/TR/2010/WD-2dcontext-20100304/
     * CSSOM, W3C Editor's Draft 31 March 2010, http://dev.w3.org/csswg/cssom/
     * CSSOM View Module, 3C Editor's Draft 2 February 2010, http://dev.w3.org/csswg/cssom-view/
     * DOM Level 2 CSS, http://www.w3.org/TR/2000/REC-DOM-Level-2-Style-20001113/css.idl
@@ -461,23 +460,25 @@ As of writing, the following W3C/WHATWG specifications are covered by C++ DOM AP
     * DOM Level 3 Load and Save, http://www.w3.org/TR/2004/REC-DOM-Level-3-LS-20040407/ls.idl
     * DOM Level 3 Validation, http://www.w3.org/TR/2004/REC-DOM-Level-3-Val-20040127/validation.idl
     * DOM Level 3 XPath, http://www.w3.org/TR/2004/NOTE-DOM-Level-3-XPath-20040226/xpath.idl
-    * Server-Sent Events, W3C Working Draft 22 December 2009, http://www.w3.org/TR/eventsource/
+    * Element Traversal Specification, W3C Recommendation 22 December 2008, http://www.w3.org/TR/2008/REC-ElementTraversal-20081222/
     * File API, W3C Working Draft, http://www.w3.org/TR/2009/WD-FileAPI-20091117/
     * Geolocation API, Editor's Draft 10 February 2010, http://dev.w3.org/geo/api/spec-source.html
-    * HTML5, W3C Working Draft 4 March 2010, http://www.w3.org/TR/2010/WD-html5-20100304/Overview.html
-    * Indexed Database API, W3C Editor's Draft 15 April 2010, http://dev.w3.org/2006/webapi/WebSimpleDB/
+    * HTML Canvas 2D Context, W3C Working Draft 4 March 2010, http://www.w3.org/TR/2010/WD-2dcontext-20100304/
     * HTML Microdata, W3C Working Draft 4 March 2010, http://www.w3.org/TR/2010/WD-microdata-20100304/
+    * HTML5, W3C Working Draft 4 March 2010, http://www.w3.org/TR/2010/WD-html5-20100304/Overview.html
     * HTML5 Web Messaging, W3C Editor's Draft 12 April 2010, http://dev.w3.org/html5/postmsg/
+    * Indexed Database API, W3C Editor's Draft 15 April 2010, http://dev.w3.org/2006/webapi/WebSimpleDB/
     * Progress Events 1.0, 3C Working Draft 21 May 2008, http://www.w3.org/TR/2008/WD-progress-events-20080521/
     * SMIL Animation, http://www.w3.org/TR/2001/REC-smil-animation-20010904/
     * Scalable Vector Graphics 1.1, W3C Recommendation 14 January 2003, http://www.w3.org/TR/2003/REC-SVG11-20030114/
     * Selectors API Level 1, W3C Candidate Recommendation 22 December 2009, http://www.w3.org/TR/2009/CR-selectors-api-20091222/
-    * Web SQL Database, W3C Editor's Draft 4 March 2010, http://dev.w3.org/html5/webdatabase/, (This specification has reached an impasse)
-    * WebGL, Khronos Working Draft, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html
+    * Server-Sent Events, W3C Working Draft 22 December 2009, http://www.w3.org/TR/eventsource/
     * Web Notifications, W3C Editor's Draft 10 February 2010, http://dev.w3.org/2006/webapi/WebNotifications/publish/
     * Web Sockets API, W3C Working Draft 22 December 2009, http://www.w3.org/TR/websockets/
+    * Web SQL Database, W3C Editor's Draft 4 March 2010, http://dev.w3.org/html5/webdatabase/, (This specification has reached an impasse)
     * Web Storage, W3C Working Draft 22 December 2009, http://www.w3.org/TR/webstorage/
     * Web Workers, W3C Working Draft 22 December 2009, http://www.w3.org/TR/workers/
+    * WebGL, Khronos Working Draft, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html
     * XMLHttpRequest Level 2, W3C Editor's Draft 19 February 2010, http://dev.w3.org/2006/webapi/XMLHttpRequest-2/
 
 For specifications those are still using OMG IDL, C++ DOM API uses the IDL definitions rewritten in Web IDL by Cameron !McCormack, the Web IDL spec editor:
