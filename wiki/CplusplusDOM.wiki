@@ -471,6 +471,7 @@ As of writing, the following W3C/WHATWG specifications are covered by C++ DOM AP
     * Progress Events 1.0, 3C Working Draft 21 May 2008, http://www.w3.org/TR/2008/WD-progress-events-20080521/
     * SMIL Animation, http://www.w3.org/TR/2001/REC-smil-animation-20010904/
     * Scalable Vector Graphics 1.1, W3C Recommendation 14 January 2003, http://www.w3.org/TR/2003/REC-SVG11-20030114/
+    * Selectors API Level 1, W3C Candidate Recommendation 22 December 2009, http://www.w3.org/TR/2009/CR-selectors-api-20091222/
     * Web SQL Database, W3C Editor's Draft 4 March 2010, http://dev.w3.org/html5/webdatabase/, (This specification has reached an impasse)
     * WebGL, Khronos Working Draft, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html
     * Web Notifications, W3C Editor's Draft 10 February 2010, http://dev.w3.org/2006/webapi/WebNotifications/publish/
