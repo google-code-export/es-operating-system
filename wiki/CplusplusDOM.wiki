@@ -478,7 +478,7 @@ As of writing, the following W3C/WHATWG specifications are covered by C++ DOM AP
     * Web SQL Database, W3C Editor's Draft 4 March 2010, http://dev.w3.org/html5/webdatabase/, (This specification has reached an impasse)
     * Web Storage, W3C Working Draft 22 December 2009, http://www.w3.org/TR/webstorage/
     * Web Workers, W3C Working Draft 22 December 2009, http://www.w3.org/TR/workers/
-    * WebGL, Khronos Working Draft, Working Draft 17 May 2010, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html
+    * WebGL, Khronos Working Draft, Working Draft 12 May 2010, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html
     * XMLHttpRequest Level 2, W3C Editor's Draft 19 February 2010, http://dev.w3.org/2006/webapi/XMLHttpRequest-2/
 
 For specifications those are still using OMG IDL, C++ DOM API uses the IDL definitions rewritten in Web IDL by Cameron !McCormack, the Web IDL spec editor:
