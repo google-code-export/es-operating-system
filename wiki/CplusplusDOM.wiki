@@ -485,10 +485,10 @@ For specifications those are still using OMG IDL, C++ DOM API uses the IDL defin
  http://lists.w3.org/Archives/Public/public-script-coord/2009OctDec/0022.html
 
 Note: Many of these specifications are still drafts, and revised frequently.
-Your Web browser may not have implemented the features specified in the above specification yet.
+Your Web browser may not have implemented the features specified in the above specifications yet.
 In that case, those features cannot be used with C++ DOM API as well.
 The situation is almost exactly same as with !JavaScript.
-The C++ DOM API continue to incorporate the updated specifications, too.
+The C++ DOM API continues to incorporate the updated specifications, too.
 
 *References*
 
