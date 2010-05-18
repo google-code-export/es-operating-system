@@ -451,7 +451,7 @@ Please consult firefox and other documentations for how to install the firefox d
 As of writing, the following W3C/WHATWG specifications are covered by C++ DOM API:
 
     * CSSOM, W3C Editor's Draft 31 March 2010, http://dev.w3.org/csswg/cssom/
-    * CSSOM View Module, 3C Editor's Draft 2 February 2010, http://dev.w3.org/csswg/cssom-view/
+    * CSSOM View Module, W3C Editor's Draft 2 February 2010, http://dev.w3.org/csswg/cssom-view/
     * DOM Level 2 CSS, http://www.w3.org/TR/2000/REC-DOM-Level-2-Style-20001113/css.idl
     * DOM Level 2 Ranges, http://www.w3.org/TR/2000/REC-DOM-Level-2-Traversal-Range-20001113/ranges.idl
     * DOM Level 2 Traversal, http://www.w3.org/TR/2000/REC-DOM-Level-2-Traversal-Range-20001113/traversal.idl
@@ -468,7 +468,7 @@ As of writing, the following W3C/WHATWG specifications are covered by C++ DOM AP
     * HTML5, W3C Working Draft 4 March 2010, http://www.w3.org/TR/2010/WD-html5-20100304/Overview.html
     * HTML5 Web Messaging, W3C Editor's Draft 12 April 2010, http://dev.w3.org/html5/postmsg/
     * Indexed Database API, W3C Editor's Draft 15 April 2010, http://dev.w3.org/2006/webapi/WebSimpleDB/
-    * Progress Events 1.0, 3C Working Draft 21 May 2008, http://www.w3.org/TR/2008/WD-progress-events-20080521/
+    * Progress Events 1.0, W3C Working Draft 21 May 2008, http://www.w3.org/TR/2008/WD-progress-events-20080521/
     * SMIL Animation, http://www.w3.org/TR/2001/REC-smil-animation-20010904/
     * Scalable Vector Graphics 1.1, W3C Recommendation 14 January 2003, http://www.w3.org/TR/2003/REC-SVG11-20030114/
     * Selectors API Level 1, W3C Candidate Recommendation 22 December 2009, http://www.w3.org/TR/2009/CR-selectors-api-20091222/
@@ -478,7 +478,7 @@ As of writing, the following W3C/WHATWG specifications are covered by C++ DOM AP
     * Web SQL Database, W3C Editor's Draft 4 March 2010, http://dev.w3.org/html5/webdatabase/, (This specification has reached an impasse)
     * Web Storage, W3C Working Draft 22 December 2009, http://www.w3.org/TR/webstorage/
     * Web Workers, W3C Working Draft 22 December 2009, http://www.w3.org/TR/workers/
-    * WebGL, Khronos Working Draft, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.html
+    * WebGL, Khronos Working Draft, Working Draft 17 May 2010, https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/WebGL-spec.htmll
     * XMLHttpRequest Level 2, W3C Editor's Draft 19 February 2010, http://dev.w3.org/2006/webapi/XMLHttpRequest-2/
 
 For specifications those are still using OMG IDL, C++ DOM API uses the IDL definitions rewritten in Web IDL by Cameron !McCormack, the Web IDL spec editor:
