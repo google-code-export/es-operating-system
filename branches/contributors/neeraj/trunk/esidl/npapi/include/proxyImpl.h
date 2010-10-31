@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Google Inc.
+ * Copyright 2009, 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 #ifndef ESNPAPI_PROXY_IMPL_H_INCLUDED
 #define ESNPAPI_PROXY_IMPL_H_INCLUDED
 
+class Object;
+
 template<class O, class I>
 class Proxy_Impl : public O, public I
 {
@@ -28,26 +30,29 @@ public:
     virtual ~Proxy_Impl()
     {
     }
-    virtual std::string getInterfaceName()
-    {
-        return O::getInterfaceName();
-    }
     virtual unsigned int retain()
     {
         return O::retain();
     }
     virtual unsigned int release()
     {
-        unsigned int count = O::release();
-        if (count == 0)
-        {
-            delete this;
-        }
-        return count;
+        return O::release();
     }
-    static Proxy_Impl* createInstance(O object)
+    static Object* createInstance(O object)
     {
-        return new Proxy_Impl(object);
+        return static_cast<Object*>(new Proxy_Impl(object));
+    }    
+    virtual void* queryInterface(const char* qualifiedName)
+    {
+        if (qualifiedName == O::getQualifiedName())
+        {
+            return static_cast<O*>(this);
+        }
+        if (void* object = I::queryInterface(qualifiedName))
+        {
+            return object;
+        }
+        return 0;
     }
 };
 

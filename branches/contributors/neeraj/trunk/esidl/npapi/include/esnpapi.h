@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Google Inc.
+ * Copyright 2009, 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,41 +18,60 @@
 #define ESNPAPI_H_INCLUDED
 
 #include <cstring>
-#include <string>
-
 using std::strlen;  // for STRINGZ_TO_NPVARIANT
 
+#include <list>
+#include <map>
+#include <string>
+
+#ifdef __native_client__
+#include "nacl/npapi.h"
+#include "nacl/npruntime.h"
+#define utf8characters UTF8Characters
+#define utf8length     UTF8Length
+#else
 #include "npapi/npapi.h"
 #include "npapi/npruntime.h"
+#endif
 
 #include "object.h"
 #include "any.h"
 #include "reflect.h"
 
+namespace org {
+namespace w3c {
+namespace dom {
+namespace html {
+class Window;
+}
+}
+}
+}
+
 class ProxyObject
 {
-    NPObject*         object;
-    NPP               npp;
-    const std::string interfaceName;
-    unsigned int      count;
+    friend class ProxyControl;
+
+    NPObject*    object;
+    NPP          npp;
+    unsigned int count;
+    unsigned int age;
+
+    // age constants
+    static const unsigned int CREATED = 0;
+    static const unsigned int NEW = 1;
+    static const unsigned int OLD = 2;
+
 public:
-    ProxyObject(NPObject* object, NPP npp, const std::string& interfaceName) :
-        object(object),
-        npp(npp),
-        interfaceName(interfaceName),
-        count(1)
-    {
-    }
-    ProxyObject(const ProxyObject& original) :
-        object(original.object),
-        npp(original.npp),
-        interfaceName(original.interfaceName),
-        count(1)
-    {
-    }
-    ~ProxyObject()
-    {
-    }
+    ProxyObject(NPObject* object, NPP npp);
+    ProxyObject(const ProxyObject& original);
+    virtual ~ProxyObject();
+
+    unsigned int retain();
+    unsigned int release();
+    unsigned int mark();
+    void invalidate();
+
     NPObject* getNPObject()
     {
         return object;
@@ -61,115 +80,190 @@ public:
     {
         return npp;
     }
-    std::string getInterfaceName()
+
+    static const char* const getQualifiedName()
     {
-        return interfaceName;
+        static const char* qualifiedName = "ProxyObject";
+        return qualifiedName;
     }
-    unsigned int retain()
-    {
-        NPN_RetainObject(object);
-        return ++count;
-    }
-    unsigned int release()
-    {
-        NPN_ReleaseObject(object);
-        return --count;
-    }
+};
+
+class ProxyControl
+{
+    NPP npp;
+    long nestingCount;  // more than zero if the control is in plugin module
+
+    std::list<ProxyObject*> oldList;
+    std::list<ProxyObject*> newList;
+
+    // Map from interfaceName to constructors.
+    static std::map<const std::string, Object* (*)(ProxyObject object)> proxyConstructorMap;
+
+public:
+    explicit ProxyControl(NPP npp);
+    ~ProxyControl();
+
+    Object* createProxy(NPObject* object, const Reflect::Type type);
+
+    long enter();
+    long leave();
+    void track(ProxyObject* proxy);
+    void untrack(ProxyObject* proxy);
+
+    static void registerMetaData(const char* meta, Object* (*createProxy)(ProxyObject object), const char* alias = 0);
 };
 
 class StubObject : public NPObject
 {
-public:
-    virtual Object* getObject() const = 0;
-    virtual void invalidate() = 0;
-    virtual bool hasMethod(NPIdentifier name) = 0;
-    virtual bool invoke(NPIdentifier name, const NPVariant* args, uint32_t arg_count, NPVariant* result) = 0;
-    virtual bool invokeDefault(const NPVariant* args, uint32_t arg_count, NPVariant* result) = 0;
-    virtual bool hasProperty(NPIdentifier name) = 0;
-    virtual bool getProperty(NPIdentifier name, NPVariant* result) = 0;
-    virtual bool setProperty(NPIdentifier name, const NPVariant* value) = 0;
-    virtual bool removeProperty(NPIdentifier name) = 0;
+    NPP npp;
+    Object* object;
 
-    static void Deallocate(NPObject* object)
+    bool call(unsigned interfaceNumber, const Reflect::SymbolData* data, const char* metaData,
+              const NPVariant* args, uint32_t arg_count, NPVariant* result);
+
+public:
+    StubObject(NPP npp) :
+        npp(npp),
+        object(0)
     {
-        delete static_cast<StubObject*>(object);
     }
-    static void Invalidate(NPObject* object)
+
+    Object* getObject() const
     {
-        static_cast<StubObject*>(object)->invalidate();
+        return object;
     }
-    static bool HasMethod(NPObject* object, NPIdentifier name)
+    void setObject(Object* object)
     {
-        return static_cast<StubObject*>(object)->hasMethod(name);
+        this->object = object;
     }
-    static bool Invoke(NPObject* object, NPIdentifier name, const NPVariant* args, uint32_t arg_count, NPVariant* result)
+
+    long enter();
+    long leave();
+
+    void deallocate();
+    void invalidate();
+    bool hasMethod(NPIdentifier name);
+    bool invoke(NPIdentifier name, const NPVariant* args, uint32_t arg_count, NPVariant* result);
+    bool invokeDefault(const NPVariant* args, uint32_t arg_count, NPVariant* result);
+    bool hasProperty(NPIdentifier name);
+    bool getProperty(NPIdentifier name, NPVariant* result);
+    bool setProperty(NPIdentifier name, const NPVariant* value);
+    bool removeProperty(NPIdentifier name);
+    bool enumeration(NPIdentifier** value, uint32_t* count);
+    bool construct(const NPVariant* args, uint32_t argCount, NPVariant* result);
+
+    static bool isStub(const NPObject* object)
     {
-        return static_cast<StubObject*>(object)->invoke(name, args, arg_count, result);
+        return object->_class == &StubObject::npclass;
     }
-    static bool InvokeDefault(NPObject* object, const NPVariant* args, uint32_t arg_count, NPVariant* result)
+
+    static NPClass npclass;
+};
+
+class StubControl
+{
+    NPP npp;
+    std::map<Object*, StubObject*> stubMap;
+
+public:
+    explicit StubControl(NPP npp);
+    ~StubControl();
+
+    NPObject* findStub(Object* object);
+    NPObject* createStub(Object* object);
+    void remove(Object* object);
+};
+
+class PluginInstance
+{
+    ProxyControl proxyControl;
+    StubControl stubControl;
+
+protected:
+    org::w3c::dom::html::Window* window;
+
+public:
+    PluginInstance(NPP npp, NPObject* window);
+    virtual ~PluginInstance();
+
+    virtual NPObject* getScriptableInstance()
     {
-        return static_cast<StubObject*>(object)->invokeDefault(args, arg_count, result);
+        return 0;
     }
-    static bool HasProperty(NPObject* object, NPIdentifier name)
+
+    ProxyControl* getProxyControl()
     {
-        return static_cast<StubObject*>(object)->hasProperty(name);
+        return &proxyControl;
     }
-    static bool GetProperty(NPObject* object, NPIdentifier name, NPVariant* result)
+
+    StubControl* getStubControl()
     {
-        return static_cast<StubObject*>(object)->getProperty(name, result);
+        return &stubControl;
     }
-    static bool SetProperty(NPObject* object, NPIdentifier name, const NPVariant* value)
-    {
-        return static_cast<StubObject*>(object)->setProperty(name, value);
-    }
-    static bool RemoveProperty(NPObject* object, NPIdentifier name)
-    {
-        return static_cast<StubObject*>(object)->removeProperty(name);
-    }
+
+    unsigned int retain(Object* stub);
+    unsigned int release(Object* stub);
 };
 
 std::string getInterfaceName(NPP npp, NPObject* object);
 
-void convertToVariant(NPP npp, bool value, NPVariant* variant);
-void convertToVariant(NPP npp, uint8_t value, NPVariant* variant);
-void convertToVariant(NPP npp, int16_t value, NPVariant* variant);
-void convertToVariant(NPP npp, uint16_t value, NPVariant* variant);
-void convertToVariant(NPP npp, int32_t value, NPVariant* variant);
-void convertToVariant(NPP npp, uint32_t value, NPVariant* variant);
-void convertToVariant(NPP npp, int value, NPVariant* variant);
-void convertToVariant(NPP npp, unsigned int value, NPVariant* variant);
-void convertToVariant(NPP npp, int64_t value, NPVariant* variant);
-void convertToVariant(NPP npp, uint64_t value, NPVariant* variant);
-void convertToVariant(NPP npp, double value, NPVariant* variant);
-void convertToVariant(NPP npp, const std::string& value, NPVariant* variant);
-void convertToVariant(NPP npp, Object* value, NPVariant* variant);
-void convertToVariant(NPP npp, const Any& any, NPVariant* variant);
+void convertToVariant(NPP npp, bool value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, int8_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, uint8_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, int16_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, uint16_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, int32_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, uint32_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, int64_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, uint64_t value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, double value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, const std::string& value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, Object* value, NPVariant* variant, bool result);
+void convertToVariant(NPP npp, const Any& any, NPVariant* variant, bool result);
 
-bool convertToBool(const NPVariant* variant);
-uint8_t convertToOctet(const NPVariant* variant);
-int16_t convertToShort(const NPVariant* variant);
-uint16_t convertToUnsignedShort(const NPVariant* variant);
-int32_t convertToLong(const NPVariant* variant);
-uint32_t convertToUnsignedLong(const NPVariant* variant);
-int64_t convertToLongLong(const NPVariant* variant);
-uint64_t convertToUnsignedLongLong(const NPVariant* variant);
-float convertToFloat(const NPVariant* variant);
-double convertToDouble(const NPVariant* variant);
+bool convertToBool(NPP npp, const NPVariant* variant);
+int8_t convertToByte(NPP npp, const NPVariant* variant);
+uint8_t convertToOctet(NPP npp, const NPVariant* variant);
+int16_t convertToShort(NPP npp, const NPVariant* variant);
+uint16_t convertToUnsignedShort(NPP npp, const NPVariant* variant);
+int32_t convertToLong(NPP npp, const NPVariant* variant);
+uint32_t convertToUnsignedLong(NPP npp, const NPVariant* variant);
+int64_t convertToLongLong(NPP npp, const NPVariant* variant);
+uint64_t convertToUnsignedLongLong(NPP npp, const NPVariant* variant);
+float convertToFloat(NPP npp, const NPVariant* variant);
+double convertToDouble(NPP npp, const NPVariant* variant);
 std::string convertToString(NPP npp, const NPVariant* variant, unsigned attribute = 0);
-Object* convertToObject(NPP npp, const NPVariant* variant, char* buffer, size_t length);
-Any convertToAny(NPP npp, const NPVariant* variant, void* buffer, size_t length);
-Any convertToAny(NPP npp, const NPVariant* variant, int type, void* buffer, size_t length);
+Object* convertToObject(NPP npp, const NPVariant* variant, const Reflect::Type type = Reflect::Type("v"));
+Any convertToAny(NPP npp, const NPVariant* variant);
+Any convertToAny(NPP npp, const NPVariant* variant, const Reflect::Type type);
 
-void addProxyConstructor(const std::string interfaceName, Object* (*createProxy)(ProxyObject object));
-void addStubConstructor(const std::string interfaceName, NPObject* (*createStub)(NPP npp, Object* object));
+Any invoke(Object* object, unsigned interfaceNumber, unsigned methodNumber,
+           const char* meta, unsigned offset,
+           unsigned argumentCount, Any* arguments);
 
-NPObject* createStub(NPP npp, const char* interfaceName, Object* object);
-Object* createProxy(NPP npp, NPObject* object);
+// The following four functions are called from initializeHtmlMetaData();
+void initializeHtmlMetaDataA_G();
+void initializeHtmlMetaDataH_N();
+void initializeHtmlMetaDataO_U();
+void initializeHtmlMetaDataV_Z();
 
-Any invoke(Object* object, const char* iid, unsigned baseNumber, unsigned methodNumber, unsigned paramCount, Any* paramArray);
+// The following five functions are called from initializeSvgMetaData();
+void initializeSvgMetaDataA_E();
+void initializeSvgMetaDataF_G();
+void initializeSvgMetaDataH_N();
+void initializeSvgMetaDataO_U();
+void initializeSvgMetaDataV_Z();
 
-void addInterfaceData(const char* iid, const char* info);
-Reflect::Interface* getInterfaceData(const std::string interfaceName);
-Reflect::Interface* getInterfaceData(const char* iid);
+void initializeMetaData();
+void initializeFileMetaData();
+void initializeGeolocationMetaData();
+void initializeHtmlMetaData();
+void initializeIndexedDBMetaData();
+void initializeSvgMetaData();
+void initializeWebDatabaseMetaData();
+void initializeWebGLMetaData();
+void initializeWorkersMetaData();
+
+extern "C" NPObject* NPP_GetScriptableInstance(NPP instance);
 
 #endif  // ESIDL_ESNPAPI_H_INCLUDED

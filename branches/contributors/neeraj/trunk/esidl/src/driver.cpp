@@ -1,5 +1,6 @@
 /*
- * Copyright 2008, 2009 Google Inc.
+ * Copyright 2010 Esrille Inc.
+ * Copyright 2008-2010 Google Inc.
  * Copyright 2007 Nintendo Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,8 @@
  */
 
 #include "esidl.h"
+#include "meta.h"
+#include "sheet.h"
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -83,14 +86,18 @@ int main(int argc, char* argv[])
     argCpp[optCpp++] = "cpp";
     argCpp[optCpp++] = "-C";  // Use -C for cpp by default.
 
+    bool version = false;
     bool skeleton = false;
     bool generic = false;
     bool isystem = false;
     bool useExceptions = true;
     bool useVirtualBase = false;
     bool java = false;
+    bool cplusplus = false;
+    bool cplusplusSrc = false;
+    bool sheet = false;
     const char* stringTypeName = "char*";   // C++ string type name to be used
-    const char* objectTypeName = "object";  // C++ object type name to be used
+    const char* objectTypeName = "Object";  // C++ object type name to be used
     const char* indent = "es";
 
     for (int i = 1; i < argc; ++i)
@@ -110,6 +117,14 @@ int main(int argc, char* argv[])
                 {
                     setIncludePath(&argv[i][2]);
                 }
+            }
+            else if (strcmp(argv[i], "-cplusplus") == 0)
+            {
+                cplusplus = true;
+            }
+            else if (strcmp(argv[i], "-cplusplus-src") == 0)
+            {
+                cplusplusSrc = true;
             }
             else if (strcmp(argv[i], "-fexceptions") == 0)
             {
@@ -160,9 +175,18 @@ int main(int argc, char* argv[])
                 ++i;
                 objectTypeName = argv[i];
             }
+            else if (strcmp(argv[i], "-prefix") == 0)
+            {
+                ++i;
+                Node::setDefaultPrefix(argv[i]);
+            }
             else if (strcmp(argv[i], "-template") == 0)
             {
                 generic = true;
+            }
+            else if (strcmp(argv[i], "-sheet") == 0)
+            {
+                sheet = true;
             }
             else if (strcmp(argv[i], "-skeleton") == 0)
             {
@@ -173,8 +197,20 @@ int main(int argc, char* argv[])
                 ++i;
                 stringTypeName = argv[i];
             }
+            else if (strcmp(argv[i], "--version") == 0)
+            {
+                version = true;
+                break;
+            }
         }
     }
+
+    if (version)
+    {
+        printf("%s (r%s)\n", argv[0], SVN_REVISION);
+        return 0;
+    }
+
     argCpp[optCpp] = 0;
 
     // Set up the global module
@@ -220,6 +256,7 @@ int main(int argc, char* argv[])
                         strcmp(argv[i], "-isystem") == 0 ||
                         strcmp(argv[i], "-namespace") == 0 ||
                         strcmp(argv[i], "-object") == 0 ||
+                        strcmp(argv[i], "-prefix") == 0 ||
                         strcmp(argv[i], "-string") == 0)
                     {
                         ++i;
@@ -296,32 +333,61 @@ int main(int argc, char* argv[])
 
     setBaseFilename("");
 
+    if (java || cplusplus || cplusplusSrc || sheet)
+    {
+        Node::setCtorScope("_");
+    }
+
     ProcessExtendedAttributes processExtendedAttributes;
     getSpecification()->accept(&processExtendedAttributes);
 
     AdjustMethodCount adjustMethodCount(Node::getFlatNamespace());
     getSpecification()->accept(&adjustMethodCount);
 
-    for (int i = 1; i < argc; ++i)
-    {
-        if (argv[i][0] == '-')
-        {
-            if (strcmp(argv[i], "-I") == 0 ||
-                strcmp(argv[i], "-include") == 0 ||
-                strcmp(argv[i], "-indent") == 0 ||
-                strcmp(argv[i], "-isystem") == 0 ||
-                strcmp(argv[i], "-namespace") == 0 ||
-                strcmp(argv[i], "-object") == 0 ||
-                strcmp(argv[i], "-string") == 0)
-            {
-                ++i;
-            }
-            continue;
-        }
-        result = output(argv[i], isystem, useExceptions, useVirtualBase,
-                        stringTypeName, objectTypeName, indent,
-                        skeleton, generic, java);
-    }
+    Meta meta(objectTypeName);
+    getSpecification()->accept(&meta);
 
+    if (java)
+    {
+        result = printJava(indent);
+    }
+    else if (cplusplus)
+    {
+        result = printCPlusPlus(stringTypeName, objectTypeName, useExceptions, useVirtualBase, indent);
+    }
+    else if (cplusplusSrc)
+    {
+        result = printCPlusPlusSrc(stringTypeName, objectTypeName, useExceptions, useVirtualBase, indent);
+    }
+    else if (sheet)
+    {
+        Sheet visitor;
+        getSpecification()->accept(&visitor);
+        result = EXIT_SUCCESS;
+    }
+    else
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            if (argv[i][0] == '-')
+            {
+                if (strcmp(argv[i], "-I") == 0 ||
+                    strcmp(argv[i], "-include") == 0 ||
+                    strcmp(argv[i], "-indent") == 0 ||
+                    strcmp(argv[i], "-isystem") == 0 ||
+                    strcmp(argv[i], "-namespace") == 0 ||
+                    strcmp(argv[i], "-object") == 0 ||
+                    strcmp(argv[i], "-prefix") == 0 ||
+                    strcmp(argv[i], "-string") == 0)
+                {
+                    ++i;
+                }
+                continue;
+            }
+            result = output(argv[i], isystem, useExceptions, useVirtualBase,
+                            stringTypeName, objectTypeName, indent,
+                            skeleton, generic);
+        }
+    }
     return result;
 }

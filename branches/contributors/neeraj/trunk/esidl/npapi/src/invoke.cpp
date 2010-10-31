@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Google Inc.
+ * Copyright 2009, 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 #include <stdio.h>
 
 #include "esnpapi.h"
-#include "reflect.h"
 
 namespace
 {
@@ -37,28 +36,56 @@ NPIdentifier getSpecialIdentifier(const Any& any)
     return id;
 }
 
+template <typename T>
+void expandSequence(NPP npp, const Sequence<T> sequence, NPVariant* variantArray)
+{
+    for (unsigned i = 0; i < sequence.getLength(); ++i)
+    {
+        convertToVariant(npp, sequence[i], variantArray + i, false);
+    }
+}
+
+Any processResult(NPP npp, NPVariant* variant, const Reflect::Type type)
+{
+    Any result = convertToAny(npp, variant, type);
+    if (NPVARIANT_IS_OBJECT(*variant))
+    {
+        if (result.isSequence() || !result.isObject())
+        {
+            NPN_ReleaseObject(NPVARIANT_TO_OBJECT(*variant));
+        }
+        else if (!StubObject::isStub(NPVARIANT_TO_OBJECT(*variant)))
+        {
+            ProxyObject* proxy = interface_cast<ProxyObject*>(static_cast<Object*>(result));
+            if (proxy)
+            {
+                proxy->mark();
+            }
+        }
+    }
+    else
+    {
+        NPN_ReleaseVariantValue(variant);
+    }
+    return result;
+}
+
 }  // namespace
 
-Any invoke(Object* object, const char* iid, unsigned baseNumber, unsigned methodNumber, unsigned paramCount, Any* paramArray)
+Any invoke(Object* object, unsigned interfaceNumber, unsigned methodNumber,
+           const char* meta, unsigned offset,
+           unsigned argumentCount, Any* arguments)
 {
-    void* buffer;   // TODO for sequence
-    size_t length;  // TODO for sequence
-
-    ProxyObject* proxy = dynamic_cast<ProxyObject*>(object);  // XXX
+    ProxyObject* proxy = interface_cast<ProxyObject*>(object);
     if (!proxy)
     {
         return Any();
     }
-    Reflect::Interface* interface = getInterfaceData(iid);
-    if (!interface)
-    {
-        return Any();
-    }
-
-    Reflect::Method method = interface->getMethod(methodNumber);
+    Reflect::Interface interface = Reflect::Interface(meta);
+    Reflect::Method method = Reflect::Method(meta + offset);
     Reflect::Type type = method.getReturnType();
 
-    printf("invoke %s::%s %p\n", interface->getName().c_str(), method.getName().c_str(), proxy->getNPObject());
+    printf("invoke %s::%s %p : %s\n", interface.getName().c_str(), method.getName().c_str(), proxy->getNPObject(), type.getQualifiedName().c_str());
 
     NPIdentifier id;
     NPVariant result;
@@ -69,34 +96,34 @@ Any invoke(Object* object, const char* iid, unsigned baseNumber, unsigned method
         id = NPN_GetStringIdentifier(method.getName().c_str());
         if (NPN_GetProperty(proxy->getNPP(), proxy->getNPObject(), id, &result))
         {
-            return convertToAny(proxy->getNPP(), &result, buffer, length);
+            return processResult(proxy->getNPP(), &result, type);
         }
     }
     else if (method.isSetter())
     {
         id = NPN_GetStringIdentifier(method.getName().c_str());
         NPVariant value;
-        convertToVariant(proxy->getNPP(), paramArray[paramCount - 1], &value);
+        convertToVariant(proxy->getNPP(), arguments[argumentCount - 1], &value, false);
         NPN_SetProperty(proxy->getNPP(), proxy->getNPObject(), id, &value);
     }
     else if (method.isSpecialGetter())
     {
-        id = getSpecialIdentifier(paramArray[paramCount - 1]);
+        id = getSpecialIdentifier(arguments[argumentCount - 1]);
         if (NPN_GetProperty(proxy->getNPP(), proxy->getNPObject(), id, &result))
         {
-            return convertToAny(proxy->getNPP(), &result, buffer, length);
+            return processResult(proxy->getNPP(), &result, type);
         }
     }
     else if (method.isSpecialSetter() || method.isSpecialCreator())
     {
-        id = getSpecialIdentifier(paramArray[paramCount - 2]);
+        id = getSpecialIdentifier(arguments[argumentCount - 2]);
         NPVariant value;
-        convertToVariant(proxy->getNPP(), paramArray[paramCount - 1], &value);
+        convertToVariant(proxy->getNPP(), arguments[argumentCount - 1], &value, false);
         NPN_SetProperty(proxy->getNPP(), proxy->getNPObject(), id, &value);
     }
     else if (method.isSpecialDeleter())
     {
-        id = getSpecialIdentifier(paramArray[paramCount - 1]);
+        id = getSpecialIdentifier(arguments[argumentCount - 1]);
         NPN_RemoveProperty(proxy->getNPP(), proxy->getNPObject(), id);
     }
     else
@@ -104,15 +131,18 @@ Any invoke(Object* object, const char* iid, unsigned baseNumber, unsigned method
         unsigned variadicCount = 0;
         if (method.isVariadic())
         {
-            variadicCount = static_cast<unsigned>(paramArray[paramCount - 1]);
-            paramCount -= 2;
+            --argumentCount;
+            Sequence<int> sequence(arguments[argumentCount]);  // TODO: make sure this works ignoring T
+            variadicCount = sequence.getLength();
         }
-        unsigned variantCount = paramCount - 1 + variadicCount;
+
+        unsigned variantCount = argumentCount + variadicCount;
         NPVariant variantArray[variantCount];
-        for (int i = 1; i < paramCount; ++i)
+        for (int i = 0; i < argumentCount; ++i)
         {
-            convertToVariant(proxy->getNPP(), paramArray[i], &variantArray[i - 1]);
+            convertToVariant(proxy->getNPP(), arguments[i], &variantArray[i], false);
         }
+
         if (0 < variadicCount)
         {
             Reflect::Parameter param = method.listParameter();
@@ -120,134 +150,121 @@ Any invoke(Object* object, const char* iid, unsigned baseNumber, unsigned method
             {
                 param.next();
             }
-            switch (param.getType().getType())
+            Reflect::Type type = param.getType();
+            if (type.isNullable())
             {
-            case Reflect::kBoolean:
-            {
-                const bool* variadic = reinterpret_cast<const bool*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
+                switch (type.getType())
                 {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
+                case Reflect::kBoolean:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<bool> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kByte:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<int8_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kOctet:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<uint8_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kShort:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<int16_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kUnsignedShort:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<uint16_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kLong:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<int32_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kUnsignedLong:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<uint32_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kLongLong:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<int64_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kUnsignedLongLong:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<uint64_t> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kFloat:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<float> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kDouble:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<double> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kString:
+                    expandSequence(proxy->getNPP(), Sequence<Nullable<std::string> >(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
                 }
-                break;
             }
-            case Reflect::kOctet:
+            else
             {
-                const uint8_t* variadic = reinterpret_cast<const uint8_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
+                switch (type.getType())
                 {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
+                case Reflect::kBoolean:
+                    expandSequence(proxy->getNPP(), Sequence<bool>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kByte:
+                    expandSequence(proxy->getNPP(), Sequence<int8_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kOctet:
+                    expandSequence(proxy->getNPP(), Sequence<uint8_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kShort:
+                    expandSequence(proxy->getNPP(), Sequence<int16_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kUnsignedShort:
+                    expandSequence(proxy->getNPP(), Sequence<uint16_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kLong:
+                    expandSequence(proxy->getNPP(), Sequence<int32_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kUnsignedLong:
+                    expandSequence(proxy->getNPP(), Sequence<uint32_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kLongLong:
+                    expandSequence(proxy->getNPP(), Sequence<int64_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kUnsignedLongLong:
+                    expandSequence(proxy->getNPP(), Sequence<uint64_t>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kFloat:
+                    expandSequence(proxy->getNPP(), Sequence<float>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kDouble:
+                    expandSequence(proxy->getNPP(), Sequence<double>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kString:
+                    expandSequence(proxy->getNPP(), Sequence<std::string>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                case Reflect::kAny:
+                    expandSequence(proxy->getNPP(), Sequence<Any>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
+                // TODO: kSequence???
+                case Reflect::kObject:
+                default:
+                    expandSequence(proxy->getNPP(), Sequence<Object*>(arguments[argumentCount]), &variantArray[argumentCount]);
+                    break;
                 }
-                break;
-            }
-            case Reflect::kShort:
-            {
-                const int16_t* variadic = reinterpret_cast<const int16_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kUnsignedShort:
-            {
-                const uint16_t* variadic = reinterpret_cast<const uint16_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kLong:
-            {
-                const int32_t* variadic = reinterpret_cast<const int32_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kUnsignedLong:
-            {
-                const uint32_t* variadic = reinterpret_cast<const uint32_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kLongLong:
-            {
-                const int64_t* variadic = reinterpret_cast<const int64_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kUnsignedLongLong:
-            {
-                const uint64_t* variadic = reinterpret_cast<const uint64_t*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kFloat:
-            {
-                const float* variadic = reinterpret_cast<const float*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kDouble:
-            {
-                const double* variadic = reinterpret_cast<const double*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kString:
-            {
-                const std::string* variadic = reinterpret_cast<const std::string*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kAny:
-            {
-                const Any* variadic = reinterpret_cast<const Any*>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            case Reflect::kObject:
-            {
-                Object** variadic = reinterpret_cast<Object**>(static_cast<intptr_t>(paramArray[paramCount]));
-                for (int i = paramCount - 1; i < variantCount; ++i)
-                {
-                    convertToVariant(proxy->getNPP(), *variadic++, &variantArray[i]);
-                }
-                break;
-            }
-            default:
-                // TODO: Are we going to support non-simple types with variadic?
-                break;
             }
         }
+
         id = NPN_GetStringIdentifier(method.getName().c_str());
-        if (NPN_Invoke(proxy->getNPP(), proxy->getNPObject(), id, variantArray, variantCount, &result))
+        if (method.isOperation())
         {
-            return convertToAny(proxy->getNPP(), &result, buffer, length);
+            if (NPN_Invoke(proxy->getNPP(), proxy->getNPObject(), id, variantArray, variantCount, &result))
+            {
+                return processResult(proxy->getNPP(), &result, type);
+            }
+        }
+        else if (method.isConstructor())
+        {
+            // Chrome uses NPN_Construct()
+            if (NPN_Construct(proxy->getNPP(), proxy->getNPObject(), variantArray, variantCount, &result))
+            {
+                return processResult(proxy->getNPP(), &result, type);
+            }
+            // Firefox uses NPN_InvokeDefault()
+            if (NPN_InvokeDefault(proxy->getNPP(), proxy->getNPObject(), variantArray, variantCount, &result))
+            {
+                return processResult(proxy->getNPP(), &result, type);
+            }
         }
     }
     return Any();

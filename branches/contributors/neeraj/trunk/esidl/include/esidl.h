@@ -1,5 +1,6 @@
 /*
- * Copyright 2008, 2009 Google Inc.
+ * Copyright 2010 Esrille Inc.
+ * Copyright 2008-2010 Google Inc.
  * Copyright 2007 Nintendo Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,6 +66,7 @@ Node* getCurrent();
 Node* setCurrent(const Node* node);
 
 Node* resolve(const Node* scope, std::string name);
+Node* resolveInBase(const Interface* interface, std::string name);
 
 std::string& getJavadoc();
 void setJavadoc(const char* doc);
@@ -89,9 +91,13 @@ protected:
     int                 lastLine;
     int                 lastColumn;
 
+    mutable std::string meta;           // TODO: meta should not be mutable. fix later.
+
     static int          level;          // current include level
     static const char*  baseObjectName; // default base object name
     static const char*  namespaceName;  // flat namespace name if non zero
+    static const char*  defaultPrefix;  // ::org::w3c::dom
+    static const char*  ctorScope;      // "::" by default. could be "_"
 
 public:
     // Attribute bits
@@ -122,10 +128,11 @@ public:
     static const uint32_t PrototypeRoot =            0x00004000;
     // [Null]
     static const uint32_t NullIsEmpty =              0x00008000;
-    static const uint32_t NullIsNull =               0x00010000;
     // [Undefined]
     static const uint32_t UndefinedIsEmpty =         0x00020000;
     static const uint32_t UndefinedIsNull =          0x00040000;
+    // [AllowAny]
+    static const uint32_t AllowAny =                 0x00080000;  // TODO: Update meta
     // [Replaceable]
     static const uint32_t Replaceable =              0x00100000;
     // [Optional]
@@ -136,6 +143,17 @@ public:
     static const uint32_t Supplemental =             0x02000000;
     // [Constructor]
     static const uint32_t Constructor =              0x04000000;
+    // [OverrideBuiltins]
+    static const uint32_t OverrideBuiltins =         0x08000000;  // TODO: Update meta
+    // [ReplaceableNamedProperties]
+    // cf. http://www.w3.org/Bugs/Public/show_bug.cgi?id=8241
+    static const uint32_t ReplaceableNamedProperties=0x10000000;  // TODO: Update metat
+
+    // misc. bits
+    static const uint32_t HasCovariant =             0x00010000;
+    static const uint32_t HasIndexedProperties =     0x20000000;
+    static const uint32_t HasNamedProperties =       0x40000000;
+    static const uint32_t UnnamedProperty =          0x80000000;  // This should be banned.
 
     void setLocation(struct YYLTYPE* yylloc);
     void setLocation(struct YYLTYPE* first, struct YYLTYPE* last);
@@ -247,6 +265,11 @@ public:
     const std::string& getSource() const
     {
         return source;
+    }
+
+    std::string& getMeta() const
+    {
+        return meta;
     }
 
     uint32_t getAttr() const
@@ -370,20 +393,12 @@ public:
         return name;
     }
 
-    std::string getQualifiedName() const
-    {
-        if (name.compare(0, 2, "::") == 0)
-        {
-            return name;
-        }
+    std::string getQualifiedName() const;
 
-        std::string qualifiedName;
-        for (const Node* node = this; node && node->name != ""; node = node->getParent())
-        {
-            qualifiedName = "::" + node->name + qualifiedName;
-        }
-        return qualifiedName;
-    }
+    std::string getQualifiedModuleName() const;
+
+    virtual std::string getPrefixedName() const;
+    std::string getPrefixedModuleName() const;
 
     // If there is an interface definition as well as interface forward declaration,
     // search() must return the interface definition.
@@ -474,6 +489,11 @@ public:
         return compare("double", scope) == 0;
     }
 
+    virtual Module* isModule(const Node* scope)
+    {
+        return 0;
+    }
+
     virtual Member* isTypedef(const Node* scope) const
     {
         return 0;
@@ -497,6 +517,11 @@ public:
     virtual NativeType* isNative(const Node* scope)
     {
         return 0;
+    }
+
+    virtual bool isConstructor() const
+    {
+        return false;
     }
 
     size_t getOffset() const
@@ -534,7 +559,7 @@ public:
 
     bool isDefinedIn(const char* source) const
     {
-        return getRank() == 1 && (getSource() == source || getSource() == "");
+        return getRank() == 1 && (!source || getSource() == source || getSource() == "");
     }
 
     void setExtendedAttributes(NodeList* list)
@@ -592,6 +617,26 @@ public:
     static const char* getFlatNamespace()
     {
         return namespaceName ;
+    }
+
+    static void setDefaultPrefix(const char* name)
+    {
+        defaultPrefix = name;
+    }
+
+    static const char* getDefaultPrefix()
+    {
+        return defaultPrefix;
+    }
+
+    static void setCtorScope(const char* name)
+    {
+        ctorScope = name;
+    }
+
+    static const char* getCtorScope()
+    {
+        return ctorScope;
     }
 };
 
@@ -688,6 +733,16 @@ public:
         return node->isNative(node->getParent());
     }
 
+    virtual Module* isModule(const Node* scope)
+    {
+        Node* node = search(scope);
+        if (!node)
+        {
+            return 0;
+        }
+        return node->isModule(node->getParent());
+    }
+
     virtual Member* isTypedef(const Node* scope) const;
 
     virtual void accept(Visitor* visitor);
@@ -774,13 +829,22 @@ public:
         }
         if (getQualifiedName() == "::dom")
         {
-            return "::org::w3c::dom";
+            return defaultPrefix;
         }
         if (Module* parent = dynamic_cast<Module*>(getParent()))
         {
             return parent->getPrefixedName() + body;
         }
-        return "::org::w3c::dom" + body;
+        if (!strcmp(defaultPrefix, "::"))
+        {
+            return body;
+        }
+        return defaultPrefix + body;
+    }
+
+    virtual Module* isModule(const Node* scope)
+    {
+        return this;
     }
 
     virtual void accept(Visitor* visitor);
@@ -855,11 +919,11 @@ class Interface : public Node
     Node* extends;
     int constCount;
     int methodCount;
+    mutable int interfaceCount;  // total number of non-supplemental interfaces this interface will implement excluding Object.
     Interface* constructor;
-    std::list<const Interface*> mixins;
-    std::list<const Interface*> implementedOn;
-    std::list<const Interface*> supplementals;
+    std::list<const Interface*> supplementalList;
     std::list<const Interface*> implementList;
+    std::list<const Interface*> superList;
 
 public:
     Interface(std::string identifier, Node* extends = 0, bool forward = false) :
@@ -867,6 +931,7 @@ public:
         extends(extends),
         constCount(0),
         methodCount(0),
+        interfaceCount(0),
         constructor(0)
     {
         if (!forward)
@@ -883,6 +948,8 @@ public:
             delete extends;
         }
     }
+
+    std::string getPrefixedName() const;
 
     virtual void add(Node* node);
     void processExtendedAttributes();
@@ -937,6 +1004,9 @@ public:
         return methodCount;
     }
 
+    int getInterfaceCount() const;
+    void getInterfaceList(std::list<const Interface*>* list) const;
+
     int addMethodCount(int count)
     {
         methodCount += count;
@@ -974,14 +1044,24 @@ public:
         return super;
     }
 
+    virtual bool isConstructor() const
+    {
+        return dynamic_cast<const Interface*>(getParent());
+    }
+
     Interface* getConstructor() const
     {
         return constructor;
     }
 
-    const std::list<const Interface*>* getMixins() const
+    const std::list<const Interface*>* getSuperList() const
     {
-        return &mixins;
+        return &superList;
+    }
+
+    const std::list<const Interface*>* getSupplementals() const
+    {
+        return &supplementalList;
     }
 
     const std::list<const Interface*>* getImplements() const
@@ -999,53 +1079,31 @@ public:
     void implements(Interface* mixin, bool importImplements)
     {
         // cf. http://lists.w3.org/Archives/Public/public-webapps/2009JulSep/0528.html
-        if (!(mixin->attr & (Supplemental | NoInterfaceObject)))
+        if (!(mixin->attr & Supplemental))
         {
             implementList.push_back(mixin);
         }
         if ((mixin->attr & Supplemental) || importImplements)
         {
-            mixins.push_back(mixin);
+            supplementalList.push_back(mixin);
 
             mixin->setAttr(mixin->getAttr() | ImplementedOn);
-            mixin->implementedOn.push_back(this);
         }
     }
 
-    Interface* getImplementedOn() const
+    void collectSupplementals(std::list<const Interface*>* interfaceList) const
     {
-        // TODO: This is is wrong. It should check [NoInterfaceObject], too.
-        if (implementedOn.size() == 1)
-        {
-            return const_cast<Interface*>(implementedOn.front());
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    void collectMixins(std::list<const Interface*>* interfaceList, const Interface* interface) const
-    {
-        for (std::list<const Interface*>::const_reverse_iterator i = interface->getMixins()->rbegin();
-             i != interface->getMixins()->rend();
+        for (std::list<const Interface*>::const_reverse_iterator i = getSupplementals()->rbegin();
+             i != getSupplementals()->rend();
              ++i)
         {
             assert(!(*i)->isLeaf());
-            collectMixins(interfaceList, *i);
+            (*i)->collectSupplementals(interfaceList);
         }
-        interfaceList->push_front(interface);
+        interfaceList->push_front(this);
     }
 
-    void collectMixins(std::list<const Interface*>* interfaceList) const
-    {
-        for (const Interface* interface = this;
-             interface && !interface->isBaseObject();
-             interface = interface->getSuper())
-        {
-            collectMixins(interfaceList, interface);
-        }
-    }
+    void collectMixins(std::list<const Interface*>* interfaceList) const;
 
     void adjustMethodCount();
 };
@@ -1153,7 +1211,14 @@ public:
 
     void setSpec(Node* spec)
     {
-        this->spec = spec;
+        if (ArrayType* array = dynamic_cast<ArrayType*>(this->spec))
+        {
+            array->setSpec(spec);
+        }
+        else
+        {
+            this->spec = spec;
+        }
     }
 
     Node* getMax() const
@@ -1162,6 +1227,11 @@ public:
     }
 
     unsigned getLength(const Node* scope);
+
+    virtual bool isInterface(const Node* scope) const
+    {
+        return true;
+    }
 
     virtual ArrayType* isArray(const Node* scope)
     {
@@ -1270,7 +1340,7 @@ public:
         delete spec;
     }
 
-    Node* getSpec() const
+    virtual Node* getSpec() const
     {
         return spec;
     }
@@ -1339,6 +1409,15 @@ public:
         return spec->isNative(scope);
     }
 
+    virtual Module* isModule(const Node* scope)
+    {
+        if (!type)
+        {
+            return 0;
+        }
+        return spec->isModule(scope);
+    }
+
     virtual Member* isTypedef(const Node* scope) const
     {
         return type ? const_cast<Member*>(this) : 0;
@@ -1354,6 +1433,9 @@ class Attribute : public Member
     Node* setraises;
     std::string putForwards;
 
+    mutable std::string metaGetter;
+    mutable std::string metaSetter;
+
 public:
     Attribute(std::string identifier, Node* spec, bool readonly = false) :
         Member(identifier, spec, 0),
@@ -1361,6 +1443,16 @@ public:
         getraises(0),
         setraises(0)
     {
+    }
+
+    std::string& getMetaGetter() const
+    {
+        return metaGetter;
+    }
+
+    std::string& getMetaSetter() const
+    {
+        return metaSetter;
     }
 
     bool isReadonly() const
@@ -1485,6 +1577,8 @@ class OpDcl : public Member
     int methodCount;
     std::vector<int> paramCounts;  // for each method
 
+    mutable std::vector<std::string> metaOps;
+
 public:
     OpDcl(std::string identifier, Node* spec) :
         Member(identifier, spec, 0),
@@ -1493,10 +1587,24 @@ public:
         methodCount(1)
     {
         children = new NodeList;
+        if (identifier == "")
+        {
+            attr |= UnnamedProperty;
+        }
     }
 
     virtual void add(Node* node);
     void processExtendedAttributes();
+
+    std::string& getMetaOp(int i) const
+    {
+        assert(i < methodCount);
+        if (metaOps.size() < methodCount)
+        {
+            metaOps.resize(methodCount);
+        }
+        return metaOps.at(i);
+    }
 
     Node* getRaises() const
     {
@@ -1536,6 +1644,29 @@ public:
         assert(0 <= i && i < methodCount);
         return (methodCount == 1) ? paramCount : paramCounts[i];
     }
+
+    Node* hasCovariantReturnType() const
+    {
+        Interface* interface = static_cast<Interface*>(getParent());
+        assert(interface);
+        if (!resolveInBase(interface, getName()))
+        {
+            return 0;
+        }
+        // This node possibly overrides a base class operation.
+        if (ScopedName* name = dynamic_cast<ScopedName*>(getSpec()))
+        {
+            Node* spec = name->search(interface);
+            check(spec, "could not resolved %s.", name->getName().c_str());
+            if (dynamic_cast<Interface*>(spec) && !spec->isBaseObject())
+            {
+                return spec;
+            }
+        }
+        return 0;
+    }
+
+    virtual Node* getSpec() const;
 
     virtual void accept(Visitor* visitor);
 };
@@ -1854,23 +1985,22 @@ public:
 
     virtual void at(const Interface* node)
     {
+        if (!node->isLeaf())
+        {
+            for (NodeList::iterator i = node->begin(); i != node->end(); ++i)
+            {
+                (*i)->accept(this);
+                if (OpDcl* op = dynamic_cast<OpDcl*>(*i))
+                {
+                    const_cast<Interface*>(node)->processExtendedAttributes(op);
+                }
+                else if (Attribute* attr = dynamic_cast<Attribute*>(*i))
+                {
+                    const_cast<Interface*>(node)->processExtendedAttributes(attr);
+                }
+            }
+        }
         const_cast<Interface*>(node)->processExtendedAttributes();
-        if (node->isLeaf())
-        {
-            return;
-        }
-        for (NodeList::iterator i = node->begin(); i != node->end(); ++i)
-        {
-            (*i)->accept(this);
-            if (OpDcl* op = dynamic_cast<OpDcl*>(*i))
-            {
-                const_cast<Interface*>(node)->processExtendedAttributes(op);
-            }
-            else if (Attribute* attr = dynamic_cast<Attribute*>(*i))
-            {
-                const_cast<Interface*>(node)->processExtendedAttributes(attr);
-            }
-        }
     }
 
     virtual void at(const Attribute* node)
@@ -1922,13 +2052,18 @@ public:
     }
 };
 
+int printJava(const char* indent);
+int printCPlusPlus(const char* stringTypeName, const char* objectTypeName,
+                   bool useExceptions, bool useVirtualBase, const char* indent);
+int printCPlusPlusSrc(const char* stringTypeName, const char* objectTypeName,
+                      bool useExceptions, bool useVirtualBase, const char* indent);
+
 extern void print();
 extern void printCxx(const char* source, const char* stringTypeName, const char* objectTypeName,
                      bool useExceptions, bool useVirtualBase, const char* indent);
 extern void printSkeleton(const char* source, bool isystem, const char* indent);
 extern void printTemplate(const char* source, const char* stringTypeName, const char* objectTypeName,
                           bool useExceptions, bool isystem, const char* indent);
-extern void printJava(const char* source, const char* indent);
 
 extern std::string getOutputFilename(std::string, const char* suffix);
 extern std::string getIncludedName(const std::string& header);
@@ -1945,7 +2080,6 @@ extern int output(const char* filename,
                   bool isystem, bool useExceptions, bool useMultipleInheritance,
                   const char* stringTypeName, const char* objectTypeName, const char* indent,
                   bool skeleton,
-                  bool generic,
-                  bool java);
+                  bool generic);
 
 #endif  // ESIDL_H_INCLUDED

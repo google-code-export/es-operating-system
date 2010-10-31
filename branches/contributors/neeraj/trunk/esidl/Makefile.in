@@ -35,7 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = esidl$(EXEEXT)
+@NACL_FALSE@bin_PROGRAMS = esidl$(EXEEXT)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure config.guess \
@@ -52,11 +52,20 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_esidl_OBJECTS = esidl-cxx.$(OBJEXT) esidl-driver.$(OBJEXT) \
-	esidl-esidl.$(OBJEXT) esidl-java.$(OBJEXT) \
-	esidl-lexer.$(OBJEXT) esidl-parser.$(OBJEXT) \
-	esidl-print.$(OBJEXT) esidl-skeleton.$(OBJEXT) \
-	esidl-template.$(OBJEXT)
+am__esidl_SOURCES_DIST = include/cplusplus.h include/cplusplusCall.h \
+	include/cplusplusInvoke.h include/cplusplusMeta.h \
+	include/cplusplusTemplate.h include/cxx.h include/esidl.h \
+	include/expr.h include/formatter.h include/forward.h \
+	include/info.h include/java.h include/meta.h include/reflect.h \
+	include/sheet.h include/utf.h src/cplusplus.cpp src/cxx.cpp \
+	src/driver.cpp src/esidl.cpp src/java.cpp src/lexer.ll \
+	src/parser.yy src/print.cpp src/skeleton.cpp src/template.cpp
+@NACL_FALSE@am_esidl_OBJECTS = esidl-cplusplus.$(OBJEXT) \
+@NACL_FALSE@	esidl-cxx.$(OBJEXT) esidl-driver.$(OBJEXT) \
+@NACL_FALSE@	esidl-esidl.$(OBJEXT) esidl-java.$(OBJEXT) \
+@NACL_FALSE@	esidl-lexer.$(OBJEXT) esidl-parser.$(OBJEXT) \
+@NACL_FALSE@	esidl-print.$(OBJEXT) esidl-skeleton.$(OBJEXT) \
+@NACL_FALSE@	esidl-template.$(OBJEXT)
 esidl_OBJECTS = $(am_esidl_OBJECTS)
 esidl_LDADD = $(LDADD)
 esidl_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -92,7 +101,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(esidl_SOURCES)
-DIST_SOURCES = $(esidl_SOURCES)
+DIST_SOURCES = $(am__esidl_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -107,7 +116,6 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir dist dist-all distcheck
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -204,6 +212,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -271,29 +280,44 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = . testsuite npapi java
-BUILT_SOURCES = lexer.cc parser.cc parser.h
-esidl_SOURCES = \
-	include/cplusplus.h\
-	include/esidl.h \
-	include/expr.h \
-	include/formatter.h \
-	include/forward.h \
-	include/info.h \
-	include/java.h \
-	include/reflect.h \
-	include/utf.h \
-	src/cxx.cpp \
-	src/driver.cpp \
-	src/esidl.cpp \
-	src/java.cpp \
-	src/lexer.ll \
-	src/parser.yy \
-	src/print.cpp \
-	src/skeleton.cpp \
-	src/template.cpp
+@ENABLE_JAVA_FALSE@JAVADIR = 
+@ENABLE_JAVA_TRUE@JAVADIR = java
+@ENABLE_CPLUSPLUS_FALSE@CPLUSPLUSDIR = 
+@ENABLE_CPLUSPLUS_TRUE@CPLUSPLUSDIR = cplusplus
+@ENABLE_NPAPI_FALSE@NPAPIDIR = 
+@ENABLE_NPAPI_TRUE@NPAPIDIR = npapi
+SUBDIRS = . testsuite $(JAVADIR) $(CPLUSPLUSDIR) $(NPAPIDIR)
+DIST_SUBDIRS = testsuite java cplusplus npapi
+@NACL_FALSE@BUILT_SOURCES = lexer.cc parser.cc parser.h
+@NACL_FALSE@esidl_SOURCES = \
+@NACL_FALSE@	include/cplusplus.h\
+@NACL_FALSE@	include/cplusplusCall.h \
+@NACL_FALSE@	include/cplusplusInvoke.h \
+@NACL_FALSE@	include/cplusplusMeta.h \
+@NACL_FALSE@	include/cplusplusTemplate.h \
+@NACL_FALSE@	include/cxx.h \
+@NACL_FALSE@	include/esidl.h \
+@NACL_FALSE@	include/expr.h \
+@NACL_FALSE@	include/formatter.h \
+@NACL_FALSE@	include/forward.h \
+@NACL_FALSE@	include/info.h \
+@NACL_FALSE@	include/java.h \
+@NACL_FALSE@	include/meta.h \
+@NACL_FALSE@	include/reflect.h \
+@NACL_FALSE@	include/sheet.h \
+@NACL_FALSE@	include/utf.h \
+@NACL_FALSE@	src/cplusplus.cpp \
+@NACL_FALSE@	src/cxx.cpp \
+@NACL_FALSE@	src/driver.cpp \
+@NACL_FALSE@	src/esidl.cpp \
+@NACL_FALSE@	src/java.cpp \
+@NACL_FALSE@	src/lexer.ll \
+@NACL_FALSE@	src/parser.yy \
+@NACL_FALSE@	src/print.cpp \
+@NACL_FALSE@	src/skeleton.cpp \
+@NACL_FALSE@	src/template.cpp
 
-esidl_CXXFLAGS = -D YYERROR_VERBOSE
+@NACL_FALSE@esidl_CXXFLAGS = -D YYERROR_VERBOSE
 AM_YFLAGS = -d -v -t
 AM_CPPFLAGS = \
 	-iquote $(srcdir)/include \
@@ -302,6 +326,10 @@ AM_CPPFLAGS = \
 EXTRA_DIST = \
 	LICENSE \
 	dom/COPYRIGHT.html \
+	dom/2dcontext.idl \
+	dom/arrays.idl \
+	dom/console.idl \
+	dom/cssom.idl \
 	dom/cssomview.idl \
 	dom/dom2css.idl \
 	dom/dom2events.idl \
@@ -310,16 +338,33 @@ EXTRA_DIST = \
 	dom/dom2traversal.idl \
 	dom/dom2views.idl \
 	dom/dom3core.idl \
+	dom/dom3events.idl \
 	dom/dom3ls.idl \
 	dom/dom3validation.idl \
 	dom/dom3xpath.idl \
+	dom/elementtraversal.idl \
+	dom/eventsource.idl \
 	dom/file.idl \
+	dom/geolocation.idl \
 	dom/html5.idl \
 	dom/idl_scraper.pl \
+	dom/indexeddb.idl \
+	dom/microdata.idl \
 	dom/NOTICE \
+	dom/postmsg.idl \
+	dom/progress-events.idl \
+	dom/selectors.idl \
+	dom/smil.idl \
+	dom/svg.idl \
+	dom/webdatabase.idl \
 	dom/webgl.idl \
+	dom/webnotifications.idl \
+	dom/webstorage.idl \
+	dom/websocket.idl \
 	dom/wget_webidl_dom \
-	dom/xhr2.idl
+	dom/workers.idl \
+	dom/xhr2.idl \
+	setup.pepper
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -418,6 +463,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esidl-cplusplus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esidl-cxx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esidl-driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esidl-esidl.Po@am__quote@
@@ -448,6 +494,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+esidl-cplusplus.o: src/cplusplus.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esidl_CXXFLAGS) $(CXXFLAGS) -MT esidl-cplusplus.o -MD -MP -MF $(DEPDIR)/esidl-cplusplus.Tpo -c -o esidl-cplusplus.o `test -f 'src/cplusplus.cpp' || echo '$(srcdir)/'`src/cplusplus.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/esidl-cplusplus.Tpo $(DEPDIR)/esidl-cplusplus.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/cplusplus.cpp' object='esidl-cplusplus.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esidl_CXXFLAGS) $(CXXFLAGS) -c -o esidl-cplusplus.o `test -f 'src/cplusplus.cpp' || echo '$(srcdir)/'`src/cplusplus.cpp
+
+esidl-cplusplus.obj: src/cplusplus.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esidl_CXXFLAGS) $(CXXFLAGS) -MT esidl-cplusplus.obj -MD -MP -MF $(DEPDIR)/esidl-cplusplus.Tpo -c -o esidl-cplusplus.obj `if test -f 'src/cplusplus.cpp'; then $(CYGPATH_W) 'src/cplusplus.cpp'; else $(CYGPATH_W) '$(srcdir)/src/cplusplus.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/esidl-cplusplus.Tpo $(DEPDIR)/esidl-cplusplus.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/cplusplus.cpp' object='esidl-cplusplus.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esidl_CXXFLAGS) $(CXXFLAGS) -c -o esidl-cplusplus.obj `if test -f 'src/cplusplus.cpp'; then $(CYGPATH_W) 'src/cplusplus.cpp'; else $(CYGPATH_W) '$(srcdir)/src/cplusplus.cpp'; fi`
 
 esidl-cxx.o: src/cxx.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(esidl_CXXFLAGS) $(CXXFLAGS) -MT esidl-cxx.o -MD -MP -MF $(DEPDIR)/esidl-cxx.Tpo -c -o esidl-cxx.o `test -f 'src/cxx.cpp' || echo '$(srcdir)/'`src/cxx.cpp
@@ -755,6 +815,7 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+@NACL_TRUE@dist-hook:
 
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
@@ -973,6 +1034,7 @@ maintainer-clean-generic:
 	-rm -f parser.cc
 	-rm -f parser.h
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+@NACL_TRUE@clean-local:
 clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
@@ -1070,11 +1132,11 @@ uninstall-am: uninstall-binPROGRAMS
 	uninstall uninstall-am uninstall-binPROGRAMS
 
 
-clean-local:
-	-rm -f $(BUILT_SOURCES) parser.output $(nobase_nodist_include_HEADERS)
+@NACL_FALSE@clean-local:
+@NACL_FALSE@	-rm -f $(BUILT_SOURCES) parser.output $(nobase_nodist_include_HEADERS)
 
-dist-hook:
-	-rm -f $(distdir)/lexer.cc $(distdir)/parser.cc $(distdir)/parser.h
+@NACL_FALSE@dist-hook:
+@NACL_FALSE@	-rm -f $(distdir)/lexer.cc $(distdir)/parser.cc $(distdir)/parser.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010 Esrille Inc.
  * Copyright 2008-2010 Google Inc.
  * Copyright 2007 Nintendo Co., Ltd.
  *
@@ -18,10 +19,12 @@
 #ifndef ESIDL_CPLUSPLUS_H_INCLUDED
 #define ESIDL_CPLUSPLUS_H_INCLUDED
 
+#define USE_CONSTRUCTOR
+#define USE_VIRTUAL_BASE
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <map>
 #include <string>
 #include "esidl.h"
 #include "formatter.h"
@@ -29,8 +32,6 @@
 class CPlusPlus : public Visitor, public Formatter
 {
 protected:
-    const char* source;
-
     std::string stringTypeName;
     std::string objectTypeName;
     bool useExceptions;
@@ -39,11 +40,12 @@ protected:
     int optionalStage;
     int optionalCount;
 
-    std::string moduleName;
     const Node* currentNode;
 
     int paramCount;  // The number of parameters of the previously evaluated operation
     const ParamDcl* variadicParam;  // Non-NULL if the last parameter of the previously evaluated operation is variadic
+
+    std::string prefixedModuleName;
 
     int getParamCount() const
     {
@@ -65,10 +67,6 @@ protected:
         const Node* saved = currentNode;
         for (NodeList::iterator i = node->begin(); i != node->end(); ++i)
         {
-            if (!(*i)->isDefinedIn(source))
-            {
-                continue;
-            }
             if ((*i)->isNative(node->getParent()))
             {
                 continue;
@@ -77,7 +75,10 @@ protected:
             {
                 write("%s", separater);
             }
-            currentNode = (*i);
+            if ((*i)->isInterface(currentNode) || (*i)->isModule(currentNode))
+            {
+                currentNode = (*i);
+            }
             (*i)->accept(this);
         }
         currentNode = saved;
@@ -92,7 +93,7 @@ protected:
             name = name.substr(pos + 2);
         }
         name[0] = tolower(name[0]);
-        return name;
+        return getEscapedName(name);
     }
 
     bool hasCustomStringType() const
@@ -100,11 +101,26 @@ protected:
         return stringTypeName != "char*";
     }
 
+    void visitInterfaceElement(const Interface* interface, Node* element)
+    {
+        if (dynamic_cast<Interface*>(element))
+        {
+            // Do not process Constructor.
+            return;
+        }
+
+        optionalStage = 0;
+        do
+        {
+            optionalCount = 0;
+            element->accept(this);
+            ++optionalStage;
+        } while (optionalStage <= optionalCount);
+    }
+
 public:
-    CPlusPlus(const char* source, FILE* file, const char* stringTypeName = "char*", const char* objectTypeName = "object",
-              bool useExceptions = true, const char* indent = "es") :
+    CPlusPlus(FILE* file, const std::string& stringTypeName, const std::string& objectTypeName, bool useExceptions, const std::string& indent) :
         Formatter(file, indent),
-        source(source),
         stringTypeName(stringTypeName),
         objectTypeName(objectTypeName),
         useExceptions(useExceptions),
@@ -113,6 +129,20 @@ public:
         paramCount(0),
         variadicParam(0)
     {
+        prefixedModuleName = currentNode->getPrefixedModuleName();
+    }
+
+    CPlusPlus(const Formatter* formatter, const std::string& stringTypeName, const std::string& objectTypeName, bool useExceptions) :
+        Formatter(formatter),
+        stringTypeName(stringTypeName),
+        objectTypeName(objectTypeName),
+        useExceptions(useExceptions),
+        constructorMode(false),
+        currentNode(getSpecification()),
+        paramCount(0),
+        variadicParam(0)
+    {
+        prefixedModuleName = currentNode->getPrefixedModuleName();
     }
 
     virtual void at(const Node* node)
@@ -123,9 +153,9 @@ public:
             Node* resolved = resolve(currentNode, name);
             if (resolved)
             {
-                name = resolved->getQualifiedName();
+                name = resolved->getPrefixedName();
                 name = getInterfaceName(name);
-                name = getScopedName(moduleName, name);
+                name = getScopedName(prefixedModuleName, name);
             }
             write("%s", name.c_str());
         }
@@ -145,10 +175,7 @@ public:
                 writetab();
             }
             write("namespace %s {\n", node->getName().c_str());
-                moduleName += "::";
-                moduleName += node->getName();
                 printChildren(node);
-                moduleName.erase(moduleName.size() - node->getName().size() - 2);
             writeln("}");
         }
         else
@@ -159,6 +186,10 @@ public:
 
     virtual void at(const Type* node)
     {
+        if (node->getAttr() & Node::Nullable)
+        {
+            write("Nullable<");
+        }
         if (node->getName() == "boolean")
         {
             write("bool");
@@ -191,96 +222,62 @@ public:
         {
             write(stringTypeName.c_str());
         }
+        else if (node->getName() == "Date")
+        {
+            write("unsigned long long");
+        }
         else
         {
             write("%s", node->getName().c_str());
+        }
+        if (node->getAttr() & Node::Nullable)
+        {
+            write(">");
         }
     }
 
     virtual void at(const SequenceType* node)
     {
         Node* spec = node->getSpec();
-        if (spec->isOctet(node->getParent()))
+        write("Sequence<");
+        spec->accept(this);
+        if (spec->isInterface(currentNode))
         {
-            write("void*");
+            write("*");
         }
-        else
-        {
-            spec->accept(this);
-            if (spec->isInterface(node->getParent()))
-            {
-                write("**");
-            }
-            else
-            {
-                write("*");
-            }
-        }
+        write(">");
+    }
+
+    virtual void at(const ArrayType* node)
+    {
+        Node* spec = node->getSpec();
+        Type* type = dynamic_cast<Type*>(spec);
+        // Note we don't need separate array types for primitive types in C++.
+        std::string name = getScopedName(prefixedModuleName, "::dom::ObjectArray");
+        write("%s<", name.c_str());
+        spec->accept(this);
+        write(">");
     }
 
     void getter(const Attribute* node)
     {
         static Type replaceable("any");
         std::string cap = node->getName().c_str();
-        cap[0] = toupper(cap[0]);   // XXX
+        cap[0] = toupper(cap[0]);
         Node* spec = node->getSpec();
         if (node->isReplaceable())
         {
             spec = &replaceable;
         }
-        SequenceType* seq = const_cast<SequenceType*>(spec->isSequence(node->getParent()));
         std::string name = getBufferName(node);
 
         write("virtual ");
-        if (seq)
+        spec->accept(this);
+        if (spec->isInterface(node->getParent()))
         {
-            write("int get%s(", cap.c_str());
-            seq->accept(this);
-            write(" %s", name.c_str());
-            if (seq->getMax())
-            {
-                write(")");
-            }
-            else
-            {
-                write(", int %sLength)", name.c_str());
-            }
+            write("*");
         }
-        else if (!hasCustomStringType() && spec->isString(node->getParent()))
-        {
-            write("const ", cap.c_str());
-            spec->accept(this);
-            write(" get%s(void* %s, int %sLength)", cap.c_str(), name.c_str(), name.c_str());
-        }
-        else if (spec->isArray(node->getParent()))
-        {
-            write("void get%s(", cap.c_str());
-            spec->accept(this);
-            write(" %s)", name.c_str());
-        }
-        else if (spec->isAny(node->getParent()))
-        {
-            spec->accept(this);
-            write(" get%s(", cap.c_str());
-            write("void* %s, int %sLength)", name.c_str(), name.c_str());
-        }
-        else
-        {
-            if (spec->isInterface(node->getParent()))
-            {
-                spec->accept(this);
-                write("*");
-            }
-            else if (NativeType* nativeType = spec->isNative(node->getParent()))
-            {
-                nativeType->accept(this);
-            }
-            else
-            {
-                spec->accept(this);
-            }
-            write(" get%s()", cap.c_str());
-        }
+        write(" get%s()", cap.c_str());
         if (useExceptions && node->getGetRaises())
         {
             write(" throw(");
@@ -298,7 +295,7 @@ public:
 
         static Type replaceable("any");
         std::string cap = node->getName().c_str();
-        cap[0] = toupper(cap[0]);   // XXX
+        cap[0] = toupper(cap[0]);
         Node* spec = node->getSpec();
         if (node->isReplaceable())
         {
@@ -312,55 +309,17 @@ public:
             assert(forwards);
             spec = forwards->getSpec();
         }
-        SequenceType* seq = const_cast<SequenceType*>(spec->isSequence(node->getParent()));
         std::string name = getBufferName(node);
 
         // setter
         write("virtual ");
-        if (seq)
+        write("void set%s(", cap.c_str());
+        spec->accept(this);
+        if (spec->isInterface(node->getParent()))
         {
-            write("int set%s(const ", cap.c_str());
-            seq->accept(this);
-            write(" %s", name.c_str());
-            if (seq->getMax())
-            {
-                write(")");
-            }
-            else
-            {
-                write(", int %sLength)", name.c_str());
-            }
+            write("*");
         }
-        else if (spec->isString(node->getParent()))
-        {
-            write("void set%s(const ", cap.c_str());
-            spec->accept(this);
-            write(" %s)", name.c_str());
-        }
-        else if (spec->isArray(node->getParent()) || spec->isAny(node->getParent()))
-        {
-            write("void set%s(const ", cap.c_str());
-            spec->accept(this);
-            write(" %s)", name.c_str());
-        }
-        else
-        {
-            write("void set%s(", cap.c_str());
-            if (spec->isInterface(node->getParent()))
-            {
-                spec->accept(this);
-                write("*");
-            }
-            else if (NativeType* nativeType = spec->isNative(node->getParent()))
-            {
-                nativeType->accept(this);
-            }
-            else
-            {
-                spec->accept(this);
-            }
-            write(" %s)", name.c_str());
-        }
+        write(" %s)", name.c_str());
         if (useExceptions && node->getSetRaises())
         {
             write(" throw(");
@@ -370,78 +329,8 @@ public:
         return true;
     }
 
-    virtual void at(const OpDcl* node)
+    void writeParameters(const OpDcl* node, bool needComma = false)
     {
-        if (!constructorMode)
-        {
-            write("virtual ");
-        }
-        else
-        {
-            write("static ");
-        }
-
-        bool needComma = true;  // true to write "," before the 1st parameter
-        Node* spec = node->getSpec();
-        SequenceType* seq = const_cast<SequenceType*>(spec->isSequence(node->getParent()));
-        if (seq)
-        {
-            std::string name = getBufferName(spec);
-
-            write("int");
-            write(" %s(", node->getName().c_str());
-            seq->accept(this);
-            write(" %s", name.c_str());
-            if (!seq->getMax())
-            {
-                write(", int %sLength", name.c_str());
-            }
-        }
-        else if (!hasCustomStringType() && spec->isString(node->getParent()))
-        {
-            std::string name = getBufferName(spec);
-
-            write("const ");
-            spec->accept(this);
-            write(" %s(", node->getName().c_str());
-            write("void* %s, int %sLength", name.c_str(), name.c_str());
-        }
-        else if (spec->isArray(node->getParent()))
-        {
-            std::string name = getBufferName(spec);
-
-            write("void");
-            write(" %s(", node->getName().c_str());
-            spec->accept(this);
-            write(" %s", name.c_str());
-        }
-        else if (spec->isAny(node->getParent()))
-        {
-            std::string name = getBufferName(spec);
-
-            spec->accept(this);
-            write(" %s(", node->getName().c_str());
-            write("void* %s, int %sLength", name.c_str(), name.c_str());
-        }
-        else
-        {
-            if (spec->isInterface(node->getParent()))
-            {
-                spec->accept(this);
-                write("*");
-            }
-            else if (NativeType* nativeType = spec->isNative(node->getParent()))
-            {
-                nativeType->accept(this);
-            }
-            else
-            {
-                spec->accept(this);
-            }
-            write(" %s(", node->getName().c_str());
-            needComma = false;
-        }
-
         paramCount = 0;
         variadicParam = 0;
         for (NodeList::iterator i = node->begin(); i != node->end(); ++i)
@@ -463,7 +352,27 @@ public:
             ++paramCount;
             param->accept(this);
         }
+    }
 
+    virtual void at(const OpDcl* node)
+    {
+        if (!constructorMode)
+        {
+            write("virtual ");
+        }
+        else
+        {
+            write("static ");
+        }
+
+        Node* spec = node->getSpec();
+        spec->accept(this);
+        if (spec->isInterface(node->getParent()))
+        {
+            write("*");
+        }
+        write(" %s(", getEscapedName(node->getName()).c_str());
+        writeParameters(node);
         write(")");
         if (useExceptions && node->getRaises())
         {
@@ -478,56 +387,26 @@ public:
         static SequenceType variadicSequence(0);
 
         Node* spec = node->getSpec();
-        SequenceType* seq = const_cast<SequenceType*>(spec->isSequence(node->getParent()));
         if (node->isVariadic())
         {
             variadicParam = node;
             variadicSequence.setSpec(spec);
-            seq = &variadicSequence;
+            spec = &variadicSequence;
         }
 
-        if (seq && !seq->getSpec()->isInterface(currentNode) ||
-            spec->isString(node->getParent()) ||
-            spec->isArray(node->getParent()))
+        spec->accept(this);
+        if (spec->isInterface(node->getParent()))
         {
-            write("const ");
+            write("*");
         }
+        write(" %s", getEscapedName(node->getName()).c_str());
 
+        // Default argument for the variadic parameter
         if (node->isVariadic())
         {
-            seq->accept(this);
-            write(" %s = 0, int %sLength = 0", node->getName().c_str() , node->getName().c_str());
-        }
-        else if (seq)
-        {
-            seq->accept(this);
-            write(" %s", node->getName().c_str());
-            if (!seq->getMax())
-            {
-                write(", int %sLength", node->getName().c_str());
-            }
-        }
-        else if (spec->isArray(node->getParent()))
-        {
+            write(" = ");
             spec->accept(this);
-            write(" %s", node->getName().c_str());
-        }
-        else
-        {
-            if (spec->isInterface(node->getParent()))
-            {
-                spec->accept(this);
-                write("*");
-            }
-            else if (NativeType* nativeType = spec->isNative(node->getParent()))
-            {
-                nativeType->accept(this);
-            }
-            else
-            {
-                spec->accept(this);
-            }
-            write(" %s", node->getName().c_str());
+            write("()");
         }
     }
 
@@ -556,16 +435,16 @@ public:
         return qualifiedName;
     }
 
-    static std::string getIncludedName(const std::string headerFilename, const char* indent = "es")
+    static std::string getIncludedName(const std::string headerFilename, const std::string& indent = "es")
     {
         std::string included(headerFilename);
         bool capitalize = true;
 
-        if (strcmp(indent, "google") == 0)
+        if (indent == "google")
         {
             included += "_";
         }
-        else if (strcmp(indent, "es") == 0)
+        else if (indent == "es")
         {
             included += "_INCLUDED";
         }
@@ -584,6 +463,24 @@ public:
         }
         return included;
     }
+
+    std::string getClassName(const Node* node)
+    {
+        if (node->isBaseObject())
+        {
+            return objectTypeName;
+        }
+        std::string className = node->getName();
+#ifdef USE_CONSTRUCTOR
+        if (node->getAttr() & Node::Constructor)
+        {
+            className = node->getParent()->getName() + node->getCtorScope() + className;
+        }
+#endif
+        return className;
+    }
+
+    static std::string getEscapedName(std::string name);
 };
 
 #endif  // ESIDL_CPLUSPLUS_H_INCLUDED

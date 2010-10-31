@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Google Inc.
+ * Copyright 2008-2010 Google Inc.
  * Copyright 2007 Nintendo Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +54,8 @@ namespace
 int Node::level = 1;
 const char* Node::baseObjectName = "::object";
 const char* Node::namespaceName;
+const char* Node::defaultPrefix = "::org::w3c::dom";
+const char* Node::ctorScope = "::";
 
 Node* getSpecification()
 {
@@ -176,6 +178,63 @@ void Node::setLocation(struct YYLTYPE* first, struct YYLTYPE* last)
     lastColumn = last->last_column;
 }
 
+std::string Node::getQualifiedName() const
+{
+    if (name.compare(0, 2, "::") == 0)
+    {
+        return name;
+    }
+
+    std::string qualifiedName;
+    for (const Node* node = this; node && node->name != ""; node = node->getParent())
+    {
+        qualifiedName = (node->isConstructor() ? ctorScope : "::") + node->name + qualifiedName;
+    }
+    return qualifiedName;
+}
+
+std::string Node::getQualifiedModuleName() const
+{
+    for (const Node* node = this; node; node = node->getParent())
+    {
+        if (dynamic_cast<const Module*>(node))
+        {
+            return node->getQualifiedName();
+        }
+    }
+    return "";
+}
+
+std::string Node::getPrefixedName() const
+{
+    if (Node* parent = getParent())
+    {
+        return parent->getPrefixedName() + (isConstructor() ? ctorScope : "::") + getName();
+    }
+    return getName();
+}
+
+std::string Node::getPrefixedModuleName() const
+{
+    for (const Node* node = this; node; node = node->getParent())
+    {
+        if (dynamic_cast<const Module*>(node))
+        {
+            return node->getPrefixedName();
+        }
+    }
+    return "";
+}
+
+std::string Interface::getPrefixedName() const
+{
+    if (isBaseObject())
+    {
+        return getBaseObjectName();
+    }
+    return Node::getPrefixedName();
+}
+
 bool Module::hasPredeclarations() const
 {
     if (isLeaf())
@@ -287,6 +346,33 @@ void OpDcl::adjustMethodCount()
     Interface* interface = dynamic_cast<Interface*>(getParent());
     assert(interface);
     interface->addMethodCount(methodCount - 1);
+
+    if (hasCovariantReturnType())
+    {
+        Node* base = resolveInBase(interface, getName());
+        assert(base);
+        base->setAttr(base->getAttr() | OpDcl::HasCovariant);
+        Interface* interface = dynamic_cast<Interface*>(base->getParent());
+        assert(interface);
+        interface->setAttr(interface->getAttr() | OpDcl::HasCovariant);
+    }
+}
+
+Node* OpDcl::getSpec() const
+{
+    static Type any("any");
+
+    Node* interface = getParent();
+    if (interface)
+    {
+        if ((interface->getAttr() & Interface::OverrideBuiltins) &&
+            (getAttr() & OpDcl::IndexGetter) &&
+            dynamic_cast<ParamDcl*>(*(this->begin()))->getSpec()->getName() == "string")
+        {
+            return &any;
+        }
+    }
+    return Member::getSpec();
 }
 
 void Implements::resolve(bool importImplements)
@@ -320,6 +406,10 @@ void Module::processExtendedAttributes()
         else if (ext->getName() == "ExceptionConsts")
         {
             ext->report("Warning: '%s' has been deprecated.", ext->getName().c_str());
+        }
+        else
+        {
+            ext->report("Warning: unknown extended attribute '%s'.", ext->getName().c_str());
         }
     }
 }
@@ -393,9 +483,17 @@ void Interface::processExtendedAttributes()
             }
             constructor->add(op);
         }
+        else if (ext->getName() == "OverrideBuiltins")
+        {
+            attr |= OverrideBuiltins;
+        }
         else if (ext->getName() == "Supplemental")
         {
             attr |= Supplemental;
+        }
+        else if (ext->getName() == "ReplaceableNamedProperties")
+        {
+            attr |= ReplaceableNamedProperties;
         }
         else if (ext->getName() == "NoIndexingOperations" ||
                  ext->getName() == "ImplementedOn" ||
@@ -403,6 +501,10 @@ void Interface::processExtendedAttributes()
                  ext->getName() == "Stringifies")
         {
             ext->report("Warning: '%s' has been deprecated.", ext->getName().c_str());
+        }
+        else
+        {
+            ext->report("Warning: unknown extended attribute '%s'.", ext->getName().c_str());
         }
     }
 
@@ -466,18 +568,62 @@ void Attribute::processExtendedAttributes()
         {
             ext->report("Warning: '%s' has been deprecated.", ext->getName().c_str());
         }
+        else
+        {
+            ext->report("Warning: unknown extended attribute '%s'.", ext->getName().c_str());
+        }
     }
     setAttr(attr);
 }
 
 void OpDcl::processExtendedAttributes()
 {
+    uint32_t attr = getAttr();
+
+    // Check indexed/named properties
+    if (attr & IndexMask)
+    {
+        Node* spec = dynamic_cast<ParamDcl*>(*(begin()))->getSpec();
+        Node* interface = getParent();
+        if (spec->getName() == "unsigned long")
+        {
+            interface->setAttr(interface->getAttr() | HasIndexedProperties);
+        }
+        else if (spec->getName() == "string")
+        {
+            interface->setAttr(interface->getAttr() | HasNamedProperties);
+        }
+        if (attr & UnnamedProperty)
+        {
+            if (attr & IndexGetter)
+            {
+                getName() = "getElement";
+            }
+            else if (attr & IndexSetter)
+            {
+                getName() = "setElement";
+            }
+            else if (attr & IndexCreator)
+            {
+                getName() = "createElement";
+            }
+            else if (attr & IndexDeleter)
+            {
+                getName() = "deleteElement";
+            }
+        }
+    }
+    if ((attr & UnnamedProperty) && (attr & Stringifier))
+    {
+        getName() = "toString";
+    }
+
+    // Process extended attributes
     NodeList* list = getExtendedAttributes();
     if (!list)
     {
         return;
     }
-    uint32_t attr = getAttr();
     for (NodeList::iterator i = list->begin(); i != list->end(); ++i)
     {
         ExtendedAttribute* ext = dynamic_cast<ExtendedAttribute*>(*i);
@@ -519,6 +665,10 @@ void OpDcl::processExtendedAttributes()
         {
             ext->report("Warning: '%s' has been deprecated.", ext->getName().c_str());
         }
+        else
+        {
+            ext->report("Warning: unknown extended attribute '%s'.", ext->getName().c_str());
+        }
     }
     setAttr(attr);
 }
@@ -559,12 +709,20 @@ void ParamDcl::processExtendedAttributes()
                 }
             }
         }
+        else if (ext->getName() == "AllowAny")
+        {
+            attr |= AllowAny;
+        }
         else if (ext->getName() == "Null" ||
                  ext->getName() == "Undefined" ||
                  ext->getName() == "Optional" ||
                  ext->getName() == "Variadic")
         {
             ext->report("Warning: '%s' has been deprecated.", ext->getName().c_str());
+        }
+        else
+        {
+            ext->report("Warning: unknown extended attribute '%s'.", ext->getName().c_str());
         }
     }
     setAttr(attr);
@@ -608,38 +766,57 @@ Node* Node::search(const std::string& elem, size_t pos) const
     return forwardDecl;
 }
 
+Node* resolveInBase(const Interface* interface, std::string name)
+{
+    Node* extends = interface->getExtends();
+    if (!extends)
+    {
+        return 0;
+    }
+    for (NodeList::iterator i = extends->begin();
+         i != extends->end();
+         ++i)
+    {
+        ScopedName* baseName = static_cast<ScopedName*>(*i);
+        Interface* base = dynamic_cast<Interface*>(baseName->search(interface->getParent()));
+        if (base)
+        {
+            if (base->getParent()->search(name) == base)
+            {
+                return base;
+            }
+            // Search the interface members to check method overrides.
+            if (Node* found = base->search(name))
+            {
+                return found;
+            }
+            if (Node* found = resolveInBase(base, name))
+            {
+                return found;
+            }
+        }
+    }
+    return 0;
+ }
+
 Node* resolve(const Node* scope, std::string name)
 {
     if (name.compare(0, 2, "::") == 0)
     {
         return getSpecification()->search(name, 2);
     }
-    else
+
+    for (const Node* node = scope; node; node = node->getParent())
     {
-        for (const Node* node = scope; node; node = node->getParent())
+        if (Node* found = node->search(name))
         {
-            if (Node* found = node->search(name))
+            return found;
+        }
+        if (const Interface* base = dynamic_cast<const Interface*>(node))
+        {
+            if (Node* found = resolveInBase(base, name))
             {
                 return found;
-            }
-            if (const Interface* interface = dynamic_cast<const Interface*>(node))
-            {
-                if (Node* extends = interface->getExtends())
-                {
-                    for (NodeList::iterator i = extends->begin();
-                         i != extends->end();
-                         ++i)
-                    {
-                        ScopedName* baseName = static_cast<ScopedName*>(*i);
-                        if (Node* baseInterface = baseName->search(interface->getParent()))
-                        {
-                            if (Node* found = resolve(baseInterface, name))
-                            {
-                                return found;
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -683,8 +860,91 @@ Node* ScopedName::search(const Node* scope) const
     return resolved;
 }
 
+// This method works only after AdjustMethodCount visitor has been applied.
+int Interface::getInterfaceCount() const
+{
+    if (interfaceCount != 0)
+    {
+        return interfaceCount;
+    }
+
+    interfaceCount = 1;
+    for (std::list<const Interface*>::const_iterator i = superList.begin();
+         i != superList.end();
+         ++i)
+    {
+        if (!(*i)->isBaseObject())
+        {
+            interfaceCount += (*i)->getInterfaceCount();
+        }
+    }
+    for (std::list<const Interface*>::const_reverse_iterator i = implementList.rbegin();
+            i != implementList.rend();
+            ++i)
+    {
+        interfaceCount += (*i)->getInterfaceCount();
+    }
+    return interfaceCount;
+}
+
+void Interface::getInterfaceList(std::list<const Interface*>* list) const
+{
+    for (std::list<const Interface*>::const_reverse_iterator i = implementList.rbegin();
+         i != implementList.rend();
+         ++i)
+    {
+        if (!((*i)->getAttr() & Interface::Supplemental))
+        {
+            (*i)->getInterfaceList(list);
+        }
+    }
+    for (std::list<const Interface*>::const_iterator i = superList.begin();
+         i != superList.end();
+         ++i)
+    {
+        if (!((*i)->getAttr() & Interface::Supplemental) && !(*i)->isBaseObject())
+        {
+            (*i)->getInterfaceList(list);
+        }
+    }
+    list->push_front(this);
+}
+
+void Interface::collectMixins(std::list<const Interface*>* list) const
+{
+    for (std::list<const Interface*>::const_reverse_iterator i = implementList.rbegin();
+         i != implementList.rend();
+         ++i)
+    {
+        if (!((*i)->getAttr() & Interface::Supplemental))
+        {
+            list->push_back(*i);
+            (*i)->collectMixins(list);
+        }
+    }
+    for (std::list<const Interface*>::const_iterator i = superList.begin();
+         i != superList.end();
+         ++i)
+    {
+        if (!((*i)->getAttr() & Interface::Supplemental) && !(*i)->isBaseObject())
+        {
+            (*i)->collectMixins(list);
+        }
+    }
+}
+
 void Interface::adjustMethodCount()
 {
+    if (extends)
+    {
+        for (NodeList::iterator i = extends->begin(); i != extends->end(); ++i)
+        {
+            Interface* super = dynamic_cast<Interface*>(static_cast<ScopedName*>(*i)->search(getParent()));
+            check(super, "could not resolve '%s'.", name.substr(0, name.rfind('-')).c_str());
+            superList.push_back(super);
+        }
+    }
+
     switch (attr & (Supplemental | NoInterfaceObject))
     {
     case Supplemental:
@@ -692,7 +952,6 @@ void Interface::adjustMethodCount()
         ScopedName* org = new ScopedName(name.substr(0, name.rfind('-')));
         Interface* supplemental = dynamic_cast<Interface*>(org->search(getParent()));
         check(supplemental, "could not resolve '%s'.", name.substr(0, name.rfind('-')).c_str());
-        supplementals.push_back(supplemental);
         supplemental->implements(this, true);
         break;
     }
@@ -702,7 +961,6 @@ void Interface::adjustMethodCount()
             for (NodeList::iterator i = extends->begin(); i != extends->end(); ++i)
             {
                 Interface* supplemental = dynamic_cast<Interface*>(static_cast<ScopedName*>(*i)->search(getParent()));
-                supplementals.push_back(supplemental);
                 supplemental->implements(this, true);
             }
         }
@@ -820,28 +1078,20 @@ int output(const char* filename,
            const char* objectTypeName,
            const char* indent,
            bool skeleton,
-           bool generic,
-           bool java)
+           bool generic)
 {
     Forward forward(filename);
     getSpecification()->accept(&forward);
     forward.generateForwardDeclarations();
 
-    if (!java)
+    printCxx(filename, stringTypeName, objectTypeName, useExceptions, useVirtualBase, indent);
+    if (skeleton)
     {
-        printCxx(filename, stringTypeName, objectTypeName, useExceptions, useVirtualBase, indent);
-        if (skeleton)
-        {
-            printSkeleton(filename, isystem, indent);
-        }
-        if (generic)
-        {
-            printTemplate(filename, stringTypeName, objectTypeName, useExceptions, isystem, indent);
-        }
+        printSkeleton(filename, isystem, indent);
     }
-    else
+    if (generic)
     {
-        printJava(filename, indent);
+        printTemplate(filename, stringTypeName, objectTypeName, useExceptions, isystem, indent);
     }
     return EXIT_SUCCESS;
 }

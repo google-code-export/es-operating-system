@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Google Inc.
+ * Copyright 2008-2010 Google Inc.
  * Copyright 2007 Nintendo Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ FILE* createFile(const std::string package, const Node* node)
     filename += "/";
     if (node->getAttr() & Node::Constructor)
     {
-        filename += node->getParent()->getName() + "_";
+        filename += node->getParent()->getName() + node->getCtorScope();
     }
     filename += node->getName() + ".java";
 #endif
@@ -155,8 +155,8 @@ class JavaInterface : public Java
     }
 
 public:
-    JavaInterface(const char* source, FILE* file, const char* indent = "es") :
-        Java(source, file, indent)
+    JavaInterface(FILE* file, const char* indent = "es") :
+        Java(file, indent)
     {
     }
 
@@ -195,25 +195,33 @@ public:
             writetab();
         }
 
+#ifdef USE_ABSTRACT
         write("public %s ", constructor ? "abstract class" : "interface");
+#else
+        write("public interface ");
+#endif
 
 #ifdef USE_CONSTRUCTOR
         if (node->getAttr() & Interface::Constructor)
         {
-            write("%s_%s", Java::getEscapedName(node->getParent()->getName()).c_str(),
+            write("%s_%s", getEscapedName(node->getParent()->getName()).c_str(),
                            node->getName().c_str());
         }
         else
         {
-            write("%s", Java::getEscapedName(node->getName()).c_str());
+            write("%s", getEscapedName(node->getName()).c_str());
         }
 #else
-        write("%s", Java::getEscapedName(node->getName()).c_str());
+        write("%s", getEscapedName(node->getName()).c_str());
 #endif
 
         if (node->getExtends())
         {
+#ifdef USE_ABSTRACT
             const char* separator = constructor ? " implements " : " extends ";
+#else
+            const char* separator = " extends ";
+#endif
             for (NodeList::iterator i = node->getExtends()->begin();
                  i != node->getExtends()->end();
                  ++i)
@@ -230,29 +238,20 @@ public:
         }
         write(" {\n");
 
-#ifdef USE_CONSTRUCTOR
+#ifdef USE_ABSTRACT
         if (constructor)
         {
             methodAccessLevel = "public abstract";
         }
 #endif
 
-        for (NodeList::iterator i = node->begin(); i != node->end(); ++i)
-        {
-            visitInterfaceElement(node, *i);
-        }
-
-        // Expand mixins
+        // Expand supplementals
         std::list<const Interface*> interfaceList;
-        node->collectMixins(&interfaceList, node);
+        node->collectSupplementals(&interfaceList);
         for (std::list<const Interface*>::const_iterator i = interfaceList.begin();
-                i != interfaceList.end();
-                ++i)
+             i != interfaceList.end();
+             ++i)
         {
-            if (*i == node)
-            {
-                continue;
-            }
             writeln("// %s", (*i)->getName().c_str());
             const Node* saved = currentNode;
             for (NodeList::iterator j = (*i)->begin(); j != (*i)->end(); ++j)
@@ -263,14 +262,14 @@ public:
             currentNode = saved;
         }
 
-#ifdef USE_CONSTRUCTOR
+#ifdef USE_ABSTRACT
         if (constructor)
         {
             methodAccessLevel = "public static";
             writeln("");
             writeln("// Constructor");
             writeln("static public %s_Constructor factory;",
-                    Java::getEscapedName(node->getName()).c_str());
+                    getEscapedName(node->getName()).c_str());
             for (NodeList::iterator i = constructor->begin();
                  i != constructor->end();
                  ++i)
@@ -374,7 +373,7 @@ public:
         }
         Java::at(node);
 
-#ifdef USE_CONSTRUCTOR
+#ifdef USE_ABSTRACT
         if (methodAccessLevel == "public static")
         {
             writeln("{");
@@ -558,18 +557,13 @@ public:
             prefixedName = module->getPrefixedName();
         }
         visitChildren(node->getExtends());
-        visitChildren(node);
-        // Expand mixins
+        // Expand supplementals
         std::list<const Interface*> interfaceList;
-        node->collectMixins(&interfaceList, node);
+        node->collectSupplementals(&interfaceList);
         for (std::list<const Interface*>::const_iterator i = interfaceList.begin();
              i != interfaceList.end();
              ++i)
         {
-            if (*i == node)
-            {
-                continue;
-            }
             currentNode = *i;
             visitChildren(*i);
         }
@@ -616,14 +610,12 @@ public:
 
 class JavaVisitor : public Visitor
 {
-    const char* source;
     const char* indent;
 
     std::string prefixedName;
 
 public:
-    JavaVisitor(const char* source, const char* indent = "es") :
-        source(source),
+    JavaVisitor(const char* indent = "es") :
         indent(indent)
     {
     }
@@ -647,7 +639,7 @@ public:
 
     virtual void at(const ExceptDcl* node)
     {
-        if (1 < node->getRank() || node->isLeaf() || !node->isDefinedIn(source))
+        if (1 < node->getRank() || node->isLeaf())
         {
             return;
         }
@@ -658,10 +650,10 @@ public:
             return;
         }
 
-        fprintf(file, "// Generated by esidl %s.\n\n", VERSION);
+        fprintf(file, "// Generated by esidl (r%s).\n\n", SVN_REVISION);
         fprintf(file, "package %s;\n\n", Java::getPackageName(prefixedName).c_str());
 
-        JavaInterface javaInterface(source, file, indent);
+        JavaInterface javaInterface(file, indent);
         javaInterface.at(node);
 
         fclose(file);
@@ -669,7 +661,7 @@ public:
 
     virtual void at(const Interface* node)
     {
-        if (1 < node->getRank() || node->isLeaf() || !node->isDefinedIn(source) ||
+        if (1 < node->getRank() || node->isLeaf() ||
             (node->getAttr() & Interface::Supplemental))
         {
             return;
@@ -681,14 +673,14 @@ public:
             return;
         }
 
-        fprintf(file, "// Generated by esidl %s.\n\n", VERSION);
+        fprintf(file, "// Generated by esidl (r%s).\n\n", SVN_REVISION);
         fprintf(file, "package %s;\n\n", Java::getPackageName(prefixedName).c_str());
 
         JavaImport import(Java::getPackageName(prefixedName), file, indent);
         import.at(node);
         import.print();
 
-        JavaInterface javaInterface(source, file, indent);
+        JavaInterface javaInterface(file, indent);
         javaInterface.at(node);
 
         fclose(file);
@@ -702,8 +694,9 @@ public:
     }
 };
 
-void printJava(const char* source, const char* indent)
+int printJava(const char* indent)
 {
-    JavaVisitor visitor(source, indent);
+    JavaVisitor visitor(indent);
     getSpecification()->accept(&visitor);
+    return 0;
 }

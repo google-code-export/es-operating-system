@@ -151,7 +151,9 @@ NP_Initialize(NPNetscapeFuncs* pFuncs
   NPNFuncs.hasmethod               = pFuncs->hasmethod;
   NPNFuncs.releasevariantvalue     = pFuncs->releasevariantvalue;
   NPNFuncs.setexception            = pFuncs->setexception;
+  NPNFuncs.enumerate               = pFuncs->enumerate;
   NPNFuncs.pluginthreadasynccall   = pFuncs->pluginthreadasynccall;
+  NPNFuncs.construct               = pFuncs->construct;
 
 #ifdef XP_UNIX
   /*
@@ -177,11 +179,9 @@ NP_Initialize(NPNetscapeFuncs* pFuncs
 #ifdef OJI
   pluginFuncs->javaClass  = NPP_GetJavaClass();
 #endif
-
-  NPP_Initialize();
 #endif
 
-  return NPERR_NO_ERROR;
+  return NPP_Initialize();
 }
 
 NPError OSCALL NP_Shutdown()

@@ -15,6 +15,9 @@
 
 @SET_MAKE@
 
+
+
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,8 +38,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+@NACL_FALSE@am__append_1 = -fPIC
+@NACL_TRUE@bin_PROGRAMS = npestest$(EXEEXT) npespaint$(EXEEXT) \
+@NACL_TRUE@	npesxhr$(EXEEXT) npesmd5sum$(EXEEXT)
+@NACL_FALSE@am__append_2 = \
+@NACL_FALSE@	npn_gate.cpp
+
 subdir = npapi/sample
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(dist_html_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -65,14 +75,89 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
+	"$(DESTDIR)$(htmldir)" "$(DESTDIR)$(htmldir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libnpessample_la_LIBADD =
-am__objects_1 = np_entry.lo npn_gate.lo npp_gate.lo npp_sample.lo \
-	sample.lo
-am__objects_2 =
-am_libnpessample_la_OBJECTS = $(am__objects_1) $(am__objects_2)
-libnpessample_la_OBJECTS = $(am_libnpessample_la_OBJECTS)
+libnpesmd5sum_la_LIBADD =
+am__libnpesmd5sum_la_SOURCES_DIST = np_entry.cpp npp_gate.cpp \
+	npn_gate.cpp npp_md5sum.cpp md5sum.cc md5sum.h
+@NACL_FALSE@am__objects_1 = npn_gate.lo
+am__objects_2 = np_entry.lo npp_gate.lo $(am__objects_1)
+@NACL_FALSE@am_libnpesmd5sum_la_OBJECTS = $(am__objects_2) \
+@NACL_FALSE@	npp_md5sum.lo md5sum.lo
+@NACL_FALSE@nodist_libnpesmd5sum_la_OBJECTS = MD5.lo \
+@NACL_FALSE@	MD5_Constructor.lo
+libnpesmd5sum_la_OBJECTS = $(am_libnpesmd5sum_la_OBJECTS) \
+	$(nodist_libnpesmd5sum_la_OBJECTS)
+@NACL_FALSE@am_libnpesmd5sum_la_rpath = -rpath $(libdir)
+libnpespaint_la_LIBADD =
+am__libnpespaint_la_SOURCES_DIST = np_entry.cpp npp_gate.cpp \
+	npn_gate.cpp npp_paint.cpp paint.cc paint.h
+@NACL_FALSE@am_libnpespaint_la_OBJECTS = $(am__objects_2) npp_paint.lo \
+@NACL_FALSE@	paint.lo
+libnpespaint_la_OBJECTS = $(am_libnpespaint_la_OBJECTS)
+@NACL_FALSE@am_libnpespaint_la_rpath = -rpath $(libdir)
+libnpestest_la_LIBADD =
+am__libnpestest_la_SOURCES_DIST = np_entry.cpp npp_gate.cpp \
+	npn_gate.cpp npp_test.cpp test.cpp test.h
+@NACL_FALSE@am_libnpestest_la_OBJECTS = $(am__objects_2) npp_test.lo \
+@NACL_FALSE@	test.lo
+@NACL_FALSE@nodist_libnpestest_la_OBJECTS = Test.lo \
+@NACL_FALSE@	Test_Constructor.lo
+libnpestest_la_OBJECTS = $(am_libnpestest_la_OBJECTS) \
+	$(nodist_libnpestest_la_OBJECTS)
+@NACL_FALSE@am_libnpestest_la_rpath = -rpath $(libdir)
+libnpesxhr_la_LIBADD =
+am__libnpesxhr_la_SOURCES_DIST = np_entry.cpp npp_gate.cpp \
+	npn_gate.cpp npp_xhr.cpp xhr.cc xhr.h
+@NACL_FALSE@am_libnpesxhr_la_OBJECTS = $(am__objects_2) npp_xhr.lo \
+@NACL_FALSE@	xhr.lo
+libnpesxhr_la_OBJECTS = $(am_libnpesxhr_la_OBJECTS)
+@NACL_FALSE@am_libnpesxhr_la_rpath = -rpath $(libdir)
+PROGRAMS = $(bin_PROGRAMS)
+am__npesmd5sum_SOURCES_DIST = np_entry.cpp npp_gate.cpp npn_gate.cpp \
+	npp_md5sum.cpp md5sum.cc md5sum.h
+@NACL_FALSE@am__objects_3 = npesmd5sum-npn_gate.$(OBJEXT)
+am__objects_4 = npesmd5sum-np_entry.$(OBJEXT) \
+	npesmd5sum-npp_gate.$(OBJEXT) $(am__objects_3)
+@NACL_TRUE@am_npesmd5sum_OBJECTS = $(am__objects_4) \
+@NACL_TRUE@	npesmd5sum-npp_md5sum.$(OBJEXT) \
+@NACL_TRUE@	npesmd5sum-md5sum.$(OBJEXT)
+@NACL_TRUE@nodist_npesmd5sum_OBJECTS = npesmd5sum-MD5.$(OBJEXT) \
+@NACL_TRUE@	npesmd5sum-MD5_Constructor.$(OBJEXT)
+npesmd5sum_OBJECTS = $(am_npesmd5sum_OBJECTS) \
+	$(nodist_npesmd5sum_OBJECTS)
+npesmd5sum_LDADD = $(LDADD)
+am__npespaint_SOURCES_DIST = np_entry.cpp npp_gate.cpp npn_gate.cpp \
+	npp_paint.cpp paint.cc paint.h
+@NACL_FALSE@am__objects_5 = npespaint-npn_gate.$(OBJEXT)
+am__objects_6 = npespaint-np_entry.$(OBJEXT) \
+	npespaint-npp_gate.$(OBJEXT) $(am__objects_5)
+@NACL_TRUE@am_npespaint_OBJECTS = $(am__objects_6) \
+@NACL_TRUE@	npespaint-npp_paint.$(OBJEXT) \
+@NACL_TRUE@	npespaint-paint.$(OBJEXT)
+npespaint_OBJECTS = $(am_npespaint_OBJECTS)
+npespaint_LDADD = $(LDADD)
+am__npestest_SOURCES_DIST = np_entry.cpp npp_gate.cpp npn_gate.cpp \
+	npp_test.cpp test.cpp test.h
+@NACL_FALSE@am__objects_7 = npestest-npn_gate.$(OBJEXT)
+am__objects_8 = npestest-np_entry.$(OBJEXT) \
+	npestest-npp_gate.$(OBJEXT) $(am__objects_7)
+@NACL_TRUE@am_npestest_OBJECTS = $(am__objects_8) \
+@NACL_TRUE@	npestest-npp_test.$(OBJEXT) npestest-test.$(OBJEXT)
+@NACL_TRUE@nodist_npestest_OBJECTS = npestest-Test.$(OBJEXT) \
+@NACL_TRUE@	npestest-Test_Constructor.$(OBJEXT)
+npestest_OBJECTS = $(am_npestest_OBJECTS) $(nodist_npestest_OBJECTS)
+npestest_LDADD = $(LDADD)
+am__npesxhr_SOURCES_DIST = np_entry.cpp npp_gate.cpp npn_gate.cpp \
+	npp_xhr.cpp xhr.cc xhr.h
+@NACL_FALSE@am__objects_9 = npesxhr-npn_gate.$(OBJEXT)
+am__objects_10 = npesxhr-np_entry.$(OBJEXT) npesxhr-npp_gate.$(OBJEXT) \
+	$(am__objects_9)
+@NACL_TRUE@am_npesxhr_OBJECTS = $(am__objects_10) \
+@NACL_TRUE@	npesxhr-npp_xhr.$(OBJEXT) npesxhr-xhr.$(OBJEXT)
+npesxhr_OBJECTS = $(am_npesxhr_OBJECTS)
+npesxhr_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -95,8 +180,21 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libnpessample_la_SOURCES)
-DIST_SOURCES = $(libnpessample_la_SOURCES)
+SOURCES = $(libnpesmd5sum_la_SOURCES) \
+	$(nodist_libnpesmd5sum_la_SOURCES) $(libnpespaint_la_SOURCES) \
+	$(libnpestest_la_SOURCES) $(nodist_libnpestest_la_SOURCES) \
+	$(libnpesxhr_la_SOURCES) $(npesmd5sum_SOURCES) \
+	$(nodist_npesmd5sum_SOURCES) $(npespaint_SOURCES) \
+	$(npestest_SOURCES) $(nodist_npestest_SOURCES) \
+	$(npesxhr_SOURCES)
+DIST_SOURCES = $(am__libnpesmd5sum_la_SOURCES_DIST) \
+	$(am__libnpespaint_la_SOURCES_DIST) \
+	$(am__libnpestest_la_SOURCES_DIST) \
+	$(am__libnpesxhr_la_SOURCES_DIST) \
+	$(am__npesmd5sum_SOURCES_DIST) $(am__npespaint_SOURCES_DIST) \
+	$(am__npestest_SOURCES_DIST) $(am__npesxhr_SOURCES_DIST)
+DATA = $(dist_html_DATA) $(nodist_html_DATA)
+HEADERS = $(nodist_noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -160,6 +258,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -227,36 +326,72 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libnpessample.la
-AM_CPPFLAGS = \
-	-fPIC -fshort-wchar \
-	-I $(srcdir) \
-	-I ../include \
-	-I ../include/w3c \
-	-I $(srcdir)/../include \
-	-I $(srcdir)/../../include \
-	-g \
-	-DXP_UNIX
+@NACL_FALSE@esidl = ../../esidl
+@NACL_TRUE@esidl = esidl
+SUFFIXES = .idl
+generated_headers = \
+	com/rsa/MD5.h \
+	com/rsa/MD5_Constructor.h \
+	org/w3c/dom/Test.h \
+	org/w3c/dom/Test_Constructor.h
 
-AM_LDFLAGS = -L.. -ldl -lesnpapi
-cpp_source_files = \
-	np_entry.cpp \
-	npn_gate.cpp \
-	npp_gate.cpp \
-	npp_sample.cpp \
-	sample.cpp
+generated_sources = \
+	com/rsa/MD5.cpp \
+	com/rsa/MD5_Constructor.cpp \
+	org/w3c/dom/Test.cpp \
+	org/w3c/dom/Test_Constructor.cpp
 
-header_files = \
-	sample.h
-
-libnpessample_la_SOURCES = $(cpp_source_files) $(header_files)
+BUILT_SOURCES = $(generated_headers) $(generated_sources)
+nodist_noinst_HEADERS = $(generated_headers)
+AM_CPPFLAGS = -fshort-wchar -std=gnu++0x -Wall -I $(builddir) -I \
+	$(builddir)/.. -I $(srcdir) -I ../include -I $(srcdir)/.. -I \
+	$(srcdir)/../include -I $(srcdir)/../../include -I \
+	$(srcdir)/../../cplusplus -DXP_UNIX -DHAVE_CONFIG_H \
+	-fno-implicit-inline-templates -fno-default-inline \
+	$(am__append_1)
+@NACL_FALSE@lib_LTLIBRARIES = libnpestest.la libnpespaint.la libnpesxhr.la libnpesmd5sum.la
+@NACL_FALSE@AM_LDFLAGS = -L.. -ldl -lesnpapi
+@NACL_TRUE@AM_LDFLAGS = -L.. -lesnpapi -lgoogle_nacl_npruntime -lgoogle_nacl_imc -lpthread -lsrpc
+@NACL_TRUE@npestest_CPPFLAGS = $(AM_CPPFLAGS)
+@NACL_TRUE@npespaint_CPPFLAGS = $(AM_CPPFLAGS)
+@NACL_TRUE@npesxhr_CPPFLAGS = $(AM_CPPFLAGS)
+@NACL_TRUE@npesmd5sum_CPPFLAGS = $(AM_CPPFLAGS)
+cpp_source_files = np_entry.cpp npp_gate.cpp $(am__append_2)
+@NACL_FALSE@nodist_libnpestest_la_SOURCES = org/w3c/dom/Test.h org/w3c/dom/Test.cpp org/w3c/dom/Test_Constructor.cpp
+@NACL_FALSE@libnpestest_la_SOURCES = $(cpp_source_files) npp_test.cpp test.cpp test.h
+@NACL_FALSE@libnpespaint_la_SOURCES = $(cpp_source_files) npp_paint.cpp paint.cc paint.h
+@NACL_FALSE@libnpesxhr_la_SOURCES = $(cpp_source_files) npp_xhr.cpp xhr.cc xhr.h
+@NACL_FALSE@nodist_libnpesmd5sum_la_SOURCES = com/rsa/MD5.h com/rsa/MD5.cpp com/rsa/MD5_Constructor.cpp
+@NACL_FALSE@libnpesmd5sum_la_SOURCES = $(cpp_source_files) npp_md5sum.cpp md5sum.cc md5sum.h
+@NACL_TRUE@nodist_npestest_SOURCES = org/w3c/dom/Test.h org/w3c/dom/Test.cpp org/w3c/dom/Test_Constructor.cpp
+@NACL_TRUE@npestest_SOURCES = $(cpp_source_files) npp_test.cpp test.cpp test.h
+@NACL_TRUE@npespaint_SOURCES = $(cpp_source_files) npp_paint.cpp paint.cc paint.h
+@NACL_TRUE@npesxhr_SOURCES = $(cpp_source_files) npp_xhr.cpp xhr.cc xhr.h
+@NACL_TRUE@nodist_npesmd5sum_SOURCES = com/rsa/MD5.h com/rsa/MD5.cpp com/rsa/MD5_Constructor.cpp
+@NACL_TRUE@npesmd5sum_SOURCES = $(cpp_source_files) npp_md5sum.cpp md5sum.cc md5sum.h
 EXTRA_DIST = \
-	sample.html
+	md5.idl \
+	test.idl 
 
-all: all-am
+dist_html_DATA = \
+	md5sum.html \
+	md5sum.nacl.html \
+	paint.html \
+	paint.nacl.html \
+	eraser.png pen.png tools.png \
+	test.html \
+	test.nacl.html \
+	red.css green.css blue.css \
+	xhr.html \
+	xhr.nacl.html \
+	xhr.txt
+
+@NACL_TRUE@nodist_html_DATA = $(bin_PROGRAMS)
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .cpp .lo .o .obj
+.SUFFIXES: .idl .cc .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -318,8 +453,69 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libnpessample.la: $(libnpessample_la_OBJECTS) $(libnpessample_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(libnpessample_la_OBJECTS) $(libnpessample_la_LIBADD) $(LIBS)
+libnpesmd5sum.la: $(libnpesmd5sum_la_OBJECTS) $(libnpesmd5sum_la_DEPENDENCIES) 
+	$(CXXLINK) $(am_libnpesmd5sum_la_rpath) $(libnpesmd5sum_la_OBJECTS) $(libnpesmd5sum_la_LIBADD) $(LIBS)
+libnpespaint.la: $(libnpespaint_la_OBJECTS) $(libnpespaint_la_DEPENDENCIES) 
+	$(CXXLINK) $(am_libnpespaint_la_rpath) $(libnpespaint_la_OBJECTS) $(libnpespaint_la_LIBADD) $(LIBS)
+libnpestest.la: $(libnpestest_la_OBJECTS) $(libnpestest_la_DEPENDENCIES) 
+	$(CXXLINK) $(am_libnpestest_la_rpath) $(libnpestest_la_OBJECTS) $(libnpestest_la_LIBADD) $(LIBS)
+libnpesxhr.la: $(libnpesxhr_la_OBJECTS) $(libnpesxhr_la_DEPENDENCIES) 
+	$(CXXLINK) $(am_libnpesxhr_la_rpath) $(libnpesxhr_la_OBJECTS) $(libnpesxhr_la_LIBADD) $(LIBS)
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	    } \
+	; done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(bindir)" && rm -f $$files
+
+clean-binPROGRAMS:
+	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+npesmd5sum$(EXEEXT): $(npesmd5sum_OBJECTS) $(npesmd5sum_DEPENDENCIES) 
+	@rm -f npesmd5sum$(EXEEXT)
+	$(CXXLINK) $(npesmd5sum_OBJECTS) $(npesmd5sum_LDADD) $(LIBS)
+npespaint$(EXEEXT): $(npespaint_OBJECTS) $(npespaint_DEPENDENCIES) 
+	@rm -f npespaint$(EXEEXT)
+	$(CXXLINK) $(npespaint_OBJECTS) $(npespaint_LDADD) $(LIBS)
+npestest$(EXEEXT): $(npestest_OBJECTS) $(npestest_DEPENDENCIES) 
+	@rm -f npestest$(EXEEXT)
+	$(CXXLINK) $(npestest_OBJECTS) $(npestest_LDADD) $(LIBS)
+npesxhr$(EXEEXT): $(npesxhr_OBJECTS) $(npesxhr_DEPENDENCIES) 
+	@rm -f npesxhr$(EXEEXT)
+	$(CXXLINK) $(npesxhr_OBJECTS) $(npesxhr_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -327,11 +523,430 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MD5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MD5_Constructor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Test_Constructor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5sum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/np_entry.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-MD5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-MD5_Constructor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-md5sum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-np_entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-npn_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-npp_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesmd5sum-npp_md5sum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npespaint-np_entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npespaint-npn_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npespaint-npp_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npespaint-npp_paint.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npespaint-paint.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-Test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-Test_Constructor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-np_entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-npn_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-npp_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-npp_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npestest-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesxhr-np_entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesxhr-npn_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesxhr-npp_gate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesxhr-npp_xhr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npesxhr-xhr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npn_gate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npp_gate.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npp_sample.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sample.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npp_md5sum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npp_paint.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npp_test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/npp_xhr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/paint.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xhr.Plo@am__quote@
+
+.cc.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cc.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cc.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+MD5.lo: com/rsa/MD5.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MD5.lo -MD -MP -MF $(DEPDIR)/MD5.Tpo -c -o MD5.lo `test -f 'com/rsa/MD5.cpp' || echo '$(srcdir)/'`com/rsa/MD5.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MD5.Tpo $(DEPDIR)/MD5.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='com/rsa/MD5.cpp' object='MD5.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MD5.lo `test -f 'com/rsa/MD5.cpp' || echo '$(srcdir)/'`com/rsa/MD5.cpp
+
+MD5_Constructor.lo: com/rsa/MD5_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MD5_Constructor.lo -MD -MP -MF $(DEPDIR)/MD5_Constructor.Tpo -c -o MD5_Constructor.lo `test -f 'com/rsa/MD5_Constructor.cpp' || echo '$(srcdir)/'`com/rsa/MD5_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MD5_Constructor.Tpo $(DEPDIR)/MD5_Constructor.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='com/rsa/MD5_Constructor.cpp' object='MD5_Constructor.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MD5_Constructor.lo `test -f 'com/rsa/MD5_Constructor.cpp' || echo '$(srcdir)/'`com/rsa/MD5_Constructor.cpp
+
+Test.lo: org/w3c/dom/Test.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Test.lo -MD -MP -MF $(DEPDIR)/Test.Tpo -c -o Test.lo `test -f 'org/w3c/dom/Test.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Test.Tpo $(DEPDIR)/Test.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='org/w3c/dom/Test.cpp' object='Test.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Test.lo `test -f 'org/w3c/dom/Test.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test.cpp
+
+Test_Constructor.lo: org/w3c/dom/Test_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Test_Constructor.lo -MD -MP -MF $(DEPDIR)/Test_Constructor.Tpo -c -o Test_Constructor.lo `test -f 'org/w3c/dom/Test_Constructor.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Test_Constructor.Tpo $(DEPDIR)/Test_Constructor.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='org/w3c/dom/Test_Constructor.cpp' object='Test_Constructor.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Test_Constructor.lo `test -f 'org/w3c/dom/Test_Constructor.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test_Constructor.cpp
+
+npesmd5sum-np_entry.o: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-np_entry.o -MD -MP -MF $(DEPDIR)/npesmd5sum-np_entry.Tpo -c -o npesmd5sum-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-np_entry.Tpo $(DEPDIR)/npesmd5sum-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npesmd5sum-np_entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+
+npesmd5sum-np_entry.obj: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-np_entry.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-np_entry.Tpo -c -o npesmd5sum-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-np_entry.Tpo $(DEPDIR)/npesmd5sum-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npesmd5sum-np_entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+
+npesmd5sum-npp_gate.o: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-npp_gate.o -MD -MP -MF $(DEPDIR)/npesmd5sum-npp_gate.Tpo -c -o npesmd5sum-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-npp_gate.Tpo $(DEPDIR)/npesmd5sum-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npesmd5sum-npp_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+
+npesmd5sum-npp_gate.obj: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-npp_gate.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-npp_gate.Tpo -c -o npesmd5sum-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-npp_gate.Tpo $(DEPDIR)/npesmd5sum-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npesmd5sum-npp_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+
+npesmd5sum-npn_gate.o: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-npn_gate.o -MD -MP -MF $(DEPDIR)/npesmd5sum-npn_gate.Tpo -c -o npesmd5sum-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-npn_gate.Tpo $(DEPDIR)/npesmd5sum-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npesmd5sum-npn_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+
+npesmd5sum-npn_gate.obj: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-npn_gate.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-npn_gate.Tpo -c -o npesmd5sum-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-npn_gate.Tpo $(DEPDIR)/npesmd5sum-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npesmd5sum-npn_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+
+npesmd5sum-npp_md5sum.o: npp_md5sum.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-npp_md5sum.o -MD -MP -MF $(DEPDIR)/npesmd5sum-npp_md5sum.Tpo -c -o npesmd5sum-npp_md5sum.o `test -f 'npp_md5sum.cpp' || echo '$(srcdir)/'`npp_md5sum.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-npp_md5sum.Tpo $(DEPDIR)/npesmd5sum-npp_md5sum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_md5sum.cpp' object='npesmd5sum-npp_md5sum.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-npp_md5sum.o `test -f 'npp_md5sum.cpp' || echo '$(srcdir)/'`npp_md5sum.cpp
+
+npesmd5sum-npp_md5sum.obj: npp_md5sum.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-npp_md5sum.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-npp_md5sum.Tpo -c -o npesmd5sum-npp_md5sum.obj `if test -f 'npp_md5sum.cpp'; then $(CYGPATH_W) 'npp_md5sum.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_md5sum.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-npp_md5sum.Tpo $(DEPDIR)/npesmd5sum-npp_md5sum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_md5sum.cpp' object='npesmd5sum-npp_md5sum.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-npp_md5sum.obj `if test -f 'npp_md5sum.cpp'; then $(CYGPATH_W) 'npp_md5sum.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_md5sum.cpp'; fi`
+
+npesmd5sum-md5sum.o: md5sum.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-md5sum.o -MD -MP -MF $(DEPDIR)/npesmd5sum-md5sum.Tpo -c -o npesmd5sum-md5sum.o `test -f 'md5sum.cc' || echo '$(srcdir)/'`md5sum.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-md5sum.Tpo $(DEPDIR)/npesmd5sum-md5sum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='md5sum.cc' object='npesmd5sum-md5sum.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-md5sum.o `test -f 'md5sum.cc' || echo '$(srcdir)/'`md5sum.cc
+
+npesmd5sum-md5sum.obj: md5sum.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-md5sum.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-md5sum.Tpo -c -o npesmd5sum-md5sum.obj `if test -f 'md5sum.cc'; then $(CYGPATH_W) 'md5sum.cc'; else $(CYGPATH_W) '$(srcdir)/md5sum.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-md5sum.Tpo $(DEPDIR)/npesmd5sum-md5sum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='md5sum.cc' object='npesmd5sum-md5sum.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-md5sum.obj `if test -f 'md5sum.cc'; then $(CYGPATH_W) 'md5sum.cc'; else $(CYGPATH_W) '$(srcdir)/md5sum.cc'; fi`
+
+npesmd5sum-MD5.o: com/rsa/MD5.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-MD5.o -MD -MP -MF $(DEPDIR)/npesmd5sum-MD5.Tpo -c -o npesmd5sum-MD5.o `test -f 'com/rsa/MD5.cpp' || echo '$(srcdir)/'`com/rsa/MD5.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-MD5.Tpo $(DEPDIR)/npesmd5sum-MD5.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='com/rsa/MD5.cpp' object='npesmd5sum-MD5.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-MD5.o `test -f 'com/rsa/MD5.cpp' || echo '$(srcdir)/'`com/rsa/MD5.cpp
+
+npesmd5sum-MD5.obj: com/rsa/MD5.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-MD5.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-MD5.Tpo -c -o npesmd5sum-MD5.obj `if test -f 'com/rsa/MD5.cpp'; then $(CYGPATH_W) 'com/rsa/MD5.cpp'; else $(CYGPATH_W) '$(srcdir)/com/rsa/MD5.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-MD5.Tpo $(DEPDIR)/npesmd5sum-MD5.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='com/rsa/MD5.cpp' object='npesmd5sum-MD5.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-MD5.obj `if test -f 'com/rsa/MD5.cpp'; then $(CYGPATH_W) 'com/rsa/MD5.cpp'; else $(CYGPATH_W) '$(srcdir)/com/rsa/MD5.cpp'; fi`
+
+npesmd5sum-MD5_Constructor.o: com/rsa/MD5_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-MD5_Constructor.o -MD -MP -MF $(DEPDIR)/npesmd5sum-MD5_Constructor.Tpo -c -o npesmd5sum-MD5_Constructor.o `test -f 'com/rsa/MD5_Constructor.cpp' || echo '$(srcdir)/'`com/rsa/MD5_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-MD5_Constructor.Tpo $(DEPDIR)/npesmd5sum-MD5_Constructor.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='com/rsa/MD5_Constructor.cpp' object='npesmd5sum-MD5_Constructor.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-MD5_Constructor.o `test -f 'com/rsa/MD5_Constructor.cpp' || echo '$(srcdir)/'`com/rsa/MD5_Constructor.cpp
+
+npesmd5sum-MD5_Constructor.obj: com/rsa/MD5_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesmd5sum-MD5_Constructor.obj -MD -MP -MF $(DEPDIR)/npesmd5sum-MD5_Constructor.Tpo -c -o npesmd5sum-MD5_Constructor.obj `if test -f 'com/rsa/MD5_Constructor.cpp'; then $(CYGPATH_W) 'com/rsa/MD5_Constructor.cpp'; else $(CYGPATH_W) '$(srcdir)/com/rsa/MD5_Constructor.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesmd5sum-MD5_Constructor.Tpo $(DEPDIR)/npesmd5sum-MD5_Constructor.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='com/rsa/MD5_Constructor.cpp' object='npesmd5sum-MD5_Constructor.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesmd5sum_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesmd5sum-MD5_Constructor.obj `if test -f 'com/rsa/MD5_Constructor.cpp'; then $(CYGPATH_W) 'com/rsa/MD5_Constructor.cpp'; else $(CYGPATH_W) '$(srcdir)/com/rsa/MD5_Constructor.cpp'; fi`
+
+npespaint-np_entry.o: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-np_entry.o -MD -MP -MF $(DEPDIR)/npespaint-np_entry.Tpo -c -o npespaint-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-np_entry.Tpo $(DEPDIR)/npespaint-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npespaint-np_entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+
+npespaint-np_entry.obj: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-np_entry.obj -MD -MP -MF $(DEPDIR)/npespaint-np_entry.Tpo -c -o npespaint-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-np_entry.Tpo $(DEPDIR)/npespaint-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npespaint-np_entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+
+npespaint-npp_gate.o: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-npp_gate.o -MD -MP -MF $(DEPDIR)/npespaint-npp_gate.Tpo -c -o npespaint-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-npp_gate.Tpo $(DEPDIR)/npespaint-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npespaint-npp_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+
+npespaint-npp_gate.obj: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-npp_gate.obj -MD -MP -MF $(DEPDIR)/npespaint-npp_gate.Tpo -c -o npespaint-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-npp_gate.Tpo $(DEPDIR)/npespaint-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npespaint-npp_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+
+npespaint-npn_gate.o: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-npn_gate.o -MD -MP -MF $(DEPDIR)/npespaint-npn_gate.Tpo -c -o npespaint-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-npn_gate.Tpo $(DEPDIR)/npespaint-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npespaint-npn_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+
+npespaint-npn_gate.obj: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-npn_gate.obj -MD -MP -MF $(DEPDIR)/npespaint-npn_gate.Tpo -c -o npespaint-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-npn_gate.Tpo $(DEPDIR)/npespaint-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npespaint-npn_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+
+npespaint-npp_paint.o: npp_paint.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-npp_paint.o -MD -MP -MF $(DEPDIR)/npespaint-npp_paint.Tpo -c -o npespaint-npp_paint.o `test -f 'npp_paint.cpp' || echo '$(srcdir)/'`npp_paint.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-npp_paint.Tpo $(DEPDIR)/npespaint-npp_paint.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_paint.cpp' object='npespaint-npp_paint.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-npp_paint.o `test -f 'npp_paint.cpp' || echo '$(srcdir)/'`npp_paint.cpp
+
+npespaint-npp_paint.obj: npp_paint.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-npp_paint.obj -MD -MP -MF $(DEPDIR)/npespaint-npp_paint.Tpo -c -o npespaint-npp_paint.obj `if test -f 'npp_paint.cpp'; then $(CYGPATH_W) 'npp_paint.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_paint.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-npp_paint.Tpo $(DEPDIR)/npespaint-npp_paint.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_paint.cpp' object='npespaint-npp_paint.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-npp_paint.obj `if test -f 'npp_paint.cpp'; then $(CYGPATH_W) 'npp_paint.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_paint.cpp'; fi`
+
+npespaint-paint.o: paint.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-paint.o -MD -MP -MF $(DEPDIR)/npespaint-paint.Tpo -c -o npespaint-paint.o `test -f 'paint.cc' || echo '$(srcdir)/'`paint.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-paint.Tpo $(DEPDIR)/npespaint-paint.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='paint.cc' object='npespaint-paint.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-paint.o `test -f 'paint.cc' || echo '$(srcdir)/'`paint.cc
+
+npespaint-paint.obj: paint.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npespaint-paint.obj -MD -MP -MF $(DEPDIR)/npespaint-paint.Tpo -c -o npespaint-paint.obj `if test -f 'paint.cc'; then $(CYGPATH_W) 'paint.cc'; else $(CYGPATH_W) '$(srcdir)/paint.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npespaint-paint.Tpo $(DEPDIR)/npespaint-paint.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='paint.cc' object='npespaint-paint.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npespaint_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npespaint-paint.obj `if test -f 'paint.cc'; then $(CYGPATH_W) 'paint.cc'; else $(CYGPATH_W) '$(srcdir)/paint.cc'; fi`
+
+npestest-np_entry.o: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-np_entry.o -MD -MP -MF $(DEPDIR)/npestest-np_entry.Tpo -c -o npestest-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-np_entry.Tpo $(DEPDIR)/npestest-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npestest-np_entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+
+npestest-np_entry.obj: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-np_entry.obj -MD -MP -MF $(DEPDIR)/npestest-np_entry.Tpo -c -o npestest-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-np_entry.Tpo $(DEPDIR)/npestest-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npestest-np_entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+
+npestest-npp_gate.o: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-npp_gate.o -MD -MP -MF $(DEPDIR)/npestest-npp_gate.Tpo -c -o npestest-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-npp_gate.Tpo $(DEPDIR)/npestest-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npestest-npp_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+
+npestest-npp_gate.obj: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-npp_gate.obj -MD -MP -MF $(DEPDIR)/npestest-npp_gate.Tpo -c -o npestest-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-npp_gate.Tpo $(DEPDIR)/npestest-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npestest-npp_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+
+npestest-npn_gate.o: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-npn_gate.o -MD -MP -MF $(DEPDIR)/npestest-npn_gate.Tpo -c -o npestest-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-npn_gate.Tpo $(DEPDIR)/npestest-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npestest-npn_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+
+npestest-npn_gate.obj: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-npn_gate.obj -MD -MP -MF $(DEPDIR)/npestest-npn_gate.Tpo -c -o npestest-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-npn_gate.Tpo $(DEPDIR)/npestest-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npestest-npn_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+
+npestest-npp_test.o: npp_test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-npp_test.o -MD -MP -MF $(DEPDIR)/npestest-npp_test.Tpo -c -o npestest-npp_test.o `test -f 'npp_test.cpp' || echo '$(srcdir)/'`npp_test.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-npp_test.Tpo $(DEPDIR)/npestest-npp_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_test.cpp' object='npestest-npp_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-npp_test.o `test -f 'npp_test.cpp' || echo '$(srcdir)/'`npp_test.cpp
+
+npestest-npp_test.obj: npp_test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-npp_test.obj -MD -MP -MF $(DEPDIR)/npestest-npp_test.Tpo -c -o npestest-npp_test.obj `if test -f 'npp_test.cpp'; then $(CYGPATH_W) 'npp_test.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_test.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-npp_test.Tpo $(DEPDIR)/npestest-npp_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_test.cpp' object='npestest-npp_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-npp_test.obj `if test -f 'npp_test.cpp'; then $(CYGPATH_W) 'npp_test.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_test.cpp'; fi`
+
+npestest-test.o: test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-test.o -MD -MP -MF $(DEPDIR)/npestest-test.Tpo -c -o npestest-test.o `test -f 'test.cpp' || echo '$(srcdir)/'`test.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-test.Tpo $(DEPDIR)/npestest-test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='npestest-test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-test.o `test -f 'test.cpp' || echo '$(srcdir)/'`test.cpp
+
+npestest-test.obj: test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-test.obj -MD -MP -MF $(DEPDIR)/npestest-test.Tpo -c -o npestest-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-test.Tpo $(DEPDIR)/npestest-test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='npestest-test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
+
+npestest-Test.o: org/w3c/dom/Test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-Test.o -MD -MP -MF $(DEPDIR)/npestest-Test.Tpo -c -o npestest-Test.o `test -f 'org/w3c/dom/Test.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-Test.Tpo $(DEPDIR)/npestest-Test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='org/w3c/dom/Test.cpp' object='npestest-Test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-Test.o `test -f 'org/w3c/dom/Test.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test.cpp
+
+npestest-Test.obj: org/w3c/dom/Test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-Test.obj -MD -MP -MF $(DEPDIR)/npestest-Test.Tpo -c -o npestest-Test.obj `if test -f 'org/w3c/dom/Test.cpp'; then $(CYGPATH_W) 'org/w3c/dom/Test.cpp'; else $(CYGPATH_W) '$(srcdir)/org/w3c/dom/Test.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-Test.Tpo $(DEPDIR)/npestest-Test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='org/w3c/dom/Test.cpp' object='npestest-Test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-Test.obj `if test -f 'org/w3c/dom/Test.cpp'; then $(CYGPATH_W) 'org/w3c/dom/Test.cpp'; else $(CYGPATH_W) '$(srcdir)/org/w3c/dom/Test.cpp'; fi`
+
+npestest-Test_Constructor.o: org/w3c/dom/Test_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-Test_Constructor.o -MD -MP -MF $(DEPDIR)/npestest-Test_Constructor.Tpo -c -o npestest-Test_Constructor.o `test -f 'org/w3c/dom/Test_Constructor.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-Test_Constructor.Tpo $(DEPDIR)/npestest-Test_Constructor.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='org/w3c/dom/Test_Constructor.cpp' object='npestest-Test_Constructor.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-Test_Constructor.o `test -f 'org/w3c/dom/Test_Constructor.cpp' || echo '$(srcdir)/'`org/w3c/dom/Test_Constructor.cpp
+
+npestest-Test_Constructor.obj: org/w3c/dom/Test_Constructor.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npestest-Test_Constructor.obj -MD -MP -MF $(DEPDIR)/npestest-Test_Constructor.Tpo -c -o npestest-Test_Constructor.obj `if test -f 'org/w3c/dom/Test_Constructor.cpp'; then $(CYGPATH_W) 'org/w3c/dom/Test_Constructor.cpp'; else $(CYGPATH_W) '$(srcdir)/org/w3c/dom/Test_Constructor.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npestest-Test_Constructor.Tpo $(DEPDIR)/npestest-Test_Constructor.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='org/w3c/dom/Test_Constructor.cpp' object='npestest-Test_Constructor.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npestest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npestest-Test_Constructor.obj `if test -f 'org/w3c/dom/Test_Constructor.cpp'; then $(CYGPATH_W) 'org/w3c/dom/Test_Constructor.cpp'; else $(CYGPATH_W) '$(srcdir)/org/w3c/dom/Test_Constructor.cpp'; fi`
+
+npesxhr-np_entry.o: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-np_entry.o -MD -MP -MF $(DEPDIR)/npesxhr-np_entry.Tpo -c -o npesxhr-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-np_entry.Tpo $(DEPDIR)/npesxhr-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npesxhr-np_entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-np_entry.o `test -f 'np_entry.cpp' || echo '$(srcdir)/'`np_entry.cpp
+
+npesxhr-np_entry.obj: np_entry.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-np_entry.obj -MD -MP -MF $(DEPDIR)/npesxhr-np_entry.Tpo -c -o npesxhr-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-np_entry.Tpo $(DEPDIR)/npesxhr-np_entry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='np_entry.cpp' object='npesxhr-np_entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-np_entry.obj `if test -f 'np_entry.cpp'; then $(CYGPATH_W) 'np_entry.cpp'; else $(CYGPATH_W) '$(srcdir)/np_entry.cpp'; fi`
+
+npesxhr-npp_gate.o: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-npp_gate.o -MD -MP -MF $(DEPDIR)/npesxhr-npp_gate.Tpo -c -o npesxhr-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-npp_gate.Tpo $(DEPDIR)/npesxhr-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npesxhr-npp_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-npp_gate.o `test -f 'npp_gate.cpp' || echo '$(srcdir)/'`npp_gate.cpp
+
+npesxhr-npp_gate.obj: npp_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-npp_gate.obj -MD -MP -MF $(DEPDIR)/npesxhr-npp_gate.Tpo -c -o npesxhr-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-npp_gate.Tpo $(DEPDIR)/npesxhr-npp_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_gate.cpp' object='npesxhr-npp_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-npp_gate.obj `if test -f 'npp_gate.cpp'; then $(CYGPATH_W) 'npp_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_gate.cpp'; fi`
+
+npesxhr-npn_gate.o: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-npn_gate.o -MD -MP -MF $(DEPDIR)/npesxhr-npn_gate.Tpo -c -o npesxhr-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-npn_gate.Tpo $(DEPDIR)/npesxhr-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npesxhr-npn_gate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-npn_gate.o `test -f 'npn_gate.cpp' || echo '$(srcdir)/'`npn_gate.cpp
+
+npesxhr-npn_gate.obj: npn_gate.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-npn_gate.obj -MD -MP -MF $(DEPDIR)/npesxhr-npn_gate.Tpo -c -o npesxhr-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-npn_gate.Tpo $(DEPDIR)/npesxhr-npn_gate.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npn_gate.cpp' object='npesxhr-npn_gate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-npn_gate.obj `if test -f 'npn_gate.cpp'; then $(CYGPATH_W) 'npn_gate.cpp'; else $(CYGPATH_W) '$(srcdir)/npn_gate.cpp'; fi`
+
+npesxhr-npp_xhr.o: npp_xhr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-npp_xhr.o -MD -MP -MF $(DEPDIR)/npesxhr-npp_xhr.Tpo -c -o npesxhr-npp_xhr.o `test -f 'npp_xhr.cpp' || echo '$(srcdir)/'`npp_xhr.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-npp_xhr.Tpo $(DEPDIR)/npesxhr-npp_xhr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_xhr.cpp' object='npesxhr-npp_xhr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-npp_xhr.o `test -f 'npp_xhr.cpp' || echo '$(srcdir)/'`npp_xhr.cpp
+
+npesxhr-npp_xhr.obj: npp_xhr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-npp_xhr.obj -MD -MP -MF $(DEPDIR)/npesxhr-npp_xhr.Tpo -c -o npesxhr-npp_xhr.obj `if test -f 'npp_xhr.cpp'; then $(CYGPATH_W) 'npp_xhr.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_xhr.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-npp_xhr.Tpo $(DEPDIR)/npesxhr-npp_xhr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='npp_xhr.cpp' object='npesxhr-npp_xhr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-npp_xhr.obj `if test -f 'npp_xhr.cpp'; then $(CYGPATH_W) 'npp_xhr.cpp'; else $(CYGPATH_W) '$(srcdir)/npp_xhr.cpp'; fi`
+
+npesxhr-xhr.o: xhr.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-xhr.o -MD -MP -MF $(DEPDIR)/npesxhr-xhr.Tpo -c -o npesxhr-xhr.o `test -f 'xhr.cc' || echo '$(srcdir)/'`xhr.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-xhr.Tpo $(DEPDIR)/npesxhr-xhr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xhr.cc' object='npesxhr-xhr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-xhr.o `test -f 'xhr.cc' || echo '$(srcdir)/'`xhr.cc
+
+npesxhr-xhr.obj: xhr.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT npesxhr-xhr.obj -MD -MP -MF $(DEPDIR)/npesxhr-xhr.Tpo -c -o npesxhr-xhr.obj `if test -f 'xhr.cc'; then $(CYGPATH_W) 'xhr.cc'; else $(CYGPATH_W) '$(srcdir)/xhr.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/npesxhr-xhr.Tpo $(DEPDIR)/npesxhr-xhr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xhr.cc' object='npesxhr-xhr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(npesxhr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o npesxhr-xhr.obj `if test -f 'xhr.cc'; then $(CYGPATH_W) 'xhr.cc'; else $(CYGPATH_W) '$(srcdir)/xhr.cc'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -359,6 +974,46 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-dist_htmlDATA: $(dist_html_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(MKDIR_P) "$(DESTDIR)$(htmldir)"
+	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
+	done
+
+uninstall-dist_htmlDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(htmldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(htmldir)" && rm -f $$files
+install-nodist_htmlDATA: $(nodist_html_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(MKDIR_P) "$(DESTDIR)$(htmldir)"
+	@list='$(nodist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
+	done
+
+uninstall-nodist_htmlDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(htmldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(htmldir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -443,13 +1098,17 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
-all-am: Makefile $(LTLIBRARIES)
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(htmldir)" "$(DESTDIR)$(htmldir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -474,10 +1133,11 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -497,13 +1157,13 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-dist_htmlDATA install-nodist_htmlDATA
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -543,24 +1203,53 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-binPROGRAMS uninstall-dist_htmlDATA \
+	uninstall-libLTLIBRARIES uninstall-nodist_htmlDATA
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
+	ctags distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dist_htmlDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLTLIBRARIES
+	install-libLTLIBRARIES install-man install-nodist_htmlDATA \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-dist_htmlDATA \
+	uninstall-libLTLIBRARIES uninstall-nodist_htmlDATA
 
+
+vpath %.idl = $(srcdir)
+
+com/rsa/MD5.h : md5.idl
+	$(esidl) -cplusplus -string std::string -object Object -fvirtualbase $^
+
+com/rsa/MD5_Constructor.h : com/rsa/MD5.h
+
+com/rsa/MD5.cpp : md5.idl
+	$(esidl) -cplusplus-src -string std::string -object Object -fvirtualbase $^
+
+com/rsa/MD5_Constructor.cpp : com/rsa/MD5.cpp
+
+org/w3c/dom/Test.h : test.idl
+	$(esidl) -cplusplus -string std::string -object Object -fvirtualbase $^
+
+org/w3c/dom/Test_Constructor.h : org/w3c/dom/Test.h
+
+org/w3c/dom/Test.cpp : test.idl
+	$(esidl) -cplusplus-src -string std::string -object Object -fvirtualbase $^
+
+org/w3c/dom/Test_Constructor.cpp : org/w3c/dom/Test.cpp
+
+clean-local:
+	-rm -rf com org
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

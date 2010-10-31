@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Google Inc.
+ * Copyright 2009, 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,16 @@
  */
 
 #include "esnpapi.h"
-#include "reflect.h"
-#include "proxyImpl.h"
 
-#include <algorithm>
-#include <map>
+#include <assert.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 namespace
 {
-
-// Map from interfaceName to constructors.
-std::map<const std::string, Object* (*)(ProxyObject object)> proxyConstructorMap;
-std::map<const std::string, NPObject* (*)(NPP npp, Object* object)> stubConstructorMap;
-std::map<const std::string, Reflect::Interface> metaDataMap;
-
-bool isStub(const NPObject* object)
-{
-    return object->_class->deallocate == StubObject::Deallocate;
-}
 
 bool toBoolean(const NPVariant* variant)
 {
@@ -68,79 +58,132 @@ bool toBoolean(const NPVariant* variant)
     }
 }
 
-// TODO: Check length strictly.
-double toNumber(const char* string, size_t length)
+char* skipSpace(const char* str)
 {
-    const char* ptr = string;
-    double number;
-    while (*ptr && isspace(*ptr))  // TODO: Check UTF8 space
+    static const char* rgsp[] =
     {
-        ++ptr;
+        // NBSP
+        "\xc2\xa0",
+        // LS
+        "\xe2\x80\xa8",
+        // PS
+        "\xe2\x80\xa9",
+        // USP
+        "\xe1\x9a\x80",
+        "\xe1\xa0\x8e",
+        "\xe2\x80\x80",
+        "\xe2\x80\x81",
+        "\xe2\x80\x82",
+        "\xe2\x80\x83",
+        "\xe2\x80\x84",
+        "\xe2\x80\x85",
+        "\xe2\x80\x86",
+        "\xe2\x80\x87",
+        "\xe2\x80\x88",
+        "\xe2\x80\x89",
+        "\xe2\x80\x8a",
+        "\xe2\x80\xaf",
+        "\xe2\x81\x9f",
+        "\xe3\x80\x80",
+        // BOM
+        "\xef\xbb\xbf"
+    };
+
+    while (char c = *str)
+    {
+        if (strchr(" \t\v\f\n\r", c))
+        {
+            ++str;
+            continue;
+        }
+        int i;
+        for (i = 0; i < sizeof(rgsp) / sizeof(rgsp[0]); ++i)
+        {
+            const char* sp = rgsp[i];
+            size_t len = strlen(sp);
+            if (strncmp(str, sp, len) == 0)
+            {
+                str += len;
+                break;
+            }
+        }
+        if (sizeof(rgsp) / sizeof(rgsp[0]) <= i)
+        {
+            break;
+        }
+    }
+    return const_cast<char*>(str);
+}
+
+double toNumber(const std::string value)
+{
+    const char* ptr = value.c_str();
+    ptr = skipSpace(ptr);
+    const char* uptr = ptr;
+    bool negative = (*ptr == '-');
+    if (negative || *ptr == '+')
+    {
+        ++uptr;
     }
     char* end;
-    if (strncasecmp(ptr, "0x", 2) == 0)
+    double number;
+    if (strncmp(uptr, "Infinity", 8) == 0)
     {
-        ptr += 2;
-        number = strtoll(ptr, &end, 16);
+        end = const_cast<char*>(uptr) + 8;
+        number = negative ? -INFINITY : INFINITY;
     }
-    else if (strncmp(ptr, "Infinity", 8) == 0)
-    {
-        end = const_cast<char*>(ptr) + 8;
-        number = INFINITY;
-    } else
+    else
     {
         number = strtod(ptr, &end);
+        if (end == ptr)
+        {
+            return NAN;
+        }
     }
-    if (end == ptr)
-    {
-        return NAN;
-    }
-    while (*end && isspace(*end))  // TODO: Check UTF8 space
-    {
-        ++end;
-    }
-    if (*end != 0 || string + length < end)
+    end = skipSpace(end);
+    if (*end != 0)
     {
         return NAN;
     }
     return number;
 };
 
-double toNumber(const NPVariant* variant)
+double toNumber(NPP npp, const NPVariant* variant)
 {
     switch (variant->type)
     {
-        case NPVariantType_Void:
+    case NPVariantType_Void:
         return NAN;
-    break;
-        case NPVariantType_Null:
+    case NPVariantType_Null:
         return 0.0;
-    break;
-        case NPVariantType_Bool:
+    case NPVariantType_Bool:
         return NPVARIANT_TO_BOOLEAN(*variant) ? 1.0 : 0.0;
-    break;
-        case NPVariantType_Int32:
+    case NPVariantType_Int32:
         return NPVARIANT_TO_INT32(*variant);
-    break;
-        case NPVariantType_Double:
+    case NPVariantType_Double:
         return NPVARIANT_TO_DOUBLE(*variant);
-        break;
     case NPVariantType_String:
-        return toNumber(NPVARIANT_TO_STRING(*variant).utf8characters,
-                        NPVARIANT_TO_STRING(*variant).utf8length);
-        break;
+        return toNumber(std::string(NPVARIANT_TO_STRING(*variant).utf8characters,
+                                    NPVARIANT_TO_STRING(*variant).utf8length));
     case NPVariantType_Object:
-        return NAN; // TODO: Try valueOf, toString, etc.
-        break;
+        {
+            NPVariant value;
+            if (NPN_Invoke(npp, NPVARIANT_TO_OBJECT(*variant), NPN_GetStringIdentifier("valueOf"), 0, 0, &value))
+            {
+                double number = toNumber(npp, &value);
+                NPN_ReleaseVariantValue(&value);
+                return number;
+            }
+        }
+        return NAN;
     default:
         return NAN;
-        break;
     }
 }
 
-long long ToInteger(const NPVariant* variant)
+long long toInteger(NPP npp, const NPVariant* variant)
 {
-    double value = toNumber(variant);
+    double value = toNumber(npp, variant);
     if (isnan(value) || value == 0.0 || isinf(value))
     {
         return 0;
@@ -155,10 +198,6 @@ std::string toString(NPP npp, const NPVariant* variant, char attribute = 0)
     switch (variant->type)
     {
     case NPVariantType_Void:
-        if (attribute & Reflect::kUndefinedIsNull)
-        {
-            return "null";  // TODO should be something like NULL
-        }
         if (attribute & Reflect::kUndefinedIsEmpty)
         {
             return "";
@@ -166,10 +205,6 @@ std::string toString(NPP npp, const NPVariant* variant, char attribute = 0)
         return "undefined";
         break;
     case NPVariantType_Null:
-        if (attribute & Reflect::kNullIsNull)
-        {
-            return "null";  // TODO should be something like NULL
-        }
         if (attribute & Reflect::kNullIsEmpty)
         {
             return "";
@@ -228,180 +263,117 @@ std::string toString(NPP npp, const NPVariant* variant, char attribute = 0)
 
 }  // namespace
 
-void addProxyConstructor(const std::string interfaceName, Object* (*createProxy)(ProxyObject object))
-{
-    proxyConstructorMap[interfaceName] = createProxy;
-}
-
-void addStubConstructor(const std::string interfaceName, NPObject* (*createStub)(NPP npp, Object* object))
-{
-    stubConstructorMap[interfaceName] = createStub;
-}
-
-Reflect::Interface* getInterfaceData(const std::string className)
-{
-    std::map<std::string, Reflect::Interface>::iterator i;
-
-    std::string interfaceName = "::es::" + className;
-    i = metaDataMap.find(interfaceName);
-    if (i == metaDataMap.end())
-    {
-        return 0;
-    }
-    return &((*i).second);
-}
-
-Reflect::Interface* getInterfaceData(const char* iid)
-{
-    std::map<std::string, Reflect::Interface>::iterator i;
-
-    i = metaDataMap.find(iid);
-    if (i == metaDataMap.end())
-    {
-        return 0;
-    }
-    return &((*i).second);
-}
-
-void addInterfaceData(const char* iid, const char* info)
-{
-    metaDataMap[std::string(iid)] = Reflect::Interface(info, iid);
-
-    unsigned inheritedMethodCount = 0;
-    Reflect::Interface* interface = getInterfaceData(iid);
-    Reflect::Interface* super = interface;
-    while (super)
-    {
-        std::string superName = super->getQualifiedSuperName();
-        if (superName == "")
-        {
-            break;
-        }
-        super = getInterfaceData(superName.c_str());
-        if (super)
-        {
-            inheritedMethodCount += super->getMethodCount();
-        }
-    }
-    if (interface)
-    {
-        interface->setInheritedMethodCount(inheritedMethodCount);
-    }
-    printf("%s %d\n", iid, inheritedMethodCount);
-}
-
-NPObject* createStub(NPP npp, const char* interfaceName, Object* object)
-{
-    // Invokes createInstance method of the corresponding stub class.
-    std::map<std::string, NPObject* (*)(NPP npp, Object* object)>::iterator i;
-    i = stubConstructorMap.find(interfaceName);
-    if (i == stubConstructorMap.end())
-    {
-        return NULL;
-    }
-    return (*i).second(npp, object);
-}
-
-Object* createProxy(NPP npp, NPObject* object)
-{
-    if (!object)
-    {
-        return 0;
-    }
-
-    std::string className = getInterfaceName(npp, object);
-    if (className == "Function" || className == "Object")
-    {
-        // TODO: We should define 'Object' interface
-        return 0;
-    }
-
-    // Convert className into qualified name.
-    className = "::es::" + className;
-    std::map<std::string, Object* (*)(ProxyObject object)>::iterator it;
-    it = proxyConstructorMap.find(className);
-    if (it != proxyConstructorMap.end())
-    {
-        std::string interfaceName = getInterfaceName(npp, object);
-        ProxyObject browserObject = ProxyObject(object, npp, interfaceName);
-        return (*it).second(browserObject);
-    }
-    return 0;
-}
-
 std::string getInterfaceName(NPP npp, NPObject* object)
 {
     std::string className;
     NPVariant result;
+    bool asConstructor = true;  // true if object can be a constructor
 
     VOID_TO_NPVARIANT(result);
     NPN_Invoke(npp, object, NPN_GetStringIdentifier("toString"), 0, 0, &result);
-    if (NPVARIANT_IS_STRING(result))
+    for (;;)
     {
-        className = std::string(NPVARIANT_TO_STRING(result).utf8characters,
-                                NPVARIANT_TO_STRING(result).utf8length);
+        if (NPVARIANT_IS_STRING(result))
+        {
+            className = std::string(NPVARIANT_TO_STRING(result).utf8characters,
+                                    NPVARIANT_TO_STRING(result).utf8length);
+        }
+        NPN_ReleaseVariantValue(&result);
+        if (className.compare(0, 9, "function ") == 0)
+        {
+            // In Chrome, a [Constructor] object is represented as a 'Function'.
+            className = className.substr(9);
+            size_t pos = className.find('(');
+            if (pos != std::string::npos)
+            {
+                className = className.substr(0, pos);
+                break;
+            }
+            return "Function";
+        }
+        if (className.compare(0, 8, "[object ", 8) == 0 && className[className.length() - 1] == ']')
+        {
+            className = className.substr(8, className.length() - 9);
+            break;
+        }
+        // This object is likely to have a stringifier. Check the constructor name directly.
+        NPVariant constructor;
+        VOID_TO_NPVARIANT(constructor);
+        if (asConstructor && NPN_GetProperty(npp, object, NPN_GetStringIdentifier("constructor"), &constructor))
+        {
+            if (NPVARIANT_IS_OBJECT(constructor) &&
+                NPN_Invoke(npp, NPVARIANT_TO_OBJECT(constructor), NPN_GetStringIdentifier("toString"), 0, 0, &result))
+            {
+                NPN_ReleaseVariantValue(&constructor);
+                asConstructor = false;
+                continue;
+            }
+            NPN_ReleaseVariantValue(&constructor);
+        }
+        return "Object";
     }
-    NPN_ReleaseVariantValue(&result);
-    if (className.compare(0, 9, "function ") == 0)
+    // In Firefox, the constructor and an instance object cannot be distinguished by toString().
+    // Check if object has a 'prototype' to see if it is a constructor.
+    if (asConstructor && NPN_HasProperty(npp, object, NPN_GetStringIdentifier("prototype")))
     {
-        return "Function";
+        className += "_Constructor";
     }
-    if (className.compare(0, 8, "[object ", 8) != 0 ||
-        className[className.length() - 1] != ']')
-    {
-        return "Object";  // TODO: should we return a better name?
-    }
-    return className.substr(8, className.length() - 9);
+    return className;
 }
 
-bool convertToBool(const NPVariant* variant)
+bool convertToBool(NPP npp, const NPVariant* variant)
 {
     return toBoolean(variant);
 }
 
-uint8_t convertToOctet(const NPVariant* variant)
+int8_t convertToByte(NPP npp, const NPVariant* variant)
 {
-    return static_cast<uint8_t>(ToInteger(variant));
+    return static_cast<int8_t>(toInteger(npp, variant));
 }
 
-int16_t convertToShort(const NPVariant* variant)
+uint8_t convertToOctet(NPP npp, const NPVariant* variant)
 {
-    return static_cast<int16_t>(ToInteger(variant));
+    return static_cast<uint8_t>(toInteger(npp, variant));
 }
 
-uint16_t convertToUnsignedShort(const NPVariant* variant)
+int16_t convertToShort(NPP npp, const NPVariant* variant)
 {
-    return static_cast<uint16_t>(ToInteger(variant));
+    return static_cast<int16_t>(toInteger(npp, variant));
 }
 
-int32_t convertToLong(const NPVariant* variant)
+uint16_t convertToUnsignedShort(NPP npp, const NPVariant* variant)
 {
-    return static_cast<int32_t>(ToInteger(variant));
+    return static_cast<uint16_t>(toInteger(npp, variant));
 }
 
-uint32_t convertToUnsignedLong(const NPVariant* variant)
+int32_t convertToLong(NPP npp, const NPVariant* variant)
 {
-    return static_cast<uint32_t>(ToInteger(variant));
+    return static_cast<int32_t>(toInteger(npp, variant));
 }
 
-int64_t convertToLongLong(const NPVariant* variant)
+uint32_t convertToUnsignedLong(NPP npp, const NPVariant* variant)
 {
-    return static_cast<int64_t>(ToInteger(variant));
+    return static_cast<uint32_t>(toInteger(npp, variant));
 }
 
-uint64_t convertToUnsignedLongLong(const NPVariant* variant)
+int64_t convertToLongLong(NPP npp, const NPVariant* variant)
 {
-    return static_cast<uint64_t>(ToInteger(variant));
+    return static_cast<int64_t>(toInteger(npp, variant));
 }
 
-float convertToFloat(const NPVariant* variant)
+uint64_t convertToUnsignedLongLong(NPP npp, const NPVariant* variant)
 {
-    return static_cast<float>(toNumber(variant));
+    return static_cast<uint64_t>(toInteger(npp, variant));
 }
 
-double convertToDouble(const NPVariant* variant)
+float convertToFloat(NPP npp, const NPVariant* variant)
 {
-    return static_cast<double>(toNumber(variant));
+    return static_cast<float>(toNumber(npp, variant));
+}
+
+double convertToDouble(NPP npp, const NPVariant* variant)
+{
+    return toNumber(npp, variant);
 }
 
 std::string convertToString(NPP npp, const NPVariant* variant, unsigned attribute)
@@ -409,32 +381,35 @@ std::string convertToString(NPP npp, const NPVariant* variant, unsigned attribut
   return toString(npp, variant, attribute);
 }
 
-Object* convertToObject(NPP npp, const NPVariant* variant, char* buffer, size_t length)
+Object* convertToObject(NPP npp, const NPVariant* variant, const Reflect::Type type)
 {
-    // If the embedded NPObject is a stub object, set the original interface
-    // pointer to any. Otherwise, call toString() method to retrieve the class
-    // name and create a corresponding proxy and set it to any.
     if (!NPVARIANT_IS_OBJECT(*variant))
     {
-        return NULL;
+        return 0;
     }
     NPObject* object = NPVARIANT_TO_OBJECT(*variant);
     if (!object)
     {
-        return NULL;
+        return 0;
     }
-    if (isStub(object))
+    if (StubObject::isStub(object))
     {
         StubObject* stub = static_cast<StubObject*>(object);
         return stub->getObject();
     }
-    else
+    PluginInstance* instance = static_cast<PluginInstance*>(npp->pdata);
+    if (instance)
     {
-        return createProxy(npp, object);
+        ProxyControl* proxyControl = instance->getProxyControl();
+        if (proxyControl)
+        {
+            return proxyControl->createProxy(object, type);
+        }
     }
+    return 0;
 }
 
-Any convertToAny(NPP npp, const NPVariant* variant, void* buffer, size_t length)
+Any convertToAny(NPP npp, const NPVariant* variant)
 {
     switch (variant->type)
     {
@@ -443,20 +418,20 @@ Any convertToAny(NPP npp, const NPVariant* variant, void* buffer, size_t length)
         return Any();
         break;
     case NPVariantType_Bool:
-        return convertToBool(variant);
+        return convertToBool(npp, variant);
         break;
     case NPVariantType_Int32:
-        return convertToLong(variant);
+        return convertToLong(npp, variant);
         break;
     case NPVariantType_Double:
-        return convertToDouble(variant);
+        return convertToDouble(npp, variant);
         break;
     case NPVariantType_String:
         return convertToString(npp, variant);
         break;
     case NPVariantType_Object:
     {
-        Object* object = convertToObject(npp, variant, static_cast<char*>(buffer), length);
+        Object* object = convertToObject(npp, variant);
         if (!object)
         {
             return Any();
@@ -473,49 +448,189 @@ Any convertToAny(NPP npp, const NPVariant* variant, void* buffer, size_t length)
     }
 }
 
-Any convertToAny(NPP npp, const NPVariant* variant, int type, void* buffer, size_t length)
+namespace
 {
-    switch (type)
+
+template <typename T>
+Any convertToSequence(NPP npp, const NPVariant* variant, const Reflect::Type type)
+{
+    unsigned length = 0;
+    NPVariant result;
+    INT32_TO_NPVARIANT(0, result);
+    if (NPVARIANT_IS_OBJECT(*variant) &&
+        NPN_GetProperty(npp, NPVARIANT_TO_OBJECT(*variant), NPN_GetStringIdentifier("length"), &result))
     {
-    case Any::TypeVoid:
+        if (NPVARIANT_IS_INT32(result)) {
+            length = NPVARIANT_TO_INT32(result);
+        }
+        NPN_ReleaseVariantValue(&result);
+    }
+    Sequence<T> sequence(length);
+    for (unsigned i = 0; i < length; ++i)
+    {
+        NPVariant element;
+        VOID_TO_NPVARIANT(element);
+        NPIdentifier id = NPN_GetIntIdentifier(i);
+        if (NPN_GetProperty(npp, NPVARIANT_TO_OBJECT(*variant), id, &element))
+        {
+            Any value = convertToAny(npp, &element, type);
+            sequence.setElement(i, static_cast<T>(value));
+        }
+    }
+    return sequence;
+}
+
+}
+
+Any convertToAny(NPP npp, const NPVariant* variant, const Reflect::Type type)
+{
+    if (type.isSequence())
+    {
+        Reflect::Sequence sequence(type);
+        Reflect::Type elementType(sequence.getType());
+        if (elementType.isNullable())
+        {
+            switch (type.getType())
+            {
+            case Reflect::kBoolean:
+                return convertToSequence<Nullable<bool> >(npp, variant, elementType);
+                break;
+            case Reflect::kByte:
+                return convertToSequence<Nullable<int8_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kOctet:
+                return convertToSequence<Nullable<uint8_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kShort:
+                return convertToSequence<Nullable<int16_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kUnsignedShort:
+                return convertToSequence<Nullable<uint16_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kLong:
+                return convertToSequence<Nullable<int32_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kUnsignedLong:
+                return convertToSequence<Nullable<uint32_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kLongLong:
+                return convertToSequence<Nullable<int64_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kUnsignedLongLong:
+                return convertToSequence<Nullable<uint64_t> >(npp, variant, elementType);
+                break;
+            case Reflect::kFloat:
+                return convertToSequence<Nullable<float> >(npp, variant, elementType);
+                break;
+            case Reflect::kDouble:
+                return convertToSequence<Nullable<double> >(npp, variant, elementType);
+                break;
+            case Reflect::kString:
+                return convertToSequence<Nullable<std::string> >(npp, variant, elementType);
+                break;
+            }
+        }
+        else {
+            switch (type.getType())
+            {
+            case Reflect::kBoolean:
+                return convertToSequence<bool>(npp, variant, elementType);
+                break;
+            case Reflect::kByte:
+                return convertToSequence<int8_t>(npp, variant, elementType);
+                break;
+            case Reflect::kOctet:
+                return convertToSequence<uint8_t>(npp, variant, elementType);
+                break;
+            case Reflect::kShort:
+                return convertToSequence<int16_t>(npp, variant, elementType);
+                break;
+            case Reflect::kUnsignedShort:
+                return convertToSequence<uint16_t>(npp, variant, elementType);
+                break;
+            case Reflect::kLong:
+                return convertToSequence<int32_t>(npp, variant, elementType);
+                break;
+            case Reflect::kUnsignedLong:
+                return convertToSequence<uint32_t>(npp, variant, elementType);
+                break;
+            case Reflect::kLongLong:
+                return convertToSequence<int64_t>(npp, variant, elementType);
+                break;
+            case Reflect::kUnsignedLongLong:
+                return convertToSequence<uint64_t>(npp, variant, elementType);
+                break;
+            case Reflect::kFloat:
+                return convertToSequence<float>(npp, variant, elementType);
+                break;
+            case Reflect::kDouble:
+                return convertToSequence<double>(npp, variant, elementType);
+                break;
+            case Reflect::kString:
+                return convertToSequence<std::string>(npp, variant, elementType);
+                break;
+            case Reflect::kAny:
+                return convertToSequence<Any>(npp, variant, elementType);
+                break;
+            // TODO: kSequence???
+            case Reflect::kObject:
+            default:
+                return convertToSequence<Object*>(npp, variant, elementType);
+                break;
+            }
+        }
+    }
+
+    if (type.isNullable() && NPVARIANT_IS_NULL(*variant))
+    {
         return Any();
+    }
+
+    switch (type.getType())
+    {
+    case Reflect::kBoolean:
+        return convertToBool(npp, variant);
         break;
-    case Any::TypeBool:
-        return convertToBool(variant);
+    case Reflect::kByte:
+        return convertToByte(npp, variant);
         break;
-    case Any::TypeOctet:
-        return convertToOctet(variant);
+    case Reflect::kOctet:
+        return convertToOctet(npp, variant);
         break;
-    case Any::TypeShort:
-        return convertToShort(variant);
+    case Reflect::kShort:
+        return convertToShort(npp, variant);
         break;
-    case Any::TypeUnsignedShort:
-        return convertToUnsignedShort(variant);
+    case Reflect::kUnsignedShort:
+        return convertToUnsignedShort(npp, variant);
         break;
-    case Any::TypeLong:
-        return convertToLong(variant);
+    case Reflect::kLong:
+        return convertToLong(npp,variant);
         break;
-    case Any::TypeUnsignedLong:
-        return convertToUnsignedLong(variant);
+    case Reflect::kUnsignedLong:
+        return convertToUnsignedLong(npp, variant);
         break;
-    case Any::TypeLongLong:
-        return convertToLongLong(variant);
+    case Reflect::kLongLong:
+        return convertToLongLong(npp, variant);
         break;
-    case Any::TypeUnsignedLongLong:
-        return convertToUnsignedLongLong(variant);
+    case Reflect::kUnsignedLongLong:
+        return convertToUnsignedLongLong(npp, variant);
         break;
-    case Any::TypeFloat:
-        return convertToFloat(variant);
+    case Reflect::kFloat:
+        return convertToFloat(npp, variant);
         break;
-    case Any::TypeDouble:
-        return convertToDouble(variant);
+    case Reflect::kDouble:
+        return convertToDouble(npp, variant);
         break;
-    case Any::TypeString:
+    case Reflect::kString:
         return convertToString(npp, variant);
         break;
-    case Any::TypeObject:
+    case Reflect::kDate:
+        // Note DOM3 Core compliant browser (e.g., Chrome) returns a Date object for DOMTimeStamp
+        return convertToUnsignedLongLong(npp, variant);
+        break;
+    case Reflect::kObject:
     {
-        Object* object = convertToObject(npp, variant, static_cast<char*>(buffer), length);
+        Object* object = convertToObject(npp, variant);
         if (!object)
         {
             return Any();
@@ -527,125 +642,315 @@ Any convertToAny(NPP npp, const NPVariant* variant, int type, void* buffer, size
         break;
     }
     default:
-        return Any();
+        return convertToAny(npp, variant);
         break;
     }
 }
 
-void convertToVariant(NPP npp, bool value, NPVariant* variant)
+void convertToVariant(NPP npp, bool value, NPVariant* variant, bool result)
 {
     BOOLEAN_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, uint8_t value, NPVariant* variant)
+void convertToVariant(NPP npp, int8_t value, NPVariant* variant, bool result)
 {
     INT32_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, int16_t value, NPVariant* variant)
+void convertToVariant(NPP npp, uint8_t value, NPVariant* variant, bool result)
 {
     INT32_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, uint16_t value, NPVariant* variant)
+void convertToVariant(NPP npp, int16_t value, NPVariant* variant, bool result)
 {
     INT32_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, int32_t value, NPVariant* variant)
+void convertToVariant(NPP npp, uint16_t value, NPVariant* variant, bool result)
 {
     INT32_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, uint32_t value, NPVariant* variant)
+void convertToVariant(NPP npp, int32_t value, NPVariant* variant, bool result)
 {
     INT32_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, int64_t value, NPVariant* variant)
+void convertToVariant(NPP npp, uint32_t value, NPVariant* variant, bool result)
+{
+    INT32_TO_NPVARIANT(value, *variant);
+}
+
+void convertToVariant(NPP npp, int64_t value, NPVariant* variant, bool result)
 {
     DOUBLE_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, uint64_t value, NPVariant* variant)
+void convertToVariant(NPP npp, uint64_t value, NPVariant* variant, bool result)
 {
     DOUBLE_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, double value, NPVariant* variant)
+void convertToVariant(NPP npp, double value, NPVariant* variant, bool result)
 {
     DOUBLE_TO_NPVARIANT(value, *variant);
 }
 
-void convertToVariant(NPP npp, const std::string& value, NPVariant* variant)
+void convertToVariant(NPP npp, const std::string& value, NPVariant* variant, bool result)
 {
-    STRINGN_TO_NPVARIANT(value.c_str(), value.length(), *variant);
+    if (value.length() == 0)
+    {
+        STRINGN_TO_NPVARIANT(0, 0, *variant);
+        return;
+    }
+    if (!result)
+    {
+        STRINGN_TO_NPVARIANT(value.c_str(), value.length(), *variant);
+        return;
+    }
+    void* buffer = NPN_MemAlloc(value.length());
+    if (!buffer)
+    {
+        STRINGN_TO_NPVARIANT(0, 0, *variant);
+        return;
+    }
+    memmove(buffer, value.c_str(), value.length());
+    STRINGN_TO_NPVARIANT(static_cast<NPUTF8*>(buffer), value.length(), *variant);
 }
 
-void convertToVariant(NPP npp, Object* value, NPVariant* variant)
+void convertToVariant(NPP npp, Object* value, NPVariant* variant, bool result)
 {
     if (!value)
     {
         NULL_TO_NPVARIANT(*variant);
         return;
     }
-    if (ProxyObject* proxy = dynamic_cast<ProxyObject*>(value))
+    if (ProxyObject* proxy = interface_cast<ProxyObject*>(value))
     {
+        if (result)
+        {
+            NPN_RetainObject(proxy->getNPObject());
+        }
         OBJECT_TO_NPVARIANT(proxy->getNPObject(), *variant);
+        return;
     }
-    else
+    if (PluginInstance* instance = static_cast<PluginInstance*>(npp->pdata))
     {
-        std::string interfaceName = value->getInterfaceName();
-        NPObject* object = createStub(npp, interfaceName.c_str(), value);
-        OBJECT_TO_NPVARIANT(object, *variant);
+        StubControl* stubControl = instance->getStubControl();
+        if (stubControl)
+        {
+            NPObject* object = stubControl->createStub(value);
+            if (object)
+            {
+                if (result)
+                {
+                    NPN_RetainObject(object);
+                }
+                OBJECT_TO_NPVARIANT(object, *variant);
+                return;
+            }
+        }
+    }
+    NULL_TO_NPVARIANT(*variant);
+}
+
+namespace
+{
+
+NPObject* createArray(NPP npp)
+{
+    NPObject* array = 0;
+    NPObject* window;
+    NPN_GetValue(npp, NPNVWindowNPObject, &window);
+    NPString script =
+    {
+        "new Array();",
+        12
+    };
+    NPVariant result;
+    if (NPN_Evaluate(npp, window, &script, &result))
+    {
+        if (NPVARIANT_IS_OBJECT(result))
+        {
+            array = NPVARIANT_TO_OBJECT(result);
+        }
+        else
+        {
+            NPN_ReleaseVariantValue(&result);
+        }
+    }
+    NPN_ReleaseObject(window);
+    return array;
+}
+
+template <typename T>
+void copySequence(NPP npp, NPObject* array, const Sequence<T> sequence, bool result)
+{
+    for (unsigned i = 0; i < sequence.getLength(); ++i)
+    {
+        NPIdentifier id = NPN_GetIntIdentifier(i);
+        NPVariant element;
+        convertToVariant(npp, sequence[i], &element, result);
+        NPN_SetProperty(npp, array, id, &element);
     }
 }
 
-void convertToVariant(NPP npp, const Any& any, NPVariant* variant)
+}
+
+void convertToVariant(NPP npp, const Any& any, NPVariant* variant, bool result)
 {
+    if (any.isSequence())
+    {
+        NPObject* array = createArray(npp);
+        if (array)
+        {
+            if (any.isAny())
+            {
+                copySequence(npp, array, Sequence<Any>(any), result);
+            }
+            else if (any.isNullable())
+            {
+                switch (any.getType())
+                {
+                case Any::TypeBool:
+                    copySequence(npp, array, Sequence<Nullable<bool> >(any), result);
+                    break;
+                case Any::TypeByte:
+                    copySequence(npp, array, Sequence<Nullable<int8_t> >(any), result);
+                    break;
+                case Any::TypeOctet:
+                    copySequence(npp, array, Sequence<Nullable<uint8_t> >(any), result);
+                    break;
+                case Any::TypeShort:
+                    copySequence(npp, array, Sequence<Nullable<int16_t> >(any), result);
+                    break;
+                case Any::TypeUnsignedShort:
+                    copySequence(npp, array, Sequence<Nullable<uint16_t> >(any), result);
+                    break;
+                case Any::TypeLong:
+                    copySequence(npp, array, Sequence<Nullable<int32_t> >(any), result);
+                    break;
+                case Any::TypeUnsignedLong:
+                    copySequence(npp, array, Sequence<Nullable<uint32_t> >(any), result);
+                    break;
+                case Any::TypeLongLong:
+                    copySequence(npp, array, Sequence<Nullable<int64_t> >(any), result);
+                    break;
+                case Any::TypeUnsignedLongLong:
+                    copySequence(npp, array, Sequence<Nullable<uint64_t> >(any), result);
+                    break;
+                case Any::TypeFloat:
+                    copySequence(npp, array, Sequence<Nullable<float> >(any), result);
+                    break;
+                case Any::TypeDouble:
+                    copySequence(npp, array, Sequence<Nullable<double> >(any), result);
+                    break;
+                case Any::TypeString:
+                    copySequence(npp, array, Sequence<Nullable<std::string> >(any), result);
+                    break;
+                }
+            }
+            else
+            {
+                switch (any.getType())
+                {
+                case Any::TypeBool:
+                    copySequence(npp, array, Sequence<bool>(any), result);
+                    break;
+                case Any::TypeByte:
+                    copySequence(npp, array, Sequence<int8_t>(any), result);
+                    break;
+                case Any::TypeOctet:
+                    copySequence(npp, array, Sequence<uint8_t>(any), result);
+                    break;
+                case Any::TypeShort:
+                    copySequence(npp, array, Sequence<int16_t>(any), result);
+                    break;
+                case Any::TypeUnsignedShort:
+                    copySequence(npp, array, Sequence<uint16_t>(any), result);
+                    break;
+                case Any::TypeLong:
+                    copySequence(npp, array, Sequence<int32_t>(any), result);
+                    break;
+                case Any::TypeUnsignedLong:
+                    copySequence(npp, array, Sequence<uint32_t>(any), result);
+                    break;
+                case Any::TypeLongLong:
+                    copySequence(npp, array, Sequence<int64_t>(any), result);
+                    break;
+                case Any::TypeUnsignedLongLong:
+                    copySequence(npp, array, Sequence<uint64_t>(any), result);
+                    break;
+                case Any::TypeFloat:
+                    copySequence(npp, array, Sequence<float>(any), result);
+                    break;
+                case Any::TypeDouble:
+                    copySequence(npp, array, Sequence<double>(any), result);
+                    break;
+                case Any::TypeString:
+                    copySequence(npp, array, Sequence<std::string>(any), result);
+                    break;
+                // TODO: Any::Sequence?
+                case Any::TypeObject:
+                default:
+                    copySequence(npp, array, Sequence<Object*>(any), result);
+                    break;
+                }
+            }
+            OBJECT_TO_NPVARIANT(array, *variant);
+            return;
+        }
+        NULL_TO_NPVARIANT(*variant);
+        return;
+    }
+
     switch (any.getType())
     {
     case Any::TypeVoid:
-        VOID_TO_NPVARIANT(*variant);
+        NULL_TO_NPVARIANT(*variant);
         break;
     case Any::TypeBool:
-        convertToVariant(npp, static_cast<bool>(any), variant);
+        convertToVariant(npp, static_cast<bool>(any), variant, result);
+        break;
+    case Any::TypeByte:
+        convertToVariant(npp, static_cast<int8_t>(any), variant, result);
         break;
     case Any::TypeOctet:
-        convertToVariant(npp, static_cast<uint8_t>(any), variant);
+        convertToVariant(npp, static_cast<uint8_t>(any), variant, result);
         break;
     case Any::TypeShort:
-        convertToVariant(npp, static_cast<int16_t>(any), variant);
+        convertToVariant(npp, static_cast<int16_t>(any), variant, result);
         break;
     case Any::TypeUnsignedShort:
-        convertToVariant(npp, static_cast<uint16_t>(any), variant);
+        convertToVariant(npp, static_cast<uint16_t>(any), variant, result);
         break;
     case Any::TypeLong:
-        convertToVariant(npp, static_cast<int32_t>(any), variant);
+        convertToVariant(npp, static_cast<int32_t>(any), variant, result);
         break;
     case Any::TypeUnsignedLong:
-        convertToVariant(npp, static_cast<uint32_t>(any), variant);
+        convertToVariant(npp, static_cast<uint32_t>(any), variant, result);
         break;
     case Any::TypeLongLong:
-        convertToVariant(npp, static_cast<int64_t>(any), variant);
+        convertToVariant(npp, static_cast<int64_t>(any), variant, result);
         break;
     case Any::TypeUnsignedLongLong:
-        convertToVariant(npp, static_cast<uint64_t>(any), variant);
+        convertToVariant(npp, static_cast<uint64_t>(any), variant, result);
         break;
     case Any::TypeFloat:
-        convertToVariant(npp, static_cast<float>(any), variant);
+        convertToVariant(npp, static_cast<float>(any), variant, result);
         break;
     case Any::TypeDouble:
-        convertToVariant(npp, static_cast<double>(any), variant);
+        convertToVariant(npp, static_cast<double>(any), variant, result);
         break;
     case Any::TypeString:
-        convertToVariant(npp, static_cast<const std::string>(any), variant);
+        convertToVariant(npp, static_cast<const std::string>(any), variant, result);
         break;
     case Any::TypeObject:
-        convertToVariant(npp, static_cast<Object*>(any), variant);
+        convertToVariant(npp, static_cast<Object*>(any), variant, result);
         break;
     default:
-        NULL_TO_NPVARIANT(*variant);
+        VOID_TO_NPVARIANT(*variant);
         break;
     }
 }

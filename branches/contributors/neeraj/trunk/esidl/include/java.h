@@ -21,7 +21,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <map>
 #include <string>
 #include "esidl.h"
 #include "formatter.h"
@@ -31,8 +30,6 @@
 class Java : public Visitor, public Formatter
 {
 protected:
-    const char* source;
-
     bool useExceptions;
 
     int optionalStage;
@@ -86,9 +83,8 @@ protected:
     }
 
 public:
-    Java(const char* source, FILE* file, const char* indent = "es") :
+    Java(FILE* file, const char* indent = "es") :
         Formatter(file, indent),
-        source(source),
         useExceptions(true),
         currentNode(0),
         paramCount(0),
@@ -196,6 +192,12 @@ public:
         else if (node->getName() == "any")
         {
             write("Object");
+        }
+        else if (node->getName() == "Date")
+        {
+            // cf. http://www.w3.org/TR/DOM-Level-3-Core/core.html#Core-DOMTimeStamp
+            //     http://lists.w3.org/Archives/Public/public-webapps/2009JanMar/0458.html
+            write("long");
         }
         else
         {
