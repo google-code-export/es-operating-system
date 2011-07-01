@@ -4,15 +4,15 @@
 
 *Note*: ES web browser has been tested only on [http://fedoraproject.org/ Fedora] 14 and 15 at this point.
 
-To build ES web browser, we recommend you to use Fedora 15, as of writing this today, 
-since we need [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] 1.8.5.
-Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser.
+*Note*: For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] instead of our own classic esjs.
+Since we need SpiderMonkey 1.8.5, we recommend you to use Fedora 15 as of writing this today. Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser. 
 If you build !SpiderMonkey yourself, it's fine too.
 If so, please set the environment variable GECKO_SDK to the installed directory.
 
 Before start building, please make sure you have built and installed the latest esidl Web IDL compiler
 following the [QuickSetup instruction] from the subversion repository.
-Then check out the source code, and set up the configure script by doing the following steps:
+
+To build ES web browser, check out the source code, and set up the configure script by doing the following steps:
 
 {{{
 $ svn checkout http://es-operating-system.googlecode.com/svn/trunk/www
