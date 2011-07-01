@@ -5,7 +5,7 @@
 *Note*: ES web browser has been tested only on [http://fedoraproject.org/ Fedora] 14 and 15 at this point.
 
 *Note*: For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] instead of our own classic esjs.
-Since we need SpiderMonkey 1.8.5, we recommend you to use Fedora 15 as of writing this today. Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser. 
+Since we need !SpiderMonkey 1.8.5, we recommend you to use Fedora 15 as of writing this today. Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser. 
 If you build !SpiderMonkey yourself, it's fine too.
 If so, please set the environment variable GECKO_SDK to the installed directory.
 
@@ -67,7 +67,7 @@ please do not expect you can visits and see many other sites.
 Here's a quick introduction about  
 [http://code.google.com/p/es-operating-system/source/browse/trunk/www the current browser source tree]:
 
-  * www - A DOM core and events implementation along with JSAPI bridge for using SpiderMonkey.
+  * www - A DOM core and events implementation along with JSAPI bridge for using !SpiderMonkey.
     ** css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
     ** html - An implementation of the HTML5 parser and HTML interfaces and elements. 
     ** http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
