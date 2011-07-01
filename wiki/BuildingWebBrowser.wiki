@@ -1,0 +1,76 @@
+#summary How to build ES web browser for Linux
+
+= Building ES web browser for Linux =
+
+*Note*: ES web browser has been tested only on [http://fedoraproject.org/ Fedora] 14 and 15 at this point.
+
+To build ES web browser, we recommend you to use Fedora 15, as of writing this today, 
+since we need [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] 1.8.5.
+Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser.
+If you build !SpiderMonkey yourself, it's fine too.
+If so, please set the environment variable GECKO_SDK to the installed directory.
+
+Before start building, please make sure you have built and installed the latest esidl Web IDL compiler
+following the [QuickSetup instruction] from the subversion repository.
+Then check out the source code, and set up the configure script by doing the following steps:
+
+{{{
+$ svn checkout http://es-operating-system.googlecode.com/svn/trunk/www
+$ cd www
+$ aclocal
+$ autoconf
+$ autoheader
+$ automake -a --foreign
+}}}
+
+Then build the web browser:
+
+{{{
+$ configure CXXFLAGS=-g CFLAGS=-g
+$ make
+}}}
+
+The browser core executable is currently build as `Script.test`. 
+For testing, we recommend you to run a HTTP server locally on your PC with `www/testdata` directory at the root.
+Running the following command in `www/testdata` would be sufficient:
+
+{{{
+$ python -m SimpleHTTPServer
+}}}
+
+Then execute `Script.test` as below:
+
+{{{
+./ScriptTest [path to 'testdata']/default.css http://localhost:8000/browser.html
+}}}
+
+`Script.test` takes two command line arguments: 
+the 1st one is the default CSS style sheet, 
+and the 2nd one is the initial URL to open.
+As we are going to build the browser UI in HTML, 
+the 2nd argument in the above command line points to a tiny browser web application.
+If a new window successfully comes up, 
+type `http://localhost:8000/1.html` in the top most text box and hit the Enter key
+(note currently a caret is not shown, but backspace, delete, home, end, left, and right arrow keys are functioning). 
+If everything is fine, you'll see the screens like below:
+
+http://es-operating-system.googlecode.com/svn/html/Browser/screenshot1.png
+
+Please take a look into [http://code.google.com/p/es-operating-system/source/browse/trunk/www/testdata www/testdata]
+to see what else you can test now.
+
+http://es-operating-system.googlecode.com/svn/html/Browser/screenshot2.png
+
+Since the current version only implements a few very critical paths for a web browser, 
+please do not expect you can visits and see many other sites.
+
+Here's a quick introduction about  
+[http://code.google.com/p/es-operating-system/source/browse/trunk/www the current browser source tree]:
+
+  * www - A DOM core and events implementation along with JSAPI bridge for using SpiderMonkey.
+    ** css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
+    ** html - An implementation of the HTML5 parser and HTML interfaces and elements. 
+    ** http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
+    ** idl - Web IDL definitions customized for the current esidl.
+    ** testdata - test data files.
+    ** url - URL parser
