@@ -367,7 +367,7 @@ Thank you very much. Obrigado!
 
 `[2]` Ingalls, D., Mikkonen T., Palacz, K., Taivalsaari, A. Sun Labs Lively Kernel FAQ. 2007. http://www.sunlabs.com/projects/lively/faq.html .
 
-`[3]` Mendelsohn, N. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997.
+`[3]` Mendelsohn, N. Operating Systems for Component Software Environments. In Proceedings of the 6th Workshop on Hot Topics in Operating Systems (HotOS-VI), pp. 49-54, May 1997. http://www.arcanedomain.com/publications.html .
 
 `[4]` Mitchell, J. An Overview of the Spring System (In IEEE COMPCOM '94) - Introduction by Jim Mitchell. In Sun Microsystems Laboratories The First Ten Years: 1991-2001, October 2001. http://research.sun.com/features/tenyears/volcd/papers/mitchell.htm .
 
