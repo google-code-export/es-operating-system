@@ -2,12 +2,19 @@
 
 = Building ES web browser for Linux =
 
-*Note*: ES web browser has been tested only on [http://fedoraproject.org/ Fedora] 14 and 15 at this point.
+*Note*: ES web browser has been tested only on [http://fedoraproject.org/ Fedora] 14, 15 and Ubuntu 11.04 at this point.
 
-*Note*: For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] instead of our own classic esjs.
+*Note for Fedora users*: For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] instead of our own classic esjs.
 Since we need !SpiderMonkey 1.8.5, we recommend you to use Fedora 15 as of writing this today. Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser. 
 If you build !SpiderMonkey yourself, it's fine too.
-If so, please set the environment variable GECKO_SDK to the installed directory.
+
+*Note for Ubuntu users*: Please execute the following command to install the prerequisites to build ES web browser:
+{{{
+$ sudo apt-get install subversion autoconf automake texinfo bison flex libmozjs-dev re2c libicu-dev libfreetype6-dev \
+freeglut3-dev libpng-dev libboost-dev libboost-iostreams-dev libboost-system-dev libboost-regex-dev
+}}}
+
+----
 
 Before start building, please make sure you have built and installed the latest esidl Web IDL compiler
 following the [QuickSetup instruction] from the subversion repository.
