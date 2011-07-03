@@ -74,10 +74,12 @@ please do not expect you can visits and see many other sites.
 Here's a quick introduction about  
 [http://code.google.com/p/es-operating-system/source/browse/trunk/www the current browser source tree]:
 
-  * www - A DOM core and events implementation along with JSAPI bridge for using !SpiderMonkey.
+  * www - A DOM core and events implementation.
     ** css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
+    ** font - A tiny font manager that converts !TrueType fonts to OpenGL textures.
     ** html - An implementation of the HTML5 parser and HTML interfaces and elements. 
     ** http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
     ** idl - Web IDL definitions customized for the current esidl.
+    ** js - JSAPI bridge for using !SpiderMonkey.
     ** testdata - test data files.
     ** url - URL parser
