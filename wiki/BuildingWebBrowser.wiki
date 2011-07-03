@@ -32,7 +32,7 @@ $ cd www
 $ aclocal
 $ autoconf
 $ autoheader
-$ automake -a --foreign
+$ automake -a -c --foreign
 }}}
 
 Then build the web browser:
