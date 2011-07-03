@@ -4,7 +4,12 @@
 
 *Note*: ES web browser has been tested only on [http://fedoraproject.org/ Fedora] 14, 15 and [http://www.ubuntu.com/ Ubuntu] 11.04 at this point.
 
-*Note for Fedora users*: For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] instead of our own classic esjs.
+*Note for Fedora users*: Please execute the following command to install the prerequisites to build ES web browser:
+{{{
+$ sudo yum install subversion autoconf automake texinfo bison flex js-devel re2c libicu-devel freetype-devel \
+freeglut-devel libpng-devel boost-devel boost-iostreams boost-system boost-regex
+}}}
+For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] instead of our own classic esjs.
 Since we need !SpiderMonkey 1.8.5, we recommend you to use Fedora 15 as of writing this today. Fedora 14 comes with an older version of js-devel, which is not compatible with ES web browser. 
 If you build !SpiderMonkey yourself, it's fine too.
 
