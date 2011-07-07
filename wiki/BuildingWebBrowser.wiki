@@ -88,3 +88,11 @@ Here's a quick introduction about
     ** js - JSAPI bridge for using !SpiderMonkey.
     ** testdata - test data files.
     ** url - URL parser
+
+----
+*Change history*
+
+Brief descriptions of ok revisions.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1777 r1777] esidl has almost switched over to Web IDL W3C Editor’s Draft 4 July 2011 specification, and ES web browser is built from the IDL definitions in the very recent DOM Core and HTML specifications.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1759 r1759]  Supported Ubuntu 11.04.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1753 r1753] The initial open source edition. Tested only on Fedora 15.
