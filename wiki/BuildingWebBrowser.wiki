@@ -42,7 +42,7 @@ $ configure CXXFLAGS=-g CFLAGS=-g
 $ make
 }}}
 
-*Note*: [http://es-operating-system.googlecode.com/svn-history/r1779/trunk/setup.www Here] is a setup script for doing the above steps automatically to build esidl and ES web browser.
+*Note*: [http://es-operating-system.googlecode.com/svn/trunk/setup.www Here] is a setup script for doing the above steps automatically to build esidl and ES web browser.
 
 The browser core executable is currently built as `Script.test`. 
 For testing, we recommend you to run a HTTP server locally on your PC with `www/testdata` directory at the root.
