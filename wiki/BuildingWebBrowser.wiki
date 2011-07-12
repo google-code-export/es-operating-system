@@ -7,13 +7,13 @@
 *Prerequisites on Fedora*:
 {{{
 $ sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex js-devel re2c libicu-devel \
-freetype-devel freeglut-devel libpng-devel boost-devel boost-iostreams boost-system boost-regex
+freetype-devel freeglut-devel libpng-devel libjpeg-devel boost-devel boost-iostreams boost-system boost-regex
 }}}
 
 *Prerequisites on Ubuntu*:
 {{{
 $ sudo apt-get install subversion autoconf automake libtool texinfo bison flex libmozjs-dev re2c libicu-dev \
-libfreetype6-dev freeglut3-dev libpng-dev libboost-dev libboost-iostreams-dev libboost-system-dev libboost-regex-dev
+libfreetype6-dev freeglut3-dev libpng-dev libjpeg-dev libboost-dev libboost-iostreams-dev libboost-system-dev libboost-regex-dev
 }}}
 
 For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] 1.8.5 instead of our own classic esjs.
