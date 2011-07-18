@@ -92,7 +92,10 @@ Here's a quick introduction about
 *Change history*
 
 Brief descriptions of ok revisions.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1794 r1797] Fix SEGV due to HTTP notifications sent to deleted CSS boxes.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1794 r1794] Support CSS 2.1 border styles.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1793 r1793] Support JPEG image.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1783 r1783] Support x86-64 (only tested on Fedora 15).
   * [http://code.google.com/p/es-operating-system/source/detail?r=1777 r1777] esidl has almost switched over to Web IDL W3C Editor’s Draft 4 July 2011 specification, and ES web browser is built from the IDL definitions in the very recent DOM Core and HTML specifications.
-  * [http://code.google.com/p/es-operating-system/source/detail?r=1759 r1759] Supported Ubuntu 11.04.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1759 r1759] Support Ubuntu 11.04.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1753 r1753] The initial open source edition. Tested only on Fedora 15.
