@@ -92,7 +92,7 @@ Here's a quick introduction about
 *Change history*
 
 Brief descriptions of ok revisions.
-  * [http://code.google.com/p/es-operating-system/source/detail?r=1794 r1797] Fix SEGV due to HTTP notifications sent to deleted CSS boxes.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1798 r1798] Fix SEGV due to HTTP notifications sent to deleted CSS boxes.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1794 r1794] Support CSS 2.1 border styles.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1793 r1793] Support JPEG image.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1783 r1783] Support x86-64 (only tested on Fedora 15).
