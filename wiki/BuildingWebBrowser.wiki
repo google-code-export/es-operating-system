@@ -92,6 +92,7 @@ Here's a quick introduction about
 *Change history*
 
 Brief descriptions of ok revisions.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1802 r1802] Implement a simplified shrink-to-fit calculation. The example in CSS 2.1 [http://www.w3.org/TR/CSS21/visuren.html#float-position "9.5.1 Positioning the float: the 'float' property"] is now rendered as expected.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1798 r1798] Fix SEGV due to HTTP notifications sent to deleted CSS boxes.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1794 r1794] Support CSS 2.1 border styles.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1793 r1793] Support JPEG image.
