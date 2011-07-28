@@ -1,0 +1,87 @@
+#!/bin/bash -v
+
+# Check prerequisites
+if [ -f /etc/redhat-release ];
+then
+	echo Fedora
+	sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex js-devel re2c libicu-devel freetype-devel freeglut-devel libpng-devel libjpeg-devel boost-devel boost-iostreams boost-system boost-regex
+elif  [ -f  /etc/debian_version ];
+then
+	echo Ubuntu
+	sudo apt-get install subversion autoconf automake libtool texinfo bison flex libmozjs-dev re2c libicu-dev libfreetype6-dev freeglut3-dev libpng-dev libjpeg-dev libboost-dev libboost-iostreams-dev libboost-system-dev libboost-regex-dev
+fi
+
+if [ -z "$ES_WWW_SDK" ];
+then
+export ES_WWW_SDK=`pwd`/sdk
+fi
+mkdir -p $ES_WWW_SDK
+echo $PATH | grep -q "$ES_WWW_SDK/bin"
+if [ $? != 0 ]
+then
+	export PATH=$PATH:$ES_WWW_SDK/bin
+fi
+
+if [ ! -d trunk ];
+then
+	# Check out the source code from Google Code
+	mkdir trunk
+	if [ -z $GOOGLE_USERNAME ];
+	then
+		svn checkout http://es-operating-system.googlecode.com/svn/trunk/ trunk
+	else
+		svn checkout https://es-operating-system.googlecode.com/svn/trunk/ trunk --username $GOOGLE_USERNAME
+	fi
+	for i in trunk trunk/tools trunk/os trunk/init trunk/cmd trunk/esjs
+	do
+		(cd $i; aclocal --force; autoconf -f; automake -a --foreign -f)
+	done
+	for i in trunk/esidl
+	do
+		(cd $i; aclocal --force; autoconf -f; libtoolize --force; automake -a --foreign -f)
+	done
+	for i in trunk/www
+	do
+		(cd $i; aclocal --force; autoconf -f; autoheader -f; automake -a --foreign -f)
+	done
+else
+	cd trunk
+	svn update
+	cd ..
+fi
+
+if [ ! -d local ];
+then
+	mkdir local
+fi
+cd local
+
+# Build esidl
+if [ ! -d esidl ];
+then
+	mkdir esidl
+	cd esidl
+	CFLAGS=-g CXXFLAGS=-g ../../trunk/esidl/configure --prefix=$ES_WWW_SDK --disable-npapi --disable-java
+else
+	cd esidl
+fi
+make
+estatus=$?
+[ $estatus != 0 ] && exit $estatus
+make install-exec
+estatus=$?
+[ $estatus != 0 ] && exit $estatus
+cd ..
+
+# Build ES Web browser
+if [ ! -d www ];
+then
+	mkdir www
+	cd www
+	CFLAGS=-g CXXFLAGS=-g ../../trunk/www/configure --prefix=$ES_WWW_SDK
+else
+	cd www
+fi
+make
+estatus=$?
+[ $estatus != 0 ] && exit $estatus
