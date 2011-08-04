@@ -92,7 +92,8 @@ Here's a quick introduction about
 *Change history*
 
 Brief descriptions of ok revisions.
-  * [http://code.google.com/p/es-operating-system/source/detail?r=1815 r1815] Support more CSS 2.1 properties and bug fixes. A more detailed description is given [http://shiki.esrille.com/2011/07/es721.html here] with  figures (in Japanese).
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1846 r1846] Support more CSS 2.1 properties, and the 'load' and 'click' DOM events. A more detailed description is given [http://shiki.esrille.com/2011/07/es731.html here] with screenshots (in Japanese). 
+  * [http://code.google.com/p/es-operating-system/source/detail?r=1815 r1815] Support more CSS 2.1 properties and bug fixes. A more detailed description is given [http://shiki.esrille.com/2011/07/es721.html here] with  screenshots (in Japanese).
   * [http://code.google.com/p/es-operating-system/source/detail?r=1802 r1802] Implement a simplified shrink-to-fit calculation. The example in CSS 2.1 [http://www.w3.org/TR/CSS21/visuren.html#float-position "9.5.1 Positioning the float: the 'float' property"] is now rendered as expected.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1798 r1798] Fix SEGV due to HTTP notifications sent to deleted CSS boxes.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1794 r1794] Support CSS 2.1 border styles.
