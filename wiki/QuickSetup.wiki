@@ -15,9 +15,8 @@ to execute the 'sudo' command.
 
 Note: The following Linux distributions are currently used to build ES operating system:
 
- * Fedora 12 (Constantine)
- * Ubuntu 8.10 (Intrepid Ibex)
- * Ubuntu 9.10 (Karmic Koala)
+ * Fedora 15 (Lovelock)
+ * Ubuntu 11.04 (Natty Narwhal)
 
 The ES operating system can be built from the ES source tarball, or from the 
 ES subversion trunk. The latter might fail or create an unstable binaries
