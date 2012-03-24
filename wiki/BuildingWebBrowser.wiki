@@ -94,6 +94,8 @@ Here's a quick introduction about
 *Change history*
 
 Brief descriptions of ok revisions.
+
+  * [http://code.google.com/p/es-operating-system/source/detail?r=2578 r2578] Passed 8440 of the 9365 html4 tests (90.1%) in the [http://test.csswg.org/suites/css2.1/20110323/ CSS 2.1 Conformance Test Suite].
   * [http://code.google.com/p/es-operating-system/source/detail?r=2452 r2452] Passed [http://hixie.ch/tests/evil/acid/002-no-data/ Acid2 Test (a version without data URLs)].
   * [http://code.google.com/p/es-operating-system/source/detail?r=1961 r1961] Passed [http://www.w3.org/Style/CSS/Test/CSS1/current/test5526c.htm Acid1 Test].
   * [http://code.google.com/p/es-operating-system/source/detail?r=1783 r1783] Support x86-64 (only tested on Fedora 15).
