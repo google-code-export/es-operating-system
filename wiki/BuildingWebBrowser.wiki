@@ -6,7 +6,7 @@
 
 *Prerequisites on Fedora*:
 {{{
-$ sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex js-devel re2c libicu-devel \
+$ sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex js-devel v8-devel re2c libicu-devel \
 freetype-devel freeglut-devel libpng-devel libjpeg-devel boost-devel boost-iostreams boost-system boost-regex
 }}}
 
@@ -16,7 +16,7 @@ $ sudo apt-get install subversion autoconf automake libtool texinfo bison flex l
 libfreetype6-dev freeglut3-dev libpng-dev libjpeg-dev libboost-dev libboost-iostreams-dev libboost-system-dev libboost-regex-dev
 }}}
 
-For the !JavaScript engine, we're using [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] 1.8.5 instead of our own classic esjs.
+For the !JavaScript engine, currently ES web browser can be configured with either [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8].
 
 ----
 
@@ -89,12 +89,14 @@ Here's a quick introduction about
     ** js - JSAPI bridge for using !SpiderMonkey.
     ** testdata - test data files.
     ** url - URL parser
+    ** v8 - V8 API bridge for using V8
 
 ----
 *Change history*
 
 Brief descriptions of ok revisions.
 
+  * [http://code.google.com/p/es-operating-system/source/detail?r=2599 r2599] Support the V8 JavaScript engine in addition to SpiderMonkey.
   * [http://code.google.com/p/es-operating-system/source/detail?r=2578 r2578] Passed 8440 of the 9365 html4 tests (90.1%) in the [http://test.csswg.org/suites/css2.1/20110323/ CSS 2.1 Conformance Test Suite].
   * [http://code.google.com/p/es-operating-system/source/detail?r=2452 r2452] Passed [http://hixie.ch/tests/evil/acid/002-no-data/ Acid2 Test (a version without data URLs)].
   * [http://code.google.com/p/es-operating-system/source/detail?r=1961 r1961] Passed [http://www.w3.org/Style/CSS/Test/CSS1/current/test5526c.htm Acid1 Test].
