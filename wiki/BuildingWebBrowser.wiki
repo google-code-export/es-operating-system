@@ -52,7 +52,7 @@ $ python -m SimpleHTTPServer
 Then execute `Script.test` as below:
 
 {{{
-./ScriptTest [path to 'testdata']/default.css http://localhost:8000/browser.html
+./ScriptTest [path to 'testdata']/default.css file://[path to 'navigator']/navigator.html
 }}}
 
 `Script.test` takes two command line arguments: 
@@ -61,11 +61,10 @@ and the 2nd one is the initial URL to open.
 As we are going to build the browser UI in HTML, 
 the 2nd argument in the above command line points to a tiny browser web application.
 If a new window successfully comes up, 
-type `http://localhost:8000/1.html` in the top most text box and hit the Enter key
-(note currently a caret is not shown, but backspace, delete, home, end, left, and right arrow keys are functioning). 
-If everything is fine, you'll see the screens like below:
+type `about.html` in the top most text box and hit the Enter key
+(note currently a caret is not shown, but backspace, delete, home, end, left, and right arrow keys are functioning), or simply click the 'settings' icon. If everything is fine, you'll see the screens like below:
 
-<img src="http://es-operating-system.googlecode.com/svn/html/Browser/screenshot1.png" width="50%" height="50%">
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2605.navigator.png" width="50%" height="50%">
 
 Currently we are actively implementing [http://www.w3.org/TR/CSS2/ CSS 2.1] and testing our implementation using [http://test.csswg.org/suites/css2.1/20110323/ CSS2.1 Conformance Test Suite].
 
@@ -87,6 +86,7 @@ Here's a quick introduction about
     ** http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
     ** idl - Web IDL definitions customized for the current esidl.
     ** js - JSAPI bridge for using !SpiderMonkey.
+    ** navigator - a tiny browser web application written in HTML.
     ** testdata - test data files.
     ** url - URL parser
     ** v8 - V8 API bridge for using V8
