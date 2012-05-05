@@ -6,7 +6,7 @@
 
 *Prerequisites on Fedora*:
 {{{
-$ sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex js-devel v8-devel re2c libicu-devel \
+$ sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex giflib-devel js-devel v8-devel re2c libicu-devel \
 freetype-devel freeglut-devel libpng-devel libjpeg-devel boost-devel boost-iostreams boost-system boost-regex
 }}}
 
