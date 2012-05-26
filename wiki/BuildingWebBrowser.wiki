@@ -2,69 +2,28 @@
 
 = Building ES web browser for Linux =
 
-*Note*: An easy ES web browser setup script for Fedora 16 and Ubuntu 11.04 is available [http://es-operating-system.googlecode.com/svn/trunk/setup.www here]. ES web browser has been mainly tested on [http://fedoraproject.org/ Fedora] 16 at this point.
+On Fedora 16 and Ubuntu 12.04, please use the [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script] for building ES web browser. 
 
-*Prerequisites on Fedora*:
-{{{
-$ sudo yum install gcc gcc-c++ subversion autoconf automake libtool texinfo bison flex giflib-devel js-devel v8-devel re2c libicu-devel \
-freetype-devel freeglut-devel libpng-devel libjpeg-devel boost-devel boost-iostreams boost-system boost-regex
-}}}
-
-*Prerequisites on Ubuntu*:
-{{{
-$ sudo apt-get install subversion autoconf automake libtool texinfo bison flex libmozjs-dev re2c libicu-dev \
-libfreetype6-dev freeglut3-dev libpng-dev libjpeg-dev libboost-dev libboost-iostreams-dev libboost-system-dev libboost-regex-dev
-}}}
-
-For the !JavaScript engine, currently ES web browser can be configured with either [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8].
+*Note*: ES web browser is mainly tested on [http://fedoraproject.org/ Fedora] 16 at this point. 
 
 ----
 
-Before start building, please make sure you have built and installed the latest esidl Web IDL compiler
-following the [QuickSetup instruction] from the subversion repository.
+The browser core executables are currently built as `Navigator.test` and `NavigatorV8.test`;
+`Navigator.test` and `NavigatorV8.test` are linked with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] and
+[http://code.google.com/p/v8/ V8] !JavaScript engine, respectively.
 
-To build ES web browser, check out the source code, and set up the configure script by doing the following steps:
-
-{{{
-$ svn checkout http://es-operating-system.googlecode.com/svn/trunk/www
-$ cd www
-$ aclocall --force
-$ autoconf -f
-$ autoheader -f
-$ automake -a -c --foreign -f
-}}}
-
-Then build the web browser:
+To start ES web browser, type from the command line like below:
 
 {{{
-$ configure CXXFLAGS=-g CFLAGS=-g
-$ make
+$ ./Navigator.test path_to_'www/navigator'
 }}}
 
-The browser core executable is currently built as `Script.test`. 
-For testing, we recommend you to run a HTTP server locally on your PC with `www/testdata` directory at the root.
-Running the following command in `www/testdata` would be sufficient:
+`Navigator.test` takes one command line argument that specifies the directory containing the the default CSS style sheet ([http://code.google.com/p/es-operating-system/source/browse/trunk/www/navigator/default.css default.css]), and the default UI HTML file ([http://code.google.com/p/es-operating-system/source/browse/trunk/www/navigator/navigator.html navigator.html]). Note the main browser UI is written in HTML and !JavaScipt in ES web browser.
 
-{{{
-$ python -m SimpleHTTPServer
-}}}
+If a new window successfully shows up, click the setting icon at the top right corner of the window, which is just a link to the about page at this point.
+If everything goes fine, you'll see the window like below:
 
-Then execute `Script.test` as below:
-
-{{{
-./ScriptTest [path to 'testdata']/default.css file://[path to 'navigator']/navigator.html
-}}}
-
-`Script.test` takes two command line arguments: 
-the 1st one is the default CSS style sheet, 
-and the 2nd one is the initial URL to open.
-As we are going to build the browser UI in HTML, 
-the 2nd argument in the above command line points to a tiny browser web application.
-If a new window successfully comes up, 
-type `about.html` in the top most text box and hit the Enter key
-(note currently a caret is not shown, but backspace, delete, home, end, left, and right arrow keys are functioning), or simply click the 'settings' icon. If everything is fine, you'll see the screens like below:
-
-<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2605.navigator.png" width="50%" height="50%">
+<img src="http://es-operating-system.googlecode.com/svn-history/r2731/html/Browser/r2695.about.png" width="50%" height="50%">
 
 Currently we are actively implementing [http://www.w3.org/TR/CSS2/ CSS 2.1] and testing our implementation using [http://test.csswg.org/suites/css2.1/20110323/ CSS2.1 Conformance Test Suite].
 
