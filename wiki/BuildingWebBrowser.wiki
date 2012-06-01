@@ -1,10 +1,12 @@
-#summary How to build ES web browser for Linux
+#summary ES web browser for Linux
 
-= Building ES web browser for Linux =
+= ES web browser for Linux =
 
-On Fedora 16 and Ubuntu 12.04, please use the [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script] for building ES web browser. 
+ES web browser is a new web browser, including the totally new CSS/HTML rendering engine, currently being developed as a part of the ES operating system project. As a graphics backend, ES web browser uses [http://www.opengl.org/ OpenGL]. As a !JavaScript engine, currently ES web browser can be configured with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8] along with our [Cplusplus0xBinding C++11 Web IDL binding].
 
-*Note*: ES web browser is mainly tested on [http://fedoraproject.org/ Fedora] 16 at this point. 
+On [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu] 12.04, please use the [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script] for building ES web browser. 
+
+*Note*: ES web browser is mainly tested on Fedora 17 at this point. ES web browser won't be built with the default libraries that comes with Fedora version 15 or earlier and Ubuntu 11.10 or earlier including [http://www.boost.org/ boost], SpiderMonkey, V8, and so forth.
 
 ----
 
@@ -55,11 +57,12 @@ Here's a quick introduction about
 
 Brief descriptions of ok revisions.
 
+  * [http://code.google.com/p/es-operating-system/source/detail?r=2743 r2743] Support Fedora 17.
+  * [http://code.google.com/p/es-operating-system/source/detail?r=2736 r2736] Support Ubuntu 12.04.
   * [http://code.google.com/p/es-operating-system/source/detail?r=2599 r2599] Support the V8 !JavaScript engine in addition to !SpiderMonkey.
   * [http://code.google.com/p/es-operating-system/source/detail?r=2578 r2578] Passed 8440 of the 9365 html4 tests (90.1%) in the [http://test.csswg.org/suites/css2.1/20110323/ CSS 2.1 Conformance Test Suite].
   * [http://code.google.com/p/es-operating-system/source/detail?r=2452 r2452] Passed [http://hixie.ch/tests/evil/acid/002-no-data/ Acid2 Test (a version without data URLs)].
   * [http://code.google.com/p/es-operating-system/source/detail?r=1961 r1961] Passed [http://www.w3.org/Style/CSS/Test/CSS1/current/test5526c.htm Acid1 Test].
   * [http://code.google.com/p/es-operating-system/source/detail?r=1783 r1783] Support x86-64 (only tested on Fedora 15).
   * [http://code.google.com/p/es-operating-system/source/detail?r=1777 r1777] esidl has almost switched over to Web IDL W3C Editor’s Draft 4 July 2011 specification, and ES web browser is built from the IDL definitions in the very recent DOM Core and HTML specifications.
-  * [http://code.google.com/p/es-operating-system/source/detail?r=1759 r1759] Support Ubuntu 11.04.
   * [http://code.google.com/p/es-operating-system/source/detail?r=1753 r1753] The initial open source edition. Tested only on Fedora 15.
