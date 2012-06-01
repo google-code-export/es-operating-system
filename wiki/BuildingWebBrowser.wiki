@@ -2,7 +2,7 @@
 
 = ES web browser for Linux =
 
-ES web browser is a new web browser, including the totally new CSS/HTML rendering engine, currently being developed as a part of the ES operating system project. As a graphics backend, ES web browser uses [http://www.opengl.org/ OpenGL]. As a !JavaScript engine, currently ES web browser can be configured with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8] along with our [Cplusplus0xBinding C++11 Web IDL binding].
+ES web browser is a new web browser, including a totally new CSS/HTML rendering engine, currently being developed as a part of the ES operating system project. As a graphics backend, ES web browser uses [http://www.opengl.org/ OpenGL]. As a !JavaScript engine, currently ES web browser can be configured with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8] along with our [Cplusplus0xBinding C++11 Web IDL binding].
 
 On [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu] 12.04, please use the [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script] for building ES web browser. 
 
@@ -10,7 +10,7 @@ On [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu]
 
 ----
 
-The browser core executables are currently built as `Navigator.test` and `NavigatorV8.test`;
+The browser core executables are built as `Navigator.test` and `NavigatorV8.test`;
 `Navigator.test` and `NavigatorV8.test` are linked with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] and
 [http://code.google.com/p/v8/ V8] !JavaScript engine, respectively.
 
