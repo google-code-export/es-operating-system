@@ -36,7 +36,7 @@ Currently we are actively implementing [http://www.w3.org/TR/CSS2/ CSS 2.1] and 
 
 [http://hixie.ch/tests/evil/acid/002-no-data/ Acid2 (a version without data URLs)]
 
-<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2452.acid2.png" width="50%" height="50%">
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2762.acid2.png" width="50%" height="50%">
 
 Here's a quick introduction about  
 [http://code.google.com/p/es-operating-system/source/browse/trunk/www the current browser source tree]:
