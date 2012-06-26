@@ -5,7 +5,7 @@
 Escort web browser is a new web browser, including a totally new CSS/HTML rendering engine, currently being developed as a part of the ES operating system project.
 Escort web browser core components will be used like a window system in today's operating systems in the ES operating system, but before doing so, we are experimenting it as a standalone web browser on Linux.
 
-Currently Escort web browser can be built on [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu] 12.04 using an easy [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script].
+Currently Escort web browser can be built on [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu] 12.04 using an easy [http://es-operating-system.googlecode.com/svn/trunk/setup.escort setup script].
 As a graphics backend, Escortt web browser uses [http://www.opengl.org/ OpenGL]. As a !JavaScript engine, currently Escort web browser can be configured with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8] along with our [Cplusplus0xBinding C++11 Web IDL binding].
 
 *Note*: Escort web browser is mainly tested on Fedora 17 at this point. Escort web browser may not be built with the default libraries that come with Fedora version 15 or earlier and Ubuntu 11.10 or earlier including [http://www.boost.org/ boost], !SpiderMonkey, V8, and so forth.
