@@ -45,17 +45,19 @@ Here's a quick introduction about
 [http://code.google.com/p/es-operating-system/source/browse/trunk/escort the current browser source tree]:
 
   * escort - A DOM core and events implementation.
-    * css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
-    * font - A tiny font manager that converts !TrueType fonts to OpenGL textures.
-    * html - An implementation of the HTML5 parser and HTML interfaces and elements. 
-    * http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
-    * idl - Web IDL definitions customized for the current esidl.
-    * js - JSAPI bridge for using !SpiderMonkey.
     * data
-        * escort - Escort web browser UI written in HTML.
+      * escort - Escort web browser UI written in HTML.
+    * idl - Web IDL definitions customized for the current esidl.
+    * src
+      * css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
+      * font - A tiny font manager that converts !TrueType fonts to OpenGL textures.
+      * html - An implementation of the HTML5 parser and HTML interfaces and elements. 
+      * http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
+      * js - JSAPI bridge for using !SpiderMonkey.
+      * url - URL parser
+      * v8 - V8 API bridge for using V8
+      * xbl - A simplified HTML based XBL 2.0 implementation.
     * testdata - test data files.
-    * url - URL parser
-    * v8 - V8 API bridge for using V8
 
 ----
 *Change history*
