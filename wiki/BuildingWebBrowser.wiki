@@ -1,13 +1,14 @@
-#summary ES web browser for Linux
+#summary Escort web browser
 
-= ES web browser for Linux =
+= Escort web browser =
 
-ES web browser is a new web browser, including a totally new CSS/HTML rendering engine, currently being developed as a part of the ES operating system project. The ES web browser core components will be used like a window system in today's operating systems in the ES operating system, but before doing so, we are experimenting it as a standalone web browser on Linux.
+Escort web browser is a new web browser, including a totally new CSS/HTML rendering engine, currently being developed as a part of the ES operating system project.
+Escort web browser core components will be used like a window system in today's operating systems in the ES operating system, but before doing so, we are experimenting it as a standalone web browser on Linux.
 
-Currently ES web browser can be built on [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu] 12.04 using an easy [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script].
-As a graphics backend, ES web browser uses [http://www.opengl.org/ OpenGL]. As a !JavaScript engine, currently ES web browser can be configured with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8] along with our [Cplusplus0xBinding C++11 Web IDL binding].
+Currently Escort web browser can be built on [http://fedoraproject.org/ Fedora] 16, 17 and [http://www.ubuntu.com/ Ubuntu] 12.04 using an easy [http://es-operating-system.googlecode.com/svn/trunk/setup.www setup script].
+As a graphics backend, Escortt web browser uses [http://www.opengl.org/ OpenGL]. As a !JavaScript engine, currently Escort web browser can be configured with [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or [http://code.google.com/p/v8/ V8] along with our [Cplusplus0xBinding C++11 Web IDL binding].
 
-*Note*: ES web browser is mainly tested on Fedora 17 at this point. ES web browser won't be built with the default libraries that come with Fedora version 15 or earlier and Ubuntu 11.10 or earlier including [http://www.boost.org/ boost], !SpiderMonkey, V8, and so forth.
+*Note*: Escort web browser is mainly tested on Fedora 17 at this point. Escort web browser may not be built with the default libraries that come with Fedora version 15 or earlier and Ubuntu 11.10 or earlier including [http://www.boost.org/ boost], !SpiderMonkey, V8, and so forth.
 
 ----
 
@@ -15,13 +16,15 @@ The browser core executables are built as `Navigator.test` and `NavigatorV8.test
 `Navigator.test` and `NavigatorV8.test` are linked with !SpiderMonkey and
 V8 !JavaScript engine, respectively.
 
-To start ES web browser, type from the command line like below:
+To start Escort web browser, type from the command line like below:
 
 {{{
-$ ./Navigator.test path_to_'www/navigator'
+$ ./Navigator.test path_to_'escort/data/navigator'
 }}}
 
-`Navigator.test` takes one command line argument that specifies the directory containing the the default CSS style sheet ([http://code.google.com/p/es-operating-system/source/browse/trunk/www/navigator/default.css default.css]), and the default UI HTML file ([http://code.google.com/p/es-operating-system/source/browse/trunk/www/navigator/navigator.html navigator.html]). Note the main browser UI is written in HTML and !JavaScipt in ES web browser.
+`Navigator.test` takes one command line argument that specifies the directory containing the the default CSS style sheet ([http://code.google.com/p/es-operating-system/source/browse/trunk/escort/data/escort/default.css default.css]),
+and the default UI HTML file ([http://code.google.com/p/es-operating-system/source/browse/trunk/escort/data/escort/escort.htmll escort.html]).
+Note the main browser UI is written in HTML and !JavaScipt in ES web browser.
 
 If a new window successfully shows up, click the setting icon at the top right corner of the window, which is just a link to the about page at this point.
 If everything goes fine, you'll see the window like below:
@@ -39,19 +42,20 @@ Currently we are actively implementing [http://www.w3.org/TR/CSS2/ CSS 2.1] and 
 <img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2765.acid2.png" width="50%" height="50%">
 
 Here's a quick introduction about  
-[http://code.google.com/p/es-operating-system/source/browse/trunk/www the current browser source tree]:
+[http://code.google.com/p/es-operating-system/source/browse/trunk/escort the current browser source tree]:
 
-  * www - A DOM core and events implementation.
-    ** css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
-    ** font - A tiny font manager that converts !TrueType fonts to OpenGL textures.
-    ** html - An implementation of the HTML5 parser and HTML interfaces and elements. 
-    ** http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
-    ** idl - Web IDL definitions customized for the current esidl.
-    ** js - JSAPI bridge for using !SpiderMonkey.
-    ** navigator - a tiny browser web application written in HTML.
-    ** testdata - test data files.
-    ** url - URL parser
-    ** v8 - V8 API bridge for using V8
+  * escort - A DOM core and events implementation.
+    * css - A CSS parser and renderer implementation using OpenGL as a graphics back-end.
+    * font - A tiny font manager that converts !TrueType fonts to OpenGL textures.
+    * html - An implementation of the HTML5 parser and HTML interfaces and elements. 
+    * http - HTTP 1.1 client built on top of [http://www.boost.org/doc/libs/1_46_1/doc/html/boost_asio.html boost asio library]. 
+    * idl - Web IDL definitions customized for the current esidl.
+    * js - JSAPI bridge for using !SpiderMonkey.
+    * data
+        * escort - Escort web browser UI written in HTML.
+    * testdata - test data files.
+    * url - URL parser
+    * v8 - V8 API bridge for using V8
 
 ----
 *Change history*
