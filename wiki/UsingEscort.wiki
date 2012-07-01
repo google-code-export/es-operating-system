@@ -5,11 +5,11 @@
 Escort web browser is a new web browser which is currently under the
 development as one of the ES operating system projects. 
 Escort has a totally new CSS/HTML rendering engine, 
-and Escort can be configured with 
+and it can be configured with 
 [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or 
 [http://code.google.com/p/v8/ V8] 
-!JavaScript engine at this point.
-The user interface of Escort is implemented by HTML/CSS and !JavaScript.
+JavaScript engine over our [Cplusplus0xBinding Web IDL C++11 binding].
+The user interface of Escort itself is also implemented by HTML/CSS and !JavaScript. 
 
 *Note*: Escort Web Browser has been mainly tested on Fedora 17 at this point.
 
