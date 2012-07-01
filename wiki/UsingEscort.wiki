@@ -1,0 +1,162 @@
+#summary Using Escort
+
+= Using Escort Web Browser =
+
+Escort web browser is a new web browser which is currently under the
+development as one of the ES operating system projects. 
+Escort has a totally new CSS/HTML rendering engine, 
+and Escort can be configured with 
+[https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or 
+[http://code.google.com/p/v8/ V8] 
+!JavaScript engine at this point.
+The user interface of Escort is implemented by HTML/CSS and !JavaScript.
+
+*Note*: Escort Web Browser has been mainly tested on Fedora 17 at this point.
+
+== Setup ==
+
+http://code.google.com/p/es-operating-system/downloads/list has all the latest download items. 
+
+With Fedora 17, Escort can be installed with yum.
+
+=== 32-bit ===
+
+% sudo yum localinstall [http://code.google.com/p/es-operating-system/downloads/detail?name=escort-0.2.0-1.fc17.i686.rpm escort-0.2.0-1.fc17.i686.rpm]
+
+=== 64-bit ===
+
+% sudo yum localinstall [http://code.google.com/p/es-operating-system/downloads/detail?name=escort-0.2.0-1.fc17.x86_64.rpm escort-0.2.0-1.fc17.x86_64.rpm]
+
+In the other systems, Escort needs to be built and installed from the source files.
+Please refer to [BuildingWebBrowser this page] for instructions.
+
+== Starting Escort ==
+
+Here's a quick introduction for starting Escort from various shells.
+
+=== KDE ===
+
+Click [http://userbase.kde.org/Plasma/Kickoff Kickoff] application launcher (the blue ∞ icon in Fedora) at the very left of the bottom panel,
+and then select *Applications* | *Internet*. Find *Web Browser - Escort* item in the list and select it.
+
+http://es-operating-system.googlecode.com/svn/html/Browser/r2840.kde.png
+
+=== GNOME Shell ===
+
+Select *Activities* | *Applications*. Find the ES logo icon in the list and select it.
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.gnome.png" width="66.7%" height="66.7%">
+
+=== Ubuntu Unity ===
+
+Click the Ubuntu logo in the Launcher to start the [https://help.ubuntu.com/12.04/ubuntu-help/unity-dash-intro.html Dash], 
+and type "escort" in to the _Search_ bar.
+The Dash will show you the ES logo icon. Select the ES logo icon to start Escort.
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.unity.png" width="66.7%" height="66.7%">
+
+=== Terminal ===
+
+Type "escort" and hit `Enter`.
+
+{{{
+% escort
+}}}
+
+== Using Escort ==
+
+The new Escort window initially opens about:blank page:
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.blank.png" width="66.7%" height="66.7%">
+
+There is a toolbar across the bottom of the window:
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.toolbar.png" width="66.7%" height="66.7%">
+
+The toolbar offers the following items:
+
+  * ES logo button
+  * Back button
+  * Forward button
+  * Location field
+  * Reload button
+  * Cancel button
+
+Clicking the ES logo button brings the about: page (with version 0.2.0):
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.about.png" width="66.7%" height="66.7%">
+
+There is a blue link, "Esrille Inc.", in the fourth line on the about: page.
+Try clicking on the link. Now Escort tries to bring the home page of Esrille Inc.
+After you click on the link, the ES logo button switches to an animating gear icon 
+to show you that the page transfer is in progress:
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.loading.png" width="66.7%" height="66.7%">
+
+When the page is completely loaded, the gear icon changes back to the ES logo icon,
+and you'll see http://www.esrille.com/ in the location field:
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.esrille.png" width="66.7%" height="66.7%">
+
+The title bar of the Escort window shows the title and favicon of the page (if the page has one):
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.titlebar.png" width="66.7%" height="66.7%">
+
+To bring a web page by specifying a URL, click the location field, and type,
+
+  `http://www.webstandards.org/files/acid2/test.html`
+  
+which is the URL of the [http://www.webstandards.org/action/acid2/ Acid2] test page:
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.acid2-1.png" width="66.7%" height="66.7%">
+
+Hit the `Enter` key to start loading the page.
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.acid2-2.png" width="66.7%" height="66.7%">
+
+To see the Acid2 test result, click on the blue link that reads, "Take The Acid2 Test":
+
+<img src="http://es-operating-system.googlecode.com/svn/html/Browser/r2840.acid2.png" width="66.7%" height="66.7%">
+
+At this point, Escort web browser implements [http://www.w3.org/TR/CSS2/ CSS 2.1] specification relatively well and
+passes the Acid2 test.
+It also passes about 90% of the tests in the [http://test.csswg.org/suites/css2.1/20110323/ CSS2.1 Conformance Test Suite].
+We're going to support recent dynamic and rich Web pages and the
+[http://www.webstandards.org/action/acid3/ Acid3] test 
+in the future versions of the Escort browser.
+
+== File Organization ==
+
+The following is the file organization of the Escort web browser installation.
+
+{{{
+/usr/bin
+    + escort          # shell script that executes the browser core
+/usr/libexec/esrille/escort
+    + escort          # browser core (binary executable)
+/usr/share/applications
+    + escort.desktop  # desktop file for freedesktop.org environment
+/usr/share/esrille/escort
+    + escort.html     # browser UI page
+    + default.css     # default style sheet
+    + escort.ico      # default window icon
+    + etc.            # other image files used by escort.html
+/usr/share/esrille/escort/about
+    + blank           # about:blank page
+    + index.html      # about: page
+    + etc.            # other image files used by the about URL files
+/usr/share/icons/hicolor/*x*/apps
+    + escort.png      # icon files used by the GUI shell
+}}}
+
+The user specific configuration files are stored in,
+
+{{{
+$HOME/.esrille/escort
+}}}
+
+This is also where Escort creates its temporary cache files.
+
+= Contact Us =
+
+Please feel free to post your questions, suggestions, etc., on any topics related to Escort Web Browser to [http://groups.google.com/group/es-operating-system our discussion group]. We always welcome your input.
