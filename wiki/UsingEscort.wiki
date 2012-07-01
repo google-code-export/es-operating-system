@@ -27,8 +27,7 @@ With Fedora 17, Escort can be installed with yum.
 
 % sudo yum localinstall [http://code.google.com/p/es-operating-system/downloads/detail?name=escort-0.2.0-1.fc17.x86_64.rpm escort-0.2.0-1.fc17.x86_64.rpm]
 
-In the other systems, Escort needs to be built and installed from the source files.
-Please refer to [BuildingWebBrowser this page] for instructions.
+In the other systems, Escort needs to be built and installed from the source files. On Fedora 16, 17 and Ubuntu 12.04, you can use the [http://es-operating-system.googlecode.com/svn/trunk/setup.escort setup script].
 
 == Starting Escort ==
 
