@@ -12,7 +12,7 @@ and it can be configured with
 The user interface of Escort itself is also implemented by HTML/CSS and !JavaScript. 
 
 *Note*: Escort is still at an early phase of the development.
-The current alpha (unstable) version is still evolving and some parts are not  implemented yet.
+The current alpha (unstable) version is still evolving and some parts are not implemented yet.
 
 == Setup ==
 
