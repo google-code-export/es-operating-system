@@ -11,7 +11,8 @@ and it can be configured with
 !JavaScript engine over our [Cplusplus0xBinding Web IDL C++11 binding].
 The user interface of Escort itself is also implemented by HTML/CSS and !JavaScript. 
 
-*Note*: Escort Web Browser has been mainly tested on Fedora 17 at this point.
+*Note*: Escort is still at an early phase of the development.
+The current alpha (unstable) version is still evolving and some parts are not  implemented yet.
 
 == Setup ==
 
