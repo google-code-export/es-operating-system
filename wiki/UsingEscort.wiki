@@ -166,7 +166,7 @@ Escort/x.y.z
 
 Where *x.y.z.* provides the version number of the package (such as "0.2.0").
 
-_Note: This may be changed in the future versions._
+_Note: The format may be changed in the future versions._
 
 = Contact Us =
 
