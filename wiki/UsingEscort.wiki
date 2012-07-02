@@ -156,6 +156,18 @@ $HOME/.esrille/escort
 
 This is also where Escort creates its temporary cache files.
 
+== Escort's user agent string ==
+
+Escort's user agent string uses the format:
+
+{{{
+Escort/x.y.z
+}}}
+
+Where *x.y.z.* provides the version number of the package (such as "0.2.0").
+
+_Note: This may be changed in the future versions._
+
 = Contact Us =
 
 Please feel free to post your questions, suggestions, etc., on any topics related to Escort Web Browser to [http://groups.google.com/group/es-operating-system our discussion group]. We always welcome your input.
