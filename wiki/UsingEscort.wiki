@@ -9,7 +9,10 @@ and it can be configured with
 [https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or 
 [http://code.google.com/p/v8/ V8] 
 !JavaScript engine over our [Cplusplus0xBinding Web IDL C++11 binding].
-The user interface of Escort itself is also implemented by HTML/CSS and !JavaScript. 
+The user interface of Escort itself is also implemented by HTML/CSS and !JavaScript.
+
+While we are providing Escort web browser as a standalone web browser for Linux at this point,
+Escort's core components will be used like a window system in today's operating systems in the ES operating system.
 
 *Note*: Escort is still at an early phase of the development.
 The current alpha (unstable) version is still evolving and some parts are not implemented yet.
