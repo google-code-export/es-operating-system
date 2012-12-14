@@ -2,8 +2,11 @@
 
 = News =
 
+== Recent news ==
  * *14 December 2012*: esidl 0.2.2 is released, which is required to build escort from trunk at r3250 or later.
  * *2 December 2012*: escort Web Browser 0.2.3 Alpha released. Binary packages for Fedora 17 and Ubuntu 12.10 are now available [http://download.esrille.org/ here].
+
+== Older news ==
  * *11 August 2012*: escort Web Browser 0.2.2 Alpha released.
  * *24 July 2012*: escort Web Browser 0.2.1 Alpha released.
  * *1 July 2012*: escort Web Browser 0.2.0 Alpha released. This is the first alpha release including a tarball and binary packages for Fedora 17.
