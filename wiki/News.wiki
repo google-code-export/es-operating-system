@@ -1,4 +1,4 @@
-#summary Find out What's New in ES operating system projects
+#summary Find out What's New in the ES operating system projects
 
 = News =
 
