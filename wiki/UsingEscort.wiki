@@ -2,32 +2,24 @@
 
 = Using Escort Web Browser =
 
-Escort web browser is a new web browser which is currently under the
-development as one of the ES operating system projects. 
-Escort has a totally new CSS/HTML rendering engine, 
-and it can be configured with 
-[https://developer.mozilla.org/en/SpiderMonkey SpiderMonkey] or 
-[http://code.google.com/p/v8/ V8] 
-!JavaScript engine over our [Cplusplus0xBinding Web IDL C++11 binding].
-The user interface of Escort itself is also implemented by HTML/CSS and !JavaScript.
-
-While we are providing Escort web browser as a standalone web browser for Linux at this point,
-Escort's core components will be used like a window system in today's operating systems in the ES operating system.
-
 *Note*: Escort is still at an early phase of the development.
 The current alpha (unstable) version is still evolving and some parts are not implemented yet.
 
 == Setup ==
 
-=== Fedora ===
+=== Fedora 17 / Ubuntu 12.10 ===
 
-We provide a yum-style repository at [http://download.esrille.org/ download.esrille.org] for Fedora 17.
+We provide a yum-style repository for Fedora and
+a deb-style repository for Ubuntu 
+at [http://download.esrille.org/ download.esrille.org].
 Please follow the instructions there.
 
 === Other Linux distributions ===
 
 Escort needs to be built and installed from the source files at this point.
-On Fedora 16, 17 and Ubuntu 12.04, you can use the [http://es-operating-system.googlecode.com/svn/trunk/setup.escort setup script].
+Please refer to the 
+[http://es-operating-system.googlecode.com/svn/trunk/setup.escort setup script]
+for Fedora and Ubuntu to see how to configure the Makefile.
 
 == Starting Escort ==
 
