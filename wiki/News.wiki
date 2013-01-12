@@ -5,10 +5,10 @@
 == Recent news ==
  * *12 January 2013*: escort Web browser 0.3.0 and esidl Web IDL compiler 0.3.0 released. Binary packages for Fedora 17, *Fedora 18*, and Ubuntu 12.10 are now available [http://download.esrille.org/ here].
  * *29 December 2012*: Moved the source code repositories for esidl and escort to [https://github.com/esrille GitHub]
- * *23 December 2012*: escort Web browser 0.2.4 released.
- * *14 December 2012*: esidl 0.2.2 is released, which is required to build escort from trunk at r3250 or later.
 
 == Older news ==
+ * *23 December 2012*: escort Web browser 0.2.4 released.
+ * *14 December 2012*: esidl 0.2.2 is released, which is required to build escort from trunk at r3250 or later.
  * *2 December 2012*: escort Web browser 0.2.3 released. Binary packages for Fedora 17 and Ubuntu 12.10 are now available [http://download.esrille.org/ here].
  * *11 August 2012*: escort Web browser 0.2.2 released.
  * *24 July 2012*: escort Web browser 0.2.1 released.
