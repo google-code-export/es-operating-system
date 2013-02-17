@@ -43,7 +43,7 @@ $ brew install boost --with-c++11
 
 If you encounter errors during the above steps, please check HOMEBREW_CC (e.g. when “Illegal instruction: 4" occurs), and try older versions (e.g. use v8 3.9.24 instead of v8 3.15.11 when it doesn't build).
 
-Then please clone [https://github.com/esrille/esidl esidl] and [https://github.com/esrille/escort escort] from the GitHub repository, and the following steps should build esidl and escort:
+Then please clone [https://github.com/esrille/esidl esidl] and [https://github.com/esrille/escort escort] from the !GitHub repository, and the following steps should build esidl and escort:
 
 esidl:
 {{{
