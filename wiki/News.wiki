@@ -3,7 +3,7 @@
 = News =
 
 == Recent news ==
- * *7 September 2013*: esidl Web IDL compiler 0.3.1 released. Binary packages for Fedora 18, 19 and Ubuntu 12.10 adn 13.04 are available [http://download.esrille.org/ here].
+ * *7 September 2013*: esidl Web IDL compiler 0.3.2 released. Binary packages for Fedora 18, 19 and Ubuntu 12.10 adn 13.04 are available [http://download.esrille.org/ here].
  * *1 July 2013*: Escudo, aka escort, Web browser 0.3.2 released. Binary packages for Fedora 18, *19* and Ubuntu 12.10, *13.04* are available [http://download.esrille.org/ here].
  * *24 April 2013*: escort Web browser 0.3.1 and esidl Web IDL compiler 0.3.1 released. Binary packages for Fedora 18 and Ubuntu 12.10 are available [http://download.esrille.org/ here].
 
