@@ -3,11 +3,12 @@
 = News =
 
 == Recent news ==
+ * *16 September 2013*: [https://code.google.com/p/es-operating-system/downloads/detail?name=escudo-0.3.3.tar.gz escudo Web browser 0.3.3] and [https://code.google.com/p/es-operating-system/downloads/detail?name=esidl-0.3.3.tar.gz esidl Web IDL compiler 0.3.3] released. Binary packages for Fedora 18, 19 and Ubuntu 12.10 adn 13.04 are available [http://download.esrille.org/ here].
+
+== Older news ==
  * *7 September 2013*: [https://code.google.com/p/es-operating-system/downloads/detail?name=esidl-0.3.2.tar.gz esidl Web IDL compiler 0.3.2] released. Binary packages for Fedora 18, 19 and Ubuntu 12.10 adn 13.04 are available [http://download.esrille.org/ here].
  * *1 July 2013*: Escudo, aka escort, Web browser 0.3.2 released. Binary packages for Fedora 18, *19* and Ubuntu 12.10, *13.04* are available [http://download.esrille.org/ here].
  * *24 April 2013*: escort Web browser 0.3.1 and esidl Web IDL compiler 0.3.1 released. Binary packages for Fedora 18 and Ubuntu 12.10 are available [http://download.esrille.org/ here].
-
-== Older news ==
  * *17 February 2013*: Now escort Web browser can be built on *Mac OS X Lion/Mountain Lion*. For more instructions please visit [UsingEscort here].
  * *12 January 2013*: escort Web browser 0.3.0 and esidl Web IDL compiler 0.3.0 released. Binary packages for Fedora 17, *Fedora 18*, and Ubuntu 12.10 are now available [http://download.esrille.org/ here].
  * *29 December 2012*: Moved the source code repositories for esidl and escort to [https://github.com/esrille GitHub]
