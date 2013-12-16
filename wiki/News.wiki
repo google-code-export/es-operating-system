@@ -3,7 +3,8 @@
 = News =
 
 == Recent news ==
- * *24 Octobar 2013*: [https://code.google.com/p/es-operating-system/downloads/detail?name=escudo-0.4.0.tar.gz escudo Web browser 0.4.0] and [https://code.google.com/p/es-operating-system/downloads/detail?name=esidl-0.4.0.tar.gz esidl Web IDL compiler 0.4.0] released. Binary packages for Fedora 18, 19 and Ubuntu 13.04 and *13.10* are available [http://download.esrille.org/ here].
+ * *16 December 2013*: escudo 0.4.0 and esidl 0.4.0 packages for *Fedora 20* are available [http://download.esrille.org/ here].
+ * *24 October 2013*: [https://code.google.com/p/es-operating-system/downloads/detail?name=escudo-0.4.0.tar.gz escudo Web browser 0.4.0] and [https://code.google.com/p/es-operating-system/downloads/detail?name=esidl-0.4.0.tar.gz esidl Web IDL compiler 0.4.0] released. Binary packages for Fedora 18, 19 and Ubuntu 13.04 and *13.10* are available [http://download.esrille.org/ here].
  * *16 September 2013*: [https://code.google.com/p/es-operating-system/downloads/detail?name=escudo-0.3.3.tar.gz escudo Web browser 0.3.3] and [https://code.google.com/p/es-operating-system/downloads/detail?name=esidl-0.3.3.tar.gz esidl Web IDL compiler 0.3.3] released. Binary packages for Fedora 18, 19 and Ubuntu 12.10 and 13.04 are available [http://download.esrille.org/ here].
 
 == Older news ==
